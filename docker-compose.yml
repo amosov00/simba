@@ -2,7 +2,7 @@
 version: '3'
 services:
     frontend:
-        container_name: elastoo-frontend-local
+        container_name: simba-frontend-local
         command: yarn dev
         build:
             context: ./
@@ -19,7 +19,7 @@ services:
             - .env.frontend
 
     backend:
-        container_name: elastoo-backend-local
+        container_name: simba-backend-local
         command: uvicorn main:app --host 0.0.0.0 --port 8010 --loop 'uvloop' --lifespan on --reload --proxy-headers
         build:
             context: ./
@@ -36,7 +36,7 @@ services:
             - .env.backend
 
     db:
-        container_name: elastoo-mongodb-local
+        container_name: simba-mongodb-local
         image: mongo:4.2-bionic
         command: mongod --port 27017
         ports:

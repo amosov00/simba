@@ -18,7 +18,7 @@ docs_config = {
 } if not IS_PRODUCTION else {}
 
 app = FastAPI(
-    title="Elastoo",
+    title="Simba",
     exception_handlers=exception_handlers,
     on_startup=[prepopulate_db],
     on_shutdown=[close_db_connection],
