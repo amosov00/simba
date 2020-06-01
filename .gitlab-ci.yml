@@ -42,17 +42,17 @@ build-frontend:
         - master
         - develop
 
-#deploy-develop:
-#    stage: deploy
-#    variables:
-#        ENV: 'develop'
-#    environment:
-#        name: develop
-#    script:
-#        - echo "Starting deployment stage ..."
-#        - sh ./deployment/scripts/deploy.sh
-#    only:
-#        - develop
+deploy-develop:
+    stage: deploy
+    variables:
+        ENV: 'develop'
+    environment:
+        name: develop
+    script:
+        - echo "Starting deployment stage ..."
+        - sh ./deployment/scripts/deploy.sh
+    only:
+        - develop
 
 #deploy-production:
 #    stage: deploy
