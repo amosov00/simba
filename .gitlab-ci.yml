@@ -9,7 +9,6 @@ variables:
 before_script:
     - apk add --update --no-cache git openssh sshpass curl
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - docker login -u "$ELASTOO_REGISTRY_USERNAME" -p "$ELASTOO_REGISTRY_SECRET" $ELASTOO_REGISTRY_URL
 
 after_script:
     - docker logout $CI_REGISTRY
