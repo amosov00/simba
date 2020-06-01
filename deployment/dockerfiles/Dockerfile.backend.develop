@@ -6,4 +6,4 @@ COPY ./backend/ /app/
 WORKDIR /app/
 
 # Install requirements
-RUN poetry install --no-dev
+RUN pip install -r requirements.txt
