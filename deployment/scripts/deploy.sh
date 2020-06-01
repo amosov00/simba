@@ -4,27 +4,24 @@ set -e
 
 >.env
 
-echo "CI_REGISTRY=$CI_REGISTRY" >> .env.local
-echo "CI_PROJECT_NAMESPACE=$CI_PROJECT_NAMESPACE" >> .env.local
-echo "CI_PROJECT_NAME=$CI_PROJECT_NAME" >> .env.local
+echo "CI_REGISTRY=$CI_REGISTRY" >> .env
+echo "CI_PROJECT_NAMESPACE=$CI_PROJECT_NAMESPACE" >> .env
+echo "CI_PROJECT_NAME=$CI_PROJECT_NAME" >> .env
 
 
 echo "########## Processing enviroment and pems ##########"
 if [[ "$CI_COMMIT_REF_SLUG" == "master" ]]; then
     DOCKER_COMPOSE_FILENAME="docker-compose.prod.yml"
     HOST_IP=$PROD_HOST_IP
-    PROJECT_DIR='/home/projects/neutrinobank'
+    PROJECT_DIR=''
     HOST_USER=root
-    cp ./deployment/permissions/neutrino.pem ./permission.pem
 
 elif [[ "$CI_COMMIT_REF_SLUG" == "develop" ]]; then
     DOCKER_COMPOSE_FILENAME="docker-compose.develop.yml"
     HOST_IP=$DEVELOP_HOST_IP
-    PROJECT_DIR='/home/netwood/_projects/neutrinobank'
+    PROJECT_DIR='/home/netwood/_projects/simba'
     HOST_USER=nikita
     echo "$HETZNER_DEV_HOST_1_PEM" >> ./permission.pem
-else
-    DOCKER_COMPOSE_FILENAME="docker-compose.yml"
 fi
 
 chmod 400 ./permission.pem
@@ -34,11 +31,13 @@ echo "########## Ping $HOST_IP with settings $SSH_OPTION ##########"
 ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP"
 
 echo "########## Pull changes from gitlab repo ##########"
-ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" "cd $PROJECT_DIR &&
-git pull https://$DEPLOY_TOKEN_USERNAME:$DEPLOY_TOKEN_SECRET@gitlab.com/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME $CI_COMMIT_REF_NAME"
+ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" "cd $PROJECT_DIR && git pull $CI_REPOSITORY_URL $CI_COMMIT_REF_NAME"
 
-echo "########## Copy .env file ##########"
+echo "########## Copy .env files ##########"
 scp $SSH_OPTION -i ./permission.pem ./.env $HOST_USER@"$HOST_IP":$PROJECT_DIR
+
+ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" "cd $PROJECT_DIR &&
+'$ENV_BACKEND' > .env.backend && '$ENV_DB' > .env.db && '$ENV_FRONTEND' > .env.frontend"
 
 echo "########## Pull images from Gitlab Container Registry ##########"
 ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"

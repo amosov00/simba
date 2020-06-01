@@ -1,10 +1,10 @@
-## Save as ".env.frontend"
+## Save as ".env.backend"
 
 DEBUG=False
-ENV=local
+ENV=develop
 HOST=0.0.0.0
-PORT=4000
-HOST_URL=""
-DATABASE_URL=""
-DATABASE_NAME=""
-SENTRY_DNS=""
+PORT=8000
+HOST_URL=https://simba-dev.elastoo.com/
+DATABASE_URL=mongodb://elastoo-dev:0014effe-5c58-48c3-ba9b-74f946b3016e@db:27017/
+DATABASE_NAME=simba
+SENTRY_DNS=https://73b9eca278db40adb5678dcf2820b927@o379100.ingest.sentry.io/5260417
