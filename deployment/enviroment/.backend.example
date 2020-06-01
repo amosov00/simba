@@ -1,0 +1,10 @@
+## Save as ".env.frontend"
+
+DEBUG=False
+ENV=local
+HOST=0.0.0.0
+PORT=4000
+HOST_URL=""
+DATABASE_URL=""
+DATABASE_NAME=""
+SENTRY_DNS=""

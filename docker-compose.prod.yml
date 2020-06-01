@@ -1,0 +1,42 @@
+# docker-compose config for develop server
+version: '3'
+services:
+    frontend:
+        container_name: elastoo-frontend
+        restart: always
+        command: yarn start
+        image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/frontend:master-latest
+        volumes:
+            - ./static/:/app/static/
+        depends_on:
+            - backend
+        expose:
+            - 3015
+        ports:
+            - 3015:3015
+        env_file:
+            - .env.frontend
+
+    backend:
+        container_name: elastoo-backend
+        restart: always
+        command: uvicorn main:app --host 0.0.0.0 --port 8010 --loop 'uvloop' --lifespan on --proxy-headers --workers 2
+        image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:master-latest
+        depends_on:
+            - db
+        expose:
+            - 8010
+        ports:
+            - 8010:8010
+        env_file:
+            - .env.backend
+
+    db:
+        container_name: elastoo-mongodb
+        restart: always
+        image: mongo:4.2-bionic
+        command: mongod --port 27022 --auth
+        ports:
+            - 27022:27022
+        env_file:
+            - .env.db

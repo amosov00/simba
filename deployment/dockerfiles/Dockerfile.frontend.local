@@ -1,0 +1,9 @@
+FROM node:13.8-buster
+
+RUN mkdir /frontend/
+WORKDIR /frontend/
+
+RUN yarn -v || npm install -g yarn
+
+# Install requirements
+RUN yarn install

@@ -1,0 +1,10 @@
+## Save as ".env.frontend"
+
+DEBUG=False
+ENV=local
+NODE_ENV=local
+HOST=0.0.0.0
+PORT=3000
+API_URL=https://test.test/api
+API_URL_BROWSER=https://test.test/api
+SENTRY_DNS_FRONT=0

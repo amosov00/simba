@@ -1,0 +1,9 @@
+env/
+.git/
+old/
+**/node_modules/
+**/__pycache__/
+**/.nuxt/
+**/certbot/
+**/dist/
+*.pyc
