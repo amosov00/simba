@@ -13,7 +13,6 @@ before_script:
 
 after_script:
     - docker logout $CI_REGISTRY
-    - docker logout $ELASTOO_REGISTRY_URL
 
 stages:
     - build
