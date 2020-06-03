@@ -28,7 +28,7 @@ chmod 400 ./permission.pem
 
 
 echo $("ls")
-echo "$DEVELOP_HOST_IP, $HOST_IP, $ENV_DB"
+echo "$DOCKER_COMPOSE_FILENAME, $HOST_IP, $PROJECT_DIR, $DEVELOP_HOST_IP, $ENV_BACKEND"
 
 echo "########## Using '$DOCKER_COMPOSE_FILENAME' config ##########"
 echo "########## Ping $HOST_IP with settings $SSH_OPTION ##########"
