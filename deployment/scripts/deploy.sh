@@ -21,6 +21,9 @@ elif [[ "$CI_COMMIT_REF_SLUG" == "develop" ]]; then
     HOST_IP=$DEVELOP_HOST_IP
     PROJECT_DIR='/home/netwood/_projects/simba'
     HOST_USER=nikita
+    ENV_BACKEND=$DEVELOP_ENV_BACKEND
+    ENV_DB=$DEVELOP_ENV_DB
+    ENV_FRONTEND=$DEVELOP_ENV_FRONTEND
     echo "$HETZNER_DEV_HOST_1_PEM" >> ./permission.pem
 fi
 
