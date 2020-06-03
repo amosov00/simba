@@ -26,6 +26,11 @@ fi
 
 chmod 400 ./permission.pem
 
+
+printenv
+ls
+echo "$DEVELOP_HOST_IP, $HOST_IP, $ENV_DB"
+
 echo "########## Using '$DOCKER_COMPOSE_FILENAME' config ##########"
 echo "########## Ping $HOST_IP with settings $SSH_OPTION ##########"
 ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP"
