@@ -18,7 +18,7 @@ if [[ "$CI_COMMIT_REF_NAME" == "master" ]]; then
 
 elif [[ "$CI_COMMIT_REF_NAME" == "develop" ]]; then
     DOCKER_COMPOSE_FILENAME="docker-compose.develop.yml"
-    HOST_IP=91.132.23.151
+    HOST_IP=95.216.174.59
     PROJECT_DIR='/home/netwood/_projects/simba'
     HOST_USER=nikita
     echo "$HETZNER_DEV_HOST_1_PEM" >> ./permission.pem
