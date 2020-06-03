@@ -17,31 +17,31 @@ before_script:
 after_script:
   - docker logout $CI_REGISTRY
 
-#
-#build-backend:
-#  stage: build
-#  variables:
-#    CONTAINER_NAME: 'backend'
-#    DOCKERFILE_PATH: './deployment/dockerfiles/Dockerfile.backend.$CI_COMMIT_REF_SLUG'
-#  script:
-#    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CONTAINER_NAME:$CI_COMMIT_REF_SLUG-latest" . -f $DOCKERFILE_PATH --no-cache
-#    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CONTAINER_NAME:$CI_COMMIT_REF_SLUG-latest"
-#  only:
-#    - master
-#    - develop
-#
-#
-#build-frontend:
-#  stage: build
-#  variables:
-#    CONTAINER_NAME: 'frontend'
-#    DOCKERFILE_PATH: './deployment/dockerfiles/Dockerfile.frontend.$CI_COMMIT_REF_SLUG'
-#  script:
-#    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CONTAINER_NAME:$CI_COMMIT_REF_SLUG-latest" . -f $DOCKERFILE_PATH --no-cache
-#    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CONTAINER_NAME:$CI_COMMIT_REF_SLUG-latest"
-#  only:
-#    - master
-#    - develop
+
+build-backend:
+  stage: build
+  variables:
+    CONTAINER_NAME: 'backend'
+    DOCKERFILE_PATH: './deployment/dockerfiles/Dockerfile.backend.$CI_COMMIT_REF_SLUG'
+  script:
+    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CONTAINER_NAME:$CI_COMMIT_REF_SLUG-latest" . -f $DOCKERFILE_PATH --no-cache
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CONTAINER_NAME:$CI_COMMIT_REF_SLUG-latest"
+  only:
+    - master
+    - develop
+
+
+build-frontend:
+  stage: build
+  variables:
+    CONTAINER_NAME: 'frontend'
+    DOCKERFILE_PATH: './deployment/dockerfiles/Dockerfile.frontend.$CI_COMMIT_REF_SLUG'
+  script:
+    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CONTAINER_NAME:$CI_COMMIT_REF_SLUG-latest" . -f $DOCKERFILE_PATH --no-cache
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CONTAINER_NAME:$CI_COMMIT_REF_SLUG-latest"
+  only:
+    - master
+    - develop
 
 deploy-develop:
   stage: deploy
