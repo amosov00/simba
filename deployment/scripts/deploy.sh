@@ -10,13 +10,13 @@ echo "CI_PROJECT_NAME=$CI_PROJECT_NAME" >> .env
 
 
 echo "########## Processing enviroment and pems ##########"
-if [[ "$CI_COMMIT_REF_SLUG" == "master" ]]; then
+if [[ "$CI_COMMIT_REF_NAME" == "master" ]]; then
     DOCKER_COMPOSE_FILENAME="docker-compose.prod.yml"
     HOST_IP=$PROD_HOST_IP
     PROJECT_DIR=''
     HOST_USER=root
 
-elif [[ "$CI_COMMIT_REF_SLUG" == "develop" ]]; then
+elif [[ "$CI_COMMIT_REF_NAME" == "develop" ]]; then
     DOCKER_COMPOSE_FILENAME="docker-compose.develop.yml"
     HOST_IP=$DEVELOP_HOST_IP
     PROJECT_DIR='/home/netwood/_projects/simba'
