@@ -27,8 +27,7 @@ fi
 chmod 400 ./permission.pem
 
 
-printenv
-ls
+echo $("ls")
 echo "$DEVELOP_HOST_IP, $HOST_IP, $ENV_DB"
 
 echo "########## Using '$DOCKER_COMPOSE_FILENAME' config ##########"
