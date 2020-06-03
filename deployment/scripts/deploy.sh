@@ -21,7 +21,7 @@ elif [[ "$CI_COMMIT_REF_NAME" == "develop" ]]; then
     HOST_IP=95.216.174.59
     PROJECT_DIR='/home/netwood/_projects/simba'
     HOST_USER=nikita
-    echo "$HETZNER_DEV_HOST_1_PEM" >> ./permission.pem
+    cp deployment/permissions/hetzner-2.pem ./permission.pem
 fi
 
 chmod 400 ./permission.pem
