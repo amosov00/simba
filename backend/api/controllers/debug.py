@@ -13,8 +13,6 @@ async def debug_get(
     request: Request,
 ):
     return {
-        "headers": request.headers,
-        "envvars": dict(environ),
     }
 
 

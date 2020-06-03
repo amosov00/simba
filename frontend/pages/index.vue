@@ -26,14 +26,6 @@ export default {
     }
   },
   async mounted() {
-    console.log("API URL", process.env.NUXT_PORT)
-    console.log("API URL", process.env.baseURL)
-    return await this.$axios.get('/debug')
-      .then(resp => {
-        console.log(resp)
-      }).catch(err => {
-        console.log(err)
-      })
   }
 };
 </script>
