@@ -18,20 +18,14 @@ if [[ "$CI_COMMIT_REF_NAME" == "master" ]]; then
 
 elif [[ "$CI_COMMIT_REF_NAME" == "develop" ]]; then
     DOCKER_COMPOSE_FILENAME="docker-compose.develop.yml"
-    HOST_IP=$DEVELOP_HOST_IP
+    HOST_IP=91.132.23.151
     PROJECT_DIR='/home/netwood/_projects/simba'
     HOST_USER=nikita
-    ENV_BACKEND=$DEVELOP_ENV_BACKEND
-    ENV_DB=$DEVELOP_ENV_DB
-    ENV_FRONTEND=$DEVELOP_ENV_FRONTEND
     echo "$HETZNER_DEV_HOST_1_PEM" >> ./permission.pem
 fi
 
 chmod 400 ./permission.pem
 
-
-echo $("ls")
-echo "$DOCKER_COMPOSE_FILENAME, $HOST_IP, $PROJECT_DIR, $DEVELOP_HOST_IP, $ENV_BACKEND"
 
 echo "########## Using '$DOCKER_COMPOSE_FILENAME' config ##########"
 echo "########## Ping $HOST_IP with settings $SSH_OPTION ##########"
@@ -43,8 +37,8 @@ ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" "cd $PROJECT_DIR && gi
 echo "########## Copy .env files ##########"
 scp $SSH_OPTION -i ./permission.pem ./.env $HOST_USER@"$HOST_IP":$PROJECT_DIR
 
-ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" "cd $PROJECT_DIR &&
-'$ENV_BACKEND' > .env.backend && '$ENV_DB' > .env.db && '$ENV_FRONTEND' > .env.frontend"
+#ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" "cd $PROJECT_DIR &&
+#'$ENV_BACKEND' > .env.backend && '$ENV_DB' > .env.db && '$ENV_FRONTEND' > .env.frontend"
 
 echo "########## Pull images from Gitlab Container Registry ##########"
 ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
