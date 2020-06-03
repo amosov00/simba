@@ -35,7 +35,7 @@ export default {
     '@nuxtjs/dotenv'
   ],
   server: {
-    port: process.env.NUXT_PORT,
+    host: '0.0.0.0',
   },
   dotenv: !process.env.ENV ? {
     filename: '.env.local',

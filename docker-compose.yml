@@ -12,9 +12,9 @@ services:
         depends_on:
             - backend
         expose:
-            - 3015
+            - "3015"
         ports:
-            - 3015:3015
+            - "3015:3015"
         env_file:
             - .env.frontend
 
