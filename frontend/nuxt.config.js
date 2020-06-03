@@ -2,7 +2,7 @@ export default {
   mode: 'spa',
 
   head: {
-    title: 'Elastoo',
+    title: 'Simba — Swiss Quality Stablecoin',
     meta: [
       {charset: 'utf-8'},
       {name: 'viewport', content: 'width=device-width, initial-scale=1'},
@@ -10,13 +10,14 @@ export default {
     ],
     link: [
       {rel: "icon", type: "image/x-icon", href: "/favicon.ico"},
+      {rel:"stylesheet", href:"https://fonts.googleapis.com/css2?family=Roboto&display=swap"}
     ]
   },
 
   loading: {color: '#0495FB'},
 
   css: [
-    {src: '~/assets/scss/main.scss', lang: 'scss'},
+    {src: '~/assets/scss/main.sass', lang: 'sass'},
     {src: '~/assets/scss/transition.scss', lang: 'scss'},
     {src: '@fortawesome/fontawesome-free/css/all.css', lang: 'css'},
   ],
