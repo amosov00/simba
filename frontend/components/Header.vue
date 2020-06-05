@@ -22,7 +22,7 @@
     name: 'Header',
     data: () => ({
       menu: [
-          { title: 'Exchange', to: '/exchange/buysell' }, { title: 'About', to: '/about' }, { title: 'How to use', to: '/howtouse' },
+          { title: 'Exchange', to: '/exchange/trade' }, { title: 'About', to: '/about' }, { title: 'How to use', to: '/howtouse' },
           { title: 'Transparency', to: '/transparency' }, { title: 'Contacts', to: '/contacts' }
         ]
     })
