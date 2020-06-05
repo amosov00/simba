@@ -29,6 +29,7 @@ export default {
   modules: [
     '@nuxtjs/axios',
     '@nuxtjs/dotenv',
+    '@nuxtjs/sentry',
     ['nuxt-buefy', {css: false}],
     'cookie-universal-nuxt',
   ],
