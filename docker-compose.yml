@@ -35,6 +35,20 @@ services:
         env_file:
             - .env.backend
 
+    celeryworker:
+        container_name: simba-celeryworker-local
+        command: celery -A core.celery.celeryconfig worker --beat --loglevel=info -Q main-queue -c 1
+        build:
+            context: ./
+            dockerfile: deployment/dockerfiles/Dockerfile.backend.local
+        volumes:
+            - ./backend:/backend
+        depends_on:
+            - db
+            - rabbitmq
+        env_file:
+            - .env.backend
+
     db:
         container_name: simba-mongodb-local
         image: mongo:4.2-bionic
@@ -43,3 +57,11 @@ services:
             - 27017:27017
         env_file:
             - .env.db
+
+    rabbitmq:
+        container_name: simba-rabbitmq-local
+        image: rabbitmq:3.8.4-alpine
+        ports:
+            - 5672:5672
+        env_file:
+            - .env.rabbitmq

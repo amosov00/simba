@@ -1,4 +1,4 @@
-## Save as ".env.frontend"
+## Save as ".env.rabbitmq"
 
 MONGO_INITDB_DATABASE=elastoo
 MONGO_INITDB_ROOT_USERNAME=0

@@ -184,6 +184,7 @@ typings/
 .env.backend
 .env.db
 .env.local
+.env.rabbitmq
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache

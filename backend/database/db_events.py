@@ -7,11 +7,11 @@ from schemas import UserCreationNotSafe
 from config import DEBUG, ENV
 
 test_user = {
-    "email": "admin@nts.fund",
+    "email": "",
     "first_name": "admin",
     "last_name": "admin",
-    "password": "a439a4dAA",
-    "repeat_password": "a439a4dAA",
+    "password": "",
+    "repeat_password": "",
 }
 
 if DEBUG:
