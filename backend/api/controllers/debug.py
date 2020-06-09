@@ -14,11 +14,11 @@ router = APIRouter()
 
 @router.get("/")
 async def debug_get():
-    # await debug_task_1.delay()
-    res = await DebugCRUD.find_many({})
-    for i in res:
-        i.pop("_id", None)
-    return res
+    try:
+        res = await asyncio.wait_for(debug_task_1.apply_async(), timeout=2)
+    except asyncio.TimeoutError:
+        res = "Timeout"
+    return {"res": res}
 
 
 @router.post("/")

@@ -1,2 +1,2 @@
-from .celery_config import celery_instance
+from .celeryconfig import app
 from .tasks import *

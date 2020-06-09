@@ -37,11 +37,7 @@ services:
 
     celeryworker:
         container_name: simba-celeryworker-local
-#        command: ["celery", "-A celery_app.celery", "worker",  "-P celery_pool_asyncio:TaskPool", "--beat",
-#        "--loglevel info"]
-#        command: celery -A celery_app.celery_instance worker --loglevel=DEBUG -P celery_pool_asyncio:TaskPool
-#        command: celery -A celery_app.celery worker --loglevel=INFO
-        command: celery -A celery_app worker --loglevel=INFO -P celery_pool_asyncio:TaskPool
+        command: celery worker -A celery_app -P celery_pool_asyncio:TaskPool --loglevel=INFO
         build:
             context: ./
             dockerfile: deployment/dockerfiles/Dockerfile.backend.local
@@ -54,14 +50,31 @@ services:
             - .env.backend
             - .env.celery
 
+    celerybeat:
+        container_name: simba-celerybeat-local
+        command: celery beat -A celery_app --scheduler celery_pool_asyncio:PersistentScheduler --loglevel=INFO
+        build:
+            context: ./
+            dockerfile: deployment/dockerfiles/Dockerfile.backend.local
+        volumes:
+            - ./backend:/backend
+        depends_on:
+            - db
+            - rabbitmq
+            - celeryworker
+        env_file:
+            - .env.backend
+            - .env.celery
+
     celeryflower:
         image: mher/flower
+        command: celery flower --basic_auth=admin:admin
         ports:
             - 8011:8011
         expose:
             - 8011
         depends_on:
-            - celeryworker
+            - rabbitmq
         env_file:
             - .env.celery
 
