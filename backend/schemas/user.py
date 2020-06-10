@@ -59,7 +59,12 @@ class User(BaseModel):
     is_staff: Optional[bool] = Field(default=False, description="Staff role")
     is_superuser: Optional[bool] = Field(default=False, description="Superuser role")
     is_active: Optional[bool] = Field(default=True, description="User is active")
+    btc_address: str = Field(default=None, description="Linked BTC address to user for transactions")
     created_at: Optional[datetime] = Field(default=None)
+
+    # Is these fields in necessery ?
+    # user_btc_address: str = Field(default=False, description="User BTC address")
+    # user_eth_address: str = Field(default=False, description="User ETH address")
 
     @property
     def is_authenticated(self):
@@ -143,3 +148,4 @@ class UserCreationNotSafe(BaseModel):
 
 class UserUpdateNotSafe(UserCreationNotSafe):
     email: Optional[str] = Field(default="")
+

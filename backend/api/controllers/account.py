@@ -2,7 +2,7 @@ from typing import List
 from http import HTTPStatus
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request
+from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Response
 
 from api.dependencies import get_user
 from database.crud import UserCRUD
@@ -24,8 +24,14 @@ router = APIRouter()
 
 
 @router.post("/login/", response_model=UserLoginResponse)
-async def account_login(data: UserLogin = Body(...)):
-    return await UserCRUD.authenticate(data.email, data.password)
+async def account_login(
+        response: Response,
+        data: UserLogin = Body(...),
+):
+    resp = await UserCRUD.authenticate(data.email, data.password)
+    # TODO Make secure cookie token
+    response.set_cookie(key="accessToken", value=resp["token"], secure=True, httponly=True)
+    return resp
 
 
 @router.post("/signup/", response_model=UserCreationSafeResponse)
@@ -36,6 +42,13 @@ async def account_signup(data: UserCreationSafe = Body(...)):
 @router.post("/verify/", response_model=UserLoginResponse)
 async def account_verify_email(data: UserVerifyEmail = Body(...)):
     return await UserCRUD.verify_email(data.email, data.verification_code)
+
+# @router.post("/logout/", dependencies=[Depends(get_user)])
+# async def account_signup(
+#         response: Response,
+# ):
+#     response.delete_cookie(key="accessToken")
+#     return {"success": True}
 
 
 @router.get("/user/", response_model=User, response_model_exclude={"_id"})
