@@ -35,7 +35,7 @@ class EthereumContractWrapper:
 
         self.contract = self.w3.eth.contract(address=self.contract_address, abi=_abi,)
         self.all_events_titles = self._get_contract_events_titles()
-        self.last_block = self.contract.web3.eth.getBlock("latest").number
+        self.last_block = self.contract.web3.eth.blockNumber
         self.blocks = []
         self.filters = []
 
@@ -122,7 +122,11 @@ class EthereumContractWrapper:
         return True
 
     async def fetch_blocks_and_save(self, from_block: Optional[int] = None):
-        self.fetch_blocks_from_block(from_block) if from_block else self.fetch_all_blocks()
+        if not from_block:
+            last_block = await EthereumTransactionCRUD.find_last_block()
+            from_block = last_block.get("blockNumber")
+
+        self.fetch_blocks_from_block(from_block + 1) if from_block else self.fetch_all_blocks()
         print(f"{self.contract_meta.title}: {len(self.blocks)} new blocks")
         await self.save_blocks()
         return True
