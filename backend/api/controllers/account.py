@@ -13,6 +13,9 @@ from schemas.user import (
     UserCreationSafe,
     UserUpdateSafe,
     UserChangePassword,
+    UserVerifyEmail,
+    UserVerifyEmailResponse,
+    UserCreationSafeResponse
 )
 
 __all__ = ["router"]
@@ -25,9 +28,14 @@ async def account_login(data: UserLogin = Body(...)):
     return await UserCRUD.authenticate(data.email, data.password)
 
 
-@router.post("/signup/", response_model=UserLoginResponse)
+@router.post("/signup/", response_model=UserCreationSafeResponse)
 async def account_signup(data: UserCreationSafe = Body(...)):
     return await UserCRUD.create_safe(data)
+
+
+@router.post("/verify/", response_model=UserLoginResponse)
+async def account_verify_email(data: UserVerifyEmail = Body(...)):
+    return await UserCRUD.verify_email(data.email, data.verification_code)
 
 
 @router.get("/user/", response_model=User, response_model_exclude={"_id"})
@@ -45,5 +53,4 @@ async def account_update_user(user: User = Depends(get_user), payload: UserUpdat
 async def account_change_password(user: User = Depends(get_user), payload: UserChangePassword = Body(...)):
     resp = await UserCRUD.change_password(user, payload)
     return resp
-
 

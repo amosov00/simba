@@ -3,6 +3,7 @@ from datetime import datetime
 
 from pydantic import Field, validator
 from passlib.context import CryptContext
+from passlib import pwd
 
 from schemas.base import BaseModel, ObjectIdPydantic
 
@@ -16,6 +17,9 @@ __all__ = [
     "UserUpdateSafe",
     "UserUpdateNotSafe",
     "UserChangePassword",
+    "UserVerifyEmail",
+    "UserVerifyEmailResponse",
+    "UserCreationSafeResponse"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -40,8 +44,18 @@ class BaseUser(BaseModel):
 class User(BaseModel):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
     email: str = Field(...)
+    email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
+    verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
+    terms_and_condition: Optional[bool] = Field(
+        default=False, description="Terms and conditions checkbox"
+    )
+    telegram_chat_id: Optional[int] = Field(default=None)
+    telegram_id: Optional[int] = Field(default=None)
+    ethereum_wallet: Optional[str] = Field(default=None)
+    btc_wallet: Optional[str] = Field(default=None)
+    simba_wallet: Optional[str] = Field(default=None)
     is_staff: Optional[bool] = Field(default=False, description="Staff role")
     is_superuser: Optional[bool] = Field(default=False, description="Superuser role")
     is_active: Optional[bool] = Field(default=True, description="User is active")
@@ -54,6 +68,15 @@ class User(BaseModel):
     @property
     def display_name(self):
         return self.email
+
+
+class UserVerifyEmail(BaseModel):
+    email: str = Field(..., example="email")
+    verification_code: str = Field(..., example="verification_code")
+
+
+class UserVerifyEmailResponse(BaseModel):
+    msg: str = Field(..., description="Verification succeed")
 
 
 class UserLogin(BaseModel):
@@ -85,6 +108,10 @@ class UserCreationSafe(BaseModel):
     _validate_passwords = validator("password", allow_reuse=True)(validate_password)
 
 
+class UserCreationSafeResponse(BaseModel):
+    success: bool = Field(..., description="Success or not")
+
+
 class UserUpdateSafe(BaseModel):
     email: Optional[str] = Field(default=None)
     first_name: Optional[str] = Field(default=None)
@@ -97,8 +124,13 @@ class UserCreationNotSafe(BaseModel):
     email: Optional[str] = Field(default=None)
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
-    telegram: Optional[str] = Field(default=None)
+    email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
+    verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
+    telegram_id: Optional[int] = Field(default=None)
+    telegram_chat_id: Optional[int] = Field(default=None)
     ethereum_wallet: Optional[str] = Field(default=None)
+    btc_wallet: Optional[str] = Field(default=None)
+    simba_wallet: Optional[str] = Field(default=None)
     is_active: Optional[bool] = Field(default=True, description="User is active")
     is_manager: Optional[bool] = Field(default=False, description="Manager role")
     is_superuser: Optional[bool] = Field(default=False, description="Superuser role")
