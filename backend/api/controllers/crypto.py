@@ -13,7 +13,7 @@ router = APIRouter()
 
 # TODO Temp endpoint. Move to user account
 @router.get(
-    "/btc/get_address/"
+    "/btc/get-address/"
 )
 async def account_get_user(
         user: User = Depends(get_user)
@@ -26,18 +26,19 @@ async def account_get_user(
     return {"address": address}
 
 
-@router.get(
-    "/eth/contract/",
-    dependencies=Depends(get_user),
-    response_model=EthereumContract,
-    response_model_exclude={"abi_filepath"},
-)
-async def meta_contract_fetch():
-    contract = SIMBA_CONTRACT
-
-    with open(contract.abi_filepath) as f:
-        abi = ujson.load(f)
-        contract.abi = abi
-
-    return contract
+# TODO remove if not necessery
+# @router.get(
+#     "/eth/contract/",
+#     dependencies=[Depends(get_user), ],
+#     response_model=EthereumContract,
+#     response_model_exclude={"abi_filepath"},
+# )
+# async def meta_contract_fetch():
+#     contract = SIMBA_CONTRACT
+#
+#     with open(contract.abi_filepath) as f:
+#         abi = ujson.load(f)
+#         contract.abi = abi
+#
+#     return contract
 

@@ -6,7 +6,7 @@ from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 
 from api.routes import api_router
 from core.utils import CustomJSONResponse, exception_handlers
-from core.middleware import JWTAuthBackend
+from core.middleware import JWTAuthBackend, CookieJWTAuthBackend
 from database.init import mongo_client, mongo_db
 from database.db_events import prepopulate_db, close_db_connection
 from config import *
@@ -50,6 +50,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(authentication.AuthenticationMiddleware, backend=JWTAuthBackend())
+app.add_middleware(authentication.AuthenticationMiddleware, backend=CookieJWTAuthBackend())
 
 ##########
 # Misc

@@ -14,5 +14,5 @@ class EthereumContract(BaseModel):
     abi_filepath: Optional[str] = None
     first_block: int = None
     is_test: bool = False
-    provider_http_link: HttpUrl = None
-    provider_ws_link: HttpUrl = None
+    provider_http_link: str = None
+    provider_ws_link: str = None

@@ -1,7 +1,10 @@
 from typing import Literal, Optional
 from urllib.parse import urlencode, urljoin
+from http import HTTPStatus
 
 import httpx
+from fastapi import HTTPException
+from sentry_sdk import capture_message
 
 from config import IS_PRODUCTION, BLOCKCYPHER_TOKEN
 from schemas import BTCAddress, BTCTransaction
@@ -12,7 +15,7 @@ class BlockCypherBitcoinWrapper:
     api_url = "https://api.blockcypher.com/v1/btc/main" \
         if IS_PRODUCTION else "https://api.blockcypher.com/v1/btc/test3"
 
-    blockcypher_wallet_name = "main"
+    blockcypher_wallet_name = "test1"
 
     async def request(
             self,
@@ -37,11 +40,15 @@ class BlockCypherBitcoinWrapper:
             else:
                 resp = await client.get(url, params=params)
 
+        if resp.is_error:
+            capture_message(f"Invalid request to BlockCypher; status: {resp.status_code}; url: {url}")
+            raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, "Bad request")
+
         return resp.json()
 
     async def create_wallet_address(self, quantity: int = 1) -> dict:
         endpoint = f"/wallets/hd/{self.blockcypher_wallet_name}/addresses/derive"
-        return await self.request(endpoint, "GET", {"count": quantity}, with_token=True)
+        return await self.request(endpoint, "POST", {"count": quantity}, with_token=True)
 
     async def fetch_address_info(self, address_hash: str) -> Optional[BTCAddress]:
         endpoint = f"/addrs/{address_hash}/"

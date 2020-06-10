@@ -15,9 +15,8 @@ class BitcoinWrapper:
             pass
 
         address = resp["chains"][0]["chain_addresses"][0]
-
         address_full_info = await self.blockcypher_wrapper.fetch_address_info(
-            address.get("moSCLcuDoAvaMuMYza1XUydvkNH7dqxTEN")
+            address.get("address")
         )
         address_full_info.user_id = user.id
         address_full_info.public_key = address.get("public")
