@@ -11,11 +11,15 @@ from database.init import mongo_client, mongo_db
 from database.db_events import prepopulate_db, close_db_connection
 from config import *
 
-docs_config = {
-    "docs_url": "/api/docs/",
-    "redoc_url": "/api/redocs/",
-    "openapi_url": "/api/docs/openapi.json",
-} if not IS_PRODUCTION else {}
+docs_config = (
+    {
+        "docs_url": "/api/docs/",
+        "redoc_url": "/api/redocs/",
+        "openapi_url": "/api/docs/openapi.json",
+    }
+    if not IS_PRODUCTION
+    else {}
+)
 
 app = FastAPI(
     title="Simba",

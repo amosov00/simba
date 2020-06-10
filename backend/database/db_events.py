@@ -16,7 +16,7 @@ test_user = {
 
 if DEBUG:
     test_user = {
-        "email": "test@test.test",
+        "email": "dan.kuvaldin@yandex.ru",
         "first_name": "test",
         "last_name": "test",
         "password": "TestTest",
@@ -26,7 +26,9 @@ if DEBUG:
 
 async def prepopulate_users():
     if not await UserCRUD.find_by_email(test_user["email"]):
-        await UserCRUD.create_safe(user=UserCreationNotSafe(**test_user), is_active=True, is_superuser=True)
+        await UserCRUD.create_safe(
+            user=UserCreationNotSafe(**test_user), is_active=True, is_superuser=True
+        )
 
     return True
 
@@ -42,7 +44,6 @@ async def prepopulate_db():
         logging.error(f"Unable to connect DB, error {e.__class__.__name__}")
         sentry_sdk.capture_exception(e)
         return None
-
     try:
         await prepopulate_users()
     except Exception as e:
