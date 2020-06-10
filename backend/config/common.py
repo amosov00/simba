@@ -14,6 +14,8 @@ API_HOST = getenv("API_HOST", "0.0.0.0")
 API_PORT = getenv("API_PORT", 4000)
 DEBUG = getenv("DEBUG", "") == "True"
 
+BLOCKCYPHER_TOKEN = getenv("BLOCKCYPHER_TOKEN")
+
 
 IS_PRODUCTION = ENV == "production"
 
