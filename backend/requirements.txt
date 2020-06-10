@@ -69,4 +69,3 @@ varint==1.0.2
 vine==1.3.0
 web3==5.11.0
 websockets==8.1
-pyjwt
