@@ -9,13 +9,10 @@ ENV = getenv("ENV", None)
 
 HOST_URL = getenv("HOST_URL")
 
-SECRET = getenv("HOST_URL", "87de177d-0add-4783-80e1-171dd133a035")
+SECRET = getenv("SECRET", "87de177d-0add-4783-80e1-171dd133a035")
 API_HOST = getenv("API_HOST", "0.0.0.0")
 API_PORT = getenv("API_PORT", 4000)
 DEBUG = getenv("DEBUG", "") == "True"
-
-BLOCKCYPHER_TOKEN = getenv("BLOCKCYPHER_TOKEN")
-
 
 IS_PRODUCTION = ENV == "production"
 

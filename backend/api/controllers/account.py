@@ -46,4 +46,3 @@ async def account_change_password(user: User = Depends(get_user), payload: UserC
     resp = await UserCRUD.change_password(user, payload)
     return resp
 
-

@@ -24,4 +24,6 @@ class BitcoinWrapper:
         address_full_info.path = address.get("path")
 
         await BTCAddressCRUD.insert_one(address_full_info.dict())
-        await UserCRUD.update_one(user, {"btc_address": address_full_info.address})
+        await UserCRUD.update_one({"_id": user.id}, {"btc_address": address_full_info.address})
+
+        return address_full_info.address

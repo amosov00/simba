@@ -27,7 +27,7 @@ class BlockCypherBitcoinWrapper:
         params = params or {}
         params.update({"token": self.api_token}) if with_token else None
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=40.0) as client:
             if request_type == "POST":
                 if params:
                     url = urljoin(url, "?" + urlencode(params))
