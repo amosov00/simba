@@ -8,6 +8,7 @@
   import Header from "~/components/Header";
 
   export default {
+    middleware: ['fetchUser'],
     components: { Header }
   }
 </script>
