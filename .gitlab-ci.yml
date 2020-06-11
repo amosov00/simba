@@ -29,7 +29,6 @@ variables:
   - chmod 644 ~/.ssh/known_hosts
 
 before_script:
-  - *ssh_helper
   - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
 after_script:
@@ -67,15 +66,17 @@ deploy-develop:
   only:
     - develop
   script:
+    - *ssh_helper
     - sh ./deployment/scripts/proceed-env.sh
     - sh ./deployment/scripts/deploy-new.sh
 
-deploy-production:
+.deploy-production:
   stage: deploy
   environment:
     name: production
-  script:
-    - sh ./deployment/scripts/proceed-env.sh
-    - sh ./deployment/scripts/deploy-new.sh
   only:
     - master
+  script:
+    - *ssh_helper
+    - sh ./deployment/scripts/proceed-env.sh
+    - sh ./deployment/scripts/deploy-new.sh
