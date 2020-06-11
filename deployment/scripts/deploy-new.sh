@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
 echo "########## Deploying to server ##########"
 export SSH_OPTION=
@@ -13,7 +13,9 @@ echo "########## Pull changes from gitlab repo ##########"
 ssh "$SSH_USER"@"$SSH_HOST" "cd '$PROJECT_DIR' && git pull $CI_REPOSITORY_URL $CI_COMMIT_REF_NAME"
 
 echo "########## Pull images from Gitlab Container Registry ##########"
+ssh "$SSH_USER"@"$SSH_HOST" "docker login -u '$CI_REGISTRY_USER' -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
 ssh "$SSH_USER"@"$SSH_HOST" "cd '$PROJECT_DIR' && docker-compose -f $DOCKER_COMPOSE_FILENAME pull"
+ssh "$SSH_USER"@"$SSH_HOST" "docker logout $CI_REGISTRY"
 
 echo "########## Copy .env files ##########"
 scp .env.backend  "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"

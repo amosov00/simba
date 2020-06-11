@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
 set -e
 
@@ -14,5 +14,5 @@ cp "$ENV_DB" .env.db
 
 echo "########## Pass additional enviroment variables ##########"
 # COMMIT SHA for SENTRY
-echo "$CI_COMMIT_SHORT_SHA" >> .env.backend
-echo "$CI_COMMIT_SHORT_SHA" >> .env.frontend
+echo -e "COMMIT=$CI_COMMIT_SHORT_SHA" >> .env.backend
+echo -e "COMMIT=$CI_COMMIT_SHORT_SHA" >> .env.frontend

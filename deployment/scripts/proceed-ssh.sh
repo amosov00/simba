@@ -1,3 +1,4 @@
+#!/bin/bash
 echo "########## Processing ssh file ##########"
 
 test -n "$SSH_USER" || echo Fatal : missing variable SSH_PRIVATE_KEY
