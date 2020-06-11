@@ -7,6 +7,7 @@ SENTRY_DNS = getenv("SENTRY_DNS", "")
 
 sentry_sdk.init(
     dsn=SENTRY_DNS,
-    environment=ENV,
     release=COMMIT,
+    environment=ENV,
+    attach_stacktrace=True
 )
