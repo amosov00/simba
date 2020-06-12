@@ -40,7 +40,7 @@ class UserCRUD(BaseMongoCRUD):
 
         user = await super().find_one(query={"email": email})
 
-        if user and not user["email_is_active"]:
+        if user and ("email_is_active" not in user or not user["email_is_active"]):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Activate your account")
 
         if user and pwd_context.verify(password, user["password"]):
@@ -93,9 +93,23 @@ class UserCRUD(BaseMongoCRUD):
             raise HTTPException(
                 HTTPStatus.BAD_REQUEST, "User with this email is already exists",
             )
+
+        if "email_is_active" in kwargs and kwargs["email_is_active"]:
+            inserted_id = (
+                await cls.insert_one(
+                    payload={
+                        **user.dict(exclude=set(FIELDS_TO_EXCLUDE)),
+                        "created_at": datetime.now(),
+                        "is_active": True,
+                        "email_is_active": True
+                    }
+                )
+            ).inserted_id
+
+            return {"success": True}
+
         verification_code = pwd.genword()
         user_email = user.dict()["email"]
-
         try:
             email_obj = Email()
             await email_obj.send_verification_code(
@@ -118,7 +132,6 @@ class UserCRUD(BaseMongoCRUD):
                 }
             )
         ).inserted_id
-
 
         return {"success": True}
 
