@@ -16,7 +16,7 @@ test_user = {
 
 if DEBUG:
     test_user = {
-        "email": "dan.kuvaldin@yandex.ru",
+        "email": "test@test.com",
         "first_name": "test",
         "last_name": "test",
         "password": "TestTest",
@@ -27,7 +27,7 @@ if DEBUG:
 async def prepopulate_users():
     if not await UserCRUD.find_by_email(test_user["email"]):
         await UserCRUD.create_safe(
-            user=UserCreationNotSafe(**test_user), is_active=True, is_superuser=True
+            user=UserCreationNotSafe(**test_user), is_active=True, is_superuser=True, email_is_active=True
         )
 
     return True
