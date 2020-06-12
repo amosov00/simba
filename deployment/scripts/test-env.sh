@@ -19,14 +19,23 @@ echo "########## Testing env variables ##########"
 ##  test -n "$var" || echo Fatal : missing env "var"
 #done
 
-test -n "$ENV_BACKEND" || echo Fatal : missing file ENV_BACKEND && exit 1
-test -n "$ENV_FRONTEND" || echo Fatal : missing file ENV_FRONTEND && exit 1
-test -n "$ENV_DB" || echo Fatal : missing file ENV_DB && exit 1
-test -n "$ENV_RABBITMQ" || echo Fatal : missing file ENV_RABBITMQ && exit 1
-test -n "$SSH_USER" || echo Fatal : missing variable SSH_USER && exit 1
-test -n "$SSH_HOST" || echo Fatal : missing variable SSH_HOST && exit 1
-test -n "$SSH_PRIVATE_KEY" || echo Fatal : missing variable SSH_PRIVATE_KEY && exit 1
-test -n "$SSH_KNOWN_HOSTS" || echo Fatal : missing variable SSH_KNOWN_HOSTS && exit 1
-test -n "$PROJECT_DIR" || echo Fatal : missing variable PROJECT_DIR && exit 1
-test -n "$DOCKER_COMPOSE_FILENAME" || echo Fatal : missing variable DOCKER_COMPOSE_FILENAME && exit 1
-test -n "$CI_ENVIRONMENT_SLUG" || echo Fatal : missing variable CI_ENVIRONMENT_SLUG && exit 1
+ERROR="false"
+
+test -n "$ENV_BACKEND" || ERROR="ENV_BACKEND"
+test -n "$ENV_FRONTEND" || ERROR="ENV_FRONTEND"
+test -n "$ENV_DB" || ERROR="ENV_DB"
+test -n "$ENV_RABBITMQ" || ERROR="ENV_RABBITMQ"
+test -n "$SSH_USER" || ERROR="SSH_USER"
+test -n "$SSH_HOST" || ERROR="SSH_HOST"
+test -n "$SSH_PRIVATE_KEY" || ERROR="SSH_PRIVATE_KEY"
+test -n "$SSH_KNOWN_HOSTS" || ERROR="SSH_KNOWN_HOSTS"
+test -n "$PROJECT_DIR" || ERROR="PROJECT_DIR"
+test -n "$DOCKER_COMPOSE_FILENAME" || ERROR="DOCKER_COMPOSE_FILENAME"
+test -n "$CI_ENVIRONMENT_SLUG" || ERROR="CI_ENVIRONMENT_SLUG"
+
+if [ "$ERROR" != "false" ]; then
+  echo "Fatal: missing variable $ERROR"
+  exit 1
+fi
+
+echo "########## Variables successfully passed tests ##########"
