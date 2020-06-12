@@ -17,6 +17,19 @@ export const mutations = {
 };
 
 export const actions = {
+  async activateAccount({}, data) {
+    if (!data) return false;
+
+    return await this.$axios
+      .post("/account/verify/", data)
+      .then(resp => {
+        return true;
+      })
+      .catch(_ => {
+        return false
+      });
+  },
+
   async getUser({commit}) {
     return await this.$axios.get('/account/user/').then(resp => {
       if(resp.status === 200 ){
