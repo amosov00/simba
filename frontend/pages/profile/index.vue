@@ -88,7 +88,7 @@
       this.userData.first_name = first_name;
       this.userData.last_name = last_name;
 
-      this.orig_user = this.userData;
+      this.orig_user = Object.assign({}, this.userData);
     },
     async asyncData({ store }) {
       await store.dispatch('getBtcAddress')
