@@ -29,9 +29,4 @@ app.conf.update(
 )
 
 app.conf.beat_schedule = {
-    'debug_task': {
-        'task': 'debug_cronjob_1',
-        'schedule': 10.0,
-        'args': (),
-    },
 }

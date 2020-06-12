@@ -1,5 +1,7 @@
 from celery_app.celeryconfig import app
 
+import logging
+
 __all__ = ['debug_cronjob_1']
 
 INC_LIST = [0, ]
@@ -13,5 +15,5 @@ INC_LIST = [0, ]
 )
 async def debug_cronjob_1(self, *args, **kwargs):
     INC_LIST[0] += 1
-    print(f'Hello there {INC_LIST[0]}')
+    logging.info(f'Hello there {INC_LIST[0]}')
     return INC_LIST[0]
