@@ -15,19 +15,16 @@ export const mutations = {
 
 export const actions = {
   async signUp({ commit }, data) {
+    console.log(data);
+
     if (!data) return false;
     return await this.$axios
       .post("/account/signup/", data)
       .then(resp => {
-        this.$axios.setToken(resp.data.token, "Bearer");
-        this.$cookies.set("token", resp.data.token, {
-          path: "/",
-          maxAge: 60 * 60 * 24 * 7
-        });
-        commit("setUser", resp.data.user);
-        return null;
+        return true;
       })
       .catch(_ => {
+        return false
       });
   },
   async changeProfile({}, data) {

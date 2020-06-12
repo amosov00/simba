@@ -25,6 +25,7 @@ export default {
   plugins: [
     '~/plugins/auth.js',
     '~/plugins/axios.js',
+    '~/plugins/vee-validate.js',
   ],
   modules: [
     '@nuxtjs/axios',

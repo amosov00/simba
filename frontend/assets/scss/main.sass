@@ -3,6 +3,7 @@
 $body-family: "Roboto", "Verdana", "Arial", sans-serif
 $body-font-size: 14px
 $body-line-height: normal
+$primary: #0060FF
 
 $warning: #E0B72E
 
@@ -16,6 +17,10 @@ body
   font-weight: 300
   color: #000000
 
+
+input[type="text"], input[type="password"]
+  &::placeholder
+    opacity: 0.6
 
 .link
   color: #0060FF
@@ -77,6 +82,12 @@ body
   margin-right: 27px
   &:last-child
     margin-right: 0
+
+.validaton-error
+  display: block
+  margin-top: 6px
+  font-size: 12px
+  color: #bc002a
 
 @import "./helpers.sass"
 @import "./button.sass"

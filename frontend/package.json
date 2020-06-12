@@ -23,7 +23,8 @@
     "nuxt-buefy": "^0.3.28",
     "pug": "^2.0.4",
     "pug-plain-loader": "^1.0.0",
-    "sass-loader": "^8.0.2"
+    "sass-loader": "^8.0.2",
+    "vee-validate": "^3.3.3"
   },
   "devDependencies": {}
 }
