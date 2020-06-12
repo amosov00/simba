@@ -1,4 +1,4 @@
-export default ({ app, redirect }, inject) => {
+export default ({ app, redirect, route }, inject) => {
 	inject('authLogin', async (email, password) => {
 		return await app.$axios.post('/account/login/',
 			{

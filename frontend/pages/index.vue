@@ -4,7 +4,7 @@
       n-link(to="/" exact-active-class="link--active").link.link--underlined.content-tabs-item Sign in
       n-link(to="/register" exact-active-class="link--active").link.link--underlined.content-tabs-item Registration
     div.main-content
-      div.column.is-4
+      div.column.is-4.p-0
         b-field
           b-input(size="is-small" placeholder="e-mail" v-model="email")
         b-field
@@ -34,6 +34,11 @@ export default {
     async login() {
       this.loading = true;
       let resp = await this.$authLogin(this.email, this.password);
+
+      if(!resp) {
+        this.$buefy.toast.open({message: 'Check your email/password and make sure you activated your account!', type: 'is-danger', duration: 3500})
+      }
+
       this.password = "";
       this.loading = false;
     }

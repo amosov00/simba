@@ -4,7 +4,7 @@
       n-link(to="/" exact-active-class="link--active").link.link--underlined.content-tabs-item Sign in
       n-link(to="/register" exact-active-class="link--active").link.link--underlined.content-tabs-item Registration
     div.main-content
-      div.column.is-4
+      div.column.is-4.p-0
         ValidationObserver(v-slot="{ handleSubmit }")
           form(@submit.prevent="handleSubmit(submit)")
             b-field
