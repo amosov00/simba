@@ -12,7 +12,7 @@ export default ({ app, redirect, route }, inject) => {
 				path: '/',
 				maxAge: 60 * 60 * 24 * 7,
 			});
-			redirect('/profile/');
+			redirect('/exchange/');
 			return true;
 		}).catch(resp => {
 		  return false;
