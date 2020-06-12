@@ -9,16 +9,19 @@
           b-input(size="is-small" placeholder="e-mail" v-model="email")
         b-field
           b-input(size="is-small" type="password" placeholder="password" v-model="password" v-on:keypress.enter.native="login")
-        b-button(:loading="loading" @click="login").btn.w-100 Войти
+        b-button(:loading="loading" @click="login").btn.w-100 Sign in
 
 </template>
 
 <script>
 export default {
   name: "index",
-  layout: 'main',
-  component: {
-
+  layout: "main",
+  middleware ({ store, redirect }) {
+    if(store.state.user) {
+      redirect('/profile')
+      return
+    }
   },
   data() {
     return {

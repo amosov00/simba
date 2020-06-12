@@ -7,11 +7,11 @@
         div
           div.logo-text SIMBA
           div.logo-subtext Swiss Quality Stablecoin
-      div.column.is-6.has-text-right
+      div.column.is-6.has-text-right(v-if="user")
         div.mb-1.text-large
-          nuxt-link(to="/").link Alex Royce
+          nuxt-link(to="/profile").link {{ user.first_name }} {{ user.last_name }}
         div.has-text-weight-bold.text-large 999 000 050 000 SIMBA
-    div.header-menu.columns.is-flex
+    div.header-menu.columns.is-flex(v-if="user")
       div.column.is-8
         nuxt-link(:to="menuItem.to" v-for="(menuItem, i) in menu" :key="i" active-class="link--active").menu-item.link {{ menuItem.title }}
       div.column.is-4.text-large.has-text-right 1 Bitcoin = 100 000 000 SIMBA
@@ -20,6 +20,11 @@
 <script>
   export default {
     name: 'Header',
+    computed: {
+      user() {
+        return this.$store.getters.user;
+      }
+    },
     data: () => ({
       menu: [
           { title: 'Exchange', to: '/exchange/trade' }, { title: 'About', to: '/about' }, { title: 'How to use', to: '/howtouse' },
