@@ -40,8 +40,7 @@ class UserCRUD(BaseMongoCRUD):
 
         user = await super().find_one(query={"email": email})
 
-        # print(user)
-        if not user["email_is_active"]:
+        if user and not user["email_is_active"]:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Activate your account")
 
         if user and pwd_context.verify(password, user["password"]):
