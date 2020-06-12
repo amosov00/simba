@@ -22,6 +22,7 @@ echo "########## Testing env variables ##########"
 test -n "$ENV_BACKEND" || echo Fatal : missing file ENV_BACKEND
 test -n "$ENV_FRONTEND" || echo Fatal : missing file ENV_FRONTEND
 test -n "$ENV_DB" || echo Fatal : missing file ENV_DB
+test -n "$ENV_RABBITMQ" || echo Fatal : missing file ENV_DB
 test -n "$SSH_USER" || echo Fatal : missing variable SSH_USER
 test -n "$SSH_HOST" || echo Fatal : missing variable SSH_HOST
 test -n "$SSH_PRIVATE_KEY" || echo Fatal : missing variable SSH_PRIVATE_KEY

@@ -1,0 +1,4 @@
+from os import getenv
+
+CELERY_BROKER_URL = getenv("CELERY_BROKER_URL")
+CELERY_DATABASE_NAME = getenv("CELERY_DATABASE_NAME")

@@ -18,6 +18,7 @@ scp .env          "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
 scp .env.backend  "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
 scp .env.frontend "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
 scp .env.db       "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
+scp .env.rabbitmq "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
 
 
 echo "########## Reload containers services ##########"

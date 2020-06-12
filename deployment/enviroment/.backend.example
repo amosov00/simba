@@ -1,4 +1,4 @@
-## Save as ".env.backend"
+## Save as ".env.rabbitmq"
 
 DEBUG=False
 ENV=develop

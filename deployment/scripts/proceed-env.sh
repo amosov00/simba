@@ -6,6 +6,7 @@ echo "########## Processing enviroment variables ##########"
 cp "$ENV_BACKEND"   .env.backend
 cp "$ENV_FRONTEND"  .env.frontend
 cp "$ENV_DB"        .env.db
+cp "$ENV_RABBITMQ"  .env.rabbitmq
 
 
 echo "########## Pass additional enviroment variables ##########"
