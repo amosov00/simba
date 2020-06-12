@@ -15,6 +15,7 @@ services:
         ports:
             - 3015:3015
         env_file:
+            - .env
             - .env.frontend
 
     backend:
@@ -29,6 +30,7 @@ services:
         ports:
             - 8010:8010
         env_file:
+            - .env
             - .env.backend
 
     db:
@@ -39,4 +41,5 @@ services:
         ports:
             - 27022:27022
         env_file:
+            - .env
             - .env.db

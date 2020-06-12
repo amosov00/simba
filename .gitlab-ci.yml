@@ -66,6 +66,7 @@ deploy-develop:
   only:
     - develop
   script:
+    - sh ./deployment/scripts/test-env.sh
     - *ssh_helper
     - sh ./deployment/scripts/proceed-env.sh
     - sh ./deployment/scripts/deploy-new.sh
@@ -77,6 +78,7 @@ deploy-develop:
   only:
     - master
   script:
+    - sh ./deployment/scripts/test-env.sh
     - *ssh_helper
     - sh ./deployment/scripts/proceed-env.sh
     - sh ./deployment/scripts/deploy-new.sh
