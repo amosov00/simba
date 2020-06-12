@@ -39,6 +39,7 @@ def validate_password(v: Optional[str], values: dict) -> str:
 
 class BaseUser(BaseModel):
     pass
+# for what?
 
 
 class User(BaseModel):

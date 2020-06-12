@@ -19,9 +19,8 @@ class Email:
         return f'{HOST_URL}/{urlencode(params)}'
 
     async def send_verification_code(self, to: str, code: str) -> None:
-        mailserver = smtplib.SMTP(self.server, self.port)
-        mailserver.ehlo()
-        mailserver.starttls()
+        mailserver = smtplib.SMTP_SSL(self.server, self.port)
+
         mailserver.login(self.login, self.password)
         msg = MIMEMultipart()
         msg['From'] = self.login
