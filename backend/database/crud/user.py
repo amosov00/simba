@@ -94,6 +94,20 @@ class UserCRUD(BaseMongoCRUD):
             raise HTTPException(
                 HTTPStatus.BAD_REQUEST, "User with this email is already exists",
             )
+        verification_code = pwd.genword()
+        user_email = user.dict()["email"]
+
+        try:
+            email_obj = Email()
+            await email_obj.send_verification_code(
+                user_email, verification_code
+            )
+        except Exception as a:
+            print(a)
+            raise HTTPException(
+                HTTPStatus.BAD_REQUEST, "Error while sending email",
+            )
+
         inserted_id = (
             await cls.insert_one(
                 payload={
@@ -101,22 +115,11 @@ class UserCRUD(BaseMongoCRUD):
                     "created_at": datetime.now(),
                     "is_active": True,
                     "email_is_active": False,
-                    "verification_code": pwd.genword(),
+                    "verification_code": verification_code,
                 }
             )
         ).inserted_id
 
-        user_from_db = await cls.find_by_email(user.dict()["email"])
-
-        try:
-            email_obj = Email()
-            await email_obj.send_verification_code(
-                user_from_db["email"], user_from_db["verification_code"]
-            )
-        except Exception as a:
-            raise HTTPException(
-                HTTPStatus.BAD_REQUEST, "Error while sending email",
-            )
 
         return {"success": True}
 
