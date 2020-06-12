@@ -33,6 +33,9 @@ export default {
     ['nuxt-buefy', {css: false}],
     'cookie-universal-nuxt',
   ],
+  axios: {
+    baseURL: process.env.API_URL || 'https://simba-dev.elastoo.com/api/',
+  },
   buildModules: [
     '@nuxtjs/dotenv'
   ],

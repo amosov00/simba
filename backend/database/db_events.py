@@ -7,16 +7,16 @@ from schemas import UserCreationNotSafe
 from config import DEBUG, ENV
 
 test_user = {
-    "email": "",
+    "email": "admin@simba.com",
     "first_name": "admin",
     "last_name": "admin",
-    "password": "",
-    "repeat_password": "",
+    "password": "a439a4dAA",
+    "repeat_password": "a439a4dAA",
 }
 
 if DEBUG:
     test_user = {
-        "email": "test@test.test",
+        "email": "test@test.com",
         "first_name": "test",
         "last_name": "test",
         "password": "TestTest",
@@ -26,7 +26,9 @@ if DEBUG:
 
 async def prepopulate_users():
     if not await UserCRUD.find_by_email(test_user["email"]):
-        await UserCRUD.create_safe(user=UserCreationNotSafe(**test_user), is_active=True, is_superuser=True)
+        await UserCRUD.create_safe(
+            user=UserCreationNotSafe(**test_user), is_active=True, is_superuser=True, email_is_active=True
+        )
 
     return True
 
@@ -42,7 +44,6 @@ async def prepopulate_db():
         logging.error(f"Unable to connect DB, error {e.__class__.__name__}")
         sentry_sdk.capture_exception(e)
         return None
-
     try:
         await prepopulate_users()
     except Exception as e:
