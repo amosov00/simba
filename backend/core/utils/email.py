@@ -16,7 +16,7 @@ class Email:
     @staticmethod
     def _get_link(code: str, email: str) -> str:
         params = {"verification_code": code, "email": email}
-        return f'{HOST_URL}{urlencode(params)}'
+        return f'{HOST_URL}activate?{urlencode(params)}'
 
     async def send_verification_code(self, to: str, code: str) -> None:
         mailserver = smtplib.SMTP_SSL(self.server, self.port)
