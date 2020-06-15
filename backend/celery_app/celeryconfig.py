@@ -29,4 +29,9 @@ app.conf.update(
 )
 
 app.conf.beat_schedule = {
+    # 'fetch_simba_contract': {
+    #     'task': 'fetch_simba_contract',
+    #     'schedule': 60.0,
+    #     'args': (),
+    # },
 }

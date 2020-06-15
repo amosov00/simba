@@ -6,7 +6,7 @@ from pydantic import Field, validator
 
 from schemas.base import BaseModel, ObjectIdPydantic, DecimalPydantic, validate_btc_address, validate_eth_address
 
-__all__ = ['Invoice']
+__all__ = ['InvoiceStatus', 'InvoiceType', 'Invoice', 'InvoiceUpdate', 'InvoiceCreate', 'InvoiceInDB']
 
 
 class InvoiceStatus:
@@ -22,8 +22,8 @@ class InvoiceStatus:
 
 
 class InvoiceType(IntEnum):
-    buy = 1
-    sell = 2
+    BUY = 1
+    SELL = 2
 
 
 class Invoice(BaseModel):
@@ -36,11 +36,17 @@ class Invoice(BaseModel):
     simba_amount: Union[int, DecimalPydantic] = Field(default=0)
     fee: Union[int, str] = Field(default=0)
 
+    # TODO Сколько крипты было перечислено. Некорректное использование полей, найти вариант лучше
+    btc_amount_deposited: Union[int, DecimalPydantic] = Field(default=0)
+    simba_amount_deposited: Union[int, DecimalPydantic] = Field(default=0)
+
     # User wallets
-    user_eth_address: str = Field(default="")
-    user_btc_address: str = Field(default="")
-    target_eth_address: str = Field(default="")
-    target_btc_address: str = Field(default="")
+    target_eth_address: str = Field(default="", description="Address which will be scanned")
+    target_btc_address: str = Field(default="", description="Address which will be scanned")
+
+    # TODO Maybe it will be not necessery
+    # user_eth_address: str = Field(default="", description="")
+    # user_btc_address: str = Field(default="", description="")
 
     # Connected transactions
     eth_tx: List[ObjectIdPydantic] = Field(default=[])
@@ -61,19 +67,25 @@ class Invoice(BaseModel):
     # _validate_target_eth_address = validator("target_eth_address", allow_reuse=True)(validate_eth_address)
 
 
+class InvoiceInDB(Invoice):
+    id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
+
+
 class InvoiceCreate(Invoice):
     status: Literal[InvoiceStatus.ALL] = InvoiceStatus.CREATED  # noqa
 
 
 class InvoiceUpdate(BaseModel):
-    user_eth_address: str = Field(default="")
-    user_btc_address: str = Field(default="")
     target_eth_address: str = Field(default="")
     target_btc_address: str = Field(default="")
     btc_amount: Union[int, DecimalPydantic] = Field(default=0)
     simba_amount: Union[int, DecimalPydantic] = Field(default=0)
 
-    _validate_user_btc_address = validator("user_btc_address", allow_reuse=True)(validate_btc_address)
-    _validate_user_eth_address = validator("user_eth_address", allow_reuse=True)(validate_eth_address)
     _validate_target_btc_address = validator("target_btc_address", allow_reuse=True)(validate_btc_address)
     _validate_target_eth_address = validator("target_eth_address", allow_reuse=True)(validate_eth_address)
+
+    # TODO Maybe it will be not necessery
+    # user_eth_address: str = Field(default="")
+    # user_btc_address: str = Field(default="")
+    # _validate_user_btc_address = validator("user_btc_address", allow_reuse=True)(validate_btc_address)
+    # _validate_user_eth_address = validator("user_eth_address", allow_reuse=True)(validate_eth_address)

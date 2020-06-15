@@ -43,7 +43,11 @@ class BitcoinWrapper:
             address_from: str,
             wifs: List[str],
             fee: Union[int, str] = "standard",
+            test: bool = False,
     ):
+        if test:
+            return True
+
         payables = self.api_wrapper.get_payables(address_from)
 
         tx = create_signed_tx(

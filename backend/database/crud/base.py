@@ -1,17 +1,25 @@
+from abc import ABC
+
+from bson import ObjectId
+
 from database import mongo_db
 
 __all__ = [
-    "BaseMongoCRUD",
+    "BaseMongoCRUD", "ObjectId"
 ]
 
 
-class BaseMongoCRUD(object):
+class BaseMongoCRUD(ABC):
     db = mongo_db
     collection = NotImplemented
 
     @classmethod
+    async def find_by_id(cls, _id: ObjectId, **kwargs):
+        return await cls.db[cls.collection].find_one({"_id": _id}, **kwargs)
+
+    @classmethod
     async def find_one(cls, query: dict):
-        return await cls.db[cls.collection].find_one(filter=query,)
+        return await cls.db[cls.collection].find_one(filter=query, )
 
     @classmethod
     async def find_many(cls, query: dict, options: dict = None):
@@ -23,7 +31,7 @@ class BaseMongoCRUD(object):
 
     @classmethod
     async def insert_many(cls, payload: list, options: dict = None):
-        return await cls.db[cls.collection].insert_many(payload, options,)
+        return await cls.db[cls.collection].insert_many(payload, options, )
 
     @classmethod
     async def update_one(cls, query: dict, payload: dict, with_set_option: bool = True, **kwargs):
@@ -33,7 +41,7 @@ class BaseMongoCRUD(object):
     @classmethod
     async def update_many(cls, query: dict, payload: dict, with_set_option: bool = True, **kwargs):
         payload = {"$set": payload} if with_set_option else payload
-        return [i async for i in cls.db[cls.collection].update_many(query, payload, **kwargs,)]
+        return [i async for i in cls.db[cls.collection].update_many(query, payload, **kwargs, )]
 
     @classmethod
     async def delete_one(cls, query: dict, **kwargs):
