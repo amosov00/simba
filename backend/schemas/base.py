@@ -1,9 +1,43 @@
 from http import HTTPStatus
 from datetime import datetime, time
+from hashlib import sha256
 
 from bson import ObjectId, Decimal128, errors
 from fastapi import HTTPException
 from pydantic import BaseModel as PydanticBaseModel
+from web3 import Web3
+
+
+def validate_eth_address(address_hash: str) -> bool:
+    status = False
+
+    try:
+        status = Web3.isAddress(address_hash)
+    except:
+        pass
+
+    return status or ValueError("Invalid ETH address")
+
+
+def validate_btc_address(address_hash: str):
+    """ Origin: https://rosettacode.org/wiki/Bitcoin/address_validation#Python """
+
+    def decode_base58(bc, length):
+        n = 0
+        for char in bc:
+            n = n * 58 + chars.index(char)
+        return n.to_bytes(length, 'big')
+
+    chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+    status = False
+
+    try:
+        bcbytes = decode_base58(address_hash, 25)
+        status = bcbytes[-4:] == sha256(sha256(bcbytes[:-4]).digest()).digest()[:4]
+    except:
+        pass
+
+    return status
 
 
 class ObjectIdPydantic(str):
