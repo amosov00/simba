@@ -2,13 +2,14 @@ from fastapi import APIRouter
 
 from config import DEBUG
 
-from api.controllers import account, debug, crypto, meta
+from api.controllers import account, debug, crypto, meta, invoice
 
 api_router = APIRouter()
 
 api_router.include_router(account.router, prefix="/account", tags=["account"])
 api_router.include_router(crypto.router, prefix="/crypto", tags=["crypto"])
 api_router.include_router(meta.router, prefix="/meta", tags=["meta"])
+api_router.include_router(invoice.router, prefix="/invoice", tags=["invoice"])
 
 
 if DEBUG:
