@@ -5,17 +5,28 @@ from http import HTTPStatus
 import httpx
 from fastapi import HTTPException
 from sentry_sdk import capture_message
+from pycoin.services.blockcypher import BlockcypherProvider
+from pycoin.symbols import btc, tbtx
+from pycoin.coins.Tx import Tx
 
-from config import IS_PRODUCTION, BLOCKCYPHER_TOKEN
+from config import IS_PRODUCTION, BLOCKCYPHER_TOKEN, BLOCKCYPHER_WALLET_TITLE
 from schemas import BTCAddress, BTCTransaction
 
 
-class BlockCypherBitcoinWrapper:
+class BlockCypherAPIWrapper(BlockcypherProvider):
     api_token = BLOCKCYPHER_TOKEN
     api_url = "https://api.blockcypher.com/v1/btc/main" \
         if IS_PRODUCTION else "https://api.blockcypher.com/v1/btc/test3"
 
-    blockcypher_wallet_name = "test1"
+    blockcypher_wallet_name = BLOCKCYPHER_WALLET_TITLE
+
+    def __init__(self):
+        self.netcode = "BTC" if IS_PRODUCTION else "XTN"
+        self.network = btc.network if IS_PRODUCTION else tbtx.network
+        super().__init__(
+            self.api_token,
+            self.netcode
+        )
 
     async def request(
             self,
@@ -69,3 +80,12 @@ class BlockCypherBitcoinWrapper:
         endpoint = f"/txs/send/"
         res = await self.request(endpoint, request_type="POST", data=data, with_token=True)
         return res
+
+    async def push_raw_tx(self, tx: Tx):
+        endpoint = f"/txs/push/"
+        data = {"tx": tx.as_hex()}
+        res = await self.request(endpoint, request_type="POST", data=data, with_token=True)
+        return res
+
+    async def get_payables(self, address: str):
+        return self.get_payables(address)

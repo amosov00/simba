@@ -1,1 +1,1 @@
-from .bitcoin import BlockCypherBitcoinWrapper
+from .bitcoin import BlockCypherAPIWrapper
