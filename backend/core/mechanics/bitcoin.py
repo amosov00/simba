@@ -1,21 +1,67 @@
-from typing import Union, Optional
+from typing import Union, Optional, List
 
-from core.integrations.blockcypher import BlockCypherBitcoinWrapper
+from pycoin.coins.tx_utils import create_signed_tx
+
+from core.integrations.blockcypher import BlockCypherAPIWrapper
 from database.crud import UserCRUD, BTCAddressCRUD
 from schemas import User
 
 
+class Payable:
+    def __init__(self, address: str, amount: int):
+        if not all([
+            isinstance(address, str),
+            isinstance(amount, int),
+        ]):
+            raise ValueError("Invalid types")
+
+        self.address = address
+        self.amount = amount
+
+    @property
+    def serialized(self) -> tuple:
+        return self.address, self.amount
+
+
 class BitcoinWrapper:
     def __init__(self):
-        self.blockcypher_wrapper = BlockCypherBitcoinWrapper()
+        self.api_wrapper = BlockCypherAPIWrapper()
+
+    @staticmethod
+    async def create_spendables(pairs=List[Payable]):
+        result = []
+        for pair in pairs:
+            if not isinstance(pair, Payable):
+                raise AttributeError("Invalid format of ")
+
+            result.append(pair.serialized)
+        return result
+
+    async def create_and_sign_transaction(
+            self,
+            spendables: List[tuple],
+            address_from: str,
+            wifs: List[str],
+            fee: Union[int, str] = "standard",
+    ):
+        payables = self.api_wrapper.get_payables(address_from)
+
+        tx = create_signed_tx(
+            self.api_wrapper.network,
+            spendables=spendables,
+            payables=payables,
+            wifs=wifs,
+            fee=fee
+        )
+        return await self.api_wrapper.push_raw_tx(tx)
 
     async def create_wallet_address(self, user: User):
-        resp = await self.blockcypher_wrapper.create_wallet_address(1)
+        resp = await self.api_wrapper.create_wallet_address(1)
         if "errors" in resp:
             pass
 
         address = resp["chains"][0]["chain_addresses"][0]
-        address_full_info = await self.blockcypher_wrapper.fetch_address_info(
+        address_full_info = await self.api_wrapper.fetch_address_info(
             address.get("address")
         )
         address_full_info.user_id = user.id

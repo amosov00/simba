@@ -4,6 +4,7 @@ from .common import IS_PRODUCTION, BASE_DIR
 from schemas import EthereumContract
 
 BLOCKCYPHER_TOKEN = getenv("BLOCKCYPHER_TOKEN")
+BLOCKCYPHER_WALLET_TITLE = getenv("BLOCKCYPHER_WALLET_TITLE", "test1")
 INFURA_HTTP_URL = getenv("INFURA_HTTP_URL")
 INFURA_WS_URL = getenv("INFURA_WS_URL")
 
