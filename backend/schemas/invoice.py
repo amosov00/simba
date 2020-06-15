@@ -57,7 +57,7 @@ class Invoice(BaseModel):
     finised_at: Optional[datetime] = Field(default="")
 
     # Validate transaction before processing
-    validation_md5_hash: str = Field(..., default="")
+    validation_md5_hash: str = Field(default="")
 
     # Validators. TODO Нужно ли использовать валидаторы здесь? Это сильно замедлит валидацию большого кол-ва
     # данные
