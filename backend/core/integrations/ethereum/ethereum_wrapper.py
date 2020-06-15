@@ -81,7 +81,7 @@ class EthereumContractWrapper:
         except ConnectionClosedError as e:
             # TODO deal with exception code = 1011 (unexpected error), reason = Internal server disconnect error
             capture_exception(e)
-            print(e, f"Contract:{self.contract_meta.title}", f"Event:{event}", sep="\n")
+            logging.info(e, f"Contract:{self.contract_meta.title}", f"Event:{event}", sep="\n")
             pass
 
         return True
@@ -124,9 +124,9 @@ class EthereumContractWrapper:
     async def fetch_blocks_and_save(self, from_block: Optional[int] = None):
         if not from_block:
             last_block = await EthereumTransactionCRUD.find_last_block()
-            from_block = last_block.get("blockNumber")
+            from_block = last_block.get("blockNumber") if last_block else None
 
         self.fetch_blocks_from_block(from_block + 1) if from_block else self.fetch_all_blocks()
-        print(f"{self.contract_meta.title}: {len(self.blocks)} new blocks")
+        logging.info(f"{self.contract_meta.title}: {len(self.blocks)} new blocks")
         await self.save_blocks()
         return True
