@@ -19,8 +19,6 @@ __all__ = [
     "InvoiceUpdate",
     "InvoiceCreate",
     "InvoiceInDB",
-    "InvoiceCreateRequest",
-    "InvoiceCreateResponse",
 ]
 
 
@@ -31,7 +29,7 @@ class InvoiceStatus:
     COMPLETED = "completed"
     CANCELED = "canceled"
 
-    ALL = (CREATED, WAITING, PROCESSING, COMPLETED, CREATED)
+    ALL = (CREATED, WAITING, PROCESSING, COMPLETED, CANCELED)
 
 
 class InvoiceType(IntEnum):
@@ -89,66 +87,8 @@ class InvoiceInDB(Invoice):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
 
 
-class InvoiceCreate(Invoice):
-    status: Literal[InvoiceStatus.ALL] = InvoiceStatus.CREATED  # noqa
-
-
-class InvoiceCreateRequest(BaseModel):
-    invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")
-    btc_amount: Union[int, DecimalPydantic] = Field(default=0)
-    simba_amount: Union[int, DecimalPydantic] = Field(default=0)
-    fee: Union[int, str] = Field(default=0)
-
-    btc_amount_deposited: Union[int, DecimalPydantic] = Field(default=0)
-    simba_amount_deposited: Union[int, DecimalPydantic] = Field(default=0)
-
-    # User wallets
-    target_eth_address: str = Field(
-        default="", description="Address which will be scanned"
-    )
-    target_btc_address: str = Field(
-        default="", description="Address which will be scanned"
-    )
-
-    # Connected transactions
-    eth_tx: List[ObjectIdPydantic] = Field(default=[])
-    btc_tx: List[ObjectIdPydantic] = Field(default=[])
-
-    # Datetimes
-    created_at: datetime = Field(default_factory=datetime.utcnow, description="UTC")
-    finised_at: Optional[datetime] = Field(default=None)
-
-    validation_md5_hash: str = Field(default="")
-
-
-class InvoiceCreateResponse(BaseModel):
-    id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
-    status: Literal[InvoiceStatus.ALL] = Field(..., description="Status title")  # noqa
-    invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")
-
-    # Amount
-    btc_amount: Union[int, DecimalPydantic] = Field(default=0)
-    simba_amount: Union[int, DecimalPydantic] = Field(default=0)
-    fee: Union[int, str] = Field(default=0)
-
-    btc_amount_deposited: Union[int, DecimalPydantic] = Field(default=0)
-    simba_amount_deposited: Union[int, DecimalPydantic] = Field(default=0)
-
-    # User wallets
-    target_eth_address: str = Field(
-        default="", description="Address which will be scanned"
-    )
-    target_btc_address: str = Field(
-        default="", description="Address which will be scanned"
-    )
-
-    # Connected transactions
-    eth_tx: List[ObjectIdPydantic] = Field(default=[])
-    btc_tx: List[ObjectIdPydantic] = Field(default=[])
-
-    # Datetimes
-    created_at: datetime = Field(default_factory=datetime.utcnow, description="UTC")
-    finised_at: Optional[datetime] = Field(default=None)
+class InvoiceCreate(BaseModel):
+    invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")  # noqa
 
 
 class InvoiceUpdate(BaseModel):

@@ -9,7 +9,7 @@ api_router = APIRouter()
 api_router.include_router(account.router, prefix="/account", tags=["account"])
 api_router.include_router(crypto.router, prefix="/crypto", tags=["crypto"])
 api_router.include_router(meta.router, prefix="/meta", tags=["meta"])
-api_router.include_router(invoice.router, prefix="/invoice", tags=["invoice"])
+api_router.include_router(invoice.router, prefix="/invoices", tags=["invoice"])
 
 
 if DEBUG:

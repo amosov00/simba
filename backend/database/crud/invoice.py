@@ -5,7 +5,6 @@ from schemas import (
     InvoiceType,
     InvoiceCreate,
     InvoiceInDB,
-    InvoiceCreateRequest,
     InvoiceUpdate
 )
 from .base import BaseMongoCRUD, ObjectId
@@ -39,14 +38,17 @@ class InvoiceCRUD(BaseMongoCRUD):
         })
 
     @classmethod
-    async def create_invoice(cls, user: User, data: InvoiceCreateRequest):
+    async def invoice_info(cls, invoice_id: str, user: User):
+        pass
+
+    @classmethod
+    async def create_invoice(cls, user: User, data: InvoiceCreate):
         user_id = user.id
         inserted_id = (
             await cls.insert_one(
                 payload={
                     **data.dict(),
                     "user_id": user_id,
-                    "invoice_type": data.invoice_type,
                     "status": InvoiceStatus.CREATED,
                 }
             )
@@ -55,18 +57,58 @@ class InvoiceCRUD(BaseMongoCRUD):
         return created_invoice
 
     @classmethod
-    async def update_invoice(cls, invoice_id: str, user_id: ObjectId, payload: InvoiceUpdate):
-        if not invoice_id or not await cls.find_invoice_by_id(ObjectId(invoice_id), user_id):
+    async def cancel_invoice(cls, invoice_id: str, user: User):
+        if not invoice_id or not await cls.find_invoice_by_id(ObjectId(invoice_id), user.id):
             raise HTTPException(
                 HTTPStatus.BAD_REQUEST, "No such invoice",
             )
         try:
             await cls.update_one(
                 query={
-                    "user_id": user_id,
+                    "user_id": user.id,
+                    "_id": ObjectId(invoice_id)
+                },
+                payload={"status": InvoiceStatus.CANCELED},
+            )
+        except Exception:
+            raise HTTPException(
+                HTTPStatus.BAD_REQUEST, "Error while updating invoice",
+            )
+        return True
+
+    @classmethod
+    async def update_invoice(cls, invoice_id: str, user: User, payload: InvoiceUpdate):
+        if not invoice_id or not await cls.find_invoice_by_id(ObjectId(invoice_id), user.id):
+            raise HTTPException(
+                HTTPStatus.BAD_REQUEST, "No such invoice",
+            )
+        try:
+            await cls.update_one(
+                query={
+                    "user_id": user.id,
                     "_id": ObjectId(invoice_id)
                 },
                 payload=payload.dict(exclude_unset=True),
+            )
+        except Exception:
+            raise HTTPException(
+                HTTPStatus.BAD_REQUEST, "Error while updating invoice",
+            )
+        return True
+
+    @classmethod
+    async def confirm_invoice(cls, invoice_id: str, user: User):
+        if not invoice_id or not await cls.find_invoice_by_id(ObjectId(invoice_id), user.id): # noqa
+            raise HTTPException(
+                HTTPStatus.BAD_REQUEST, "No such invoice",
+            )
+        try:
+            await cls.update_one(
+                query={
+                    "user_id": user.id,
+                    "_id": ObjectId(invoice_id)
+                },
+                payload={"status": InvoiceStatus.WAITING},
             )
         except Exception:
             raise HTTPException(
