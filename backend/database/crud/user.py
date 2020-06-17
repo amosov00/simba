@@ -116,7 +116,6 @@ class UserCRUD(BaseMongoCRUD):
                 user_email, verification_code
             )
         except Exception as a:
-            print(a)
             raise HTTPException(
                 HTTPStatus.BAD_REQUEST, "Error while sending email",
             )
