@@ -4,7 +4,7 @@ from hashlib import sha256
 
 from bson import ObjectId, Decimal128, errors
 from fastapi import HTTPException
-from pydantic import BaseModel as PydanticBaseModel
+from pydantic import BaseModel as PydanticBaseModel, Field
 from web3 import Web3
 
 
