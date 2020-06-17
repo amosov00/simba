@@ -27,9 +27,9 @@ class InvoiceStatus:
     WAITING = "waiting"  # Waiting transaction from user
     PROCESSING = "processing"  # Waiting to generate SIMBA or send BTC
     COMPLETED = "completed"
-    CANCELED = "canceled"
+    CANCELLED = "cancelled"
 
-    ALL = (CREATED, WAITING, PROCESSING, COMPLETED, CANCELED)
+    ALL = (CREATED, WAITING, PROCESSING, COMPLETED, CANCELLED)
 
 
 class InvoiceType(IntEnum):
@@ -38,27 +38,27 @@ class InvoiceType(IntEnum):
 
 
 class Invoice(BaseModel):
-    user_id: ObjectIdPydantic = Field(..., alias="_id", title="_id")
+    user_id: ObjectIdPydantic = Field(...)
     status: Literal[InvoiceStatus.ALL] = Field(..., description="Status title")  # noqa
     invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")
 
     # Amount
-    btc_amount: Union[int, DecimalPydantic] = Field(default=0)
-    simba_amount: Union[int, DecimalPydantic] = Field(default=0)
+    btc_amount: Union[int, DecimalPydantic] = Field(default=None)
+    simba_amount: Union[int, DecimalPydantic] = Field(default=None)
 
     # TODO if fee is necessary ?
     # fee: Union[int, str] = Field(default=0)
 
     # TODO Сколько крипты было перечислено. Некорректное использование полей, найти вариант лучше
-    btc_amount_deposited: Union[int, DecimalPydantic] = Field(default=0)
-    simba_amount_deposited: Union[int, DecimalPydantic] = Field(default=0)
+    btc_amount_deposited: Union[int, DecimalPydantic] = Field(default=None)
+    simba_amount_deposited: Union[int, DecimalPydantic] = Field(default=None)
 
     # User wallets
     target_eth_address: str = Field(
-        default="", description="Address which will be scanned"
+        default=None, description="Address which will be scanned"
     )
     target_btc_address: str = Field(
-        default="", description="Address which will be scanned"
+        default=None, description="Address which will be scanned"
     )
 
     # TODO Maybe it will be not necessery

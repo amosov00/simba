@@ -7,6 +7,10 @@ from schemas import InvoiceInDB, InvoiceType, InvoiceStatus
 
 
 class CryptoCurrencyRate(ABC):
+    # TODO Remove if not necessary
+
+    # 1 BTC = 100,000,000 SATOSHI
+    SATOSHI_IN_BTC = 10 ** 8
     # 1 BTC = 100,000,000 SIMBA
     SIMBA_IN_BTC = 10 ** 8
 
@@ -20,7 +24,8 @@ class CryptoCurrencyRate(ABC):
 
 
 class CryptoValidation(ABC):
-    # Делать независимую логику для валидации исходящих данных
+    SIMBA_TOKENS_MINIMAL_AMOUNT = 200000
+    # Делать независимую дполнительную логику для валидации исходящих данных
 
     def _validate_invoice(self, excepted_status: InvoiceStatus) -> bool:
         invoice: InvoiceInDB = getattr(self, "invoice", None)
@@ -48,11 +53,15 @@ class CryptoValidation(ABC):
     def _validate_fee(self):
         pass
 
-    def _validate_amount(self):
-        pass
+    @classmethod
+    def validate_simba_amount(cls, simba: int) -> bool:
+        if simba and simba >= cls.SIMBA_TOKENS_MINIMAL_AMOUNT:
+            return True
 
-    @staticmethod
-    def _validate_currency_rate(btc: Union[int, float], simba: Union[int, float]) -> bool:
-        status = simba / btc == 100000000
+        return False
+
+    @classmethod
+    def validate_currency_rate(cls, btc: int, simba: int) -> bool:
+        status = simba / btc == 1
         # TODO raise error if not valid
         return status
