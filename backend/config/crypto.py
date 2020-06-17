@@ -10,7 +10,7 @@ INFURA_WS_URL = getenv("INFURA_WS_URL")
 
 SIMBA_CONTRACT = EthereumContract(
     title="SIMBA",
-    address="0x2e52216529F2C47735bbbB8D5fB868c4A93440c5",
+    address="0x60E1BF648580AafbFf6c1bc122BB1AE6Be7C1352",
     abi_filepath=path.join(BASE_DIR, "config", "simba_abi.json"),
     is_test=IS_PRODUCTION is False,
     provider_http_link=INFURA_HTTP_URL,

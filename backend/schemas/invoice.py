@@ -73,7 +73,6 @@ class Invoice(BaseModel):
 
     # Validate transaction before processing
     validation_md5_hash: str = Field(default="")
-    # Crashing on me
 
     # Validators.
     # TODO Нужно ли использовать валидаторы здесь? Это сильно замедлит валидацию большого кол-ва данных
