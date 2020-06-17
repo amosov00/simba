@@ -8,7 +8,7 @@ from pydantic import BaseModel as PydanticBaseModel
 from web3 import Web3
 
 
-def validate_eth_address(address_hash: str) -> bool:
+def validate_eth_address(address_hash: str):
     status = False
 
     try:
@@ -16,7 +16,10 @@ def validate_eth_address(address_hash: str) -> bool:
     except:
         pass
 
-    return status or ValueError("Invalid ETH address")
+    if not status:
+        raise ValueError("Invalid ETH address")
+
+    return address_hash
 
 
 def validate_btc_address(address_hash: str):
@@ -37,7 +40,10 @@ def validate_btc_address(address_hash: str):
     except:
         pass
 
-    return status
+    if not status:
+        raise ValueError("Invalid BTC address")
+
+    return address_hash
 
 
 class ObjectIdPydantic(str):
