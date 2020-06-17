@@ -11,6 +11,7 @@ from schemas.invoice import (
     InvoiceCreate,
     InvoiceUpdate,
     InvoiceInDB,
+    InvoiceStatus
 )
 from schemas.user import User
 
@@ -37,15 +38,14 @@ async def show_invoice_by_id(invoice_id: str, user: User = Depends(get_user)):
 
 @router.put("/{invoice_id}/")
 async def update_invoice(invoice_id: str, user: User = Depends(get_user), payload: InvoiceUpdate = Body(...)):
-    resp = await InvoiceCRUD.update_invoice(invoice_id, user, payload) if payload.dict(exclude_unset=True) else {}
-    return resp
+    return await InvoiceCRUD.update_invoice(invoice_id, user, payload.dict(exclude_unset=True))
 
 
 @router.post("/{invoice_id}/cancel/")
 async def cancel_invoice(invoice_id: str, user: User = Depends(get_user)):
-    return await InvoiceCRUD.cancel_invoice(invoice_id, user)
+    return await InvoiceCRUD.update_invoice(invoice_id, user, {"status": InvoiceStatus.CANCELED})
 
 
 @router.post("/{invoice_id}/confirm/")
 async def confirm_invoice(invoice_id: str, user: User = Depends(get_user)):
-    return await InvoiceCRUD.confirm_invoice(invoice_id, user)
+    return await InvoiceCRUD.update_invoice(invoice_id, user, {"status": InvoiceStatus.WAITING})
