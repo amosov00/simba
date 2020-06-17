@@ -11,7 +11,6 @@ from schemas.user import (
     UserUpdateSafe,
     UserChangePassword,
     UserVerifyEmail,
-    UserVerifyEmailResponse,
     UserCreationSafeResponse
 )
 
@@ -26,8 +25,6 @@ async def account_login(
         data: UserLogin = Body(...),
 ):
     resp = await UserCRUD.authenticate(data.email, data.password)
-    # TODO Make secure cookie token
-    response.set_cookie(key="accessToken", value=resp["token"], secure=True, httponly=True)
     return resp
 
 

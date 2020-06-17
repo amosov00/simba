@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Union
 from urllib.parse import urlencode, urljoin
 from http import HTTPStatus
 
@@ -32,7 +32,7 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
             params: dict = None,
             data: dict = None,
             with_token: bool = False
-    ) -> dict:
+    ) -> Union[list, dict, None]:
 
         url = self.api_url + endpoint
         params = params or {}

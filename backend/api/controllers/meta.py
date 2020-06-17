@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request
 import ujson
 
 from api.dependencies import get_user
-from core.integrations.blockcypher import BlockCypherWebhooksWrapper
+from core.mechanics import BlockCypherWebhookHandler
 from schemas import EthereumContract
 from config import SIMBA_CONTRACT, WEBHOOK_PATH
 
@@ -31,5 +31,5 @@ async def meta_contract_fetch():
 async def meta_webhook_handler(
         payload: dict = Body(...)
 ):
-    await BlockCypherWebhooksWrapper().handle(payload)
+    await BlockCypherWebhookHandler().parse(payload)
     return {"success": True}
