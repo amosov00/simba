@@ -62,18 +62,13 @@ class InvoiceCRUD(BaseMongoCRUD):
             raise HTTPException(
                 HTTPStatus.BAD_REQUEST, "No such invoice",
             )
-        try:
-            await cls.update_one(
-                query={
-                    "user_id": user.id,
-                    "_id": ObjectId(invoice_id)
-                },
-                payload={"status": InvoiceStatus.CANCELED},
-            )
-        except Exception:
-            raise HTTPException(
-                HTTPStatus.BAD_REQUEST, "Error while updating invoice",
-            )
+        await cls.update_one(
+            query={
+                "user_id": user.id,
+                "_id": ObjectId(invoice_id)
+            },
+            payload={"status": InvoiceStatus.CANCELED},
+        )
         return True
 
     @classmethod
@@ -82,18 +77,13 @@ class InvoiceCRUD(BaseMongoCRUD):
             raise HTTPException(
                 HTTPStatus.BAD_REQUEST, "No such invoice",
             )
-        try:
-            await cls.update_one(
-                query={
-                    "user_id": user.id,
-                    "_id": ObjectId(invoice_id)
-                },
-                payload=payload.dict(exclude_unset=True),
-            )
-        except Exception:
-            raise HTTPException(
-                HTTPStatus.BAD_REQUEST, "Error while updating invoice",
-            )
+        await cls.update_one(
+            query={
+                "user_id": user.id,
+                "_id": ObjectId(invoice_id)
+            },
+            payload=payload.dict(exclude_unset=True),
+        )
         return True
 
     @classmethod
@@ -102,16 +92,11 @@ class InvoiceCRUD(BaseMongoCRUD):
             raise HTTPException(
                 HTTPStatus.BAD_REQUEST, "No such invoice",
             )
-        try:
-            await cls.update_one(
-                query={
-                    "user_id": user.id,
-                    "_id": ObjectId(invoice_id)
-                },
-                payload={"status": InvoiceStatus.WAITING},
-            )
-        except Exception:
-            raise HTTPException(
-                HTTPStatus.BAD_REQUEST, "Error while updating invoice",
-            )
+        await cls.update_one(
+            query={
+                "user_id": user.id,
+                "_id": ObjectId(invoice_id)
+            },
+            payload={"status": InvoiceStatus.WAITING},
+        )
         return True
