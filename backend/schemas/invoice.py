@@ -34,7 +34,9 @@ class Invoice(BaseModel):
     # Amount
     btc_amount: Union[int, DecimalPydantic] = Field(default=0)
     simba_amount: Union[int, DecimalPydantic] = Field(default=0)
-    fee: Union[int, str] = Field(default=0)
+
+    # TODO if fee is necessary ?
+    # fee: Union[int, str] = Field(default=0)
 
     # TODO Сколько крипты было перечислено. Некорректное использование полей, найти вариант лучше
     btc_amount_deposited: Union[int, DecimalPydantic] = Field(default=0)

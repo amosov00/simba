@@ -5,6 +5,7 @@ from pycoin.coins.tx_utils import create_signed_tx
 from core.integrations.blockcypher import BlockCypherAPIWrapper
 from database.crud import UserCRUD, BTCAddressCRUD
 from schemas import User
+from .base import CryptoValidation
 
 
 class Payable:
@@ -23,7 +24,7 @@ class Payable:
         return self.address, self.amount
 
 
-class BitcoinWrapper:
+class BitcoinWrapper(CryptoValidation):
     def __init__(self):
         self.api_wrapper = BlockCypherAPIWrapper()
 
