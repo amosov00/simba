@@ -47,7 +47,8 @@ class InvoiceCRUD(BaseMongoCRUD):
         return await super().find_one({
             "_id": ObjectId(invoice_id),
             "user_id": user_id,
-            "status": {"$in": [InvoiceStatus.CREATED, InvoiceStatus.WAITING]}
+            # TODO uncomment later
+            # "status": InvoiceStatus.CREATED}
         })
 
     @classmethod
@@ -85,11 +86,4 @@ class InvoiceCRUD(BaseMongoCRUD):
             user_id: Union[ObjectId, ObjectIdPydantic],
             payload: dict
     ) -> bool:
-        await cls.update_one(
-            query={
-                "user_id": invoice_id,
-                "_id": user_id,
-            },
-            payload=payload,
-        )
-        return True
+        return await super().update_one({"_id": invoice_id, "user_id": user_id}, payload)

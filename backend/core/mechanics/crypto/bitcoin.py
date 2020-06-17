@@ -29,7 +29,7 @@ class BitcoinWrapper(CryptoValidation):
         self.api_wrapper = BlockCypherAPIWrapper()
 
     @staticmethod
-    async def create_spendables(pairs=List[Payable]):
+    def create_spendables(pairs=List[Payable]):
         result = []
         for pair in pairs:
             if not isinstance(pair, Payable):
@@ -44,12 +44,9 @@ class BitcoinWrapper(CryptoValidation):
             address_from: str,
             wifs: List[str],
             fee: Union[int, str] = "standard",
-            test: bool = False,
     ):
-        if test:
-            return True
 
-        payables = self.api_wrapper.get_payables(address_from)
+        payables = await self.api_wrapper.get_payables(address_from)
 
         tx = create_signed_tx(
             self.api_wrapper.network,

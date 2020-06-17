@@ -44,26 +44,33 @@ class BaseUser(BaseModel):
 
 class User(BaseModel):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
+
     email: str = Field(...)
-    email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
-    verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
+
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
-    terms_and_condition: Optional[bool] = Field(
-        default=False, description="Terms and conditions checkbox"
-    )
+
+    verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
+    btc_address: str = Field(default=None, description="Linked BTC address to user for transactions")
+
     telegram_chat_id: Optional[int] = Field(default=None)
     telegram_id: Optional[int] = Field(default=None)
-    ethereum_wallet: Optional[str] = Field(default=None)
-    btc_wallet: Optional[str] = Field(default=None)
-    simba_wallet: Optional[str] = Field(default=None)
+
+    email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
     is_staff: Optional[bool] = Field(default=False, description="Staff role")
     is_superuser: Optional[bool] = Field(default=False, description="Superuser role")
     is_active: Optional[bool] = Field(default=True, description="User is active")
-    btc_address: str = Field(default=None, description="Linked BTC address to user for transactions")
+
+    terms_and_condition: Optional[bool] = Field(
+        default=False, description="Terms and conditions checkbox"
+    )
+
     created_at: Optional[datetime] = Field(default=None)
 
     # Is these fields in necessery ?
+    # ethereum_wallet: Optional[str] = Field(default=None)
+    # btc_wallet: Optional[str] = Field(default=None)
+    # simba_wallet: Optional[str] = Field(default=None)
     # user_btc_address: str = Field(default=False, description="User BTC address")
     # user_eth_address: str = Field(default=False, description="User ETH address")
 

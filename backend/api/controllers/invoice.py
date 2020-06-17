@@ -5,12 +5,13 @@ from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Res
 
 from api.dependencies import get_user
 from database.crud import InvoiceCRUD
-from schemas.invoice import (
+from schemas import (
     Invoice,
     InvoiceCreate,
     InvoiceUpdate,
     InvoiceInDB,
-    InvoiceStatus
+    InvoiceStatus,
+    BlockCypherWebhookEvents,
 )
 from schemas.user import User
 from core.mechanics import BlockCypherWebhookHandler, InvoiceValidation
@@ -60,6 +61,8 @@ async def confirm_invoice(invoice_id: str, user: User = Depends(get_user)):
 
     # await BlockCypherWebhookHandler().create_webhook(
     #     invoice=invoice,
+    #     event=BlockCypherWebhookEvents.UNCONFIRMED_TX,
+    #     wallet_address=user.btc_address
     # )
 
     return True

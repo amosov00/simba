@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request
 import ujson
+import logging
 
 from api.dependencies import get_user
 from core.mechanics import BlockCypherWebhookHandler
@@ -31,5 +32,6 @@ async def meta_contract_fetch():
 async def meta_webhook_handler(
         payload: dict = Body(...)
 ):
-    await BlockCypherWebhookHandler().parse(payload)
-    return {"success": True}
+    logging.info(payload)
+    # await BlockCypherWebhookHandler().parse(payload)
+    return payload
