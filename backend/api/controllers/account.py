@@ -63,9 +63,7 @@ async def account_change_password(user: User = Depends(get_user), payload: UserC
     return resp
 
 
-@router.get(
-    "/get-btc-address/"
-)
+@router.get("/btc-address/")
 async def account_get_user(
         user: User = Depends(get_user)
 ):

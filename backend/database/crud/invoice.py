@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import Literal, Union, Tuple
 
 from schemas import (
     Invoice,
@@ -17,7 +17,7 @@ __all__ = ["InvoiceCRUD"]
 
 
 class InvoiceCRUD(BaseMongoCRUD):
-    collection = "invoices"
+    collection = "invoice"
 
     @classmethod
     async def find_invoices_by_type_and_status(
@@ -43,12 +43,12 @@ class InvoiceCRUD(BaseMongoCRUD):
             cls,
             invoice_id: str,
             user_id: Union[ObjectId, ObjectIdPydantic],
+            statuses: tuple = (InvoiceStatus.CREATED, )
     ):
         return await super().find_one({
             "_id": ObjectId(invoice_id),
             "user_id": user_id,
-            # TODO uncomment later
-            # "status": InvoiceStatus.CREATED}
+            "status": {"$in": list(statuses)}
         })
 
     @classmethod

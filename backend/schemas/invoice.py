@@ -19,6 +19,7 @@ __all__ = [
     "InvoiceUpdate",
     "InvoiceCreate",
     "InvoiceInDB",
+    "InvoiceTransactionManual",
 ]
 
 
@@ -110,3 +111,8 @@ class InvoiceUpdate(BaseModel):
     # user_btc_address: str = Field(default="")
     # _validate_user_btc_address = validator("user_btc_address", allow_reuse=True)(validate_btc_address)
     # _validate_user_eth_address = validator("user_eth_address", allow_reuse=True)(validate_eth_address)
+
+
+class InvoiceTransactionManual(BaseModel):
+    eth_transaction_hash: str = None
+    btc_transaction_hash: str = None

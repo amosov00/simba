@@ -1,51 +1,28 @@
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Tuple
 
 from pycoin.coins.tx_utils import create_signed_tx
 
 from core.integrations.blockcypher import BlockCypherAPIWrapper
-from database.crud import UserCRUD, BTCAddressCRUD
-from schemas import User
-from .base import CryptoValidation
+from database.crud import UserCRUD, BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
+from schemas import User, InvoiceInDB, InvoiceStatus
+from .base import CryptoValidation, ParseCryptoTransaction
 
 
-class Payable:
-    def __init__(self, address: str, amount: int):
-        if not all([
-            isinstance(address, str),
-            isinstance(amount, int),
-        ]):
-            raise ValueError("Invalid types")
-
-        self.address = address
-        self.amount = amount
-
-    @property
-    def serialized(self) -> tuple:
-        return self.address, self.amount
-
-
-class BitcoinWrapper(CryptoValidation):
+class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
     def __init__(self):
         self.api_wrapper = BlockCypherAPIWrapper()
 
-    @staticmethod
-    def create_spendables(pairs=List[Payable]):
-        result = []
-        for pair in pairs:
-            if not isinstance(pair, Payable):
-                raise AttributeError("Invalid format of ")
-
-            result.append(pair.serialized)
-        return result
-
     async def create_and_sign_transaction(
             self,
-            spendables: List[tuple],
+            spendables: List[Tuple[str, int]],
             address_from: str,
             wifs: List[str],
             fee: Union[int, str] = "standard",
     ):
-
+        """
+        Spendables передавать в форме [(<address_hash>, <btc_amount>), ]
+        Wif передавать в формате [<wif>, ]
+        """
         payables = await self.api_wrapper.get_payables(address_from)
 
         tx = create_signed_tx(
@@ -74,3 +51,35 @@ class BitcoinWrapper(CryptoValidation):
         await UserCRUD.update_one({"_id": user.id}, {"btc_address": address_full_info.address})
 
         return address_full_info.address
+
+    async def fetch_and_save_transaction(self, invoice: InvoiceInDB, transaction_hash: str) -> dict:
+        """
+
+        """
+        transaction = await self.api_wrapper.fetch_transaction_info(transaction_hash)
+
+        await self.validate_btc_transaction_with_invoice(invoice, transaction)
+
+        tx_id = (
+            await BTCTransactionCRUD.insert_one(transaction.dict())
+        ).inserted_id
+
+        incoming_btc = self.get_btc_amount_btc_transaction(transaction, invoice.target_btc_address)
+
+        invoice.btc_tx = list({*invoice.btc_tx, tx_id})
+        invoice.btc_amount_deposited = invoice.btc_amount_deposited + incoming_btc \
+            if invoice.btc_amount_deposited else incoming_btc
+
+        await InvoiceCRUD.update_one(
+            {"_id": invoice.id},
+            {
+                "btc_tx": invoice.btc_tx,
+                "status": InvoiceStatus.COMPLETED,
+                "btc_amount_deposited": invoice.btc_amount_deposited,
+            }
+        )
+
+        return {
+            "incoming_btc": incoming_btc,
+            "tx_hash": transaction.hash
+        }

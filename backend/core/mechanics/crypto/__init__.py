@@ -1,2 +1,2 @@
-from .bitcoin import BitcoinWrapper, Payable
+from .bitcoin import BitcoinWrapper
 from .simba import SimbaWrapper

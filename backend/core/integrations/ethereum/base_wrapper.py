@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import Union
 
 from sys import getsizeof
 from decimal import Decimal
@@ -17,7 +18,8 @@ class EthereumBaseWrapper(ABC):
     def __init__(self, contract: EthereumContract):
         _abi = []
         _bin = None
-        self.w3 = Web3(Web3.WebsocketProvider("wss://rinkeby.infura.io/ws/v3/9ce7b0aa43c640b38742853ede40089c", websocket_timeout=60))
+        self.w3 = Web3(Web3.WebsocketProvider("wss://rinkeby.infura.io/ws/v3/9ce7b0aa43c640b38742853ede40089c",
+                                              websocket_timeout=60))
         self.contract_meta = contract
         self.contract_address = Web3.toChecksumAddress(contract.address)
 
@@ -47,3 +49,11 @@ class EthereumBaseWrapper(ABC):
             obj = Decimal128(Decimal(obj))
 
         return obj
+
+    def fetch_transaction_by_hash(self, transaction_hash: Union[str, HexBytes]):
+        # if isinstance(transaction_hash, str):
+        #     transaction_hash = Web3.toHex(transaction_hash)
+        return self.w3.eth.getBlock(
+            transaction_hash,
+            full_transactions=True
+        )

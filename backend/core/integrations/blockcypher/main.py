@@ -13,11 +13,15 @@ class BlockCypherAPIWrapper(BlockCypherBaseAPIWrapper):
     async def fetch_address_info(self, address_hash: str) -> Optional[BTCAddress]:
         endpoint = f"/addrs/{address_hash}/"
         res = await self.request(endpoint)
+        if not res:
+            pass
         return BTCAddress(**res) if res else None
 
     async def fetch_transaction_info(self, transaction_hash: str) -> Optional[BTCTransaction]:
         endpoint = f"/txs/{transaction_hash}/"
         res = await self.request(endpoint)
+        if not res:
+            pass
         return BTCTransaction(**res) if res else None
 
     async def create_transaction(self, data: dict) -> dict:
