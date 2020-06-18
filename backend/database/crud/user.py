@@ -2,6 +2,7 @@ from typing import Optional, Union
 from passlib import pwd
 from datetime import datetime, timedelta
 from http import HTTPStatus
+import pyotp
 
 from fastapi.exceptions import HTTPException
 
@@ -23,7 +24,7 @@ from schemas.user import (
 
 __all__ = ["UserCRUD"]
 
-FIELDS_TO_EXCLUDE = ("repeat_password", "recover_code")
+FIELDS_TO_EXCLUDE = ("repeat_password", "recover_code", "auth_code")
 
 
 class UserCRUD(BaseMongoCRUD):
@@ -38,13 +39,26 @@ class UserCRUD(BaseMongoCRUD):
         return await super().find_one(query={"email": email}) if email else None
 
     @classmethod
-    async def authenticate(cls, email: str, password: str) -> dict:
+    async def check_2fa(cls, user_id: ObjectId, pin_code: str) -> bool:
+        user = await cls.find_by_id(user_id)
+        totp = pyotp.TOTP(user["auth_code"])
+        current_pin_code = totp.now()
+        if pin_code == current_pin_code:
+            return True
+        else:
+            return False
+
+    @classmethod
+    async def authenticate(cls, email: str, password: str, pin_code: Optional[str] = None) -> dict:
         email = email.lower()
 
-        user = await super().find_one(query={"email": email})
+        user = await cls.find_one(query={"email": email})
 
         if user and ("email_is_active" not in user or not user["email_is_active"]):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Activate your account")
+
+        if "two_factor" in user and user["two_factor"] is True and not await cls.check_2fa(user["_id"], pin_code):
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin_code")
 
         if user and pwd_context.verify(password, user["password"]):
             token = encode_jwt_token({"id": str(user["_id"])})
@@ -236,3 +250,17 @@ class UserCRUD(BaseMongoCRUD):
 
         return True
 
+    @classmethod
+    async def create_2fa(cls, user: User):
+        auth_code = pyotp.random_base32()
+        await cls.update_one(
+            query={
+                "_id": user.id
+            },
+            payload={
+                "auth_code": auth_code,
+                "two_factor": True
+            }
+        )
+        target_url = pyotp.totp.TOTP(auth_code).provisioning_uri(user.email, issuer_name="Simba")
+        return {"URL": target_url}

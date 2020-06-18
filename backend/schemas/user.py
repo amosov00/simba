@@ -50,6 +50,8 @@ class User(BaseModel):
     email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
     verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
     recover_code: Optional[str] = Field(default=None, description="JWT token for password recover")
+    auth_code: Optional[str] = Field(default=None, description="Code for 2fa generation")
+    two_factor: Optional[bool] = Field(defaul=False, description="On/off 2fa")
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
     terms_and_condition: Optional[bool] = Field(
@@ -103,6 +105,7 @@ class UserVerifyEmailResponse(BaseModel):
 class UserLogin(BaseModel):
     email: str = Field(..., example="email")
     password: str = Field(..., example="password")
+    pin_code: Optional[str] = Field(default=None, example="auth pin-code")
 
 
 class UserLoginResponse(BaseModel):
@@ -165,3 +168,6 @@ class UserCreationNotSafe(BaseModel):
 class UserUpdateNotSafe(UserCreationNotSafe):
     email: Optional[str] = Field(default="")
 
+
+class User2faURL(BaseModel):
+    URL: str = Field(default="")

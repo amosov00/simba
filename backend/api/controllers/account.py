@@ -17,7 +17,8 @@ from schemas.user import (
     UserVerifyEmailResponse,
     UserCreationSafeResponse,
     UserRecover,
-    UserRecoverLink
+    UserRecoverLink,
+    User2faURL,
 )
 
 __all__ = ["router"]
@@ -35,12 +36,12 @@ async def account_recover(data: UserRecoverLink = Body(...)):
     return await UserCRUD.recover(data)
 
 
-@router.post("/login/", response_model=UserLoginResponse, response_model_exclude={"recover_code"})
+@router.post("/login/", response_model=UserLoginResponse, response_model_exclude={"recover_code", "auth_code"})
 async def account_login(
         response: Response,
         data: UserLogin = Body(...),
 ):
-    resp = await UserCRUD.authenticate(data.email, data.password)
+    resp = await UserCRUD.authenticate(data.email, data.password, data.pin_code)
     # TODO Make secure cookie token
     response.set_cookie(key="accessToken", value=resp["token"], secure=True, httponly=True)
     return resp
@@ -63,7 +64,7 @@ async def account_verify_email(data: UserVerifyEmail = Body(...)):
 #     return {"success": True}
 
 
-@router.get("/user/", response_model=User, response_model_exclude={"_id", "recover_code"})
+@router.get("/user/", response_model=User, response_model_exclude={"_id", "recover_code", "auth_code"})
 async def account_get_user(user: User = Depends(get_user)):
     return user
 
@@ -79,3 +80,7 @@ async def account_change_password(user: User = Depends(get_user), payload: UserC
     resp = await UserCRUD.change_password(user, payload)
     return resp
 
+
+@router.get("/create_2fa/", response_model=User2faURL)
+async def create_2fa(user: User = Depends(get_user)):
+    return await UserCRUD.create_2fa(user)
