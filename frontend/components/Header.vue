@@ -28,7 +28,7 @@
     data: () => ({
       menu: [
           { title: 'Exchange', to: '/exchange/' }, { title: 'About', to: '/about' }, { title: 'How to use', to: '/howtouse' },
-          { title: 'Transparency', to: '/transparency' }, { title: 'Contacts', to: '/contacts' }
+          { title: 'Transparency', to: '/transparency' }, { title: 'Wallet', to: '/wallet' }, { title: 'Contacts', to: '/contacts' }
         ]
     })
   }
@@ -54,8 +54,8 @@
 .header-menu
   padding: 7px 0 7px 90px
 .menu-item
-  font-size: 18px
-  margin-right: 20px
+  font-size: 16px
+  margin-right: 10px
   &:last-child
     margin-right: 0
 </style>
