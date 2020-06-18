@@ -25,7 +25,7 @@ __all__ = ["router"]
 router = APIRouter()
 
 
-@router.get("/recover/")
+@router.post("/recover/")
 async def account_recover_send(data: UserRecover = Body(...)):
     return await UserCRUD.recover_send(data)
 
