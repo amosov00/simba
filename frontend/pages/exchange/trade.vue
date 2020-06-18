@@ -5,7 +5,7 @@
       n-link(to="/exchange/bills" active-class="link--active").link.link--underlined.content-tabs-item Bills
     div.main-content
       n-link(to="/exchange/buysell").btn.mr-2 Buy
-      button.btn Sell
+      n-link(to="/exchange/buysell").btn.mr-2 Sell
       b-table(:data="data" :columns="columns" focusable striped).is-flex.mt-4.data-table
 </template>
 
