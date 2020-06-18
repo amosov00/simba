@@ -31,14 +31,19 @@
     name: "exchange-buysell",
     layout: 'main',
     components: {MetamaskWallet, WalletConfirm, CreatePayment, BillPayment, Status, Final },
-    async created() {
-      await this.$store.dispatch('fetchContracts');
-      console.log(this.$store.getters.contract);
-    },
     computed: {
       metamask_modal() {
         return this.$store.getters['metamask/status'] !== 'online';
       }
+    },
+    mounted() {
+      this.$on('nextStep', () => {
+        console.log(1)
+
+        let steps = this.tradeData.steps;
+
+        steps.current = steps.list[steps.list.indexOf(steps.current)+1]
+      });
     },
     data: () => {
       return {
