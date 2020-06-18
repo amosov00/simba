@@ -48,7 +48,7 @@ class Email:
         msg['Subject'] = "Simba"
         msg['To'] = to
         body = "Добрый день! <br>\n" \
-               "Перейдите по ссылке для восстановления порля в Simba: {}<br>\n" \
+               "Перейдите по ссылке для восстановления пароля в Simba: {}<br>\n" \
                "До встречи!".format(Email._get_link(code, user_id, method="recover"))
         msg.attach(MIMEText(body, 'html'))
         text = msg.as_string()
