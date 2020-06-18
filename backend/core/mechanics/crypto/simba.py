@@ -14,13 +14,13 @@ class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
         )
         self.invoice = invoice
 
-    async def issue_tokens(self, customer_address: str, incoming_btc: int):
+    async def issue_tokens(self, customer_address: str, incoming_btc: int, comment: str):
         simba_to_issue = self.btc_to_simba_tokens(incoming_btc)
 
-        self._validate_invoice(excepted_status=InvoiceStatus.PROCESSING)
+        # self._validate_invoice(excepted_status=InvoiceStatus.PROCESSING)
 
         tx_hash = self.api_wrapper.issue_coins(
-            customer_address, simba_to_issue, "test"
+            customer_address, simba_to_issue, comment
         )
         return await self.complete_invoice(str(tx_hash))
 
