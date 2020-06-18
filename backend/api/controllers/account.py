@@ -15,7 +15,9 @@ from schemas.user import (
     UserChangePassword,
     UserVerifyEmail,
     UserVerifyEmailResponse,
-    UserCreationSafeResponse
+    UserCreationSafeResponse,
+    UserRecover,
+    UserRecoverLink
 )
 
 __all__ = ["router"]
@@ -23,7 +25,17 @@ __all__ = ["router"]
 router = APIRouter()
 
 
-@router.post("/login/", response_model=UserLoginResponse)
+@router.get("/recover/")
+async def account_recover_send(data: UserRecover = Body(...)):
+    return await UserCRUD.recover_send(data)
+
+
+@router.put("/recover/")
+async def account_recover(data: UserRecoverLink = Body(...)):
+    return await UserCRUD.recover(data)
+
+
+@router.post("/login/", response_model=UserLoginResponse, response_model_exclude={"recover_code"})
 async def account_login(
         response: Response,
         data: UserLogin = Body(...),
@@ -51,7 +63,7 @@ async def account_verify_email(data: UserVerifyEmail = Body(...)):
 #     return {"success": True}
 
 
-@router.get("/user/", response_model=User, response_model_exclude={"_id"})
+@router.get("/user/", response_model=User, response_model_exclude={"_id", "recover_code"})
 async def account_get_user(user: User = Depends(get_user)):
     return user
 
