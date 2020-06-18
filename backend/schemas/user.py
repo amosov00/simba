@@ -19,7 +19,9 @@ __all__ = [
     "UserChangePassword",
     "UserVerifyEmail",
     "UserVerifyEmailResponse",
-    "UserCreationSafeResponse"
+    "UserCreationSafeResponse",
+    "UserRecover",
+    "UserRecoverLink"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -47,6 +49,8 @@ class User(BaseModel):
     email: str = Field(...)
     email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
     verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
+    recover_code: Optional[str] = Field(default=None, description="Code for password recover")
+    recover_code_expire_at: Optional[datetime] = Field(default=None, description="Expire date for recover_code")
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
     terms_and_condition: Optional[bool] = Field(
@@ -74,6 +78,19 @@ class User(BaseModel):
     @property
     def display_name(self):
         return self.email
+
+
+class UserRecover(BaseModel):
+    email: str = Field(..., example="email")
+
+
+class UserRecoverLink(BaseModel):
+    user_id: str = Field(...)
+    recover_code: str = Field(...)
+    password: str = Field(...)
+    repeat_password: str = Field(...)
+
+    _validate_passwords = validator("password", allow_reuse=True)(validate_password)
 
 
 class UserVerifyEmail(BaseModel):

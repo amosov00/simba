@@ -1,6 +1,6 @@
 from typing import Optional, Union
 from passlib import pwd
-from datetime import datetime
+from datetime import datetime, timedelta
 from http import HTTPStatus
 
 from fastapi.exceptions import HTTPException
@@ -9,6 +9,7 @@ from database.crud.base import BaseMongoCRUD
 from core.utils.jwt import decode_jwt_token, encode_jwt_token
 from core.utils.email import Email
 from core.utils import to_objectid
+from .base import ObjectId
 from schemas.user import (
     User,
     UserCreationSafe,
@@ -16,11 +17,13 @@ from schemas.user import (
     pwd_context,
     UserChangePassword,
     UserUpdateNotSafe,
+    UserRecover,
+    UserRecoverLink
 )
 
 __all__ = ["UserCRUD"]
 
-FIELDS_TO_EXCLUDE = ("repeat_password",)
+FIELDS_TO_EXCLUDE = ("repeat_password", "recover_code")
 
 
 class UserCRUD(BaseMongoCRUD):
@@ -150,7 +153,7 @@ class UserCRUD(BaseMongoCRUD):
 
     @classmethod
     async def update_not_safe(
-        cls, user_id: str, payload: UserUpdateNotSafe
+            cls, user_id: str, payload: UserUpdateNotSafe
     ) -> Union[dict, User]:
         user = await cls.find_by_id(user_id)
 
@@ -183,3 +186,50 @@ class UserCRUD(BaseMongoCRUD):
         )
 
         return True
+
+    @classmethod
+    async def recover_send(cls, payload: UserRecover):
+        user = await cls.find_by_email(payload.email)
+        if not user:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "No such user")
+        recover_code = pwd.genword()
+        expire_at = datetime.utcnow() + timedelta(hours=3)
+
+        await cls.update_one(
+            {"_id": user["_id"]},
+            {
+                "recover_code": recover_code,
+                "recover_code_expire_at": expire_at
+            }
+        )
+
+        emailobj = Email()
+        await emailobj.send_recover_code(user["email"], recover_code, user["_id"])
+
+        return True
+
+    @classmethod
+    async def recover(cls, payload: UserRecoverLink):
+        user = await cls.find_one(
+            {
+                "_id": ObjectId(payload.user_id)
+            }
+        )
+        expire_date = user["recover_code_expire_at"]
+        recover_code = user["recover_code"]
+
+        if expire_date < datetime.utcnow():
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Code expired")
+
+        if recover_code != payload.recover_code:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect code")
+
+        await cls.update_one(
+            query={"_id": user["_id"]}, payload={
+                "password": payload.password,
+                "recover_code": None
+            }
+        )
+
+        return True
+
