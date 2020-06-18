@@ -19,7 +19,7 @@ class Email:
             params = {f"{method}_code": code, "email": email}
             return f'{HOST_URL}activate?{urlencode(params)}'
         if method == "recover":
-            params = {f"{method}_code": code, "id": email}
+            params = {f"{method}_code": code}
             return f'{HOST_URL}recover?{urlencode(params)}'
 
     async def send_verification_code(self, to: str, code: str) -> None:
@@ -31,7 +31,7 @@ class Email:
         msg['Subject'] = "Simba"
         msg['To'] = to
         body = "Добрый день! <br>\n" \
-               "Перейдите по ссылке для регистрации в Simba: {}<br>\n" \
+               'Перейдите по <a href="{}">этой</a> ссылке для регистрации в Simba<br>\n' \
                "Надеемся вам понравится! До встречи!".format(Email._get_link(code, to, method='verification'))
         msg.attach(MIMEText(body, 'html'))
         text = msg.as_string()
@@ -39,7 +39,7 @@ class Email:
         mailserver.quit()
 
     # TODO: Do smth with code repetion
-    async def send_recover_code(self, to: str, code: str, user_id: str) -> None:
+    async def send_recover_code(self, to: str, code: str) -> None:
         mailserver = smtplib.SMTP_SSL(self.server, self.port)
 
         mailserver.login(self.login, self.password)
@@ -48,8 +48,8 @@ class Email:
         msg['Subject'] = "Simba"
         msg['To'] = to
         body = "Добрый день! <br>\n" \
-               "Перейдите по ссылке для восстановления пароля в Simba: {}<br>\n" \
-               "До встречи!".format(Email._get_link(code, user_id, method="recover"))
+               'Перейдите по <a href="{}">этой</a> ссылке для восстановления пароля в Simba<br>\n' \
+               "До встречи!".format(Email._get_link(code, "", method="recover"))
         msg.attach(MIMEText(body, 'html'))
         text = msg.as_string()
         mailserver.sendmail(self.login, to, text)

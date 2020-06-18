@@ -49,8 +49,7 @@ class User(BaseModel):
     email: str = Field(...)
     email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
     verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
-    recover_code: Optional[str] = Field(default=None, description="Code for password recover")
-    recover_code_expire_at: Optional[datetime] = Field(default=None, description="Expire date for recover_code")
+    recover_code: Optional[str] = Field(default=None, description="JWT token for password recover")
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
     terms_and_condition: Optional[bool] = Field(
@@ -85,7 +84,6 @@ class UserRecover(BaseModel):
 
 
 class UserRecoverLink(BaseModel):
-    user_id: str = Field(...)
     recover_code: str = Field(...)
     password: str = Field(...)
     repeat_password: str = Field(...)

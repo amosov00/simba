@@ -192,36 +192,39 @@ class UserCRUD(BaseMongoCRUD):
         user = await cls.find_by_email(payload.email)
         if not user:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "No such user")
-        recover_code = pwd.genword()
-        expire_at = datetime.utcnow() + timedelta(hours=3)
+
+        recover_code = encode_jwt_token({"_id": user["_id"]}, timedelta(hours=3))
 
         await cls.update_one(
-            {"_id": user["_id"]},
             {
-                "recover_code": recover_code,
-                "recover_code_expire_at": expire_at
+                "_id": user["_id"],
+            },
+            {
+                "recover_code": recover_code
             }
         )
 
         emailobj = Email()
-        await emailobj.send_recover_code(user["email"], recover_code, user["_id"])
+        await emailobj.send_recover_code(user["email"], recover_code)
 
         return True
 
     @classmethod
     async def recover(cls, payload: UserRecoverLink):
+        data = decode_jwt_token(payload.recover_code)
+
+        if data is None:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect code")
+
+        user_id = data["_id"]
+
         user = await cls.find_one(
             {
-                "_id": ObjectId(payload.user_id)
+                "_id": ObjectId(user_id)
             }
         )
-        expire_date = user["recover_code_expire_at"]
-        recover_code = user["recover_code"]
 
-        if expire_date < datetime.utcnow():
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "Code expired")
-
-        if recover_code != payload.recover_code:
+        if "recover_code" not in user or user["recover_code"] != payload.recover_code:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect code")
 
         await cls.update_one(
