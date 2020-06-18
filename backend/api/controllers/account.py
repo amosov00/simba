@@ -1,9 +1,6 @@
-from typing import List
-from http import HTTPStatus
-from datetime import datetime
-
 from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Response
 
+from core.mechanics.crypto import BitcoinWrapper
 from api.dependencies import get_user
 from database.crud import UserCRUD
 from schemas.user import (
@@ -41,8 +38,6 @@ async def account_login(
         data: UserLogin = Body(...),
 ):
     resp = await UserCRUD.authenticate(data.email, data.password)
-    # TODO Make secure cookie token
-    response.set_cookie(key="accessToken", value=resp["token"], secure=True, httponly=True)
     return resp
 
 
@@ -54,6 +49,7 @@ async def account_signup(data: UserCreationSafe = Body(...)):
 @router.post("/verify/", response_model=UserLoginResponse)
 async def account_verify_email(data: UserVerifyEmail = Body(...)):
     return await UserCRUD.verify_email(data.email, data.verification_code)
+
 
 # @router.post("/logout/", dependencies=[Depends(get_user)])
 # async def account_signup(
@@ -79,3 +75,14 @@ async def account_change_password(user: User = Depends(get_user), payload: UserC
     resp = await UserCRUD.change_password(user, payload)
     return resp
 
+
+@router.get("/btc-address/")
+async def account_get_user(
+        user: User = Depends(get_user)
+):
+    if not user.btc_address:
+        address = await BitcoinWrapper().create_wallet_address(user)
+    else:
+        address = user.btc_address
+
+    return {"address": address}
