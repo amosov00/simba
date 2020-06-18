@@ -19,7 +19,9 @@ __all__ = [
     "UserChangePassword",
     "UserVerifyEmail",
     "UserVerifyEmailResponse",
-    "UserCreationSafeResponse"
+    "UserCreationSafeResponse",
+    "UserRecover",
+    "UserRecoverLink"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -46,17 +48,18 @@ class User(BaseModel):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
 
     email: str = Field(...)
+    email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
+    verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
+    recover_code: Optional[str] = Field(default=None, description="JWT token for password recover")
 
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
 
-    verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
     btc_address: str = Field(default=None, description="Linked BTC address to user for transactions")
 
     telegram_chat_id: Optional[int] = Field(default=None)
     telegram_id: Optional[int] = Field(default=None)
 
-    email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
     is_staff: Optional[bool] = Field(default=False, description="Staff role")
     is_superuser: Optional[bool] = Field(default=False, description="Superuser role")
     is_active: Optional[bool] = Field(default=True, description="User is active")
@@ -81,6 +84,18 @@ class User(BaseModel):
     @property
     def display_name(self):
         return self.email
+
+
+class UserRecover(BaseModel):
+    email: str = Field(..., example="email")
+
+
+class UserRecoverLink(BaseModel):
+    recover_code: str = Field(...)
+    password: str = Field(...)
+    repeat_password: str = Field(...)
+
+    _validate_passwords = validator("password", allow_reuse=True)(validate_password)
 
 
 class UserVerifyEmail(BaseModel):

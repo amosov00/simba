@@ -1,7 +1,7 @@
 <template lang="pug">
   div
     div.is-flex.content-tabs
-      n-link(to="/exchange/trade" active-class="link--active").link.link--underlined.content-tabs-item Buy/sell
+      n-link(to="/exchange/buysell" active-class="link--active").link.link--underlined.content-tabs-item Buy/sell
       n-link(to="/exchange/bills" active-class="link--active").link.link--underlined.content-tabs-item Bills
     div.main-content
       div.position-relative
@@ -13,6 +13,8 @@
           @click="tradeData.steps.current = step" :class="{ 'steps-item--active': (i) < tradeData.steps.list.indexOf(tradeData.steps.current)+1}").steps-item {{ i+1 }}
       div.trade-content
         component(:is="tradeData.steps.current")
+    b-modal(:active.sync="metamask_modal" has-modal-card :can-cancel="false")
+     MetamaskWallet
 </template>
 
 <script>
@@ -22,10 +24,22 @@
   import Status from "@/components/Trade/Status"
   import Final from "@/components/Trade/Final"
 
+  import Web3 from 'web3';
+  import MetamaskWallet from "~/components/MetamaskWallet";
+
   export default {
     name: "exchange-buysell",
     layout: 'main',
-    components: { WalletConfirm, CreatePayment, BillPayment, Status, Final },
+    components: {MetamaskWallet, WalletConfirm, CreatePayment, BillPayment, Status, Final },
+    async created() {
+      await this.$store.dispatch('fetchContracts');
+      console.log(this.$store.getters.contract);
+    },
+    computed: {
+      metamask_modal() {
+        return this.$store.getters['metamask/status'] !== 'online';
+      }
+    },
     data: () => {
       return {
         operation: 'Buy',
