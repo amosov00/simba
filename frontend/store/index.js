@@ -3,13 +3,18 @@ import _ from "lodash";
 export const state = () => ({
   user: null,
   btc_address: '',
-  contract: ''
+  contract: '',
+  tradeData: {
+    simba: 0,
+    btc: 0
+  }
 });
 
 export const getters = {
   user: s => s.user,
   btc_address: s => s.btc_address,
-  contract: s => s.contract
+  contract: s => s.contract,
+  tradeData: s => s.tradeData
 };
 
 export const mutations = {
@@ -17,6 +22,7 @@ export const mutations = {
   setBtcAddress: (state, btc_address) => (state.btc_address = btc_address),
   deleteUser: state => (state.user = null),
   setContract: (state, data) => (state.contract = data),
+  setTradeData: (state, data) => (state.tradeData = data),
 };
 
 export const actions = {
@@ -53,7 +59,7 @@ export const actions = {
 
 
   async getBtcAddress({ commit }) {
-    return await this.$axios.get('/crypto/btc/get-address/')
+    return await this.$axios.get('/account/btc-address/')
       .then(resp => {
         commit('setBtcAddress', resp.data.address);
         return true;
