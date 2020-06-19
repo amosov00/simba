@@ -24,7 +24,8 @@
     "pug": "^2.0.4",
     "pug-plain-loader": "^1.0.0",
     "sass-loader": "^8.0.2",
-    "vee-validate": "^3.3.3"
+    "vee-validate": "^3.3.3",
+    "web3": "^1.2.9"
   },
   "devDependencies": {}
 }

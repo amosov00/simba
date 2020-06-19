@@ -10,6 +10,8 @@
         b-field
           b-input(size="is-small" type="password" placeholder="password" v-model="password" v-on:keypress.enter.native="login")
         b-button(:loading="loading" @click="login").btn.w-100 Sign in
+        div.mt-2
+          n-link(to="/forgot" exact-active-class="link--active").link.link--underlined Forgot password?
 
 </template>
 

@@ -1,0 +1,44 @@
+from typing import Literal, Optional
+from pycoin.coins.Tx import Tx
+
+from schemas import BTCAddress, BTCTransaction
+from .base import BlockCypherBaseAPIWrapper
+
+
+class BlockCypherAPIWrapper(BlockCypherBaseAPIWrapper):
+    async def create_wallet_address(self, quantity: int = 1) -> dict:
+        endpoint = f"/wallets/hd/{self.blockcypher_wallet_name}/addresses/derive"
+        return await self.request(endpoint, "POST", {"count": quantity}, with_token=True)
+
+    async def fetch_address_info(self, address_hash: str) -> Optional[BTCAddress]:
+        endpoint = f"/addrs/{address_hash}/"
+        res = await self.request(endpoint)
+        if not res:
+            pass
+        return BTCAddress(**res) if res else None
+
+    async def fetch_transaction_info(self, transaction_hash: str) -> Optional[BTCTransaction]:
+        endpoint = f"/txs/{transaction_hash}/"
+        res = await self.request(endpoint)
+        if not res:
+            pass
+        return BTCTransaction(**res) if res else None
+
+    async def create_transaction(self, data: dict) -> dict:
+        endpoint = f"/txs/new/"
+        res = await self.request(endpoint, request_type="POST", data=data)
+        return res
+
+    async def send_transaction(self, data: dict):
+        endpoint = f"/txs/send/"
+        res = await self.request(endpoint, request_type="POST", data=data, with_token=True)
+        return res
+
+    async def push_raw_tx(self, tx: Tx):
+        endpoint = f"/txs/push/"
+        data = {"tx": tx.as_hex()}
+        res = await self.request(endpoint, request_type="POST", data=data, with_token=True)
+        return res
+
+    async def get_payables(self, address: str):
+        return self.get_payables(address)

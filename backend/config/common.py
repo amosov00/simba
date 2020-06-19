@@ -16,4 +16,6 @@ DEBUG = getenv("DEBUG", "") == "True"
 
 IS_PRODUCTION = ENV == "production"
 
+WEBHOOK_PATH = getenv("WEBHOOK_PATH")
+
 ALLOWED_ORIGINS = ["*"]

@@ -1,1 +1,2 @@
-from .bitcoin import BlockCypherAPIWrapper
+from .main import BlockCypherAPIWrapper
+from .webhook import BlockCypherWebhooksWrapper

@@ -1,4 +1,4 @@
-from core.integrations.ethereum import EthereumContractWrapper
+from core.integrations.ethereum import ContractEventsWrapper
 from celery_app.celeryconfig import app
 from config import SIMBA_CONTRACT
 
@@ -12,5 +12,5 @@ __all__ = ['fetch_simba_contract_cronjob']
     time_limit=300,
 )
 async def fetch_simba_contract_cronjob(self, *args, **kwargs):
-    await EthereumContractWrapper(SIMBA_CONTRACT).fetch_blocks_and_save()
+    await ContractEventsWrapper(SIMBA_CONTRACT).fetch_blocks_and_save()
     return True
