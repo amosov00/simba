@@ -51,7 +51,7 @@ class User(BaseModel):
     email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
     verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
     recover_code: Optional[str] = Field(default=None, description="JWT token for password recover")
-    auth_code: Optional[str] = Field(default=None, description="Code for 2fa generation")
+    secret_2fa: Optional[str] = Field(default=None, description="Code for 2fa generation")
     two_factor: Optional[bool] = Field(defaul=False, description="On/off 2fa")
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)

@@ -37,7 +37,7 @@ async def account_recover(data: UserRecoverLink = Body(...)):
     return await UserCRUD.recover(data)
 
 
-@router.post("/login/", response_model=UserLoginResponse, response_model_exclude={"recover_code", "auth_code"})
+@router.post("/login/", response_model=UserLoginResponse, response_model_exclude={"recover_code", "secret_2fa"})
 async def account_login(
         response: Response,
         data: UserLogin = Body(...),
@@ -65,7 +65,7 @@ async def account_verify_email(data: UserVerifyEmail = Body(...)):
 #     return {"success": True}
 
 
-@router.get("/user/", response_model=User, response_model_exclude={"_id", "recover_code", "auth_code"})
+@router.get("/user/", response_model=User, response_model_exclude={"_id", "recover_code", "secret_2fa"})
 async def account_get_user(user: User = Depends(get_user)):
     return user
 
@@ -82,11 +82,11 @@ async def account_change_password(user: User = Depends(get_user), payload: UserC
     return resp
 
 
-@router.get("/create_2fa/", response_model=User2faURL)
+@router.get("/2fa/", response_model=User2faURL)
 async def create_2fa(user: User = Depends(get_user)):
     return await UserCRUD.create_2fa(user)
 
 
-@router.post("/confirm_2fa/")
+@router.post("/2fa/")
 async def confirm_2fa(user: User = Depends(get_user), payload: User2faConfirm = Body(...)):
     return await UserCRUD.confirm_2fa(user, payload)

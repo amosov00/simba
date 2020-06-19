@@ -25,7 +25,7 @@ from schemas.user import (
 
 __all__ = ["UserCRUD"]
 
-FIELDS_TO_EXCLUDE = ("repeat_password", "recover_code", "auth_code")
+FIELDS_TO_EXCLUDE = ("repeat_password", "recover_code", "secret_2fa")
 
 
 class UserCRUD(BaseMongoCRUD):
@@ -42,7 +42,7 @@ class UserCRUD(BaseMongoCRUD):
     @classmethod
     async def check_2fa(cls, user_id: ObjectId, pin_code: str) -> bool:
         user = await cls.find_by_id(user_id)
-        totp = pyotp.TOTP(user["auth_code"])
+        totp = pyotp.TOTP(user["secret_2fa"])
         current_pin_code = totp.now()
         if pin_code == current_pin_code:
             return True
@@ -253,8 +253,8 @@ class UserCRUD(BaseMongoCRUD):
 
     @classmethod
     async def create_2fa(cls, user: User):
-        auth_code = pyotp.random_base32()
-        target_url = pyotp.totp.TOTP(auth_code).provisioning_uri(user.email, issuer_name="Simba")
+        secret_2fa = pyotp.random_base32()
+        target_url = pyotp.totp.TOTP(secret_2fa).provisioning_uri(user.email, issuer_name="Simba")
         return {"URL": target_url}
 
     @classmethod
@@ -268,7 +268,7 @@ class UserCRUD(BaseMongoCRUD):
                 "_id": user.id
             },
             payload={
-                "auth_code": payload.token,
+                "secret_2fa": payload.token,
                 "two_factor": True
             }
         )
