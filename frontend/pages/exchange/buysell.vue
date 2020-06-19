@@ -104,11 +104,4 @@
     font-size: 22px
     line-height: 144.19%
     color: #E0B72E
-  .back-btn
-    top: 5px
-    position: absolute
-    left: -70px
-    &:hover
-      cursor: pointer
-      opacity: 0.7
 </style>
