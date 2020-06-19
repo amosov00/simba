@@ -21,7 +21,8 @@ __all__ = [
     "UserVerifyEmailResponse",
     "UserCreationSafeResponse",
     "UserRecover",
-    "UserRecoverLink"
+    "UserRecoverLink",
+    "User2faConfirm"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -171,3 +172,8 @@ class UserUpdateNotSafe(UserCreationNotSafe):
 
 class User2faURL(BaseModel):
     URL: str = Field(default="")
+
+
+class User2faConfirm(BaseModel):
+    token: str = Field(...)
+    pin_code: str = Field(...)

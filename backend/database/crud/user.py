@@ -19,7 +19,8 @@ from schemas.user import (
     UserChangePassword,
     UserUpdateNotSafe,
     UserRecover,
-    UserRecoverLink
+    UserRecoverLink,
+    User2faConfirm
 )
 
 __all__ = ["UserCRUD"]
@@ -253,14 +254,22 @@ class UserCRUD(BaseMongoCRUD):
     @classmethod
     async def create_2fa(cls, user: User):
         auth_code = pyotp.random_base32()
+        target_url = pyotp.totp.TOTP(auth_code).provisioning_uri(user.email, issuer_name="Simba")
+        return {"URL": target_url}
+
+    @classmethod
+    async def confirm_2fa(cls, user: User, payload: User2faConfirm):
+        totp = pyotp.TOTP(payload.token)
+        current_pin_code = totp.now()
+        if current_pin_code != payload.pin_code:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin-code")
         await cls.update_one(
             query={
                 "_id": user.id
             },
             payload={
-                "auth_code": auth_code,
+                "auth_code": payload.token,
                 "two_factor": True
             }
         )
-        target_url = pyotp.totp.TOTP(auth_code).provisioning_uri(user.email, issuer_name="Simba")
-        return {"URL": target_url}
+        return True

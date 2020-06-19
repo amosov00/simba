@@ -19,6 +19,7 @@ from schemas.user import (
     UserRecover,
     UserRecoverLink,
     User2faURL,
+    User2faConfirm
 )
 
 __all__ = ["router"]
@@ -84,3 +85,8 @@ async def account_change_password(user: User = Depends(get_user), payload: UserC
 @router.get("/create_2fa/", response_model=User2faURL)
 async def create_2fa(user: User = Depends(get_user)):
     return await UserCRUD.create_2fa(user)
+
+
+@router.post("/confirm_2fa/")
+async def confirm_2fa(user: User = Depends(get_user), payload: User2faConfirm = Body(...)):
+    return await UserCRUD.confirm_2fa(user, payload)
