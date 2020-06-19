@@ -11,7 +11,7 @@
         button.btn.w-100(:disabled="addDisabled" @click="connect") Connect Metamask
       div.mt-2(v-if="addDisabled").has-text-danger.has-text-centered Metamask extension is not installed
       div.has-text-centered.mt-4
-        n-link(to="/exchange/trade/") Go back
+        n-link(to="/exchange/") Go back
 
 </template>
 
@@ -67,13 +67,13 @@
             return false;
           });
 
-        miniToken.methods.transfer(account, 0).call().then(res => {
+/*        miniToken.methods.transfer(account, 0).call().then(res => {
           console.log(res)
         })
 
         miniToken.methods.approve(account, 1).call().then(res => {
           console.log(res)
-        })
+        })*/
 
         /*const transactionParameters = {
           nonce: '0x00', // ignored by MetaMask
