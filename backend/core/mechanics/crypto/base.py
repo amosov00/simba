@@ -28,10 +28,14 @@ class CryptoCurrencyRate(ABC):
 
 
 class ParseCryptoTransaction:
-    @staticmethod
-    def get_btc_amount_btc_transaction(transaction: BTCTransaction, btc_address: str):
+    @classmethod
+    def get_output_by_btc_transaction(cls, transaction: BTCTransaction, btc_address: str):
+        return list(filter(lambda o: btc_address in o.addresses, transaction.outputs))
+
+    @classmethod
+    def get_btc_amount_btc_transaction(cls, transaction: BTCTransaction, btc_address: str):
         amount: int = 0
-        objects = list(filter(lambda o: btc_address in o.addresses, transaction.outputs))
+        objects = cls.get_output_by_btc_transaction(transaction, btc_address)
 
         for i in objects:
             amount += i.value
@@ -44,13 +48,9 @@ class ParseCryptoTransaction:
 
 
 class CryptoValidation(ABC):
+    # Класс для валидации количества значений криптовалют
+    # TODO синхронизировать с InvoiceMechanics().validate(). Есть повторяющиеся элементы
     SIMBA_TOKENS_MINIMAL_AMOUNT = 200000
-
-    # Делать независимую дполнительную логику для валидации исходящих данных
-
-    def _validate_invoice(self, excepted_status: InvoiceStatus) -> bool:
-        # TODO complete
-        return True
 
     @classmethod
     async def validate_btc_transaction_with_invoice(cls, invoice: InvoiceInDB, transaction: BTCTransaction) -> bool:
@@ -79,9 +79,9 @@ class CryptoValidation(ABC):
 
         else:
             errors.append("Transaction has no outputs")
-        # TODO uncomment later
-        # if errors:
-        #     raise HTTPException(HTTPStatus.BAD_REQUEST, errors)
+
+        if errors:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, errors)
 
         return True
 

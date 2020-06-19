@@ -1,7 +1,7 @@
 from .base import BlockCypherBaseAPIWrapper
 
 
-class BlockCypherWebhooksWrapper(BlockCypherBaseAPIWrapper):
+class BlockCypherWebhookAPIWrapper(BlockCypherBaseAPIWrapper):
     async def create_webhook(self, data: dict) -> dict:
         endpoint = "/hooks"
         return await self.request(endpoint, "POST", data=data, with_token=True)

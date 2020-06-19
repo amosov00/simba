@@ -44,45 +44,30 @@ class Invoice(BaseModel):
     invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")
 
     # Amount
-    btc_amount: Union[int, DecimalPydantic] = Field(default=None)
-    simba_amount: Union[int, DecimalPydantic] = Field(default=None)
+    btc_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send")
+    simba_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send")
 
-    # TODO if fee is necessary ?
-    # fee: Union[int, str] = Field(default=0)
-
-    # TODO Сколько крипты было перечислено. Некорректное использование полей, найти вариант лучше
-    btc_amount_deposited: Union[int, DecimalPydantic] = Field(default=None)
-    simba_amount_deposited: Union[int, DecimalPydantic] = Field(default=None)
+    btc_amount_proceeded: Union[int, DecimalPydantic] = Field(
+        default=0, description="Total of BTC amount, which was received or sent"
+    )
+    simba_amount_proceeded: Union[int, DecimalPydantic] = Field(
+        default=0, description="Total of SIMBA amount, which was received or sent"
+    )
 
     # User wallets
-    target_eth_address: str = Field(
-        default=None, description="Address which will be scanned"
-    )
-    target_btc_address: str = Field(
-        default=None, description="Address which will be scanned"
-    )
-
-    # TODO Maybe it will be not necessery
-    # user_eth_address: str = Field(default="", description="")
-    # user_btc_address: str = Field(default="", description="")
+    target_eth_address: str = Field(default=None, description="Address which will be scanned")
+    target_btc_address: str = Field(default=None, description="Address which will be scanned")
 
     # Connected transactions
-    eth_tx: List[ObjectIdPydantic] = Field(default=[])
-    btc_tx: List[ObjectIdPydantic] = Field(default=[])
+    eth_tx_ids: List[ObjectIdPydantic] = Field(default=[])
+    btc_tx_ids: List[ObjectIdPydantic] = Field(default=[])
 
     # Datetimes
     created_at: datetime = Field(default_factory=datetime.utcnow, description="UTC")
-    finised_at: Optional[datetime] = Field(default=None)
+    finised_at: Optional[datetime] = Field(default=None, description="Update when completed status")
 
     # Validate transaction before processing
     validation_md5_hash: str = Field(default="")
-
-    # Validators.
-    # TODO Нужно ли использовать валидаторы здесь? Это сильно замедлит валидацию большого кол-ва данных
-    # _validate_user_btc_address = validator("user_btc_address", allow_reuse=True)(validate_btc_address)
-    # _validate_user_eth_address = validator("user_eth_address", allow_reuse=True)(validate_eth_address)
-    # _validate_target_btc_address = validator("target_btc_address", allow_reuse=True)(validate_btc_address)
-    # _validate_target_eth_address = validator("target_eth_address", allow_reuse=True)(validate_eth_address)
 
 
 class InvoiceInDB(Invoice):
@@ -94,23 +79,14 @@ class InvoiceCreate(BaseModel):
 
 
 class InvoiceUpdate(BaseModel):
-    target_eth_address: str = Field(default="")
-    target_btc_address: str = Field(default="")
-    btc_amount: Union[int, DecimalPydantic] = Field(default=0)
-    simba_amount: Union[int, DecimalPydantic] = Field(default=0)
+    target_eth_address: str = Field(default=None, description="Address which will be scanned")
+    target_btc_address: str = Field(default=None, description="Address which will be scanned")
 
-    _validate_target_btc_address = validator("target_btc_address", allow_reuse=True)(
-        validate_btc_address
-    )
-    _validate_target_eth_address = validator("target_eth_address", allow_reuse=True)(
-        validate_eth_address
-    )
+    btc_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send")
+    simba_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send")
 
-    # TODO Maybe it will be not necessery
-    # user_eth_address: str = Field(default="")
-    # user_btc_address: str = Field(default="")
-    # _validate_user_btc_address = validator("user_btc_address", allow_reuse=True)(validate_btc_address)
-    # _validate_user_eth_address = validator("user_eth_address", allow_reuse=True)(validate_eth_address)
+    _validate_target_btc_address = validator("target_btc_address", allow_reuse=True)(validate_btc_address)
+    _validate_target_eth_address = validator("target_eth_address", allow_reuse=True)(validate_eth_address)
 
 
 class InvoiceTransactionManual(BaseModel):

@@ -1,2 +1,2 @@
 from .main import BlockCypherAPIWrapper
-from .webhook import BlockCypherWebhooksWrapper
+from .webhook import BlockCypherWebhookAPIWrapper

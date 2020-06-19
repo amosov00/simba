@@ -16,7 +16,7 @@ from schemas import (
     BlockCypherWebhookEvents,
 )
 from schemas.user import User
-from core.mechanics import BitcoinWrapper, SimbaWrapper, InvoiceValidation
+from core.mechanics import BitcoinWrapper, SimbaWrapper, InvoiceMechanics, BlockCypherWebhookHandler
 
 __all__ = ["router"]
 
@@ -73,7 +73,7 @@ async def update_invoice(
 
     if invoice.invoice_type == InvoiceType.BUY and payload.btc_transaction_hash:
         tx_meta = await BitcoinWrapper().fetch_and_save_transaction(invoice, payload.btc_transaction_hash)
-        eth_tx_hash = await SimbaWrapper().issue_tokens_and_save(
+        eth_tx_hash = await SimbaWrapper().validate_and_issue_tokens(
             invoice, invoice.target_eth_address, incoming_btc=tx_meta["incoming_btc"], comment=tx_meta["tx_hash"]
         )
         response.update({
@@ -92,22 +92,20 @@ async def update_invoice(
 
 @router.post("/{invoice_id}/confirm/")
 async def confirm_invoice(invoice_id: str, user: User = Depends(get_user)):
-    # Validate invoice
     invoice = await InvoiceCRUD.find_invoice_safely(invoice_id, user.id)
 
     if not invoice:
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Invoice not found or modification is forbidden")
 
-    invoice = InvoiceValidation(invoice).validate()
+    invoice = InvoiceMechanics(invoice).validate()
 
     await InvoiceCRUD.update_invoice_not_safe(invoice.id, user.id, {"status": InvoiceStatus.WAITING})
 
-    # await BlockCypherWebhookHandler().create_webhook(
-    #     invoice=invoice,
-    #     event=BlockCypherWebhookEvents.UNCONFIRMED_TX,
-    #     wallet_address=user.btc_address
-    # )
-
+    await BlockCypherWebhookHandler().create_webhook(
+        invoice=invoice,
+        event=BlockCypherWebhookEvents.TX_CONFIMATION,
+        wallet_address=user.btc_address
+    )
     return True
 
 

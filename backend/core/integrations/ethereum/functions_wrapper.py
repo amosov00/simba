@@ -10,7 +10,8 @@ from .base_wrapper import EthereumBaseWrapper
 from schemas import EthereumContract
 
 GAS = 250000
-GAS_PRICE = Web3.toWei("24", "gwei")
+GAS_PRICE = Web3.toWei("1", "gwei")
+GAS_LIMIT = 50000
 
 
 class ContractFunctionsWrapper(EthereumBaseWrapper):
@@ -48,5 +49,3 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
-    def redeem_coins(self, customer_address: str, amount: int, comment: str):
-        pass
