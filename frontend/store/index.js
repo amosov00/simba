@@ -95,4 +95,22 @@ export const actions = {
         return false;
       });
   },
+  async startRecover({}, data) {
+    return await this.$axios.post("/account/recover/", data)
+      .then(_ => {
+        return true;
+      })
+      .catch(err => {
+        return false;
+      });
+  },
+  async finishRecover({}, data) {
+    return await this.$axios.put("/account/recover/", data)
+      .then(_ => {
+        return true;
+      })
+      .catch(err => {
+        return false;
+      });
+  },
 };
