@@ -17,6 +17,7 @@
 export default {
   name: "exchange-transfer",
   layout: "main",
+  middleware: ['contract'],
   data: () => {
     return {
       transferData: {
