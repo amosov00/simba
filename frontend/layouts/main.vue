@@ -12,7 +12,7 @@
   import PasswordChange from "~/components/PasswordChange";
 
   export default {
-    middleware: ['fetchUser', 'contract'],
+    middleware: ['fetchUser'],
     components: { Header, PasswordChange },
     data: () => ({
       showModalNew: false
