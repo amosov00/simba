@@ -70,10 +70,9 @@ async def invoice_fetch_one(invoice_id: str, user: User = Depends(get_user)):
 
 @router.put("/{invoice_id}/")
 async def invoice_update(invoice_id: str, user: User = Depends(get_user), payload: InvoiceUpdate = Body(...)):
-    await InvoiceCRUD.update_invoice(
-        invoice_id, user, payload.dict(exclude_unset=True), statuses=(InvoiceStatus.CREATED,),
+    return await InvoiceCRUD.update_invoice(
+        invoice_id, user, payload, statuses=(InvoiceStatus.CREATED,),
     )
-    return True
 
 
 @router.post("/{invoice_id}/transaction/")

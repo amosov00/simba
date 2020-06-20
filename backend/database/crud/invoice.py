@@ -1,3 +1,4 @@
+import logging
 from typing import Literal, Union, Tuple
 
 from schemas import (
@@ -6,10 +7,11 @@ from schemas import (
     InvoiceType,
     InvoiceCreate,
     InvoiceInDB,
-    InvoiceUpdate
+    InvoiceUpdate,
+    User,
+    ObjectIdPydantic
 )
 from .base import BaseMongoCRUD, ObjectId
-from schemas import User, ObjectIdPydantic
 from fastapi.exceptions import HTTPException
 from http import HTTPStatus
 
@@ -43,7 +45,7 @@ class InvoiceCRUD(BaseMongoCRUD):
             cls,
             invoice_id: str,
             user_id: Union[ObjectId, ObjectIdPydantic],
-            statuses: tuple = (InvoiceStatus.CREATED, )
+            statuses: tuple = (InvoiceStatus.CREATED,)
     ):
         invoice = await super().find_one({
             "_id": ObjectId(invoice_id),
@@ -68,20 +70,27 @@ class InvoiceCRUD(BaseMongoCRUD):
         return created_invoice
 
     @classmethod
-    async def update_invoice(cls, invoice_id: str, user: User, payload: dict, statuses: tuple = None):
-        if not payload:
+    async def update_invoice(cls, invoice_id: str, user: User, payload: InvoiceUpdate, statuses: tuple = None):
+        if not payload.dict(exclude_unset=True):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Payload is required")
+        # TODO temp logging
+        logging.info(payload.dict())
 
         invoice = await cls.find_invoice_safely(invoice_id, user.id, statuses)
 
-        await cls.update_one(
+        if invoice["invoice_type"] == InvoiceType.BUY:
+            payload = payload.dict(exclude={"target_btc_address"}, exclude_unset=True)
+        elif invoice["invoice_type"] == InvoiceType.SELL:
+            payload = payload.dict(exclude_none=True)
+
+        modified_count = (await cls.update_one(
             query={
                 "user_id": user.id,
                 "_id": invoice["_id"],
             },
             payload=payload,
-        )
-        return {**invoice, **payload}
+        )).modified_count
+        return bool(modified_count)
 
     @classmethod
     async def update_invoice_not_safe(

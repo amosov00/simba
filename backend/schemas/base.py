@@ -9,6 +9,9 @@ from web3 import Web3
 
 
 def validate_eth_address(address_hash: str):
+    if not address_hash:
+        return address_hash
+
     status = False
 
     try:
@@ -24,6 +27,8 @@ def validate_eth_address(address_hash: str):
 
 def validate_btc_address(address_hash: str):
     """ Origin: https://rosettacode.org/wiki/Bitcoin/address_validation#Python """
+    if not address_hash:
+        return address_hash
 
     def decode_base58(bc, length):
         n = 0
