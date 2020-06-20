@@ -1,37 +1,35 @@
 <template lang="pug">
   div
     div.main-content
-      div wallet
-      button(@click="launch") Metamask
-    b-modal(:active.sync="showModalNew" has-modal-card :can-cancel="false")
-      MetamaskWallet
+      b-field
+        b-input(size="is-small" v-model="transferData.address" placeholder="Address")
+      b-field
+        b-input(size="is-small" type="number" v-model="transferData.amount" placeholder="Amount")
+      b-button(@click="transferFunds").btn.w-100 Transfer
+
 </template>
 
 <script>
-  import MetamaskWallet from "~/components/MetamaskWallet";
-
-  export default {
-    name: "wallet-index",
-    components: {MetamaskWallet},
-    layout: "main",
-    data() {
-      return {
-        showModalNew: false
-      };
-    },
-    methods: {
-      launch() {
-        //this.showModalNew = true
-        this.$buefy.modal.open({
-          parent: this,
-          component: MetamaskWallet,
-          hasModalCard: true,
-          'can-cancel': false
-        })
+export default {
+  name: "exchange-transfer",
+  layout: "main",
+  middleware: ['contract'],
+  data: () => {
+    return {
+      transferData: {
+        address: "",
+        amount: 0
       }
-    },
-  };
+    };
+  },
+  methods: {
+    transferFunds() {
+      if (this.transferData.address && this.transferData.amount > 0) {
+        this.$store.dispatch("contract/transferSimbaToken", this.transferData);
+      }
+    }
+  }
+};
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>
