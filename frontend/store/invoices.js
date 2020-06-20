@@ -14,6 +14,9 @@ export const mutations = {
 
 export const actions = {
   async createTransaction({}, data) {
+
+    console.log('invoice type', data);
+
     return await this.$axios.post('/invoices/', { invoice_type: data }).then(res =>{
       return res.data;
     }).catch(_ => {
@@ -24,11 +27,11 @@ export const actions = {
   async updateTransaction({}, data) {
     let data_to_send = {
       "target_eth_address": data.eth_address,
-      "simba_amount:": data.simba_amount,
-      "btc_amount:": data.simba_amount
+      "btc_amount": data.simba_amount,
+      "simba_amount": data.simba_amount,
     }
 
-    console.log(`/invoices/${data.id}/`)
+    console.log(data_to_send);
 
     return await this.$axios.put(`/invoices/${data.id}/`, data_to_send).then(res => {
       return res.data;

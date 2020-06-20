@@ -5,6 +5,7 @@ export const state = () => ({
   btc_address: '',
   contract: '',
   tradeData: {
+    operation: 1,
     eth_address: '',
     simba: 0,
     btc: 0
@@ -23,7 +24,9 @@ export const mutations = {
   setBtcAddress: (state, btc_address) => (state.btc_address = btc_address),
   deleteUser: state => (state.user = null),
   setContract: (state, data) => (state.contract = data),
-  setTradeData: (state, data) => (state.tradeData = data),
+  setTradeData: (state, payload) => {
+    state.tradeData[payload.prop] = payload.value
+  },
 };
 
 export const actions = {
