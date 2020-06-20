@@ -20,15 +20,14 @@
   export default {
     name: 'trade-create-payment',
     data: () => ({
-      btc: 0,
-      simba: 0
+      btc: 0.00200000,
+      simba: 200000
     }),
     methods: {
       confirm() {
-        this.$store.commit('setTradeData', {
-          simba: this.simba,
-          btc: this.btc
-        })
+
+        this.$store.commit('setTradeData', { prop: 'simba', value: this.simba })
+        this.$store.commit('setTradeData', { prop: 'btc', value: this.btc })
 
         this.$parent.$emit('nextStep')
       },

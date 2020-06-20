@@ -57,14 +57,15 @@
     async mounted() {
       await this.$store.dispatch('getBtcAddress')
 
-      let res = await this.$store.dispatch('invoices/createTransaction', 1);
+      let tradeData = this.$store.getters['tradeData'];
+
+      let res = await this.$store.dispatch('invoices/createTransaction', tradeData.operation);
 
       this.new_transaction = res._id
 
-      let tradeData = this.$store.getters['tradeData'];
       let metamask_address = this.$store.getters['metamask/address'];
 
-      let updateData = { id: this.new_transaction, eth_address: metamask_address, simba_amount: tradeData.simba_amount}
+      let updateData = { id: this.new_transaction, eth_address: metamask_address, simba_amount: tradeData.simba,}
       let res2 = await this.$store.dispatch('invoices/updateTransaction', updateData)
 
       console.log('update transaction: ', res2)

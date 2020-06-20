@@ -2,8 +2,8 @@
   div
     div.main-content
       div
-        n-link(to="/exchange/buysell").btn.mr-2 Buy
-        n-link(to="/exchange/buysell").btn.mr-2 Sell
+        n-link(to="/exchange/buysell?op=buy").btn.mr-2 Buy
+        n-link(to="/exchange/buysell?op=sell").btn.mr-2 Sell
       h3.title.is-5.mt-4 Last bills
       //= b-table(:data="data" :columns="columns" focusable striped).is-flex.mt-4.data-table
       b-table(:data="invoiceData" default-sort="created_at" default-sort-direction="DESC")
@@ -13,6 +13,7 @@
               n-link(:to="'/exchange/' + props.row._id") {{ props.row._id }}
           b-table-column(field="simba_amount" label="SIMBA Amount") {{ props.row.simba_amount }}
           b-table-column(field="invoice_type" label="Type") {{ getType(props.row.invoice_type) }}
+          b-table-column(field="status" label="Status") {{ props.row.status }}
 </template>
 
 <script>
