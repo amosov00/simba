@@ -3,6 +3,7 @@
     div.is-flex.content-tabs
       n-link(to="/exchange/trade" active-class="link--active").link.link--underlined.content-tabs-item Buy/sell
       n-link(to="/exchange/bills" active-class="link--active").link.link--underlined.content-tabs-item Bills
+      n-link(to="/exchange/transfer" active-class="link--active").link.link--underlined.content-tabs-item Transfer
     div.main-content Bills
 </template>
 

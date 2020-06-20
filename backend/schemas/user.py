@@ -21,7 +21,8 @@ __all__ = [
     "UserVerifyEmailResponse",
     "UserCreationSafeResponse",
     "UserRecover",
-    "UserRecoverLink"
+    "UserRecoverLink",
+    "User2faConfirm"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -39,12 +40,6 @@ def validate_password(v: Optional[str], values: dict) -> str:
     return pwd_context.hash(v)
 
 
-class BaseUser(BaseModel):
-    pass
-
-
-# for what?
-
 
 class User(BaseModel):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
@@ -53,7 +48,8 @@ class User(BaseModel):
     email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
     verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
     recover_code: Optional[str] = Field(default=None, description="JWT token for password recover")
-
+    secret_2fa: Optional[str] = Field(default=None, description="Code for 2fa generation")
+    two_factor: Optional[bool] = Field(defaul=False, description="On/off 2fa")
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
 
@@ -113,6 +109,7 @@ class UserVerifyEmailResponse(BaseModel):
 class UserLogin(BaseModel):
     email: str = Field(..., example="email")
     password: str = Field(..., example="password")
+    pin_code: Optional[str] = Field(default=None, example="auth pin-code")
 
 
 class UserLoginResponse(BaseModel):
@@ -184,3 +181,12 @@ class UserCreationNotSafe(BaseModel):
 
 class UserUpdateNotSafe(UserCreationNotSafe):
     email: Optional[str] = Field(default="")
+
+
+class User2faURL(BaseModel):
+    URL: str = Field(default="")
+
+
+class User2faConfirm(BaseModel):
+    token: str = Field(...)
+    pin_code: str = Field(...)

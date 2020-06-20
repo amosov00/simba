@@ -41,9 +41,6 @@ input[type="text"], input[type="password"]
 .main-content
   padding: 50px 216px
 
-.b-table .table-wrapper thead
-  display: none
-
 .tabs
   padding-left: 126px
   padding-right: 126px
@@ -88,6 +85,21 @@ input[type="text"], input[type="password"]
   margin-top: 6px
   font-size: 12px
   color: #bc002a
+
+.back-btn
+  top: 5px
+  position: absolute
+  left: -70px
+  &:hover
+    cursor: pointer
+    opacity: 0.7
+
+.data-table
+  .table-wrapper
+    width: 100%
+.b-table .table
+  margin-left: -0.75em
+  margin-right: -0.75em
 
 @import "./helpers.sass"
 @import "./button.sass"

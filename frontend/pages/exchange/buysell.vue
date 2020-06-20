@@ -1,11 +1,8 @@
 <template lang="pug">
   div
-    div.is-flex.content-tabs
-      n-link(to="/exchange/buysell" active-class="link--active").link.link--underlined.content-tabs-item Buy/sell
-      n-link(to="/exchange/bills" active-class="link--active").link.link--underlined.content-tabs-item Bills
     div.main-content
       div.position-relative
-        n-link(to="/exchange/trade")
+        n-link(to="/exchange/")
           img(src="~assets/images/back.svg").back-btn
       div.steps.is-flex.align-items-center
         div.operation.mr-4 {{ operation }}
@@ -31,15 +28,28 @@
     name: "exchange-buysell",
     layout: 'main',
     components: {MetamaskWallet, WalletConfirm, CreatePayment, BillPayment, Status, Final },
-    async created() {
-      await this.$store.dispatch('fetchContracts');
-      console.log(this.$store.getters.contract);
-    },
     computed: {
       metamask_modal() {
         return this.$store.getters['metamask/status'] !== 'online';
       }
     },
+    mounted() {
+      let url_params = this.$nuxt.$route;
+
+      if(url_params.query.op === 'buy') {
+        this.operation = 'Buy';
+        this.$store.commit('setTradeData', {prop: 'operation', value: 1})
+      } else {
+        this.operation = 'Sell'
+        this.$store.commit('setTradeData', {prop: 'operation', value: 2})
+      }
+
+      this.$on('nextStep', () => {
+        let steps = this.tradeData.steps;
+        steps.current = steps.list[steps.list.indexOf(steps.current)+1]
+      });
+    },
+
     data: () => {
       return {
         operation: 'Buy',
@@ -99,11 +109,4 @@
     font-size: 22px
     line-height: 144.19%
     color: #E0B72E
-  .back-btn
-    top: 5px
-    position: absolute
-    left: -70px
-    &:hover
-      cursor: pointer
-      opacity: 0.7
 </style>
