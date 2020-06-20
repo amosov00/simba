@@ -2,7 +2,7 @@ from typing import Optional, Literal, List, Union
 from datetime import datetime
 from enum import IntEnum
 
-from pydantic import Field, validator
+from pydantic import Field, validator, PositiveInt
 
 from schemas.base import (
     BaseModel,
@@ -84,15 +84,24 @@ class InvoiceCreate(BaseModel):
     invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")  # noqa
 
 
+def validate_positive_int(value: Union[int, DecimalPydantic]):
+    if value < 1:
+        raise ValueError("Invalid amount")
+
+    return value
+
+
 class InvoiceUpdate(BaseModel):
     target_eth_address: str = Field(default=None, description="Address which will be scanned")
     target_btc_address: str = Field(default=None, description="Address which will be scanned")
 
-    btc_amount: Union[int, DecimalPydantic] = Field(default=0, description="Planned amount to receive / send")
-    simba_amount: Union[int, DecimalPydantic] = Field(default=0, description="Planned amount to receive / send")
+    btc_amount: Union[int, DecimalPydantic] = Field(default=0, description="Planned amount to receive / send", gt=0)
+    simba_amount: Union[int, DecimalPydantic] = Field(default=0, description="Planned amount to receive / send", gt=0)
 
     _validate_target_btc_address = validator("target_btc_address", allow_reuse=True)(validate_btc_address)
     _validate_target_eth_address = validator("target_eth_address", allow_reuse=True)(validate_eth_address)
+    # _validate_target_btc_amount = validator("btc_amount", allow_reuse=True)(validate_positive_int)
+    # _validate_target_simba_amount = validator("simba_amount", allow_reuse=True)(validate_positive_int)
 
 
 class InvoiceTransactionManual(BaseModel):

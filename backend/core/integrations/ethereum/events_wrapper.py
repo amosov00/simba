@@ -1,12 +1,14 @@
 import asyncio
 import logging
-from typing import Optional, Union
+from typing import Optional, Union, List
 from websockets import ConnectionClosedError
+from datetime import datetime
 
 from web3.contract import ContractEvent, LogFilter
 from sentry_sdk import capture_exception
 
 from .base_wrapper import EthereumBaseWrapper
+from schemas import EthereumTransaction
 from database.crud import EthereumTransactionCRUD
 
 __all__ = ["ContractEventsWrapper"]
@@ -25,7 +27,7 @@ class ContractEventsWrapper(EthereumBaseWrapper):
         return self.contract.events[contract_title]
 
     def _create_filter(
-        self, contract_title: str, from_block: Union[str, int] = None, to_block: Union[str, int] = None,
+            self, contract_title: str, from_block: Union[str, int] = None, to_block: Union[str, int] = None,
     ) -> LogFilter:
         return self._get_contract_event_by_title(contract_title).createFilter(
             address=self.contract_address, fromBlock=from_block, toBlock=to_block
@@ -35,7 +37,7 @@ class ContractEventsWrapper(EthereumBaseWrapper):
         try:
             for event in event_filter.get_all_entries():
                 block = dict(contract=self.contract_meta.title, **self.serialize(event))
-                self.blocks.append(block)
+                self.blocks.append(EthereumTransaction(**block))
         except ConnectionClosedError as e:
             # TODO deal with exception code = 1011 (unexpected error), reason = Internal server disconnect error
             capture_exception(e)
@@ -71,19 +73,20 @@ class ContractEventsWrapper(EthereumBaseWrapper):
     async def save_blocks(self):
         tasks = [
             EthereumTransactionCRUD.update_or_create(
-                transaction_hash=block["transactionHash"],
-                log_index=block["logIndex"],
-                payload=block
+                transaction_hash=block.transactionHash,
+                log_index=block.logIndex,
+                payload=block.dict()
             ) for block in self.blocks
         ]
         await asyncio.gather(*tasks)
         return True
 
-    async def fetch_blocks_and_save(self, from_block: Optional[int] = None):
+    async def fetch_blocks(self, from_block: Optional[int] = None) -> List[EthereumTransaction]:
+        logging.info(f"Starting fetching contract {self.contract_meta.title} at {datetime.now()}")
         if not from_block:
             last_block = await EthereumTransactionCRUD.find_last_block()
             from_block = last_block.get("blockNumber") if last_block else None
-            
+
         if not self.contract_events:
             self.contract_events = self._get_contract_events_titles()
 
@@ -92,5 +95,9 @@ class ContractEventsWrapper(EthereumBaseWrapper):
 
         self.fetch_blocks_from_block(from_block + 1) if from_block else self.fetch_all_blocks()
         logging.info(f"{self.contract_meta.title}: {len(self.blocks)} new blocks")
+        return self.blocks
+
+    async def fetch_blocks_and_save(self, from_block: Optional[int] = None) -> List[EthereumTransaction]:
+        await self.fetch_blocks(from_block)
         await self.save_blocks()
-        return True
+        return self.blocks

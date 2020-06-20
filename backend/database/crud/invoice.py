@@ -73,8 +73,6 @@ class InvoiceCRUD(BaseMongoCRUD):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Payload is required")
 
         invoice = await cls.find_invoice_safely(invoice_id, user.id, statuses)
-        if not invoice:
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "Invoice not found or modification is forbidden")
 
         await cls.update_one(
             query={

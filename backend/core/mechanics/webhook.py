@@ -91,16 +91,13 @@ class BlockCypherWebhookHandler:
             return True
 
         if transaction.confirmations < 3:
-            logging.info("1")
             await BTCTransactionCRUD.update_or_insert({"hash": transaction.hash}, transaction.dict())
 
         # TODO transaction_in_db may not exists
         elif transaction.confirmations >= 3 and transaction_in_db.simba_tokens_issued:
-            logging.info("2")
             await BTCTransactionCRUD.update_one({"hash": transaction.hash}, transaction.dict())
 
         elif transaction.confirmations >= 3 and not transaction_in_db.simba_tokens_issued:
-            logging.info("3")
             await SimbaWrapper().validate_and_issue_tokens(
                 invoice, incoming_btc=incoming_btc, comment=transaction.hash
             )
@@ -110,6 +107,6 @@ class BlockCypherWebhookHandler:
             invoice.btc_tx_ids = list({*invoice.btc_tx_ids, transaction_in_db.id})
             invoice.btc_amount_proceeded += incoming_btc
             invoice.finised_at = datetime.now()
-            await InvoiceCRUD.update_one({"_id": invoice.id}, invoice.dict(exclude={"_id"}))
+            await InvoiceCRUD.update_one({"_id": invoice.id}, invoice.dict(exclude={"id"}))
 
         return True

@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.get("/webhooks/")
 async def debug_get():
-    return await BlockCypherWebhookAPIWrapper.list_webhooks()
+    return await BlockCypherWebhookAPIWrapper().list_webhooks()
 
 
 @router.get("/")

@@ -94,6 +94,7 @@ async def invoice_add_transaction(
     if invoice.invoice_type == InvoiceType.BUY and payload.btc_transaction_hash:
         # TODO return full tx
         tx_meta = await BitcoinWrapper().fetch_and_save_transaction(invoice, payload.btc_transaction_hash)
+        # TOOD Has no validation if transaction already exists
         # TODO refactor -> to InvoiceMechanics
         eth_tx_hash = await SimbaWrapper().validate_and_issue_tokens(
             invoice, incoming_btc=tx_meta["incoming_btc"], comment=tx_meta["tx_hash"]

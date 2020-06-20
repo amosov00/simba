@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Union
+from typing import Union, List
 
 from sys import getsizeof
 from decimal import Decimal
@@ -10,7 +10,7 @@ from bson import Decimal128
 from web3 import Web3
 from web3.datastructures import AttributeDict
 
-from schemas import EthereumContract
+from schemas import EthereumContract, EthereumTransaction
 from config import INFURA_WS_URL
 
 
@@ -29,7 +29,7 @@ class EthereumBaseWrapper(ABC):
         self.contract = self.w3.eth.contract(address=self.contract_address, abi=self.abi)
 
         self.contract_events = []
-        self.blocks = []
+        self.blocks: List[EthereumTransaction] = []
         self.filters = []
         self.last_block = None
 
