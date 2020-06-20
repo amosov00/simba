@@ -1,6 +1,7 @@
 from urllib.parse import urljoin
 from typing import Literal, Optional
 from datetime import datetime
+import logging
 
 from passlib import pwd
 from sentry_sdk import capture_message
@@ -85,20 +86,28 @@ class BlockCypherWebhookHandler:
         }):
             transaction_in_db = BTCTransactionInDB(**transaction_in_db)
 
+        if transaction.block_height < 0 or transaction.confirmations == 0:
+            logging.info(0)
+            return True
+
         if transaction.confirmations < 3:
+            logging.info("1")
             await BTCTransactionCRUD.update_or_insert({"hash": transaction.hash}, transaction.dict())
 
+        # TODO transaction_in_db may not exists
         elif transaction.confirmations >= 3 and transaction_in_db.simba_tokens_issued:
+            logging.info("2")
             await BTCTransactionCRUD.update_one({"hash": transaction.hash}, transaction.dict())
 
         elif transaction.confirmations >= 3 and not transaction_in_db.simba_tokens_issued:
+            logging.info("3")
             await SimbaWrapper().validate_and_issue_tokens(
                 invoice, incoming_btc=incoming_btc, comment=transaction.hash
             )
             transaction.simba_tokens_issued = True
             await BTCTransactionCRUD.update_one({"hash": transaction.hash}, transaction.dict())
             invoice.status = InvoiceStatus.COMPLETED
-            invoice.btc_tx_ids = list({invoice.btc_tx_ids, transaction_in_db.id})
+            invoice.btc_tx_ids = list({*invoice.btc_tx_ids, transaction_in_db.id})
             invoice.btc_amount_proceeded += incoming_btc
             invoice.finised_at = datetime.now()
             await InvoiceCRUD.update_one({"_id": invoice.id}, invoice.dict(exclude={"_id"}))

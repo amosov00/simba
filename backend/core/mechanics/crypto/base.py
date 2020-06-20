@@ -95,5 +95,6 @@ class CryptoValidation(ABC):
     @classmethod
     def validate_currency_rate(cls, btc: int, simba: int) -> bool:
         # TODO raise error if not valid
-        status = simba / btc == 1
-        return status
+        if not all([isinstance(btc, int), isinstance(simba, int)]):
+            raise HTTPException(HTTPStatus)
+        return simba / btc == 1

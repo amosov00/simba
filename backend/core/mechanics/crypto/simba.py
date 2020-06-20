@@ -2,7 +2,6 @@ from hexbytes import HexBytes
 
 from .base import CryptoValidation, CryptoCurrencyRate
 from core.integrations.ethereum import ContractFunctionsWrapper, ContractEventsWrapper
-from core.mechanics import InvoiceMechanics
 from schemas import InvoiceInDB, InvoiceStatus
 from config import SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
 
@@ -31,6 +30,6 @@ class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
             incoming_btc: int,
             comment: str
     ) -> str:
-        InvoiceMechanics(invoice).validate()
+        # InvoiceMechanics(invoice).validate()
 
         return await self.issue_tokens(invoice.target_eth_address, incoming_btc, comment)

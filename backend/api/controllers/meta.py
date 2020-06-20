@@ -38,9 +38,6 @@ async def meta_webhook_handler(
     webhook_obj = await BlockCypherWebhookCRUD.find_one({"url_path": webhook_path})
 
     if webhook_obj:
-        webhook_obj.pop("_id")
-        webhook_obj.pop("invoice_id")
-        return webhook_obj
-        # await BlockCypherWebhookHandler().parse(payload)
+        await BlockCypherWebhookHandler().parse(payload)
 
     return True

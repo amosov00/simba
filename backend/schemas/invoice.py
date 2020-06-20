@@ -19,6 +19,7 @@ __all__ = [
     "InvoiceUpdate",
     "InvoiceCreate",
     "InvoiceInDB",
+    "InvoiceExtended",
     "InvoiceTransactionManual",
 ]
 
@@ -44,8 +45,8 @@ class Invoice(BaseModel):
     invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")
 
     # Amount
-    btc_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send")
-    simba_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send")
+    btc_amount: Union[int, DecimalPydantic] = Field(default=0, description="Planned amount to receive / send")
+    simba_amount: Union[int, DecimalPydantic] = Field(default=0, description="Planned amount to receive / send")
 
     btc_amount_proceeded: Union[int, DecimalPydantic] = Field(
         default=0, description="Total of BTC amount, which was received or sent"
@@ -74,6 +75,11 @@ class InvoiceInDB(Invoice):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
 
 
+class InvoiceExtended(InvoiceInDB):
+    eth_txs: Optional[list]
+    btc_txs: Optional[list]
+
+
 class InvoiceCreate(BaseModel):
     invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")  # noqa
 
@@ -82,8 +88,8 @@ class InvoiceUpdate(BaseModel):
     target_eth_address: str = Field(default=None, description="Address which will be scanned")
     target_btc_address: str = Field(default=None, description="Address which will be scanned")
 
-    btc_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send")
-    simba_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send")
+    btc_amount: Union[int, DecimalPydantic] = Field(default=0, description="Planned amount to receive / send")
+    simba_amount: Union[int, DecimalPydantic] = Field(default=0, description="Planned amount to receive / send")
 
     _validate_target_btc_address = validator("target_btc_address", allow_reuse=True)(validate_btc_address)
     _validate_target_eth_address = validator("target_eth_address", allow_reuse=True)(validate_eth_address)

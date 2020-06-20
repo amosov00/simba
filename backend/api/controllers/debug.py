@@ -3,18 +3,25 @@ from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper, BlockCypherAPIWrapper
 from core.mechanics import BitcoinWrapper, BlockCypherWebhookHandler, SimbaWrapper
 from database.crud import InvoiceCRUD
-from schemas import InvoiceInDB, BlockCypherWebhookEvents
+from schemas import InvoiceInDB, BlockCypherWebhookEvents, InvoiceUpdate
 from celery_app.tasks import debug_task_1
 from bson import ObjectId
+
 __all__ = ["router"]
 
 router = APIRouter()
 
 
+@router.get("/webhooks/")
+async def debug_get():
+    return await BlockCypherWebhookAPIWrapper.list_webhooks()
+
+
 @router.get("/")
 async def debug_get():
-    hash_ = await SimbaWrapper().validate_and_issue_tokens(None, "0xd69401E5B2F93EB66E585711ec4CEFD6e8C8346D", 10000000, "test")
-    return hash_
+    # hash_ = await SimbaWrapper().validate_and_issue_tokens(None, "0xd69401E5B2F93EB66E585711ec4CEFD6e8C8346D", 1000, "test")
+    # return hash_
+    return True
 
     # res = await BitcoinWrapper().create_and_sign_transaction(
     #     [("myWxTnrj3UHr9HQ9gzSpse7nm9vpdp47to", 72000)],
