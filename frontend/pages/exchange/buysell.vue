@@ -21,7 +21,6 @@
   import Status from "@/components/Trade/Status"
   import Final from "@/components/Trade/Final"
 
-  import Web3 from 'web3';
   import MetamaskWallet from "~/components/MetamaskWallet";
 
   export default {
