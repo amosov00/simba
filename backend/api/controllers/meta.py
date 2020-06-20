@@ -34,7 +34,6 @@ async def meta_webhook_handler(
         webhook_path: str = Path(...),
         payload: dict = Body(...),
 ):
-    logging.info(payload)
     webhook_obj = await BlockCypherWebhookCRUD.find_one({"url_path": webhook_path})
 
     if webhook_obj:

@@ -11,12 +11,26 @@ INFURA_WS_URL = getenv("INFURA_WS_URL")
 SIMBA_ADMIN_ADDRESS = getenv("SIMBA_ADMIN_ADDRESS")
 SIMBA_ADMIN_PRIVATE_KEY = getenv("SIMBA_ADMIN_PRIVATE_KEY")
 
+SST_ADMIN_ADDRESS = getenv("SST_ADMIN_ADDRESS")
+SST_ADMIN_PRIVATE_KEY = getenv("SST_ADMIN_PRIVATE_KEY")
 
-SIMBA_CONTRACT = EthereumContract(
-    title="SIMBA",
-    address="0x60E1BF648580AafbFf6c1bc122BB1AE6Be7C1352",
-    abi_filepath=path.join(BASE_DIR, "config", "simba_abi.json"),
-    is_test=IS_PRODUCTION is False,
-    provider_http_link=INFURA_HTTP_URL,
-    provider_ws_link=INFURA_WS_URL
-)
+if IS_PRODUCTION:
+    pass
+
+else:
+    SIMBA_CONTRACT = EthereumContract(
+        title="SIMBA",
+        address="0x60E1BF648580AafbFf6c1bc122BB1AE6Be7C1352",
+        abi_filepath=path.join(BASE_DIR, "config", "simba_abi_rinkeby.json"),
+        is_test=IS_PRODUCTION is False,
+        provider_http_link=INFURA_HTTP_URL,
+        provider_ws_link=INFURA_WS_URL
+    )
+    SST_CONTRACT = EthereumContract(
+        title="SST",
+        address="0xC17010E8d258631636827B3D8baC6830Fc5163Ff",
+        abi_filepath=path.join(BASE_DIR, "config", "sst_abi_rinkeby.json"),
+        is_test=IS_PRODUCTION is False,
+        provider_http_link=INFURA_HTTP_URL,
+        provider_ws_link=INFURA_WS_URL
+    )

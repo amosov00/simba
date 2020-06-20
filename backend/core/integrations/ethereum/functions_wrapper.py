@@ -36,6 +36,7 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
     def issue_coins(self, customer_address: str, amount: int, comment: str) -> HexBytes:
+        """Simba contract"""
         customer_address = Web3.toChecksumAddress(customer_address)
         self._approve(amount)
         tx = self.contract.functions.issue(
@@ -49,3 +50,17 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
+    def freeze_and_transfer(self, customer_address: str, amount: int, period: int):
+        """SST contract"""
+        customer_address = Web3.toChecksumAddress(customer_address)
+        # self._approve(amount) TODO is it necessary ?
+        tx = self.contract.functions.freezeAndTransfer(
+            customer_address, amount, period
+        ).buildTransaction({
+            'gas': GAS,
+            'gasPrice': GAS_PRICE,
+            'from': self.admin_address,
+            'nonce': self._get_nonce(),
+        })
+        signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
+        return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)

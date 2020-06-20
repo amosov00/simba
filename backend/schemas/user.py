@@ -1,11 +1,11 @@
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 from pydantic import Field, validator
 from passlib.context import CryptContext
 from passlib import pwd
 
-from schemas.base import BaseModel, ObjectIdPydantic
+from schemas.base import BaseModel, ObjectIdPydantic, validate_eth_address, validate_btc_address
 
 __all__ = [
     "pwd_context",
@@ -41,6 +41,8 @@ def validate_password(v: Optional[str], values: dict) -> str:
 
 class BaseUser(BaseModel):
     pass
+
+
 # for what?
 
 
@@ -54,6 +56,9 @@ class User(BaseModel):
 
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
+
+    user_btc_addresses: List[str] = Field(default=[])
+    user_eth_addresses: List[str] = Field(default=[])
 
     btc_address: str = Field(default=None, description="Linked BTC address to user for transactions")
 
@@ -74,8 +79,6 @@ class User(BaseModel):
     # ethereum_wallet: Optional[str] = Field(default=None)
     # btc_wallet: Optional[str] = Field(default=None)
     # simba_wallet: Optional[str] = Field(default=None)
-    # user_btc_address: str = Field(default=False, description="User BTC address")
-    # user_eth_address: str = Field(default=False, description="User ETH address")
 
     @property
     def is_authenticated(self):
@@ -145,7 +148,17 @@ class UserUpdateSafe(BaseModel):
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
 
+    user_btc_addresses: Optional[List[str]] = Field(default=None)
+    user_eth_addresses: Optional[List[str]] = Field(default=None)
+
     _validate_email = validator("email", allow_reuse=True)(validate_email)
+
+    _validate_user_btc_addresses = validator(
+        "user_btc_addresses", allow_reuse=True, each_item=True
+    )(validate_btc_address)
+    _validate_user_eth_addresses = validator(
+        "user_eth_addresses", allow_reuse=True, each_item=True
+    )(validate_eth_address)
 
 
 class UserCreationNotSafe(BaseModel):
@@ -171,4 +184,3 @@ class UserCreationNotSafe(BaseModel):
 
 class UserUpdateNotSafe(UserCreationNotSafe):
     email: Optional[str] = Field(default="")
-
