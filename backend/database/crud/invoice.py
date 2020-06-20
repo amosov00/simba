@@ -73,8 +73,6 @@ class InvoiceCRUD(BaseMongoCRUD):
     async def update_invoice(cls, invoice_id: str, user: User, payload: InvoiceUpdate, statuses: tuple = None):
         if not payload.dict(exclude_unset=True):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Payload is required")
-        # TODO temp logging
-        logging.info(payload.dict())
 
         invoice = await cls.find_invoice_safely(invoice_id, user.id, statuses)
 

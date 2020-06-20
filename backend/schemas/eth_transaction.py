@@ -5,7 +5,17 @@ from pydantic import Field, validator
 
 from schemas.base import BaseModel, DecimalPydantic, ObjectIdPydantic
 
-__all__ = ["EthereumTransaction", "EthereumTransactionInDB"]
+__all__ = ["EthereumTransaction", "EthereumTransactionInDB", "SimbaContractEvents", "SSTContractEvents"]
+
+
+class SimbaContractEvents:
+    OnIssued = "OnIssued"
+    OnRedeemed = "OnRedeemed"
+
+    ALL = (OnIssued, OnRedeemed)
+
+class SSTContractEvents:
+    pass
 
 
 class EthereumTransaction(BaseModel):

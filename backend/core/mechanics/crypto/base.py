@@ -18,13 +18,19 @@ class CryptoCurrencyRate(ABC):
     # 1 BTC = 100,000,000 SIMBA
     SIMBA_IN_BTC = 10 ** 8
 
+    SIMBA_IN_SST = 20000
+
     @classmethod
     def btc_to_simba_tokens(cls, btc: int) -> int:
         return btc
 
     @classmethod
     def simba_tokens_to_btc(cls, simba_tokens: int) -> float:
-        return simba_tokens / cls.SIMBA_IN_BTC
+        return simba_tokens
+
+    @classmethod
+    def simba_to_sst(cls, simba_tokens: int) -> int:
+        return round(simba_tokens / cls.SIMBA_IN_SST)
 
 
 class ParseCryptoTransaction:

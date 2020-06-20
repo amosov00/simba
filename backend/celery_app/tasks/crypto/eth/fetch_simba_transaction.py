@@ -1,5 +1,5 @@
 from database.crud import InvoiceCRUD, EthereumTransactionCRUD
-from schemas import InvoiceInDB
+from schemas import InvoiceInDB, SimbaContractEvents, EthereumTransaction
 from core.integrations.ethereum import ContractEventsWrapper
 from celery_app.celeryconfig import app
 from config import SIMBA_CONTRACT
@@ -16,13 +16,12 @@ __all__ = ['fetch_simba_contract_cronjob']
 async def fetch_simba_contract_cronjob(self, *args, **kwargs):
     await ContractEventsWrapper(SIMBA_CONTRACT).fetch_blocks_and_save()
 
-    transactions = EthereumTransactionCRUD.find({
-        # TODO complete
+    transactions = await EthereumTransactionCRUD.find({
+        "event": {"$in": SimbaContractEvents.ALL},
+        "invoice_id": None,
     })
-    for transaction in await ContractEventsWrapper(SIMBA_CONTRACT).fetch_blocks_and_save():
-        if transaction.event not in ("ASD", ):
-            continue
-
+    for transaction in transactions:
+        transaction = EthereumTransaction(**transaction)
         invoice = await InvoiceCRUD.find_one({
             "target_eth_address": transaction.address,
         })

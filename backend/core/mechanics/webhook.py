@@ -86,8 +86,10 @@ class BlockCypherWebhookHandler:
         }):
             transaction_in_db = BTCTransactionInDB(**transaction_in_db)
 
+        # TODO remove before prod
+        logging.info(f"Got transaction {transaction.hash};\nconfirmations {transaction.confirmations}")
+
         if transaction.block_height < 0 or transaction.confirmations == 0:
-            logging.info(0)
             return True
 
         if transaction.confirmations < 3:
