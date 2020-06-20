@@ -1,5 +1,7 @@
 import _ from "lodash";
 
+import { ToastProgrammatic as Toast } from 'buefy'
+
 export const state = () => ({
   invoices: []
 });
@@ -39,7 +41,18 @@ export const actions = {
   },
 
   async manualTransaction({}, data) {
-    return await this.$axios.post(`/invoices/${data.id}/transaction/`, { btc_transaction_hash: data.transaction_hash}).then(res => res.data)
+    return await this.$axios.post(`/invoices/${data.id}/transaction/`, { btc_transaction_hash: data.transaction_hash}).then(res => {
+      Toast.open({message: res.data, type: 'is-primary'});
+      return res.data
+    })
+      .catch(err => {
+        Toast.open({message: err.response.data[0].message, type: 'is-danger'});
+        return false
+      })
+  },
+
+  async confirmTransaction({}, id) {
+    return await this.$axios.post(`/invoices/${id}/confirm/`).then(res => res.data)
       .catch(_ => false)
   },
 

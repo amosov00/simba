@@ -19,6 +19,14 @@
       div.mt-2 Created transaction: {{ new_transaction }}
       div.mt-2 Checking your transaction every 10 sec...
       div.mt-2 Status: {{ status }}
+      div.mt-4(v-if="Object.keys(updating_invoice_data).length !== 0") Recived info:
+        span(v-if="updating_invoice_data.btc_txs.length === 0") empty
+      div.mt-1(v-if="Object.keys(updating_invoice_data).length !== 0")
+        div(v-for="(item, i) in updating_invoice_data.btc_txs" :key="i").mt-4 {{ i+1 }}
+          |) {{ item._id }}
+          div.mt-2 simba_tokens_issued: {{ item.simba_tokens_issued }}
+          div.mt-2 confirmations: {{ item.confirmations }}
+          div.mt-2 total: {{ item.total }}
       b-loading(:active.sync="busyChecking" :is-full-page="false")
     div.mt-4
       n-link(to="/exchange").has-text-weight-bold Check bills
@@ -45,12 +53,13 @@
       transaction_status: 0,
       transaction_status_list: ['not payed', 'payed!'],
       transaction_hash: '',
-      new_transaction: ''
+      new_transaction: '',
+      updating_invoice_data: {}
     }),
     methods: {
       async setTransaction() {
 
-        let res = await this.$store.dispatch('invoices/manualTransaction', { id: new_transaction._id, transaction_hash: this.transaction_hash });
+        let res = await this.$store.dispatch('invoices/manualTransaction', { id: this.new_transaction, transaction_hash: this.transaction_hash });
         console.log(res);
       }
     },
@@ -70,6 +79,11 @@
 
       console.log('update transaction: ', res2)
 
+      let res3 = await this.$store.dispatch('invoices/confirmTransaction', this.new_transaction)
+
+      console.log('confirm transaction: ', res3)
+
+
       let check;
 
       setInterval(async () => {
@@ -77,6 +91,9 @@
         check = await this.$store.dispatch('invoices/fetchSingle', this.new_transaction)
 
         this.status = check.status
+
+        this.updating_invoice_data = JSON.parse(JSON.stringify(check));
+
         await setTimeout(() => {
           this.busyChecking = false
         }, 1500)

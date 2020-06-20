@@ -40,6 +40,7 @@
     },
 
     methods: {
+
       getType(type) {
         if(type ===  2){ return 'SELL'}
 
