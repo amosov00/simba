@@ -34,11 +34,16 @@ class BlockCypherAPIWrapper(BlockCypherBaseAPIWrapper):
         res = await self.request(endpoint, request_type="POST", data=data, with_token=True)
         return res
 
-    async def push_raw_tx(self, tx: Tx):
-        endpoint = f"/txs/push/"
-        data = {"tx": tx.as_hex()}
-        res = await self.request(endpoint, request_type="POST", data=data, with_token=True)
-        return res
+    async def current_balance(self, address: str):
+        endpoint = f"/addrs/{address}/"
+        res = await self.request(endpoint, request_type="GET")
+        return res.get("final_balance")
 
-    async def get_payables(self, address: str):
-        return self.get_payables(address)
+    async def push_raw_tx(self, tx: Tx):
+        # endpoint = f"/txs/push/"
+        # data = {"tx": tx.as_hex()}
+        # res = await self.request(endpoint, request_type="POST", data=data, with_token=True)
+        return self.broadcast_tx(tx)
+
+    async def get_spendables(self, address: str):
+        return self.spendables_for_address(address)

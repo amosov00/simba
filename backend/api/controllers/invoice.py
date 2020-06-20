@@ -2,21 +2,23 @@ from typing import List
 from http import HTTPStatus
 
 from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Response
+from bson import ObjectId
 
 from api.dependencies import get_user
-from database.crud import InvoiceCRUD
+from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
 from schemas import (
     Invoice,
     InvoiceCreate,
     InvoiceUpdate,
     InvoiceInDB,
+    InvoiceExtended,
     InvoiceStatus,
     InvoiceType,
     InvoiceTransactionManual,
     BlockCypherWebhookEvents,
 )
 from schemas.user import User
-from core.mechanics import BitcoinWrapper, SimbaWrapper, InvoiceValidation
+from core.mechanics import BitcoinWrapper, SimbaWrapper, InvoiceMechanics, BlockCypherWebhookHandler
 
 __all__ = ["router"]
 
@@ -39,23 +41,43 @@ async def create_invoice(user: User = Depends(get_user), data: InvoiceCreate = B
 
 
 @router.get("/", response_model=List[InvoiceInDB])
-async def fetch_invoices(user: User = Depends(get_user)):
+async def invoice_fetch_all(user: User = Depends(get_user)):
     return await InvoiceCRUD.find_invoices_by_user_id(user.id)
 
 
-@router.get("/{invoice_id}/", response_model=InvoiceInDB)
-async def show_invoice_by_id(invoice_id: str, user: User = Depends(get_user)):
-    return await InvoiceCRUD.find_invoice_by_id(invoice_id, user.id)
+@router.get("/{invoice_id}/", response_model=InvoiceExtended)
+async def invoice_fetch_one(invoice_id: str, user: User = Depends(get_user)):
+    resp = await InvoiceCRUD.aggregate([
+        {"$match": {
+            "_id": ObjectId(invoice_id),
+            "user_id": user.id
+        }},
+        {"$lookup": {
+            "from": BTCTransactionCRUD.collection,
+            "localField": "_id",
+            "foreignField": "invoice_id",
+            "as": "btc_txs",
+        }},
+        {"$lookup": {
+            "from": EthereumTransactionCRUD.collection,
+            "localField": "_id",
+            "foreignField": "invoice_id",
+            "as": "eth_txs",
+        }},
+    ])
+    return resp[0] if resp else Response(status_code=404)
 
 
 @router.put("/{invoice_id}/")
-async def update_invoice(invoice_id: str, user: User = Depends(get_user), payload: InvoiceUpdate = Body(...)):
-    res = await InvoiceCRUD.update_invoice(invoice_id, user, payload.dict(exclude_unset=True))
+async def invoice_update(invoice_id: str, user: User = Depends(get_user), payload: InvoiceUpdate = Body(...)):
+    await InvoiceCRUD.update_invoice(
+        invoice_id, user, payload.dict(exclude_unset=True), statuses=(InvoiceStatus.CREATED,),
+    )
     return True
 
 
 @router.post("/{invoice_id}/transaction/")
-async def update_invoice(
+async def invoice_add_transaction(
         invoice_id: str,
         user: User = Depends(get_user),
         payload: InvoiceTransactionManual = Body(...)
@@ -65,16 +87,16 @@ async def update_invoice(
         user.id,
         statuses=(InvoiceStatus.WAITING, InvoiceStatus.COMPLETED),
     )
-    if not invoice:
-        raise HTTPException(HTTPStatus.NOT_FOUND, "Invoice not found")
 
     invoice = InvoiceInDB(**invoice)
     response = {}
 
     if invoice.invoice_type == InvoiceType.BUY and payload.btc_transaction_hash:
+        # TODO return full tx
         tx_meta = await BitcoinWrapper().fetch_and_save_transaction(invoice, payload.btc_transaction_hash)
-        eth_tx_hash = await SimbaWrapper().issue_tokens_and_save(
-            invoice, invoice.target_eth_address, incoming_btc=tx_meta["incoming_btc"], comment=tx_meta["tx_hash"]
+        # TODO refactor -> to InvoiceMechanics
+        eth_tx_hash = await SimbaWrapper().validate_and_issue_tokens(
+            invoice, incoming_btc=tx_meta["incoming_btc"], comment=tx_meta["tx_hash"]
         )
         response.update({
             "success": True,
@@ -90,27 +112,26 @@ async def update_invoice(
     return response
 
 
-@router.post("/{invoice_id}/confirm/")
-async def confirm_invoice(invoice_id: str, user: User = Depends(get_user)):
-    # Validate invoice
+@router.post("/{invoice_id}/confirm/", response_model=InvoiceInDB)
+async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
     invoice = await InvoiceCRUD.find_invoice_safely(invoice_id, user.id)
 
     if not invoice:
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Invoice not found or modification is forbidden")
 
-    invoice = InvoiceValidation(invoice).validate()
+    invoice = InvoiceMechanics(invoice).validate()
 
+    invoice.status = InvoiceStatus.WAITING
     await InvoiceCRUD.update_invoice_not_safe(invoice.id, user.id, {"status": InvoiceStatus.WAITING})
 
-    # await BlockCypherWebhookHandler().create_webhook(
-    #     invoice=invoice,
-    #     event=BlockCypherWebhookEvents.UNCONFIRMED_TX,
-    #     wallet_address=user.btc_address
-    # )
-
-    return True
+    await BlockCypherWebhookHandler().create_webhook(
+        invoice=invoice,
+        event=BlockCypherWebhookEvents.TX_CONFIMATION,
+        wallet_address=user.btc_address
+    )
+    return invoice
 
 
 @router.post("/{invoice_id}/cancel/")
-async def cancel_invoice(invoice_id: str, user: User = Depends(get_user)):
+async def invoice_cancel(invoice_id: str, user: User = Depends(get_user)):
     return await InvoiceCRUD.update_invoice(invoice_id, user, {"status": InvoiceStatus.CANCELLED})

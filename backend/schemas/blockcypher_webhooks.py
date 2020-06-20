@@ -8,36 +8,38 @@ __all__ = ["BlockCypherWebhook", "BlockCypherWebhookInDB", "BlockCypherWebhookEv
 
 
 class BlockCypherWebhookEvents:
+    CONFIRMED_TX = "confirmed-tx"
     UNCONFIRMED_TX = "unconfirmed-tx"
     TX_CONFIMATION = "tx-confirmation"
-
     ALL = (
-        UNCONFIRMED_TX, TX_CONFIMATION
+        CONFIRMED_TX, UNCONFIRMED_TX, TX_CONFIMATION
     )
 
 
 class BlockCypherWebhook(BaseModel):
-    id: str = Field(...)
-    event: str = Field(...)
-    address: str = Field(...)
-    token: str = Field(...)
-    url: HttpUrl = Field(...)
+    blockcypher_id: str = Field(default=None, alias="id", title="id")
+    token: str = None
+    url: HttpUrl = None
+    event: str = None
+    hash: Optional[str] = Field(default=None, description="Transaction / block hash")
+    address: Optional[str] = Field(default=None, description="Wallet address")
+    confirmations: int = None
     callback_errors: int = Field(default=0)
 
 
+class BlockCypherWebhookInDB(BlockCypherWebhook):
+    id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
+
+
 class BlockCypherWebhookCreate(BaseModel):
-    id: str = Field(...)
+    blockcypher_id: str = Field(default=None, alias="id", title="id")
     invoice_id: ObjectIdPydantic = Field(...)
     event: str = Field(...)
     token: str = Field(...)
     url: HttpUrl = Field(...)
+    url_path: str = Field(...)
 
     # Optional
     hash: Optional[str] = Field(default=None, description="Transaction / block hash")
     address: Optional[str] = Field(default=None, description="Wallet address")
     confirmations: int = Field(default=3, description="Send if confirmations more than this number")
-    # wallet_name: Optional[str] = None
-
-
-class BlockCypherWebhookInDB(BlockCypherWebhook):
-    id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")

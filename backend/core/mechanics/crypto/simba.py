@@ -18,28 +18,18 @@ class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
         # TODO валидировать количество
         simba_to_issue = incoming_btc
 
-        # self._validate_invoice(excepted_status=InvoiceStatus.PROCESSING)
-
         tx_hash = self.api_wrapper.issue_coins(
             customer_address, simba_to_issue, comment
         )
 
         return tx_hash.hex()
 
-    async def issue_tokens_and_save(
+    async def validate_and_issue_tokens(
             self,
             invoice: InvoiceInDB,
-            customer_address: str,
             incoming_btc: int,
             comment: str
-    ):
-        tx_hash = await self.issue_tokens(customer_address, incoming_btc, comment)
+    ) -> str:
+        # InvoiceMechanics(invoice).validate()
 
-        # TODO получаем только хэш; По нему нельзя быстро достать инфу по транзе, отдаем обратно только хэш
-        # eth_tx_set = {*invoice.eth_tx, tx_hash}
-
-        # await InvoiceCRUD.update_one(
-        #     {"_id": invoice.id}, {"eth_tx": list(eth_tx_set)}
-        # )
-
-        return tx_hash
+        return await self.issue_tokens(invoice.target_eth_address, incoming_btc, comment)

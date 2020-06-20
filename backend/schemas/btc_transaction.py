@@ -26,10 +26,12 @@ class BTCTransactionOutputs(BaseModel):
 
 
 class BTCTransaction(BaseModel):
+    invoice_id: ObjectIdPydantic = None
+    simba_tokens_issued: bool = False
     addresses: List[str] = None
     block_hash: str = None
-    block_height: str = None
-    block_index: str = None
+    block_height: int = None
+    block_index: int = None
     hash: str = None
     total: int = None
     fees: int = None

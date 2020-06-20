@@ -26,9 +26,9 @@ async def invoice_waiting_status(self, *args, **kwargs):
         else:
             # TODO большая уязвимость в подсчете, нужно будет потом это исправить
             balance_delta = new_address_data.balance - old_address_data.balance
-            invoice.btc_amount_deposited += balance_delta
+            invoice.btc_amount_proceeded += balance_delta
 
-            if invoice.btc_amount_deposited >= invoice.btc_amount:
+            if invoice.btc_amount_proceeded >= invoice.btc_amount:
                 invoice.status = InvoiceStatus.PROCESSING
 
             await BTCAddressCRUD.update_or_create(old_address_data.id, new_address_data.dict())

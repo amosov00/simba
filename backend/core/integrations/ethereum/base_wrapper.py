@@ -18,8 +18,7 @@ class EthereumBaseWrapper(ABC):
     def __init__(self, contract: EthereumContract):
         _abi = []
         _bin = None
-        self.w3 = Web3(Web3.WebsocketProvider("wss://rinkeby.infura.io/ws/v3/9ce7b0aa43c640b38742853ede40089c",
-                                              websocket_timeout=60))
+        self.w3 = Web3(Web3.WebsocketProvider(contract.provider_ws_link, websocket_timeout=60))
         self.contract_meta = contract
         self.contract_address = Web3.toChecksumAddress(contract.address)
 

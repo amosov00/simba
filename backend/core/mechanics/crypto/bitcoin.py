@@ -9,28 +9,60 @@ from .base import CryptoValidation, ParseCryptoTransaction
 
 
 class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
+    FEE = 15000
+
     def __init__(self):
         self.api_wrapper = BlockCypherAPIWrapper()
+        self.service_wallet_balance = 0
+
+    @staticmethod
+    def _validate_payables(payables: List[Tuple[str, int]]) -> bool:
+        return True
+
+    async def proceed_payables(
+            self,
+            destination_payables: Tuple[str, int],
+            address_from: str
+    ) -> List[Tuple[str, int]]:
+        """
+        Струкрура payable (address, satoshi)
+        destination_payables - Payable клиентского кошелька
+        difference_payables - Разница, которую нужно отправить на сервисный кошелек
+        :return:
+        """
+        btc_outcome = self.service_wallet_balance - destination_payables[1] - self.FEE
+
+        difference_payables = (address_from, btc_outcome)
+
+        return [
+            destination_payables,
+            difference_payables
+        ]
 
     async def create_and_sign_transaction(
             self,
-            spendables: List[Tuple[str, int]],
+            destination_payables: Tuple[str, int],
             address_from: str,
             wifs: List[str],
             fee: Union[int, str] = "standard",
     ):
         """
-        Spendables передавать в форме [(<address_hash>, <btc_amount>), ]
+        Payables передавать в форме [(<address_hash>, <btc_amount>), ]
+        destination_payables - Payable клиентского кошелька
         Wif передавать в формате [<wif>, ]
         """
-        payables = await self.api_wrapper.get_payables(address_from)
+        self.service_wallet_balance = await self.api_wrapper.current_balance(address_from)
+        spendables = await self.api_wrapper.get_spendables(address_from)
+        payables = await self.proceed_payables(destination_payables, address_from)
+
+        self._validate_payables(payables)
 
         tx = create_signed_tx(
             self.api_wrapper.network,
             spendables=spendables,
             payables=payables,
             wifs=wifs,
-            fee=fee
+            fee=self.FEE,
         )
         return await self.api_wrapper.push_raw_tx(tx)
 
@@ -66,17 +98,14 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
 
         incoming_btc = self.get_btc_amount_btc_transaction(transaction, invoice.target_btc_address)
 
-        invoice.btc_tx = list({*invoice.btc_tx, tx_id})
-        invoice.btc_amount_deposited = invoice.btc_amount_deposited + incoming_btc \
-            if invoice.btc_amount_deposited else incoming_btc
+        invoice.btc_tx_ids = list({*invoice.btc_tx_ids, tx_id})
+        invoice.status = InvoiceStatus.COMPLETED
+        invoice.btc_amount_proceeded = invoice.btc_amount_proceeded + incoming_btc \
+            if invoice.btc_amount_proceeded else incoming_btc
 
         await InvoiceCRUD.update_one(
             {"_id": invoice.id},
-            {
-                "btc_tx": invoice.btc_tx,
-                "status": InvoiceStatus.COMPLETED,
-                "btc_amount_deposited": invoice.btc_amount_deposited,
-            }
+            invoice.dict(exclude={"_id"})
         )
 
         return {

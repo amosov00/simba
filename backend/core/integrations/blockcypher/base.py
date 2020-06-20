@@ -53,6 +53,6 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
 
         if resp.is_error:
             capture_message(f"Invalid request to BlockCypher; status: {resp.status_code}; url: {url}")
-            raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, "Bad request")
+            raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, resp.json().get("error"))
 
         return resp.json()

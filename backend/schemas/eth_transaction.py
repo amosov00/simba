@@ -5,8 +5,12 @@ from pydantic import Field, validator
 
 from schemas.base import BaseModel, DecimalPydantic, ObjectIdPydantic
 
+__all__ = ["EthereumTransaction", "EthereumTransactionInDB"]
+
 
 class EthereumTransaction(BaseModel):
+    invoice_id: ObjectIdPydantic = None
+    bitcoins_sended: bool = False
     address: str = None
     args: dict = None
     blockHash: Union[str] = None

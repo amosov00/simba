@@ -1,11 +1,12 @@
-from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request
+from fastapi import APIRouter, HTTPException, Depends, Body, Path
 import ujson
 import logging
 
 from api.dependencies import get_user
 from core.mechanics import BlockCypherWebhookHandler
+from database.crud import BlockCypherWebhookCRUD
 from schemas import EthereumContract
-from config import SIMBA_CONTRACT, WEBHOOK_PATH
+from config import SIMBA_CONTRACT
 
 __all__ = ["router"]
 
@@ -28,10 +29,15 @@ async def meta_contract_fetch():
     return contract
 
 
-@router.post(f"/{WEBHOOK_PATH}/")
+@router.post("/{webhook_path}/", include_in_schema=False)
 async def meta_webhook_handler(
-        payload: dict = Body(...)
+        webhook_path: str = Path(...),
+        payload: dict = Body(...),
 ):
     logging.info(payload)
-    # await BlockCypherWebhookHandler().parse(payload)
-    return payload
+    webhook_obj = await BlockCypherWebhookCRUD.find_one({"url_path": webhook_path})
+
+    if webhook_obj:
+        await BlockCypherWebhookHandler().parse(payload)
+
+    return True

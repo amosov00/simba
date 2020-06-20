@@ -45,11 +45,17 @@ class InvoiceCRUD(BaseMongoCRUD):
             user_id: Union[ObjectId, ObjectIdPydantic],
             statuses: tuple = (InvoiceStatus.CREATED, )
     ):
-        return await super().find_one({
+        invoice = await super().find_one({
             "_id": ObjectId(invoice_id),
             "user_id": user_id,
-            "status": {"$in": list(statuses)}
         })
+        if not invoice:
+            raise HTTPException(HTTPStatus.NOT_FOUND, "Invoice not found")
+
+        if invoice["status"] not in statuses:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "This operation is not permitted")
+
+        return invoice
 
     @classmethod
     async def invoice_info(cls, invoice_id: str, user: User):
@@ -62,11 +68,11 @@ class InvoiceCRUD(BaseMongoCRUD):
         return created_invoice
 
     @classmethod
-    async def update_invoice(cls, invoice_id: str, user: User, payload: dict):
+    async def update_invoice(cls, invoice_id: str, user: User, payload: dict, statuses: tuple = None):
         if not payload:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Payload is required")
 
-        invoice = await cls.find_invoice_safely(invoice_id, user.id)
+        invoice = await cls.find_invoice_safely(invoice_id, user.id, statuses)
         if not invoice:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Invoice not found or modification is forbidden")
 
