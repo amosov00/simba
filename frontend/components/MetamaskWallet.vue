@@ -44,7 +44,7 @@
         window.web3 = new Web3(window.ethereum);
         window.web3.defaultAccount = account;
 
-        await this.$store.dispatch('fetchContracts');
+        /*await this.$store.dispatch('fetchContracts');
         console.log(this.$store.getters.contract);
 
         let miniToken = new web3.eth.Contract(this.$store.getters.contract.abi, this.$store.getters.contract.address)
@@ -65,7 +65,7 @@
           })
           .catch(() => {
             return false;
-          });
+          });*/
 
 /*        miniToken.methods.transfer(account, 0).call().then(res => {
           console.log(res)

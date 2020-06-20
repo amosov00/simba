@@ -21,6 +21,20 @@ export const actions = {
     })
   },
 
+  async updateTransaction({}, data) {
+    let data_to_send = {
+      "target_eth_address": data.eth_address,
+      "simba_amount:": data.simba_amount,
+      "btc_amount:": data.simba_amount
+    }
+
+    console.log(`/invoices/${data.id}/`)
+
+    return await this.$axios.put(`/invoices/${data.id}/`, data_to_send).then(res => {
+      return res.data;
+    }).catch(_ => false)
+  },
+
   async manualTransaction({}, data) {
     return await this.$axios.post(`/invoices/${data.id}/transaction/`, { btc_transaction_hash: data.transaction_hash}).then(res => res.data)
       .catch(_ => false)

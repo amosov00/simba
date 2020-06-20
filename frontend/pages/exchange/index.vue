@@ -6,7 +6,7 @@
         n-link(to="/exchange/buysell").btn.mr-2 Sell
       h3.title.is-5.mt-4 Last bills
       //= b-table(:data="data" :columns="columns" focusable striped).is-flex.mt-4.data-table
-      b-table(:data="invoiceData")
+      b-table(:data="invoiceData" default-sort="created_at" default-sort-direction="DESC")
         template(slot-scope="props")
           b-table-column(field="created_at" label="Date" sortable) {{ (new Date(props.row.created_at)).toLocaleString() }}
           b-table-column(field="id" label="ID")

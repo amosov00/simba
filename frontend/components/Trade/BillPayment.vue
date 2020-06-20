@@ -14,10 +14,12 @@
         div.text-large To accept
           = ' '
           span.has-text-weight-bold {{ tradeData.simba }} SIMBA
-    div.trade-timer 1:59:59
-    div.mt-2 Created transaction: {{ new_transaction }}
-    div.mt-2 Checking your transaction every 10 sec...
-    div.mt-2 Status: {{ status }}
+    //- div.trade-timer 1:59:59
+    div.position-relative
+      div.mt-2 Created transaction: {{ new_transaction }}
+      div.mt-2 Checking your transaction every 10 sec...
+      div.mt-2 Status: {{ status }}
+      b-loading(:active.sync="busyChecking" :is-full-page="false")
     div.mt-4
       n-link(to="/exchange").has-text-weight-bold Check bills
     div.mt-4
@@ -38,6 +40,7 @@
       }
     },
     data: () => ({
+      busyChecking: false,
       status: '',
       transaction_status: 0,
       transaction_status_list: ['not payed', 'payed!'],
@@ -58,13 +61,24 @@
 
       this.new_transaction = res._id
 
+      let tradeData = this.$store.getters['tradeData'];
+      let metamask_address = this.$store.getters['metamask/address'];
+
+      let updateData = { id: this.new_transaction, eth_address: metamask_address, simba_amount: tradeData.simba_amount}
+      let res2 = await this.$store.dispatch('invoices/updateTransaction', updateData)
+
+      console.log('update transaction: ', res2)
+
       let check;
 
       setInterval(async () => {
+        this.busyChecking = true
         check = await this.$store.dispatch('invoices/fetchSingle', this.new_transaction)
 
         this.status = check.status
-
+        await setTimeout(() => {
+          this.busyChecking = false
+        }, 1500)
       }, 10000)
     }
   }

@@ -5,6 +5,7 @@ export const state = () => ({
   btc_address: '',
   contract: '',
   tradeData: {
+    eth_address: '',
     simba: 0,
     btc: 0
   }
