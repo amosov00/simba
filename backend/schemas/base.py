@@ -12,12 +12,7 @@ def validate_eth_address(address_hash: str):
     if not address_hash:
         return address_hash
 
-    status = False
-
-    try:
-        status = Web3.isAddress(address_hash)
-    except:
-        pass
+    status = Web3.isAddress(address_hash)
 
     if not status:
         raise ValueError("Invalid ETH address")

@@ -18,8 +18,10 @@ class BlockCypherWebhookEvents:
 
 class BlockCypherWebhook(BaseModel):
     blockcypher_id: str = Field(default=None, alias="id", title="id")
+    invoice_id: ObjectIdPydantic = Field(default=None)
     token: str = None
     url: HttpUrl = None
+    url_path: str = Field(default=False)
     event: str = None
     hash: Optional[str] = Field(default=None, description="Transaction / block hash")
     address: Optional[str] = Field(default=None, description="Wallet address")

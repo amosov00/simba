@@ -96,5 +96,5 @@ class InvoiceUpdate(BaseModel):
 
 
 class InvoiceTransactionManual(BaseModel):
-    eth_transaction_hash: str = None
     btc_transaction_hash: str = None
+    eth_transaction_hash: str = None

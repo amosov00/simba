@@ -2,10 +2,11 @@ from fastapi import APIRouter, HTTPException, Depends, Body, Path
 import ujson
 import logging
 
+from sentry_sdk import capture_message
 from api.dependencies import get_user
-from core.mechanics import BlockCypherWebhookHandler
-from database.crud import BlockCypherWebhookCRUD
-from schemas import EthereumContract
+from core.mechanics import InvoiceMechanics
+from database.crud import BlockCypherWebhookCRUD, InvoiceCRUD
+from schemas import EthereumContract, BTCTransaction
 from config import SIMBA_CONTRACT
 
 __all__ = ["router"]
@@ -32,11 +33,15 @@ async def meta_contract_fetch():
 @router.post("/{webhook_path}/", include_in_schema=False)
 async def meta_webhook_handler(
         webhook_path: str = Path(...),
-        payload: dict = Body(...),
+        transaction: dict = Body(...),
 ):
     webhook_obj = await BlockCypherWebhookCRUD.find_one({"url_path": webhook_path})
+    invoice = await InvoiceCRUD.find_one({"_id": webhook_obj["invoice_id"]}) if webhook_obj else None
 
-    if webhook_obj:
-        await BlockCypherWebhookHandler().parse(payload)
+    if webhook_obj and invoice:
+        transaction = BTCTransaction(**transaction)
+        await InvoiceMechanics(invoice).proceed_new_transaction(transaction)
+    else:
+        capture_message("Webhook obj or invoice not found", level='error')
 
     return True

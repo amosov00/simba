@@ -91,16 +91,16 @@ async def invoice_add_transaction(
     response = {}
 
     if invoice.invoice_type == InvoiceType.BUY and payload.btc_transaction_hash:
-        # TODO return full tx
-        tx_meta = await BitcoinWrapper().fetch_and_save_transaction(invoice, payload.btc_transaction_hash)
-        # TOOD Has no validation if transaction already exists
-        # TODO refactor -> to InvoiceMechanics
-        eth_tx_hash = await SimbaWrapper().validate_and_issue_tokens(
-            invoice, incoming_btc=tx_meta["incoming_btc"], comment=tx_meta["tx_hash"]
-        )
+        btc_transaction = await BitcoinWrapper().fetch_transaction(invoice, payload.btc_transaction_hash)
+        if not btc_transaction:
+            raise HTTPException(HTTPStatus.NOT_FOUND, "transation is not found")
+
+        invoice_mechanics = InvoiceMechanics(invoice)
+        invoice_mechanics.validate()
+        await invoice_mechanics.proceed_new_transaction(btc_transaction)
+
         response.update({
             "success": True,
-            "tx_hash": eth_tx_hash,
         })
 
     elif invoice.invoice_type == InvoiceType.SELL and payload.eth_transaction_hash:
