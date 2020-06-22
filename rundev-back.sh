@@ -1,2 +1,2 @@
 
-docker-compose run --rm --service-ports backend
+sudo docker-compose run --rm --service-ports backend

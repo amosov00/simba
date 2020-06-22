@@ -130,6 +130,7 @@ class UserCreationSafe(BaseModel):
     last_name: Optional[str] = Field(default=None)
     repeat_password: str = Field(...)
     password: str = Field(...)
+    referral_id: Optional[str] = Field(default=None)
 
     _validate_email = validator("email", allow_reuse=True)(validate_email)
     _validate_passwords = validator("password", allow_reuse=True)(validate_password)
