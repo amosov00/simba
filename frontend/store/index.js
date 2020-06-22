@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { ToastProgrammatic as Toast } from 'buefy'
 
 export const state = () => ({
   user: null,
@@ -117,4 +118,14 @@ export const actions = {
         return false;
       });
   },
+  async confirm2fa({}, data) {
+    return await this.$axios.post('/account/2fa/', {
+      token: data.token,
+      pin_code: data.pin_code
+    }).then(() => {
+      Toast.open({message: '2FA successfuly enabled!', type: 'is-success'})
+    }).catch(() => {
+      Toast.open({message: 'Something went wrong!', type: 'is-danger'})
+    })
+  }
 };
