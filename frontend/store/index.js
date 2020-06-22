@@ -28,6 +28,7 @@ export const mutations = {
   setTradeData: (state, payload) => {
     state.tradeData[payload.prop] = payload.value
   },
+  setTwoFactor: (state, payload) => state.user.two_factor = payload
 };
 
 export const actions = {
@@ -118,11 +119,12 @@ export const actions = {
         return false;
       });
   },
-  async confirm2fa({}, data) {
+  async confirm2fa({commit}, data) {
     return await this.$axios.post('/account/2fa/', {
       token: data.token,
       pin_code: data.pin_code
     }).then(() => {
+      commit('setTwoFactor', true)
       Toast.open({message: '2FA successfuly enabled!', type: 'is-success'})
     }).catch(() => {
       Toast.open({message: 'Something went wrong!', type: 'is-danger'})

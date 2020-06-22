@@ -22,8 +22,7 @@
               div {{ btc_address }}
             div.mt-3
               a.link(@click="passChangeModal = true") Change password
-            div.mt-3
-              button.mt-4.btn.w-100(type="button" @click="show2faModal") Enable 2FA
+            button.mt-4.btn.w-100(type="button" v-if="!is2fa" @click="show2faModal") Enable 2FA
             div.is-flex.space-between
               button.mt-4.btn(type="submit" :disabled="!changesFound || invalid") Save
               button.mt-4.btn(type="button" @click="logout") Log out
@@ -54,6 +53,9 @@
       },
       btc_address() {
         return this.$store.getters.btc_address;
+      },
+      is2fa() {
+        return this.$store.getters.user.two_factor;
       }
     },
     data: () => ({
