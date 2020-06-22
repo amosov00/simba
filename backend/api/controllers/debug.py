@@ -1,20 +1,19 @@
+from typing import List
+
 from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request
 
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper, BlockCypherAPIWrapper
-from core.mechanics import BitcoinWrapper, BlockCypherWebhookHandler, SimbaWrapper, BitcoinWrapper, SSTWrapper
-from database.crud import InvoiceCRUD
-from schemas import InvoiceInDB, BlockCypherWebhookEvents, InvoiceUpdate
-from celery_app.tasks import debug_task_1
-from bson import ObjectId
+from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD
+from schemas import BlockCypherWebhookInDB
 
 __all__ = ["router"]
 
 router = APIRouter()
 
 
-@router.get("/webhooks/")
+@router.get("/webhooks/", response_model=List[BlockCypherWebhookInDB])
 async def debug_get():
-    return await BlockCypherWebhookAPIWrapper().list_webhooks()
+    return await BlockCypherWebhookCRUD.find_many({})
 
 
 @router.get("/")

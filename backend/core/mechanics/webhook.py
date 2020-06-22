@@ -39,7 +39,7 @@ class BlockCypherWebhookHandler:
     ):
         secret_path = pwd.genword(length=10)
 
-        data = BlockCypherWebhookCreate(
+        webhook = BlockCypherWebhookCreate(
             url=self._generate_webhook_url(secret_path),  # noqa
             url_path=secret_path,
             invoice_id=invoice.id,
@@ -47,13 +47,13 @@ class BlockCypherWebhookHandler:
             token=self.api_wrapper.api_token,
             address=wallet_address,
             hash=transaction_hash,
-            confirmations=3,
+            confirmations=BTC_MINIMAL_CONFIRMATIONS,
         )
         response = await self.api_wrapper.create_webhook(
-            data.dict(exclude={"invoice_id", "url_path"}, exclude_none=True)
+            webhook.dict(exclude={"invoice_id", "url_path", "created_at"}, exclude_none=True)
         )
-        data.blockcypher_id = response.get("id")
-        await BlockCypherWebhookCRUD.update_or_insert({"id": data.blockcypher_id}, payload=data.dict())
+        webhook.blockcypher_id = response.get("id")
+        await BlockCypherWebhookCRUD.update_or_insert({"id": webhook.blockcypher_id}, payload=webhook.dict())
         return True
 
     def validate_transaction(self) -> dict:
