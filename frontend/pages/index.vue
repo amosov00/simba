@@ -9,6 +9,8 @@
           b-input(size="is-small" placeholder="e-mail" v-model="email")
         b-field
           b-input(size="is-small" type="password" placeholder="password" v-model="password" v-on:keypress.enter.native="login")
+        b-field
+          b-input(size="is-small" type="number" placeholder="pin code" v-model="pin_code")
         b-button(:loading="loading" @click="login").btn.w-100 Sign in
         div.mt-2
           n-link(to="/forgot" exact-active-class="link--active").link.link--underlined Forgot password?
@@ -29,13 +31,14 @@ export default {
     return {
       email: "",
       password: "",
+      pin_code: null,
       loading: false
     };
   },
   methods: {
     async login() {
       this.loading = true;
-      let resp = await this.$authLogin(this.email, this.password);
+      let resp = await this.$authLogin(this.email, this.password, this.pin_code);
 
       if(!resp) {
         this.$buefy.toast.open({message: 'Check your email/password and make sure you activated your account!', type: 'is-danger', duration: 3500})
