@@ -29,9 +29,9 @@ app.conf.update(
 )
 
 app.conf.beat_schedule = {
-    # 'fetch_simba_contract': {
-    #     'task': 'fetch_simba_contract',
-    #     'schedule': 60.0,
+    # 'delete_unused_webhooks': {
+    #     'task': 'delete_unused_webhooks',
+    #     'schedule': 10.0,
     #     'args': (),
     # },
 }
