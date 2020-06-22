@@ -40,7 +40,6 @@ def validate_password(v: Optional[str], values: dict) -> str:
     return pwd_context.hash(v)
 
 
-
 class User(BaseModel):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
 

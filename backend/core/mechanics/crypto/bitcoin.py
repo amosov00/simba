@@ -4,7 +4,7 @@ from pycoin.coins.tx_utils import create_signed_tx
 
 from core.integrations.blockcypher import BlockCypherAPIWrapper
 from database.crud import UserCRUD, BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
-from schemas import User, InvoiceInDB, InvoiceStatus
+from schemas import User, InvoiceInDB, InvoiceStatus, BTCTransaction
 from .base import CryptoValidation, ParseCryptoTransaction
 
 
@@ -84,9 +84,12 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
 
         return address_full_info.address
 
+    async def fetch_transaction(self, invoice: InvoiceInDB, transaction_hash: str) -> BTCTransaction:
+        return await self.api_wrapper.fetch_transaction_info(transaction_hash)
+
     async def fetch_and_save_transaction(self, invoice: InvoiceInDB, transaction_hash: str) -> dict:
         """
-
+        TODO deprecated
         """
         transaction = await self.api_wrapper.fetch_transaction_info(transaction_hash)
 

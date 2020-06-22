@@ -17,7 +17,7 @@ from schemas import (
 from database.crud import BlockCypherWebhookCRUD, InvoiceCRUD, BTCTransactionCRUD
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
 from core.mechanics.crypto import SimbaWrapper
-from config import HOST_URL
+from config import HOST_URL, BTC_MINIMAL_CONFIRMATIONS
 
 __all__ = ["BlockCypherWebhookHandler"]
 
@@ -60,6 +60,7 @@ class BlockCypherWebhookHandler:
         pass
 
     async def parse(self, payload: dict):
+        # TODO depicated -> logic goes to  InvoiceMechanics
         transaction = BTCTransaction(**payload)
         invoice = None
         incoming_btc: int = 0
@@ -92,21 +93,20 @@ class BlockCypherWebhookHandler:
         if transaction.block_height < 0 or transaction.confirmations == 0:
             return True
 
-        if transaction.confirmations < 3:
+        if transaction.confirmations < BTC_MINIMAL_CONFIRMATIONS:
             await BTCTransactionCRUD.update_or_insert({"hash": transaction.hash}, transaction.dict())
 
-        # TODO transaction_in_db may not exists
-        elif transaction.confirmations >= 3 and transaction_in_db.simba_tokens_issued:
-            await BTCTransactionCRUD.update_one({"hash": transaction.hash}, transaction.dict())
+        # # TODO transaction_in_db may not exists
+        # elif transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS:
+        #     await BTCTransactionCRUD.update_one({"hash": transaction.hash}, transaction.dict())
 
-        elif transaction.confirmations >= 3 and not transaction_in_db.simba_tokens_issued:
+        elif transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS:
             await SimbaWrapper().validate_and_issue_tokens(
                 invoice, incoming_btc=incoming_btc, comment=transaction.hash
             )
             transaction.simba_tokens_issued = True
             await BTCTransactionCRUD.update_one({"hash": transaction.hash}, transaction.dict())
             invoice.status = InvoiceStatus.COMPLETED
-            invoice.btc_tx_ids = list({*invoice.btc_tx_ids, transaction_in_db.id})
             invoice.btc_amount_proceeded += incoming_btc
             invoice.finised_at = datetime.now()
             await InvoiceCRUD.update_one({"_id": invoice.id}, invoice.dict(exclude={"id"}))
