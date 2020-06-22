@@ -17,6 +17,7 @@ __all__ = ['finish_invoices_cron']
 )
 async def finish_invoices_cron(self, *args, **kwargs):
     """Крон для завершения счетов, которые неактивны > 2 часов"""
+    # TODO Complete
     invoices = await InvoiceCRUD.aggregate([
         {"$match": {
             "status": InvoiceStatus.WAITING

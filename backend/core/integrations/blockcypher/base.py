@@ -32,7 +32,7 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
             params: dict = None,
             data: dict = None,
             with_token: bool = False
-    ) -> Union[list, dict, None]:
+    ) -> Union[list, dict, str, None]:
 
         url = self.api_url + endpoint
         params = params or {}
@@ -55,4 +55,7 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
             capture_message(f"Invalid request to BlockCypher; status: {resp.status_code}; url: {url}")
             raise HTTPException(HTTPStatus.BAD_REQUEST, resp.json().get("error"))
 
-        return resp.json()
+        if resp.text:
+            return resp.json()
+        else:
+            return resp.text

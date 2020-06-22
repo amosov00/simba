@@ -11,5 +11,5 @@ class BlockCypherWebhookAPIWrapper(BlockCypherBaseAPIWrapper):
         return await self.request(endpoint, "GET", with_token=True)
 
     async def delete_webhook(self, webhook_id: str):
-        endpoint = f"/hooks/${webhook_id}"
+        endpoint = f"/hooks/{webhook_id}"
         return await self.request(endpoint, "DELETE", with_token=True)
