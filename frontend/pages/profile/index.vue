@@ -22,21 +22,25 @@
               div {{ btc_address }}
             div.mt-3
               a.link(@click="passChangeModal = true") Change password
+            button.mt-4.btn.w-100(type="button" v-if="!is2fa" @click="show2faModal") Enable 2FA
             div.is-flex.space-between
               button.mt-4.btn(type="submit" :disabled="!changesFound || invalid") Save
               button.mt-4.btn(type="button" @click="logout") Log out
     b-modal(:active.sync="passChangeModal" has-modal-card)
       PasswordChange
+    b-modal(:active.sync="modal2FA" has-modal-card)
+      Modal2FA
     b-loading(is-full-page :active.sync="isLoading")
 </template>
 
 <script>
   import PasswordChange from "~/components/PasswordChange";
+  import Modal2FA from "~/components/Modal2FA";
 
   export default {
     name: "profile",
     layout: "main",
-    components: { PasswordChange },
+    components: { PasswordChange, Modal2FA },
     computed: {
       changesFound() {
         for(let prop in this.userData){
@@ -49,6 +53,9 @@
       },
       btc_address() {
         return this.$store.getters.btc_address;
+      },
+      is2fa() {
+        return this.$store.getters.user.two_factor;
       }
     },
     data: () => ({
@@ -60,7 +67,8 @@
         first_name: '',
         last_name: '',
       },
-      passChangeModal: false
+      passChangeModal: false,
+      modal2FA: false
     }),
     methods: {
       async saveProfile() {
@@ -79,6 +87,9 @@
       },
       logout() {
         this.$authLogout();
+      },
+      show2faModal() {
+        this.modal2FA = !this.modal2FA
       }
     },
     mounted() {
