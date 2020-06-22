@@ -24,3 +24,4 @@ extend('alpha_num', alpha_num);
 extend('alpha_spaces', alpha_spaces);
 extend('required', required);
 extend('confirmed', confirmed);
+
