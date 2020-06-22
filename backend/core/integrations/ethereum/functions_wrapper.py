@@ -1,17 +1,22 @@
 import asyncio
+from http import HTTPStatus
 
 from hexbytes import HexBytes
 from bson import Decimal128
 from web3 import Web3
 from web3.contract import prepare_transaction, build_transaction_for_function
 from web3.datastructures import AttributeDict
+from fastapi import HTTPException
 
 from .base_wrapper import EthereumBaseWrapper
 from schemas import EthereumContract
 
 GAS = 250000
-GAS_PRICE = Web3.toWei("1", "gwei")
-GAS_LIMIT = 50000
+GAS_PRICE = Web3.toWei("24", "gwei")
+
+# Is necessary because of initial fee in 50k.
+# If transaction is made with amount less than 50k, error will be raised
+SIMBA_MIN_BASE_AMOUNT = 50000
 
 
 class ContractFunctionsWrapper(EthereumBaseWrapper):
@@ -21,31 +26,36 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
         self.admin_privkey = admin_private_key
 
     def _get_nonce(self):
-        return Web3.toHex(self.w3.eth.getTransactionCount(self.admin_address, "pending"))
+        return self.w3.eth.getTransactionCount(self.admin_address)
 
-    def _approve(self, amount: int) -> HexBytes:
+    def _approve(self, amount: int, nonce: int) -> HexBytes:
         tx = self.contract.functions.approve(
             self.admin_address, amount
         ).buildTransaction({
             'gas': GAS,
             'gasPrice': GAS_PRICE,
             'from': self.admin_address,
-            'nonce': self._get_nonce(),
+            'nonce': nonce,
         })
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
     def issue_coins(self, customer_address: str, amount: int, comment: str) -> HexBytes:
         """Simba contract"""
+        if amount < SIMBA_MIN_BASE_AMOUNT:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "minimal simba amount to issue - 50,000")
+
         customer_address = Web3.toChecksumAddress(customer_address)
-        self._approve(amount)
+        nonce = self._get_nonce()
+        self._approve(0, nonce)
+        self._approve(amount, nonce + 1)
         tx = self.contract.functions.issue(
             customer_address, amount, comment
         ).buildTransaction({
             'gas': GAS,
             'gasPrice': GAS_PRICE,
             'from': self.admin_address,
-            'nonce': self._get_nonce(),
+            'nonce': nonce + 2,
         })
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
