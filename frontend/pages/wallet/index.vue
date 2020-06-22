@@ -13,7 +13,7 @@
 export default {
   name: "exchange-transfer",
   layout: "main",
-  middleware: ['contract'],
+  middleware: ['contract', 'metamask'],
   data: () => {
     return {
       transferData: {
