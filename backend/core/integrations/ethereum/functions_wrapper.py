@@ -47,15 +47,14 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
 
         customer_address = Web3.toChecksumAddress(customer_address)
         nonce = self._get_nonce()
-        self._approve(0, nonce)
-        self._approve(amount, nonce + 1)
+        self._approve(amount, nonce)
         tx = self.contract.functions.issue(
             customer_address, amount, comment
         ).buildTransaction({
             'gas': GAS,
             'gasPrice': GAS_PRICE,
             'from': self.admin_address,
-            'nonce': nonce + 2,
+            'nonce': nonce + 1,
         })
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
@@ -63,7 +62,6 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
     def freeze_and_transfer(self, customer_address: str, amount: int, period: int):
         """SST contract"""
         customer_address = Web3.toChecksumAddress(customer_address)
-        # self._approve(amount) TODO is it necessary ?
         tx = self.contract.functions.freezeAndTransfer(
             customer_address, amount, period
         ).buildTransaction({

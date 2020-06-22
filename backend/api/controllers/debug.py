@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request
 
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper, BlockCypherAPIWrapper
+from core.mechanics.crypto import SimbaWrapper
 from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD
 from schemas import BlockCypherWebhookInDB
 
@@ -14,6 +15,15 @@ router = APIRouter()
 @router.get("/webhooks/", response_model=List[BlockCypherWebhookInDB])
 async def debug_get():
     return await BlockCypherWebhookCRUD.find_many({})
+
+
+@router.get("/eth/")
+async def debug_get():
+    return await SimbaWrapper().issue_tokens(
+        "0xbeb3ec5bce587420c00ec547ca2dd5626f497b73",
+        100000,
+        "manual-test"
+    )
 
 
 @router.get("/")
