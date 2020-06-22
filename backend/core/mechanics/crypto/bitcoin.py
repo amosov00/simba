@@ -6,10 +6,13 @@ from core.integrations.blockcypher import BlockCypherAPIWrapper
 from database.crud import UserCRUD, BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
 from schemas import User, InvoiceInDB, InvoiceStatus, BTCTransaction
 from .base import CryptoValidation, ParseCryptoTransaction
+from config import BTC_HOT_WALLET_ADDRESS, BTC_HOT_WALLET_WIF
 
 
 class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
     FEE = 15000
+    BTC_HOT_WALLET_WIF = BTC_HOT_WALLET_WIF
+    BTC_HOT_WALLET_ADDRESS = BTC_HOT_WALLET_ADDRESS
 
     def __init__(self):
         self.api_wrapper = BlockCypherAPIWrapper()
@@ -17,22 +20,24 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
 
     @staticmethod
     def _validate_payables(payables: List[Tuple[str, int]]) -> bool:
+        # TODO дописать валидацию
         return True
 
     async def proceed_payables(
             self,
             destination_payables: Tuple[str, int],
-            address_from: str
+            address_from: str,
+            fee: Optional[int] = None
     ) -> List[Tuple[str, int]]:
         """
         Струкрура payable (address, satoshi)
         destination_payables - Payable клиентского кошелька
         difference_payables - Разница, которую нужно отправить на сервисный кошелек
+        address from - адрес отправляющего кошелька
         :return:
         """
-        btc_outcome = self.service_wallet_balance - destination_payables[1] - self.FEE
-
-        difference_payables = (address_from, btc_outcome)
+        btc_difference = self.service_wallet_balance - destination_payables[1] - fee
+        difference_payables = (address_from, btc_difference)
 
         return [
             destination_payables,
@@ -42,18 +47,17 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
     async def create_and_sign_transaction(
             self,
             destination_payables: Tuple[str, int],
-            address_from: str,
-            wifs: List[str],
-            fee: Union[int, str] = "standard",
+            fee: Optional[int] = None,
     ):
         """
-        Payables передавать в форме [(<address_hash>, <btc_amount>), ]
+        Payables передавать в форме [(<address_hash>, <btc_amount>), ], btc_amount - in satoshi
         destination_payables - Payable клиентского кошелька
         Wif передавать в формате [<wif>, ]
         """
-        self.service_wallet_balance = await self.api_wrapper.current_balance(address_from)
-        spendables = await self.api_wrapper.get_spendables(address_from)
-        payables = await self.proceed_payables(destination_payables, address_from)
+        fee = fee or self.FEE
+        self.service_wallet_balance = await self.api_wrapper.current_balance(self.BTC_HOT_WALLET_ADDRESS)
+        spendables = await self.api_wrapper.get_spendables(self.BTC_HOT_WALLET_ADDRESS)
+        payables = await self.proceed_payables(destination_payables, self.BTC_HOT_WALLET_ADDRESS, fee)
 
         self._validate_payables(payables)
 
@@ -61,8 +65,8 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
             self.api_wrapper.network,
             spendables=spendables,
             payables=payables,
-            wifs=wifs,
-            fee=self.FEE,
+            wifs=[self.BTC_HOT_WALLET_WIF, ],
+            fee=fee,
         )
         return await self.api_wrapper.push_raw_tx(tx)
 
