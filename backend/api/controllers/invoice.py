@@ -119,15 +119,15 @@ async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
     if not invoice:
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Invoice not found or modification is forbidden")
 
-    invoice = InvoiceMechanics(invoice).validate()
+    invoice = InvoiceInDB(**invoice)
+    InvoiceMechanics(invoice).validate()
 
     invoice.status = InvoiceStatus.WAITING
     await InvoiceCRUD.update_invoice_not_safe(invoice.id, user.id, {"status": InvoiceStatus.WAITING})
-
     await BlockCypherWebhookHandler().create_webhook(
         invoice=invoice,
         event=BlockCypherWebhookEvents.TX_CONFIMATION,
-        wallet_address=user.btc_address
+        wallet_address=invoice.target_btc_address
     )
     return invoice
 
