@@ -26,7 +26,7 @@ from schemas.user import (
 
 __all__ = ["UserCRUD"]
 
-FIELDS_TO_EXCLUDE = ("repeat_password", "recover_code", "secret_2fa")
+FIELDS_TO_EXCLUDE = ("repeat_password", "recover_code", "secret_2fa", "referral_id")
 
 
 class UserCRUD(BaseMongoCRUD):
