@@ -16,87 +16,108 @@
           span.has-text-weight-bold {{ tradeData.simba }} SIMBA
     //- div.trade-timer 1:59:59
     div.position-relative
-      div.mt-2 Created transaction: {{ new_transaction }}
+      div.mt-2 Created transaction: {{ created_transaction }}
       div.mt-2 Checking your transaction every 10 sec...
       div.mt-2 Status: {{ status }}
-      div.mt-4(v-if="Object.keys(updating_invoice_data).length !== 0") Recived info:
-        span(v-if="updating_invoice_data.btc_txs.length === 0") empty
-      div.mt-1(v-if="Object.keys(updating_invoice_data).length !== 0")
-        div(v-for="(item, i) in updating_invoice_data.btc_txs" :key="i").mt-4 {{ i+1 }}
+      div.mt-4(v-if="Object.keys(updated_invoice_data).length !== 0") Recived info:
+        span(v-if="updated_invoice_data.btc_txs.length === 0") empty
+      div.mt-1(v-if="Object.keys(updated_invoice_data).length !== 0")
+        div(v-for="(item, i) in updated_invoice_data.btc_txs" :key="i").mt-4 {{ i+1 }}
           |) {{ item._id }}
           div.mt-2 simba_tokens_issued: {{ item.simba_tokens_issued }}
           div.mt-2 confirmations: {{ item.confirmations }}
           div.mt-2 total: {{ item.total }}
       b-loading(:active.sync="busyChecking" :is-full-page="false")
     div.mt-4
-      n-link(to="/exchange").has-text-weight-bold Check bills
+      Countdown(:date="updated_invoice_data.created_at" v-if="showCountdown")
     div.mt-4
       b-input(placeholder="transaction hash" v-model="transaction_hash")
       b-button.btn.mt-2(@click="setTransaction") Set transaction hash
-
 </template>
 
 <script>
+  import Countdown from "~/components/Countdown";
+
   export default {
     name: 'trade-bill-payment',
+
+    components: {Countdown},
+
+    props: {
+      multi_props: Object
+    },
+
     computed: {
       btc_address() {
         return this.$store.getters.btc_address;
       },
       tradeData() {
-        return this.$store.getters.tradeData;
+        return this.$store.getters['exchange/tradeData'];
       }
     },
     data: () => ({
       busyChecking: false,
       status: '',
-      transaction_status: 0,
-      transaction_status_list: ['not payed', 'payed!'],
       transaction_hash: '',
-      new_transaction: '',
-      updating_invoice_data: {}
+      created_transaction: '',
+      updated_invoice_data: {
+      },
+      check: {},
+      showCountdown: false
     }),
     methods: {
       async setTransaction() {
 
-        let res = await this.$store.dispatch('invoices/manualTransaction', { id: this.new_transaction, transaction_hash: this.transaction_hash });
+        let res = await this.$store.dispatch('invoices/manualTransaction', { id: this.created_transaction, transaction_hash: this.transaction_hash });
         console.log(res);
+      },
+
+      async checkSingle() {
+        this.busyChecking = true
+        this.check = await this.$store.dispatch('invoices/fetchSingle', this.created_transaction)
+        this.status = this.check.status
+        this.updated_invoice_data = JSON.parse(JSON.stringify(this.check));
+        this.busyChecking = false;
       }
     },
-    async mounted() {
+
+    async created() {
+      if(this.multi_props['no_create']) {
+        console.log('multi-props', this.multi_props);
+        this.created_transaction = this.multi_props['invoice'];
+
+      } else {
+
+        let tradeData = this.$store.getters['exchange/tradeData'];
+        let res = await this.$store.dispatch('invoices/createTransaction', tradeData.operation);
+
+        this.created_transaction = res._id
+
+        let eth_address = this.$store.getters['exchange/tradeData']['eth_address'];
+        let updateData = { id: this.created_transaction, eth_address, simba_amount: tradeData.simba}
+        let res2 = await this.$store.dispatch('invoices/updateTransaction', updateData)
+
+        console.log('update transaction: ', res2)
+
+        let res3 = await this.$store.dispatch('invoices/confirmTransaction', this.created_transaction)
+
+        console.log('confirm transaction: ', res3)
+      }
+
+
+      // Preload BTC address
       await this.$store.dispatch('getBtcAddress')
 
-      let tradeData = this.$store.getters['tradeData'];
+      await this.checkSingle()
 
-      let res = await this.$store.dispatch('invoices/createTransaction', tradeData.operation);
-
-      this.new_transaction = res._id
-
-      let metamask_address = this.$store.getters['metamask/address'];
-
-      let updateData = { id: this.new_transaction, eth_address: metamask_address, simba_amount: tradeData.simba,}
-      let res2 = await this.$store.dispatch('invoices/updateTransaction', updateData)
-
-      console.log('update transaction: ', res2)
-
-      let res3 = await this.$store.dispatch('invoices/confirmTransaction', this.new_transaction)
-
-      console.log('confirm transaction: ', res3)
-
-
-      let check;
+      this.showCountdown = true;
 
       setInterval(async () => {
-        this.busyChecking = true
-        check = await this.$store.dispatch('invoices/fetchSingle', this.new_transaction)
-
-        this.status = check.status
-
-        this.updating_invoice_data = JSON.parse(JSON.stringify(check));
-
+        this.busyChecking = true;
+        await this.checkSingle();
         await setTimeout(() => {
           this.busyChecking = false
-        }, 1500)
+        }, 1000)
       }, 10000)
     }
   }
