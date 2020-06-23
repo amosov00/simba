@@ -23,6 +23,7 @@
             div.mt-3
               a.link(@click="passChangeModal = true") Change password
             button.mt-4.btn.w-100(type="button" v-if="!is2fa" @click="show2faModal") Enable 2FA
+            button.mt-4.btn.w-100(type="button" v-else @click="disableConfirmation") Disable 2FA
             div.is-flex.space-between
               button.mt-4.btn(type="submit" :disabled="!changesFound || invalid") Save
               button.mt-4.btn(type="button" @click="logout") Log out
@@ -34,78 +35,97 @@
 </template>
 
 <script>
-  import PasswordChange from "~/components/PasswordChange";
-  import Modal2FA from "~/components/Modal2FA";
+import PasswordChange from "~/components/PasswordChange";
+import Modal2FA from "~/components/Modal2FA";
 
-  export default {
-    name: "profile",
-    layout: "main",
-    components: { PasswordChange, Modal2FA },
-    computed: {
-      changesFound() {
-        for(let prop in this.userData){
-          if(this.userData[prop] !== this.orig_user[prop]){
-            return true
-          }
+export default {
+  name: "profile",
+  layout: "main",
+  components: { PasswordChange, Modal2FA },
+  computed: {
+    changesFound() {
+      for (let prop in this.userData) {
+        if (this.userData[prop] !== this.orig_user[prop]) {
+          return true;
         }
-
-        return false
-      },
-      btc_address() {
-        return this.$store.getters.btc_address;
-      },
-      is2fa() {
-        return this.$store.getters.user.two_factor;
       }
-    },
-    data: () => ({
-      isLoading: false,
-      isSaveDisabled: true,
-      orig_user: {},
-      userData: {
-        email: '',
-        first_name: '',
-        last_name: '',
-      },
-      passChangeModal: false,
-      modal2FA: false
-    }),
-    methods: {
-      async saveProfile() {
-        this.isLoading = true;
-        const resp = await this.$store.dispatch('changeProfile', this.userData);
 
-        if(resp) {
-          this.$buefy.toast.open({message: 'Succesfully changed!', type: 'is-primary'});
-          if(!await this.$store.dispatch('getUser')) {
-            window.location.reload(true)
-          }
-        } else {
-          this.$buefy.toast.open({message: 'Error changing profile!', type: 'is-danger'});
-        }
-        this.isLoading = false;
-      },
-      logout() {
-        this.$authLogout();
-      },
-      show2faModal() {
-        this.modal2FA = !this.modal2FA
-      }
+      return false;
     },
-    mounted() {
-      let { email, last_name, first_name } = this.$store.getters.user;
-
-      this.userData.email = email;
-      this.userData.first_name = first_name;
-      this.userData.last_name = last_name;
-
-      this.orig_user = Object.assign({}, this.userData);
+    btc_address() {
+      return this.$store.getters.btc_address;
     },
-    async asyncData({ store }) {
-      await store.dispatch('getBtcAddress')
+    is2fa() {
+      return this.$store.getters.user.two_factor;
     }
-  };
+  },
+  data: () => ({
+    isLoading: false,
+    isSaveDisabled: true,
+    orig_user: {},
+    userData: {
+      email: "",
+      first_name: "",
+      last_name: ""
+    },
+    passChangeModal: false,
+    modal2FA: false
+  }),
+  methods: {
+    async saveProfile() {
+      this.isLoading = true;
+      const resp = await this.$store.dispatch("changeProfile", this.userData);
+
+      if (resp) {
+        this.$buefy.toast.open({
+          message: "Succesfully changed!",
+          type: "is-primary"
+        });
+        if (!(await this.$store.dispatch("getUser"))) {
+          window.location.reload(true);
+        }
+      } else {
+        this.$buefy.toast.open({
+          message: "Error changing profile!",
+          type: "is-danger"
+        });
+      }
+      this.isLoading = false;
+    },
+    logout() {
+      this.$authLogout();
+    },
+    show2faModal() {
+      this.modal2FA = !this.modal2FA;
+    },
+    disableConfirmation() {
+      this.$buefy.dialog.prompt({
+        message: `To confirm your action enter 2fa pin code`,
+        inputAttrs: {
+          type: "number",
+          placeholder: "Type your pin code",
+          value: "",
+          maxlength: 6,
+          min: 0
+        },
+        trapFocus: true,
+        onConfirm: value => this.$store.dispatch('delete2fa', value)
+      });
+    }
+  },
+  mounted() {
+    let { email, last_name, first_name } = this.$store.getters.user;
+
+    this.userData.email = email;
+    this.userData.first_name = first_name;
+    this.userData.last_name = last_name;
+
+    this.orig_user = Object.assign({}, this.userData);
+  },
+  async asyncData({ store }) {
+    await store.dispatch("getBtcAddress");
+  }
+};
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>
