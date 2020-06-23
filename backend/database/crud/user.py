@@ -20,7 +20,8 @@ from schemas.user import (
     UserUpdateNotSafe,
     UserRecover,
     UserRecoverLink,
-    User2faConfirm
+    User2faConfirm,
+    User2faDelete
 )
 
 __all__ = ["UserCRUD"]
@@ -270,6 +271,23 @@ class UserCRUD(BaseMongoCRUD):
             payload={
                 "secret_2fa": payload.token,
                 "two_factor": True
+            }
+        )
+        return True
+
+    @classmethod
+    async def delete_2fa(cls, user: User, payload: User2faDelete):
+        totp = pyotp.TOTP(user.secret_2fa)
+        current_pin_code = totp.now()
+        if current_pin_code != payload.pin_code:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin-code")
+        await cls.update_one(
+            query={
+                "_id": user.id
+            },
+            payload={
+                "secret_2fa": None,
+                "two_factor": False
             }
         )
         return True

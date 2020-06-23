@@ -22,7 +22,8 @@ __all__ = [
     "UserCreationSafeResponse",
     "UserRecover",
     "UserRecoverLink",
-    "User2faConfirm"
+    "User2faConfirm",
+    "User2faDelete"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -182,4 +183,8 @@ class User2faURL(BaseModel):
 
 class User2faConfirm(BaseModel):
     token: str = Field(...)
+    pin_code: str = Field(...)
+
+
+class User2faDelete(BaseModel):
     pin_code: str = Field(...)
