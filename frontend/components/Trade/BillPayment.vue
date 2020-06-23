@@ -102,7 +102,7 @@
           this.check = await this.$store.dispatch('invoices/fetchSingle', this.created_transaction)
           this.status = this.check.status
           this.updated_invoice_data = JSON.parse(JSON.stringify(this.check));
-          setTimeout(() => {
+          await setTimeout(() => {
             this.busyChecking = false;
           }, 1000)
         }
@@ -152,6 +152,7 @@
 
       this.countdown = setInterval(async () => {
         await this.checkSingle();
+        console.log('interval work!')
       }, 10000)
     },
 
