@@ -10,7 +10,7 @@
           | =
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
           input(v-model="btc" type="text" v-on:input="convertBTCtoSimba").smb-input
-      button.btn(@click="confirm") Confirm
+      b-button.btn(@click="confirm" :loading="loading") Confirm
     div.is-flex.has-text-centered
       div.smb-input-wrapper.mr-4.mt-2 SIMBA
       div.smb-input-wrapper.mt-2 BTC
@@ -29,19 +29,46 @@
       errors: [],
       btc: 0.00200000,
       simba: 200000,
+      loading: false,
       money: {
         thousands: ' ',
         precision: 0,
-        masked: false /* doesn't work with directive */
-      }
+        masked: false
+      },
+      invoice_id: ''
     }),
     methods: {
-      confirm() {
+      async confirm() {
 
         if(this.btc < 0.002 || this.simba < 200000) {
           this.errors.push('Minimum amount 200,000 SIMBA')
           return
         }
+
+        this.loading = true
+
+/*        this.$store.commit('exchange/setTradeData', { prop: 'simba', value: this.simba })
+        this.$store.commit('exchange/setTradeData', { prop: 'btc', value: +this.btc })
+
+        let tradeData = this.$store.getters['exchange/tradeData'];
+        let res = await this.$store.dispatch('invoices/createTransaction', tradeData.operation);
+
+        this.invoice_id = res._id
+
+        console.log(tradeData)
+
+        let eth_address = tradeData['eth_address'];
+        let updateData = { id: this.invoice_id, eth_address, simba_amount: tradeData.simba}
+
+        console.log(updateData);
+
+        let res2 = await this.$store.dispatch('invoices/updateTransaction', updateData)
+
+        console.log('update transaction: ', res2)
+
+        let res3 = await this.$store.dispatch('invoices/confirmTransaction', this.invoice_id)
+
+        console.log('confirm transaction: ', res3)*/
 
         this.$store.commit('exchange/setTradeData', { prop: 'simba', value: this.simba })
         this.$store.commit('exchange/setTradeData', { prop: 'btc', value: this.btc })
@@ -51,7 +78,7 @@
 
       convert() {
 
-        let test = (this.simba/100000000).toFixed(4);
+        let test = (this.simba/100000000).toFixed(8);
 
         if(isNaN(test)) {
           this.btc = 0

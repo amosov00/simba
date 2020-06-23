@@ -1,8 +1,8 @@
 <template lang="pug">
   div.countdown__digits(:class="{'countdown__digits--red': done}")
-    VueCountdown(:time="countdownTime" @end="onEnd")
+    VueCountdown(:time="countdownTime" @end="onEnd" :interval="100" tag="div")
       template(slot-scope="props")
-        | {{ twoDigits(props.hours) }}:{{ twoDigits(props.minutes) }}:{{ twoDigits(props.seconds) }}
+        | {{ props.hours }}:{{ twoDigits(props.minutes) }}:{{ twoDigits(props.seconds) }}
 </template>
 
 <script>
@@ -44,8 +44,8 @@
       },
 
       onEnd() {
-        console.log('timer done!');
         this.done = true;
+        this.$parent.$emit('expired')
       },
 
       twoDigits(number) {

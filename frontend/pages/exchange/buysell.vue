@@ -6,7 +6,7 @@
           img(src="~assets/images/back.svg").back-btn
       div.steps.is-flex.align-items-center
         div.operation.mr-4 {{ operation }}
-        span(v-for="(step, i) in tradeData.steps.list" :key="i" :class="{ 'steps-item--active': (i) < tradeData.steps.list.indexOf(tradeData.steps.current)+1}").steps-item {{ i+1 }}
+        span(v-for="(step, i) in tradeData.steps.list" :key="i" :class="{ 'steps-item--failed': failedStep(i), 'steps-item--active': activeStep(i)}").steps-item {{ i+1 }}
       div.trade-content
         component(:is="tradeData.steps.current" :multi_props="multi_props")
 </template>
@@ -22,6 +22,26 @@
     name: "exchange-buysell",
     layout: 'main',
     components: { WalletConfirm, CreatePayment, BillPayment, Status, Final },
+
+    methods: {
+      activeStep(i) {
+        if(this.failedStep(i)) {
+          return false
+        }
+
+        return i < (this.tradeData.steps.list.indexOf(this.tradeData.steps.current)+1)
+      },
+
+      failedStep(i){
+        if(this.stepFail) {
+          if(i === this.stepFail) {
+            return true
+          }
+        }
+
+        return false
+      }
+    },
 
     async middleware ({ redirect, store }) {
       if (window.ethereum !== undefined) {
@@ -44,6 +64,10 @@
         let steps = this.tradeData.steps;
         steps.current = steps.list[steps.list.indexOf(steps.current)+1]
       });
+
+      this.$on('step_failed', () => {
+        this.stepFail = this.tradeData.steps.list.indexOf(this.tradeData.steps.current)
+      })
 
 
       if(this.$nuxt.$route.query['op']) {
@@ -91,6 +115,7 @@
 
     data: () => {
       return {
+        stepFail: null,
         multi_props: {},
         operation: 'Buy',
         tradeData: {
@@ -135,6 +160,8 @@
       margin-right: 0
     &--active
       background-color: #E0B72E
+    &--failed
+      background-color: #E99C9C
 
   .operation
     font-weight: bold
