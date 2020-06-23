@@ -29,7 +29,7 @@
       Countdown(:date="updated_invoice_data.created_at" v-if="showCountdown").mr-4
       div.countdown-refresh.mr-4(:class="{ 'rotate-anim': busyChecking }" @click="checkSingle")
         img(:src="require('@/assets/images/countdown-refresh.svg')")
-      div
+      div(v-if="!expired")
         div We verify payment automatically.
         div As soon as payment is made, the status of this state will change to another.
       div(v-if="expired") Time for each bill is limited with 2 hours.
