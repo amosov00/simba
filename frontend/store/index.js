@@ -129,5 +129,17 @@ export const actions = {
     }).catch(() => {
       Toast.open({message: 'Something went wrong!', type: 'is-danger'})
     })
+  },
+  async delete2fa({commit}, pin_code) {
+    return await this.$axios.delete('/account/2fa/', {
+      data: {
+        pin_code: `${pin_code}`
+      }
+    }).then(() => {
+      commit('setTwoFactor', false)
+      Toast.open({message: '2FA successfuly disabled!', type: 'is-success'})
+    }).catch(() => {
+      Toast.open({message: 'Something went wrong!', type: 'is-danger'})
+    })
   }
 };
