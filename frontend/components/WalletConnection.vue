@@ -20,15 +20,15 @@ export default {
   }),
   methods: {
     addAddress() {
-      console.log(web3);
-      var msg =
-        "0x879a053d4800c6354e76c7985a865d2922c82fb5b3f4577b2fe08b998954f2e0";
-      var from = window.ethereum.selectedAddress;
-      if (!from) return connect();
-      web3.eth.sign(from, msg, function(err, result) {
-        if (err) return console.error(err);
-        console.log("SIGNED:" + result);
-      });
+      // console.log(web3);
+      // var msg =
+      //   "0x879a053d4800c6354e76c7985a865d2922c82fb5b3f4577b2fe08b998954f2e0";
+      // var from = window.ethereum.selectedAddress;
+      // if (!from) return connect();
+      // web3.eth.sign(from, msg, function(err, result) {
+      //   if (err) return console.error(err);
+      //   console.log("SIGNED:" + result);
+      // });
 
       // this.$store.dispatch(
       //   "metamask/signAddress",
