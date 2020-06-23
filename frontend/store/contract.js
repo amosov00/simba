@@ -39,7 +39,7 @@ export const actions = {
         ]
       },
       (err, result) => {
-        if (result) {
+        if (result.result) {
           Toast.open({message: 'Transaction sent!', type: 'is-success'})
         } else {
           Toast.open({message: 'Transaction failed!', type: 'is-danger'})
