@@ -12,10 +12,6 @@
   export default {
     name: 'trade-wallet-confirm',
 
-/*    props: {
-      ethAddress: String
-    },*/
-
     data: () => ({
     }),
 
@@ -26,10 +22,6 @@
     },
     methods: {
       next(){
-/*        let eth_wallet = this.$store.getters['metamask/address'];
-
-        this.$store.commit('setTradeData', { prop: 'eth_address', value: eth_wallet})*/
-
         this.$parent.$emit('nextStep')
       }
     }
