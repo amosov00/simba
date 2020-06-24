@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _, { stubArray } from "lodash";
 import { ToastProgrammatic as Toast } from 'buefy'
 
 export const state = () => ({
@@ -28,7 +28,8 @@ export const mutations = {
   setTradeData: (state, payload) => {
     state.tradeData[payload.prop] = payload.value
   },
-  setTwoFactor: (state, payload) => state.user.two_factor = payload
+  setTwoFactor: (state, payload) => state.user.two_factor = payload,
+  setSignedAddresses: (state, payload) => state.user.signed_addresses.push(payload)
 };
 
 export const actions = {

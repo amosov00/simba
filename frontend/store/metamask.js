@@ -1,6 +1,8 @@
 import _ from "lodash";
 import web3 from "~/plugins/web3";
-import { ToastProgrammatic as Toast } from 'buefy'
+const ethUtil = require("ethereumjs-util");
+const sigUtil = require("eth-sig-util");
+import { ToastProgrammatic as Toast } from "buefy";
 
 export const state = () => ({
   status: "offline",
@@ -24,27 +26,61 @@ export const actions = {
   set_address({ commit }, payload) {
     commit("setAddress", payload);
   },
-  signAddress({ commit }, address) {
-    console.log(address)
-    ethereum.sendAsync(
+  async signAddress({ rootGetters, commit }) {
+    const msgParams = [
       {
-        method: "personal_sign",
-        params: [
-          {
-            from: ethereum.selectedAddress,
-            to: this.$contract().SIMBA._address,
-            value: "0x00",
-            gasPrice: web3.utils.toHex(web3.utils.toWei("24", "gwei")),
-            gas: web3.utils.toHex("250000"),
-            message: 'Sign'
-          }
-        ]
+        type: "string",
+        name: "Message",
+        value: "Please provide a signature for your wallet"
+      },
+      {
+        type: "address",
+        name: "Address",
+        value: `${window.ethereum.selectedAddress}`
+      }
+    ];
+
+    const from = window.ethereum.selectedAddress;
+    const params = [msgParams, from];
+    const method = "eth_signTypedData";
+
+    web3.currentProvider.sendAsync(
+      {
+        method,
+        params,
+        from
       },
       (err, result) => {
-        if (result.result) {
-          Toast.open({ message: "Transaction sent!", type: "is-success" });
+        const recovered = sigUtil.recoverTypedSignatureLegacy({
+          data: msgParams,
+          sig: result.result
+        });
+
+        if (
+          ethUtil.toChecksumAddress(recovered) ===
+          ethUtil.toChecksumAddress(from)
+        ) {
+          const signature = {
+            address: from,
+            signature: result.result
+          };
+          commit("setSignedAddresses", signature, { root: true });
+          const signedAddresses = rootGetters.user.signed_addresses;
+          this.$axios
+            .put("/account/user/", {
+              signed_addresses: signedAddresses
+            })
+            .then(() => {
+              Toast.open({ message: "Address signed!", type: "is-success" });
+            })
+            .catch(() => {
+              Toast.open({
+                message: "Something went wrong!",
+                type: "is-danger"
+              });
+            });
         } else {
-          Toast.open({ message: "Transaction failed!", type: "is-danger" });
+          Toast.open({ message: "Signing failed!", type: "is-danger" });
         }
       }
     );
