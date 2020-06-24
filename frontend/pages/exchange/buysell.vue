@@ -83,22 +83,29 @@
       if(this.$nuxt.$route.query['id']) {
         let single_res = await this.$store.dispatch('invoices/fetchSingle', this.$nuxt.$route.query['id']);
 
+        this.multi_props = {
+          no_create: true,
+          invoice: single_res._id,
+        }
+
         if(single_res) {
           if(single_res.status === 'waiting') {
             this.tradeData.steps.current = 'BillPayment'
           }
           else if(single_res.status === 'completed') {
-            this.tradeData.steps.current = 'Status'
+            this.tradeData.steps.current = 'Final'
+            this.multi_props["buy_info"] = {
+              simba_issued: single_res.btc_txs[0].outputs[0].value,
+              target_eth: single_res.target_eth_address,
+              tx_hash: single_res.btc_txs[0].hash,
+              btc_amount_proceeded: single_res.btc_amount_proceeded
+            }
           }
         } else {
           this.$buefy.toast.open({message:'Error: invoice not found', type: 'is-danger'})
           this.$nuxt.context.redirect('/exchange/')
         }
 
-        this.multi_props = {
-          no_create: true,
-          invoice: single_res._id
-        }
       }
 
 /*      if(this.$nuxt.$route.query['op'])*/
