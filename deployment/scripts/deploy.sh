@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo "########## Deploying to server ##########"
 
 echo "########## Check is folder is created ##########"
