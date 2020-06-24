@@ -41,6 +41,11 @@ def validate_password(v: Optional[str], values: dict) -> str:
     return pwd_context.hash(v)
 
 
+class UserSignedAddresses(BaseModel):
+    address: Optional[str] = Field(default=None)
+    signature: Optional[str] = Field(default=None)
+
+
 class User(BaseModel):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
 
@@ -53,7 +58,7 @@ class User(BaseModel):
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
 
-    signed_addresses: List[str] = Field(default=[])
+    signed_addresses: List[UserSignedAddresses] = Field(default=[])
     user_btc_addresses: List[str] = Field(default=[])
     user_eth_addresses: List[str] = Field(default=[])
 
@@ -146,7 +151,7 @@ class UserUpdateSafe(BaseModel):
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
 
-    signed_addresses: Optional[List[str]] = Field(default=[])
+    signed_addresses: Optional[List[Optional[UserSignedAddresses]]] = Field(default=[])
     user_btc_addresses: Optional[List[str]] = Field(default=None)
     user_eth_addresses: Optional[List[str]] = Field(default=None)
 
