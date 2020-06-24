@@ -20,7 +20,8 @@ export const actions = {
     const methodABI = this.$contract().SIMBA._jsonInterface.find(
       el => el.name === "transfer"
     );
-    const methodInputs = [data.address, data.amount];
+    const amount = (data.amount * 1) + 5000
+    const methodInputs = [data.address, amount];
     ethereum.sendAsync(
       {
         method: "eth_sendTransaction",
