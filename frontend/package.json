@@ -31,7 +31,6 @@
     "sass-loader": "^8.0.2",
     "v-money": "^0.8.1",
     "vee-validate": "^3.3.3",
-    "vue-the-mask": "^0.11.1",
     "web3": "^1.2.9"
   },
   "devDependencies": {}
