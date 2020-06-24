@@ -32,5 +32,6 @@ async def fetch_simba_contract_cronjob(self, *args, **kwargs):
                 "event": transaction.event,
                 "logIndex": transaction.logIndex,
             }, transaction.dict())
-
+    # TODO: On issue - save invoice_id to ETHTrans
+    # TODO: On redeem - save invoice_id and gen btc on
     return True

@@ -53,7 +53,6 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
     def freeze_and_transfer(self, customer_address: str, amount: int, period: int):
         """SST contract"""
         customer_address = Web3.toChecksumAddress(customer_address)
-        # self._approve(amount) TODO is it necessary ?
         tx = self.contract.functions.freezeAndTransfer(
             customer_address, amount, period
         ).buildTransaction({

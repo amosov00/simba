@@ -9,7 +9,7 @@ from database.crud.user import UserCRUD
 
 
 class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
-    REF1_PROD = 0.625
+    REF1_PROF = 0.625
     REF2_PROF = 0.125
     REF3_PROF = 0.125
     REF4_PROF = 0.0625
@@ -25,9 +25,19 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
         )
 
     @classmethod
-    def _calculate_referrals_accurals(cls, ref_level: int, sst_tokens: int) -> float:
-        # TODO дописать
-        pass
+    def _calculate_referrals_accurals(cls, ref_level: int, sst_tokens: int) -> int:
+        result_sst = sst_tokens
+        if ref_level == 1:
+            result_sst *= cls.REF1_PROF
+        if ref_level == 2:
+            result_sst *= cls.REF2_PROF
+        if ref_level == 3:
+            result_sst *= cls.REF3_PROF
+        if ref_level == 4:
+            result_sst *= cls.REF4_PROF
+        if ref_level == 5:
+            result_sst *= cls.REF5_PROF
+        return result_sst
 
     async def send_sst_to_referrals(self, user: User, simba_tokens: int):
         sst_tokens = self.simba_to_sst(simba_tokens)
@@ -39,7 +49,6 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
                 self.api_wrapper.freeze_and_transfer(
                     wallet,
                     self._calculate_referrals_accurals(i, sst_tokens),
-                    # Take attention to this warning
                     self.PEDIOD
                 )
         return True
