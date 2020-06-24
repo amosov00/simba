@@ -53,6 +53,7 @@ class User(BaseModel):
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
 
+    signed_addresses: List[str] = Field(default=[])
     user_btc_addresses: List[str] = Field(default=[])
     user_eth_addresses: List[str] = Field(default=[])
 
@@ -145,6 +146,7 @@ class UserUpdateSafe(BaseModel):
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
 
+    signed_addresses: Optional[List[str]] = Field(default=[])
     user_btc_addresses: Optional[List[str]] = Field(default=None)
     user_eth_addresses: Optional[List[str]] = Field(default=None)
 
