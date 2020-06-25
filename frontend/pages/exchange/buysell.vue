@@ -140,35 +140,6 @@
 <style lang="sass" scoped>
   .trade-content
     margin-top: 50px
-  .steps-item
-    font-weight: 300
-    font-size: 18px
-    line-height: 100%
-    text-align: center
-    color: #FFFFFF
-    background-color: #DFDFDF
-    width: 30px
-    height: 30px
-    display: flex
-    align-items: center
-    justify-content: center
-    border-radius: 100px
-    margin-right: 70px
-    position: relative
-    &:not(:last-child)
-      &::after
-        content: ""
-        width: 60px
-        position: absolute
-        border: 1px dashed #E5E5E5
-        left: 35px
-      top: 50%
-    &:last-child
-      margin-right: 0
-    &--active
-      background-color: #E0B72E
-    &--failed
-      background-color: #E99C9C
 
   .operation
     font-weight: bold

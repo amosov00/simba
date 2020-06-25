@@ -33,6 +33,12 @@ export const mutations = {
 };
 
 export const actions = {
+  async removeAddress({}, data) {
+    return await this.$axios.put('/account/user/', data)
+      .then(() => true)
+      .catch(() => false)
+  },
+
   async fetchContracts({commit}) {
     return await this.$axios.get('/meta/eth/contract/').then(res => {
       commit('setContract', res.data)

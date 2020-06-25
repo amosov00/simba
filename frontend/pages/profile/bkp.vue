@@ -1,6 +1,8 @@
 <template lang="pug">
   div
-    div
+    div.is-flex.content-tabs
+      n-link(to="/profile" exact-active-class="link--active").link.link--underlined.content-tabs-item Profile
+    div.main-content
       ValidationObserver(v-slot="{ handleSubmit, invalid }")
         form(@submit.prevent="handleSubmit(saveProfile)")
           div.column.is-8.p-0
@@ -38,7 +40,7 @@ import Modal2FA from "~/components/Modal2FA";
 
 export default {
   name: "profile",
-  layout: "profile",
+  layout: "main",
   components: { PasswordChange, Modal2FA },
   computed: {
     changesFound() {

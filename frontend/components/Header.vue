@@ -52,7 +52,7 @@
   font-size: 18px
   line-height: 100%
 .header-menu
-  padding: 7px 0 7px 90px
+  padding: 7px 0 7px 0
 .menu-item
   font-size: 16px
   margin-right: 10px
