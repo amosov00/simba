@@ -16,6 +16,10 @@
                 b-input(native-type="text" size="is-small" placeholder="last name" v-model="register_form.last_name")
                 span.validaton-error {{ errors[0] }}
             b-field
+              //- ValidationProvider(rules="required|email" v-slot="{ errors }" name="email")
+              b-input(native-type="text" size="is-small" placeholder="Referral id" v-model="register_form.referral_id")
+                //- span.validaton-error {{ errors[0] }}
+            b-field
               ValidationProvider(rules="required|email" v-slot="{ errors }" name="email")
                 b-input(native-type="text" size="is-small" placeholder="email" v-model="register_form.email")
                 span.validaton-error {{ errors[0] }}
@@ -52,6 +56,7 @@
           email: "",
           repeat_password: "",
           password: "",
+          referral_id: ""
         },
         terms_and_conditions: null,
         loading: false
