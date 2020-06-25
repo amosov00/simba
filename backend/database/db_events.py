@@ -27,7 +27,8 @@ if DEBUG:
 async def prepopulate_users():
     if not await UserCRUD.find_by_email(test_user["email"]):
         await UserCRUD.create_safe(
-            user=UserCreationNotSafe(**test_user), is_active=True, is_superuser=True, email_is_active=True
+            user=UserCreationNotSafe(**test_user), is_active=True, is_superuser=True, email_is_active=True,
+            referral_id="admin"
         )
 
     return True
