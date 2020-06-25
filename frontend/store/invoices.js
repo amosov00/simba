@@ -17,11 +17,11 @@ export const mutations = {
 export const actions = {
   async createTransaction({}, data) {
 
-    console.log('invoice type', data);
-
     return await this.$axios.post('/invoices/', { invoice_type: data }).then(res =>{
+      Toast.open({message: 'Transaction created!', type: 'is-primary'});
       return res.data;
     }).catch(_ => {
+      Toast.open({message: 'Error creating invoice!', type: 'is-danger'});
       return false
     })
   },
@@ -33,11 +33,13 @@ export const actions = {
       "simba_amount": data.simba_amount,
     }
 
-    console.log(data_to_send);
-
     return await this.$axios.put(`/invoices/${data.id}/`, data_to_send).then(res => {
+      Toast.open({message: 'Transaction updated!', type: 'is-primary'});
       return res.data;
-    }).catch(_ => false)
+    }).catch(_ => {
+      Toast.open({message: 'Error updating invoice!', type: 'is-danger'});
+      return false
+    })
   },
 
   async manualTransaction({}, data) {
@@ -53,7 +55,10 @@ export const actions = {
 
   async confirmTransaction({}, id) {
     return await this.$axios.post(`/invoices/${id}/confirm/`).then(res => res.data)
-      .catch(_ => false)
+      .catch(_ => {
+        Toast.open({message: 'Error confirming invoice!', type: 'is-danger'});
+        return false
+      })
   },
 
   async fetchInvoices({commit}, payload) {

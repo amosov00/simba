@@ -57,7 +57,7 @@ class InvoiceMechanics(CryptoValidation):
         # TODO fill
         return True
 
-    def validate(self) -> InvoiceInDB:
+    def validate(self) -> bool:
         self._validate_common()
 
         if self.invoice.invoice_type == InvoiceType.BUY:
@@ -68,7 +68,7 @@ class InvoiceMechanics(CryptoValidation):
 
         self._raise_exception_if_exists()
 
-        return self.invoice
+        return True
 
     @classmethod
     def get_incoming_btc_from_outputs(

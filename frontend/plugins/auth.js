@@ -1,9 +1,10 @@
 export default ({ app, redirect, route }, inject) => {
-	inject('authLogin', async (email, password) => {
+	inject('authLogin', async (email, password, pin_code) => {
 		return await app.$axios.post('/account/login/',
 			{
 				email: email,
 				password: password,
+				pin_code: pin_code
 			}
 		).then(resp => {
 			app.store.commit('setUser', resp.data.user);

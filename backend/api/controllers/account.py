@@ -19,7 +19,8 @@ from schemas.user import (
     UserRecoverLink,
     User2faURL,
     User2faConfirm,
-    UserReferralURLResponse
+    UserReferralURLResponse,
+    User2faDelete
 )
 
 __all__ = ["router"]
@@ -108,3 +109,8 @@ async def account_get_user(
         address = user.btc_address
 
     return {"address": address}
+
+
+@router.delete("/2fa/")
+async def delete_2fa(user: User = Depends(get_user), payload: User2faDelete = Body(...)):
+    return await UserCRUD.delete_2fa(user, payload)

@@ -10,7 +10,7 @@
         template(slot-scope="props")
           b-table-column(field="created_at" label="Date" sortable) {{ (new Date(props.row.created_at)).toLocaleString() }}
           b-table-column(field="id" label="ID")
-              n-link(:to="'/exchange/' + props.row._id") {{ props.row._id }}
+            n-link(:to="'/exchange/buysell?id=' + props.row._id") {{ props.row._id }}
           b-table-column(field="simba_amount" label="SIMBA Amount") {{ props.row.simba_amount }}
           b-table-column(field="invoice_type" label="Type") {{ getType(props.row.invoice_type) }}
           b-table-column(field="status" label="Status") {{ props.row.status }}

@@ -6,12 +6,9 @@
           img(src="~assets/images/back.svg").back-btn
       div.steps.is-flex.align-items-center
         div.operation.mr-4 {{ operation }}
-        span(v-for="(step, i) in tradeData.steps.list" :key="i"
-          @click="tradeData.steps.current = step" :class="{ 'steps-item--active': (i) < tradeData.steps.list.indexOf(tradeData.steps.current)+1}").steps-item {{ i+1 }}
+        span(v-for="(step, i) in tradeData.steps.list" :key="i" :class="{ 'steps-item--failed': failedStep(i), 'steps-item--active': activeStep(i)}").steps-item {{ i+1 }}
       div.trade-content
-        component(:is="tradeData.steps.current")
-    b-modal(:active.sync="metamask_modal" has-modal-card :can-cancel="false")
-     MetamaskWallet
+        component(:is="tradeData.steps.current" :multi_props="multi_props")
 </template>
 
 <script>
@@ -21,52 +18,120 @@
   import Status from "@/components/Trade/Status"
   import Final from "@/components/Trade/Final"
 
-  import MetamaskWallet from "~/components/MetamaskWallet";
-
   export default {
     name: "exchange-buysell",
     layout: 'main',
-    components: {MetamaskWallet, WalletConfirm, CreatePayment, BillPayment, Status, Final },
-    computed: {
-      metamask_modal() {
-        return this.$store.getters['metamask/status'] !== 'online';
+    components: { WalletConfirm, CreatePayment, BillPayment, Status, Final },
+
+    methods: {
+      activeStep(i) {
+        if(this.failedStep(i)) {
+          return false
+        }
+
+        return i < (this.tradeData.steps.list.indexOf(this.tradeData.steps.current)+1)
+      },
+
+      failedStep(i){
+        if(this.stepFail) {
+          if(i === this.stepFail) {
+            return true
+          }
+        }
+
+        return false
       }
     },
-    mounted() {
-      let url_params = this.$nuxt.$route;
 
-      if(url_params.query.op === 'buy') {
-        this.operation = 'Buy';
-        this.$store.commit('setTradeData', {prop: 'operation', value: 1})
+    async middleware ({ redirect, store }) {
+      if (window.ethereum !== undefined) {
+        await window.ethereum.enable().then(res => {
+          store.commit('exchange/setTradeData', { prop: 'eth_address', value: res[0]})
+          return true
+        }).catch(_ => {
+          redirect('/exchange/')
+          return false
+        })
       } else {
-        this.operation = 'Sell'
-        this.$store.commit('setTradeData', {prop: 'operation', value: 2})
-      }
+        console.log('metamask not found')
 
+        redirect('/exchange/')
+      }
+    },
+
+    async beforeMount() {
       this.$on('nextStep', () => {
         let steps = this.tradeData.steps;
         steps.current = steps.list[steps.list.indexOf(steps.current)+1]
       });
+
+      this.$on('step_failed', () => {
+        this.stepFail = this.tradeData.steps.list.indexOf(this.tradeData.steps.current)
+      })
+
+
+      if(this.$nuxt.$route.query['op']) {
+        if(this.$nuxt.$route.query['op'] === 'buy') {
+          this.operation = 'Buy';
+          this.$store.commit('setTradeData', {prop: 'operation', value: 1})
+        } else {
+          this.operation = 'Sell'
+          this.$store.commit('setTradeData', {prop: 'operation', value: 2})
+        }
+      }
+
+      if(this.$nuxt.$route.query['id']) {
+        let single_res = await this.$store.dispatch('invoices/fetchSingle', this.$nuxt.$route.query['id']);
+
+        this.multi_props = {
+          no_create: true,
+          invoice: single_res._id,
+        }
+
+        if(single_res) {
+          if(single_res.status === 'waiting') {
+            this.tradeData.steps.current = 'BillPayment'
+          }
+          else if(single_res.status === 'completed') {
+            this.tradeData.steps.current = 'Final'
+            this.multi_props["buy_info"] = {
+              simba_issued: single_res.btc_txs[0].outputs[0].value,
+              target_eth: single_res.target_eth_address,
+              tx_hash: single_res.btc_txs[0].hash,
+              btc_amount_proceeded: single_res.btc_amount_proceeded
+            }
+          }
+        } else {
+          this.$buefy.toast.open({message:'Error: invoice not found', type: 'is-danger'})
+          this.$nuxt.context.redirect('/exchange/')
+        }
+
+      }
+
+/*      if(this.$nuxt.$route.query['op'])*/
+
+/*      let web3_metamask = new Web3(window.ethereum);
+
+      this.tradeData.ethAddress = await web3_metamask.eth.getAccounts().then(res => res[0]);*/
+
+/*      setTimeout(_ => {
+        this.tradeData.ethAddress = web3_metamask.selectedAddress;
+        console.log(window.ethereum.selectedAddress)
+      }, 300)*/
     },
 
     data: () => {
       return {
+        stepFail: null,
+        multi_props: {},
         operation: 'Buy',
         tradeData: {
+          ethAddress: '',
           steps: {
             current: 'WalletConfirm',
             list: ['WalletConfirm', 'CreatePayment', 'BillPayment', 'Status', 'Final']
           }
         },
-        data: [
-          { 'id': '#3', 'amount': '999 000 050 000', 'date': '01.06.2020', 'type': 'BUY', 'status': '1:15:47'},
-          { 'id': '#2', 'amount': '999 000 050 000', 'date': '01.06.2020', 'type': 'Sell', 'status': 'Not paid' },
-          { 'id': '#1', 'amount': '999 000 050 000', 'date': '01.06.2020', 'type': 'BUY', 'status': 'Paid' },
-        ],
-        columns: [
-          { field: 'id', width: '40', }, { field: 'amount' }, { field: 'date', centered: true },
-          { field: 'type' }, { field: 'status' }
-        ]
       }
     }
   };
@@ -102,6 +167,8 @@
       margin-right: 0
     &--active
       background-color: #E0B72E
+    &--failed
+      background-color: #E99C9C
 
   .operation
     font-weight: bold

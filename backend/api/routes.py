@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from config import DEBUG
 
-from api.controllers import account, debug, crypto, meta, invoice
+from api.controllers import account, debug, meta, invoice
 
 api_router = APIRouter()
 

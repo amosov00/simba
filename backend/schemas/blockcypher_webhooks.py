@@ -1,4 +1,5 @@
 from typing import Literal, Optional
+from datetime import datetime
 
 from pydantic import HttpUrl
 
@@ -27,6 +28,7 @@ class BlockCypherWebhook(BaseModel):
     address: Optional[str] = Field(default=None, description="Wallet address")
     confirmations: int = None
     callback_errors: int = Field(default=0)
+    created_at: datetime = Field(default=None, description="UTC")
 
 
 class BlockCypherWebhookInDB(BlockCypherWebhook):
@@ -45,3 +47,4 @@ class BlockCypherWebhookCreate(BaseModel):
     hash: Optional[str] = Field(default=None, description="Transaction / block hash")
     address: Optional[str] = Field(default=None, description="Wallet address")
     confirmations: int = Field(default=3, description="Send if confirmations more than this number")
+    created_at: datetime = Field(default_factory=datetime.utcnow, description="UTC")

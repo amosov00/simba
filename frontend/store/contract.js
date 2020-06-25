@@ -20,7 +20,8 @@ export const actions = {
     const methodABI = this.$contract().SIMBA._jsonInterface.find(
       el => el.name === "transfer"
     );
-    const methodInputs = [data.address, data.amount];
+    const amount = (data.amount * 1) + 5000
+    const methodInputs = [data.address, amount];
     ethereum.sendAsync(
       {
         method: "eth_sendTransaction",
@@ -39,7 +40,7 @@ export const actions = {
         ]
       },
       (err, result) => {
-        if (result) {
+        if (result.result) {
           Toast.open({message: 'Transaction sent!', type: 'is-success'})
         } else {
           Toast.open({message: 'Transaction failed!', type: 'is-danger'})

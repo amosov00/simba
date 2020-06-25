@@ -14,6 +14,7 @@ __all__ = ['fetch_simba_contract_cronjob']
     time_limit=300,
 )
 async def fetch_simba_contract_cronjob(self, *args, **kwargs):
+    # TODO Complete
     await ContractEventsWrapper(SIMBA_CONTRACT).fetch_blocks_and_save()
 
     transactions = await EthereumTransactionCRUD.find({
