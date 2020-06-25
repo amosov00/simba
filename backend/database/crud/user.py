@@ -113,12 +113,13 @@ class UserCRUD(BaseMongoCRUD):
                 HTTPStatus.BAD_REQUEST, "User with this email is already exists",
             )
 
-        ref_user = await cls.find_by_id(user.referral_id)
+        if kwargs.get("referral_id") != "admin":
+            ref_user = await cls.find_by_id(user.referral_id)
 
-        if ref_user is None:
-            raise HTTPException(
-                HTTPStatus.BAD_REQUEST, "Referral link invalid"
-            )
+            if ref_user is None:
+                raise HTTPException(
+                    HTTPStatus.BAD_REQUEST, "Referral link invalid"
+                )
 
         if "email_is_active" in kwargs and kwargs["email_is_active"]:
             inserted_id = (

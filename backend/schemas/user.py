@@ -22,7 +22,8 @@ __all__ = [
     "UserCreationSafeResponse",
     "UserRecover",
     "UserRecoverLink",
-    "User2faConfirm"
+    "User2faConfirm",
+    "UserReferralURLResponse"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -88,6 +89,10 @@ class UserRecover(BaseModel):
     email: str = Field(..., example="email")
 
 
+class UserReferralURLResponse(BaseModel):
+    URL: str = Field(..., exmaple="URL")
+
+
 class UserRecoverLink(BaseModel):
     recover_code: str = Field(...)
     password: str = Field(...)
@@ -130,7 +135,7 @@ class UserCreationSafe(BaseModel):
     last_name: Optional[str] = Field(default=None)
     repeat_password: str = Field(...)
     password: str = Field(...)
-    referral_id: Optional[str] = Field(default=None)
+    referral_id: str = Field(default=None)
 
     _validate_email = validator("email", allow_reuse=True)(validate_email)
     _validate_passwords = validator("password", allow_reuse=True)(validate_password)
@@ -164,6 +169,7 @@ class UserCreationNotSafe(BaseModel):
     last_name: Optional[str] = Field(default=None)
     email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
     verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
+    referral_id: Optional[str] = Field(default=None)
     telegram_id: Optional[int] = Field(default=None)
     telegram_chat_id: Optional[int] = Field(default=None)
     ethereum_wallet: Optional[str] = Field(default=None)

@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Response
+from urllib.parse import urlencode
 
 from core.mechanics.crypto import BitcoinWrapper
+from config import HOST_URL
 from api.dependencies import get_user
 from database.crud import UserCRUD
 from schemas.user import (
@@ -16,7 +18,8 @@ from schemas.user import (
     UserRecover,
     UserRecoverLink,
     User2faURL,
-    User2faConfirm
+    User2faConfirm,
+    UserReferralURLResponse
 )
 
 __all__ = ["router"]
@@ -61,6 +64,12 @@ async def account_verify_email(data: UserVerifyEmail = Body(...)):
 # ):
 #     response.delete_cookie(key="accessToken")
 #     return {"success": True}
+
+
+@router.get("/referral_link/", response_model=UserReferralURLResponse)
+async def account_get_referral_link(user: User = Depends(get_user)):
+    params = {f"referral_id": user.id}
+    return {"URL": f'{HOST_URL}register?{urlencode(params)}'}
 
 
 @router.get("/user/", response_model=User, response_model_exclude={"_id", "recover_code", "secret_2fa"})
