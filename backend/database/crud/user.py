@@ -7,6 +7,7 @@ import pyotp
 from fastapi.exceptions import HTTPException
 
 from database.crud.base import BaseMongoCRUD
+from database.crud.referral import ReferralCRUD
 from core.utils.jwt import decode_jwt_token, encode_jwt_token
 from core.utils.email import Email
 from core.utils import to_objectid
@@ -26,7 +27,7 @@ from schemas.user import (
 
 __all__ = ["UserCRUD"]
 
-FIELDS_TO_EXCLUDE = ("repeat_password", "recover_code", "secret_2fa")
+FIELDS_TO_EXCLUDE = ("repeat_password", "recover_code", "secret_2fa", "referral_id")
 
 
 class UserCRUD(BaseMongoCRUD):
@@ -113,6 +114,14 @@ class UserCRUD(BaseMongoCRUD):
                 HTTPStatus.BAD_REQUEST, "User with this email is already exists",
             )
 
+        if kwargs.get("referral_id") != "admin":
+            ref_user = await cls.find_by_id(user.referral_id)
+
+            if ref_user is None:
+                raise HTTPException(
+                    HTTPStatus.BAD_REQUEST, "Referral link invalid"
+                )
+
         if "email_is_active" in kwargs and kwargs["email_is_active"]:
             inserted_id = (
                 await cls.insert_one(
@@ -150,6 +159,9 @@ class UserCRUD(BaseMongoCRUD):
                 }
             )
         ).inserted_id
+
+        if user.referral_id is not None:
+            await ReferralCRUD.add_referral(inserted_id, user.referral_id)
 
         return {"success": True}
 
