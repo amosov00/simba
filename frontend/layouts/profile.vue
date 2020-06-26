@@ -11,14 +11,17 @@
           div.mt-3.logout-block
             a(href="#" @click="logout").link Logout
       nuxt.flex-1.profile-content
+    Footer
+
 </template>
 
 <script>
+  import Footer from "~/components/Footer";
   import Header from "~/components/Header";
 
   export default {
     middleware: ['fetchUser'],
-    components: { Header },
+    components: { Header, Footer },
     data: () => ({
       showModalNew: false,
       sidebar: [

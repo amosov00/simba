@@ -2,14 +2,16 @@
   div.site
     Header.header-wrapper.site-wrapper
     nuxt
+    Footer
 </template>
 
 <script>
   import Header from "~/components/Header";
+  import Footer from "~/components/Footer";
 
   export default {
     middleware: ['fetchUser'],
-    components: { Header },
+    components: { Header, Footer },
 
     data: () => ({
     }),
