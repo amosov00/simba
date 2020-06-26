@@ -9,6 +9,8 @@
         img(src="~assets/images/bitcoin.svg").mr-2
         b-field
           b-input
+        div
+          button.btn(@click="testSell") Redeem (test)
       button.btn(@click="next") Confirm
 </template>
 
@@ -28,6 +30,10 @@
       }
     },
     methods: {
+      async testSell() {
+        await this.$store.dispatch('contract/fetchContract');
+        this.$store.dispatch('contract/redeemSimbaToken', {});
+      },
       next(){
         this.$parent.$emit('nextStep')
       }
