@@ -33,7 +33,7 @@ export const mutations = {
 };
 
 export const actions = {
-  async removeAddress({}, data) {
+  async changeAddresses({}, data) {
     return await this.$axios.put('/account/user/', data)
       .then(() => true)
       .catch(() => false)
