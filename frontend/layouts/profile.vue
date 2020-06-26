@@ -9,20 +9,16 @@
             div.mt-2.mb-3.sidebar__links-block
               n-link(:to="link.url" v-for="(link, j) in menu_item.links" :key="j" exact-active-class="link--active").link.is-size-6.is-block {{ link.name }}
           div.mt-3.logout-block
-            a(href="#").link Logout
+            a(href="#" @click="logout").link Logout
       nuxt.flex-1.profile-content
-    b-modal(:active.sync="showModalNew" has-modal-card)
-      PasswordChange
 </template>
 
 <script>
   import Header from "~/components/Header";
 
-  import PasswordChange from "~/components/PasswordChange";
-
   export default {
     middleware: ['fetchUser'],
-    components: { Header, PasswordChange },
+    components: { Header },
     data: () => ({
       showModalNew: false,
       sidebar: [
@@ -31,11 +27,11 @@
         { title: 'Security', links: [{name: 'Change password', url: '/profile/change-password/'},{name: 'Two-Factor Auth', url: '/profile/2fa/'}]}
       ]
     }),
-    created() {
-      this.$on('showModalNew', () => {
-        this.showModalNew = true
-      })
-    }
+    methods: {
+      logout() {
+        this.$authLogout();
+      },
+    },
   }
 </script>
 
