@@ -31,6 +31,14 @@ export default {};
       padding: 14px 20px;
     }
 
+    &--name {
+      text-align: left;
+    }
+
+    &--value {
+      text-align: right;
+    }
+
     .blue {
       color: #0060ff;
     }
