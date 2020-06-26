@@ -11,6 +11,9 @@
               b-tooltip(:label="props.row.transactionHash" type="is-black" position="is-bottom").w-100
                 a(:href="'https://explorer.bitcoin.com/btc/tx/' + props.row.transactionHash" target="_blank" rel="noopener").text-clamp {{ props.row.transactionHash }}
             b-table-column(field="amount" label="Amount, BTC" width="100") {{props.row.amount}}
+        div.totals
+          span Total:
+          span 1,062.0050
         div.text-center
           button.btn--outlined.mt-4 more
 </template>
@@ -175,4 +178,12 @@ export default {
 };
 </script>
 
-<style lang="sass" scoped></style>
+<style lang="sass" scoped>
+.totals
+  margin-top: 20px
+  padding: 0 20px
+  display: flex
+  justify-content: space-between
+  font-size: 14px
+  font-weight: 600
+</style>
