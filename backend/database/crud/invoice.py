@@ -79,7 +79,7 @@ class InvoiceCRUD(BaseMongoCRUD):
         if invoice["invoice_type"] == InvoiceType.BUY:
             payload = payload.dict(exclude={"target_btc_address"}, exclude_unset=True)
         elif invoice["invoice_type"] == InvoiceType.SELL:
-            payload = payload.dict(exclude_none=True)
+            payload = payload.dict(exclude={"target_eth_address"}, exclude_none=True)
 
         modified_count = (await cls.update_one(
             query={

@@ -25,6 +25,9 @@ input[type="text"], input[type="password"]
 
 .link
   color: #0060FF
+  -webkit-font-smoothing: antialiased
+  -moz-osx-font-smoothing: grayscale
+  text-rendering: optimizeLegibility
   &--active
     color: #E0B72E
     &.link--underlined
@@ -40,7 +43,7 @@ input[type="text"], input[type="password"]
   background-repeat: no-repeat
   background-position: 100% 14px
 .main-content
-  padding: 50px 126px 50px 216px
+  padding: 50px 126px 50px 126px
 
 .tabs
   padding-left: 126px
@@ -60,7 +63,7 @@ input[type="text"], input[type="password"]
     border-bottom-color: transparent
 
 .content-tabs
-  padding-left: 216px
+  padding-left: 126px
   padding-right: 126px
   font-size: 22px
   color: #E0B72E
@@ -101,6 +104,51 @@ input[type="text"], input[type="password"]
 .b-table .table
   margin-left: -0.75em
   margin-right: -0.75em
+
+.steps-item
+  font-weight: 300
+  font-size: 18px
+  line-height: 100%
+  text-align: center
+  color: #FFFFFF
+  background-color: #DFDFDF
+  width: 30px
+  height: 30px
+  display: flex
+  align-items: center
+  justify-content: center
+  border-radius: 100px
+  margin-right: 70px
+  position: relative
+  &__text
+    position: absolute
+    bottom: -30px
+    color: #000000
+    font-size: 14px
+    width: 171px
+    left: 0
+    text-align: left
+  &:not(:last-child)
+    &::after
+      content: ""
+      width: 60px
+      position: absolute
+      border: 1px dashed #E5E5E5
+      left: 35px
+      top: 50%
+  &--profile
+    margin-right: 100px
+    &:not(:last-child)
+      &::after
+        width: 90px
+  &:last-child
+    margin-right: 0
+  &--active
+    background-color: #E0B72E
+    .steps-item__text
+      color: #E0B72E
+  &--failed
+    background-color: #E99C9C
 
 @import "./helpers.sass"
 @import "./button.sass"

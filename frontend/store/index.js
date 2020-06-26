@@ -33,6 +33,12 @@ export const mutations = {
 };
 
 export const actions = {
+  async removeAddress({}, data) {
+    return await this.$axios.put('/account/user/', data)
+      .then(() => true)
+      .catch(() => false)
+  },
+
   async fetchContracts({commit}) {
     return await this.$axios.get('/meta/eth/contract/').then(res => {
       commit('setContract', res.data)
@@ -64,6 +70,15 @@ export const actions = {
     }).catch(_ => false)
   },
 
+  async fetchRefLink({}) {
+    return await this.$axios.get('/account/referral_link/').then(resp => {
+      if(resp.status === 200 ){
+        return resp.data
+      }
+      return false
+    }).catch(_ => false)
+  },
+
 
   async getBtcAddress({ commit }) {
     return await this.$axios.get('/account/btc-address/')
@@ -85,6 +100,8 @@ export const actions = {
       });
   },
   async changeProfile({}, data) {
+    console.log(data);
+
     return await this.$axios.put("/account/user/", JSON.stringify(data))
       .then(_ => {
         return true;

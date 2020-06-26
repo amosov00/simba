@@ -1,5 +1,5 @@
 <template lang="pug">
-  div.wallet-content
+  div.site-wrapper
     div.wallet-content--hero
       h1.title.is-size-4 Transfer SIMBA tokens
       div
@@ -12,7 +12,7 @@
           b-input(size="is-small" type="number" min="0" step="10000" v-model="transferData.amount")
         div.wallet-content__totals
           p.subtitle.is-size-6 Fee: 5,000 SIMBA
-          p.title.is-size-6 Total: {{totalAmount}} SIMBA 
+          p.title.is-size-6 Total: {{totalAmount}} SIMBA
             span.subtitle.is-size-6 (0 USDT / {{totalBTC}} BTC)
         button(@click="transferFunds").btn.w-100 Send SIMBA
     hr.mt-4
@@ -50,7 +50,6 @@ export default {
         parent: this,
         component: WalletConnection,
         hasModalCard: true,
-        customClass: "custom-class custom-class-2",
         trapFocus: true
       });
     }
