@@ -31,6 +31,10 @@
     name: "profile-bill",
     layout: "profile",
 
+    data: () => ({
+      eth_wallet_add_modal: false
+    }),
+
     computed: {
       user() {
         return this.$store.getters.user;
@@ -38,6 +42,15 @@
     },
 
     methods: {
+      metamaskModal() {
+        this.$buefy.modal.open({
+          parent: this,
+          component: WalletConnection,
+          hasModalCard: true,
+          trapFocus: true
+        });
+      },
+
       removeAddress(index, type) {
         this.$buefy.dialog.confirm({
           title: "Delete",
@@ -71,7 +84,8 @@
     align-items: center
     height: 21px
     &:hover
-      cursor: pointer
+      color: #0060FF
+      cursor: default
       .addr__delete
         display: inline-block
     &__delete

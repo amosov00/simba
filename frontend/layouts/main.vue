@@ -2,26 +2,17 @@
   div.site
     Header.header-wrapper.site-wrapper
     nuxt
-    b-modal(:active.sync="showModalNew" has-modal-card)
-      PasswordChange
 </template>
 
 <script>
   import Header from "~/components/Header";
 
-  import PasswordChange from "~/components/PasswordChange";
-
   export default {
     middleware: ['fetchUser'],
-    components: { Header, PasswordChange },
+    components: { Header },
+
     data: () => ({
-      showModalNew: false
     }),
-    created() {
-      this.$on('showModalNew', () => {
-        this.showModalNew = true
-      })
-    }
   }
 </script>
 
