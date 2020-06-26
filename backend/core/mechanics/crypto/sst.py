@@ -15,7 +15,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
     REF4_PROF = 0.0625
     REF5_PROF = 0.0625
     # TODO уточнить насчет периода
-    PEDIOD: int = 1
+    PERIOD: int = 1
 
     def __init__(self):
         self.api_wrapper = ContractFunctionsWrapper(
@@ -49,6 +49,6 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
                 self.api_wrapper.freeze_and_transfer(
                     wallet,
                     self._calculate_referrals_accurals(i, sst_tokens),
-                    self.PEDIOD
+                    self.PERIOD
                 )
         return True
