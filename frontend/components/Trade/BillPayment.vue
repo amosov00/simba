@@ -33,7 +33,7 @@
         div We verify payment automatically.
         div As soon as payment is made, the status of this state will change to another.
       div(v-if="expired") Time for each bill is limited with 2 hours.
-    div.position-relative(style="margin-top: 120px")
+    //-- div.position-relative(style="margin-top: 120px")
       div.mt-2 Created transaction: {{ created_transaction }}
       div.mt-2 Checking your transaction every 10 sec...
       div.mt-2 Status: {{ status }}
@@ -116,6 +116,9 @@
         this.$parent.$emit('step_failed')
       })
 
+      // Preload BTC address
+      await this.$store.dispatch('getBtcAddress')
+
       if(this.multi_props['no_create']) {
         /*console.log('multi-props', this.multi_props);*/
         this.created_transaction = this.multi_props['invoice'];
@@ -127,21 +130,14 @@
         this.created_transaction = res._id
 
         let eth_address = this.$store.getters['exchange/tradeData']['eth_address'];
-        let updateData = { id: this.created_transaction, eth_address, simba_amount: tradeData.simba}
+        let btc_address = this.$store.getters['btc_address'];
+        let updateData = { id: this.created_transaction, eth_address, btc_address, simba_amount: tradeData.simba}
         let res2 = await this.$store.dispatch('invoices/updateTransaction', updateData)
-
-        console.log('update transaction: ', res2)
 
         let res3 = await this.$store.dispatch('invoices/confirmTransaction', this.created_transaction)
 
-        console.log('confirm transaction: ', res3)
-
         this.$nuxt.$router.push({ path: '/exchange/buysell', query: {id: this.created_transaction }})
       }
-
-
-      // Preload BTC address
-      await this.$store.dispatch('getBtcAddress')
 
       await this.checkSingle()
 
