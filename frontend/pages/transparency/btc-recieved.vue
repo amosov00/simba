@@ -9,7 +9,7 @@
             b-table-column(field="date" label="Date" sortable width="50") {{props.row.date}}
             b-table-column(field="txHash" label="TxHash" width="70").has-text-primary.overflow-reset
               b-tooltip(:label="props.row.transactionHash" type="is-black" position="is-bottom").w-100
-                a(:href="'https://etherscan.io/tx/' + props.row.transactionHash" target="_blank").text-clamp {{ props.row.transactionHash }}
+                a(:href="'https://explorer.bitcoin.com/btc/tx/' + props.row.transactionHash" target="_blank" rel="noopener").text-clamp {{ props.row.transactionHash }}
             b-table-column(field="amount" label="Amount, BTC" width="100") {{props.row.amount}}
         div.text-center
           button.btn--outlined.mt-4 more
