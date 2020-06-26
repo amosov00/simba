@@ -6,7 +6,7 @@
       div
         div.is-flex.align-items-center
           div.is-size-5.has-text-weight-bold BTC Address list
-          a(href="#").link.ml-2 add new
+          a(href="#" @click="addNewWalletModal('btc')").link.ml-2 add new
         div.is-italic.has-text-grey-light for withdrawal Bitcoin when redeem SIMBA
     div.mt-3
       div(v-for="(addr, i) in user.user_btc_addresses").mb-2.addr
@@ -18,7 +18,7 @@
       div
         div.is-flex.align-items-center
           div.is-size-5.has-text-weight-bold ETH Address list
-          a(href="#").link.ml-2 add new
+          a(href="#" @click="addNewWalletModal('eth')").link.ml-2 add new
         div.is-italic.has-text-grey-light for issue SIMBA
     div.mt-3
       div(v-for="(addr, i) in user.user_eth_addresses").mb-2.addr
@@ -27,9 +27,13 @@
 </template>
 
 <script>
+  import AddNewWallet from "~/components/AddNewWallet";
+
   export default {
     name: "profile-bill",
     layout: "profile",
+
+    components: {AddNewWallet},
 
     data: () => ({
       eth_wallet_add_modal: false
@@ -42,12 +46,13 @@
     },
 
     methods: {
-      metamaskModal() {
+      addNewWalletModal(type) {
         this.$buefy.modal.open({
           parent: this,
-          component: WalletConnection,
+          component: AddNewWallet,
           hasModalCard: true,
-          trapFocus: true
+          trapFocus: true,
+          props: { type }
         });
       },
 
@@ -64,7 +69,7 @@
 
             let data_to_send = {[type]: addr_list};
 
-            if(await this.$store.dispatch('removeAddress', data_to_send)) {
+            if(await this.$store.dispatch('changeAddresses', data_to_send)) {
               this.$buefy.toast.open({ message: "Address successfully deleted!", type: 'is-primary' })
             } else {
               this.$buefy.toast.open({ message: "Error deleting address!", type: 'is-danger' })

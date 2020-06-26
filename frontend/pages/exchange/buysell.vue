@@ -77,16 +77,16 @@
         } else {
           this.operation = 'Sell'
           this.$store.commit('setTradeData', {prop: 'operation', value: 2})
+
+          this.multi_props["op"] = 'sell'
         }
       }
 
       if(this.$nuxt.$route.query['id']) {
         let single_res = await this.$store.dispatch('invoices/fetchSingle', this.$nuxt.$route.query['id']);
 
-        this.multi_props = {
-          no_create: true,
-          invoice: single_res._id,
-        }
+        this.multi_props["no_create"] = true;
+        this.multi_props["invoice"] = single_res._id;
 
         if(single_res) {
           if(single_res.status === 'waiting') {
