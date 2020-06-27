@@ -5,7 +5,7 @@
       div
         b-field(label="Your wallet (selected MetaMask address)")
           b-input(size="is-small" v-model="selectedAddress" disabled)
-        button.btn--inline(@click="metamaskModal") add new
+        button.btn--inline(@click="metamaskModal" v-if="selectedAddress") add new
         b-field(label="Recipient")
           b-input(size="is-small" v-model="transferData.address")
         b-field(label="Amount")
@@ -56,7 +56,11 @@ export default {
   },
   computed: {
     selectedAddress() {
-      return window.ethereum.selectedAddress;
+      if(window.ethereum) {
+        return window.ethereum.selectedAddress;
+      } else {
+        return false
+      }
     },
     totalAmount() {
       return this.transferData.amount > 0
