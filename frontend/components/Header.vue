@@ -9,7 +9,7 @@
           div.logo-subtext Swiss Quality Stablecoin
       div.column.is-6.has-text-right(v-if="user")
         div.mb-1.text-large
-          nuxt-link(to="/profile").link {{ user.first_name }} {{ user.last_name }}
+          nuxt-link(to="/profile/data/").link {{ user.first_name }} {{ user.last_name }}
         div.has-text-weight-bold.text-large 999 000 050 000 SIMBA
     div.header-menu.columns.is-flex(v-if="user")
       div.column.is-8

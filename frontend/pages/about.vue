@@ -1,13 +1,16 @@
 <template lang="pug">
   div
     div.main-content
-      div About
+      Nothing
 </template>
 
 <script>
+  import Nothing from "~/components/Nothing";
+
   export default {
     name: "about",
     layout: "main",
+    components: {Nothing},
     data() {
       return {
       };
