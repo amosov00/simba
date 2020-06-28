@@ -1,18 +1,18 @@
 <template lang="pug">
-  div.wallet-content
+  div.site-wrapper
     div.wallet-content--hero
       h1.title.is-size-4 Transfer SIMBA tokens
       div
         b-field(label="Your wallet (selected MetaMask address)")
           b-input(size="is-small" v-model="selectedAddress" disabled)
-        button.btn--inline(@click="metamaskModal") add new
+        button.btn--inline(@click="metamaskModal" v-if="selectedAddress") add new
         b-field(label="Recipient")
           b-input(size="is-small" v-model="transferData.address")
         b-field(label="Amount")
           b-input(size="is-small" type="number" min="0" step="10000" v-model="transferData.amount")
         div.wallet-content__totals
           p.subtitle.is-size-6 Fee: 5,000 SIMBA
-          p.title.is-size-6 Total: {{totalAmount}} SIMBA 
+          p.title.is-size-6 Total: {{totalAmount}} SIMBA
             span.subtitle.is-size-6 (0 USDT / {{totalBTC}} BTC)
         button(@click="transferFunds").btn.w-100 Send SIMBA
     hr.mt-4
@@ -50,14 +50,17 @@ export default {
         parent: this,
         component: WalletConnection,
         hasModalCard: true,
-        customClass: "custom-class custom-class-2",
         trapFocus: true
       });
     }
   },
   computed: {
     selectedAddress() {
-      return window.ethereum.selectedAddress;
+      if(window.ethereum) {
+        return window.ethereum.selectedAddress;
+      } else {
+        return false
+      }
     },
     totalAmount() {
       return this.transferData.amount > 0
