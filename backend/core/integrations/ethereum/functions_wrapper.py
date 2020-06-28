@@ -28,14 +28,14 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
     def _get_nonce(self):
         return self.w3.eth.getTransactionCount(self.admin_address)
 
-    def _approve(self, amount: int) -> HexBytes:
+    def _approve(self, amount: int, nonce: int) -> HexBytes:
         tx = self.contract.functions.approve(
             self.admin_address, amount
         ).buildTransaction({
             'gas': GAS,
             'gasPrice': GAS_PRICE,
             'from': self.admin_address,
-            # 'nonce': nonce,
+            'nonce': nonce,
         })
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
@@ -46,15 +46,15 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "minimal simba amount to issue - 50,000")
 
         customer_address = Web3.toChecksumAddress(customer_address)
-        # nonce = self._get_nonce()
-        self._approve(amount)
+        nonce = self._get_nonce()
+        self._approve(amount, nonce)
         tx = self.contract.functions.issue(
             customer_address, amount, comment
         ).buildTransaction({
             'gas': GAS,
             'gasPrice': GAS_PRICE,
             'from': self.admin_address,
-            # 'nonce': nonce + 1,
+            'nonce': nonce + 1,
         })
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
