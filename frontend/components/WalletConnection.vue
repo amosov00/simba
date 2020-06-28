@@ -33,11 +33,7 @@ export default {
   },
   computed: {
     selectedAddress() {
-      if (window.ethereum) {
-        return window.ethereum.selectedAddress;
-      } else {
-        return false;
-      }
+      return window.ethereum.selectedAddress;
     }
   }
 };

@@ -23,7 +23,7 @@ export default {
   layout: "main",
   middleware ({ store, redirect }) {
     if(store.state.user) {
-      redirect('/profile/data/')
+      redirect('/profile')
       return
     }
   },

@@ -1,12 +1,12 @@
 <template lang="pug">
   div
     div.main-content
-      div About
+      div Transparency
 </template>
 
 <script>
   export default {
-    name: "about",
+    name: "transparency",
     layout: "main",
     data() {
       return {

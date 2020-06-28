@@ -2,14 +2,16 @@
   div
     div.is-size-5.has-text-weight-bold Your referral code:
     div.is-flex.mt-2
-      div.mr-2.has-text-weight-medium {{ ref_code }}
-      CopyToClipboard(:value_to_copy="ref_code")
+      div.mr-2.has-text-weight-medium j4FG93hna9oi
+      div
+        img(:src="require('~/assets/images/copy.svg')")
     div.mt-3
       div.is-size-5.has-text-weight-bold Your referral link:
       div.is-flex.mt-2
         div.mr-2.has-text-weight-medium
-          a(:href="ref_link").link {{ ref_link }}
-        CopyToClipboard(:value_to_copy="ref_link")
+          a(href="#").link simba.storage/register?ref=j4FG93hna9oi
+        div
+          img(:src="require('~/assets/images/copy.svg')")
     div.mt-4.mb-2.is-size-6 Get tokens for each deposit of users invited via your link. How it works?
     div.is-size-6
       div 1. You copy the link and send it to your friend.
@@ -24,20 +26,18 @@
         div.is-flex.space-between.has-text-weight-bold.mt-3
           div Total
           div 999,232,050.50
+
 </template>
 
 <script>
 
-  import CopyToClipboard from "~/components/CopyToClipboard";
-
   export default {
     name: "profile-partner",
     layout: "profile",
-    components: { CopyToClipboard },
     computed: {
     },
     data: () => ({
-      ref_code: '',
+
       table1: {
         data: [
           { date: '01/06/2020, 09:49:15', email: 'example@test.test', name: 'Константин Константинопольский', level: 1},
@@ -62,21 +62,6 @@
       }
     }),
     methods: {
-    },
-
-    created() {
-      if(this.ref_link) {
-        let url_data = new URL(this.ref_link)
-        this.ref_code = url_data.searchParams.get("referral_id")
-      }
-    },
-
-    async asyncData({store}) {
-      let res = await store.dispatch('fetchRefLink');
-
-      if(store.dispatch('fetchRefLink')) {
-        return { ref_link: res.URL }
-      }
     }
   };
 </script>
