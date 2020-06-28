@@ -28,14 +28,14 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
     def _get_nonce(self):
         return self.w3.eth.getTransactionCount(self.admin_address)
 
-    def _approve(self, amount: int, nonce: int) -> HexBytes:
+    def _approve(self, amount: int) -> HexBytes:
         tx = self.contract.functions.approve(
             self.admin_address, amount
         ).buildTransaction({
             'gas': GAS,
             'gasPrice': GAS_PRICE,
             'from': self.admin_address,
-            'nonce': nonce,
+            # 'nonce': nonce,
         })
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
