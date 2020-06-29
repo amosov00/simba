@@ -20,7 +20,8 @@ from schemas.user import (
     User2faURL,
     User2faConfirm,
     UserReferralURLResponse,
-    User2faDelete
+    User2faDelete,
+    UserReferralsInfo
 )
 
 __all__ = ["router"]
@@ -99,6 +100,7 @@ async def create_2fa(user: User = Depends(get_user)):
 async def confirm_2fa(user: User = Depends(get_user), payload: User2faConfirm = Body(...)):
     return await UserCRUD.confirm_2fa(user, payload)
 
+
 @router.get("/btc-address/")
 async def account_get_user(
         user: User = Depends(get_user)
@@ -114,3 +116,8 @@ async def account_get_user(
 @router.delete("/2fa/")
 async def delete_2fa(user: User = Depends(get_user), payload: User2faDelete = Body(...)):
     return await UserCRUD.delete_2fa(user, payload)
+
+
+@router.get("/referrals/", response_model=UserReferralsInfo)
+async def get_referrals_info(user: User = Depends(get_user)):
+    return await UserCRUD.referrals_info(user)
