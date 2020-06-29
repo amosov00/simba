@@ -24,7 +24,8 @@ __all__ = [
     "UserRecoverLink",
     "User2faConfirm",
     "UserReferralURLResponse",
-    "User2faDelete"
+    "User2faDelete",
+    "UserReferralsInfo"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -208,3 +209,17 @@ class User2faConfirm(BaseModel):
 
 class User2faDelete(BaseModel):
     pin_code: str = Field(...)
+
+
+class UserReferralInfo(BaseModel):
+    created_at: datetime = Field(...)
+    email: str = Field(...)
+    first_name: Optional[str] = Field(default=None)
+    last_name: Optional[str] = Field(default=None)
+    level: int = Field(...)
+
+
+class UserReferralsInfo(BaseModel):
+    referrals: Optional[List[Optional[UserReferralInfo]]] = Field(default=[])
+
+
