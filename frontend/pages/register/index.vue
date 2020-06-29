@@ -17,7 +17,7 @@
                 span.validaton-error {{ errors[0] }}
             b-field
               //- ValidationProvider(rules="required|email" v-slot="{ errors }" name="email")
-              b-input(native-type="text" size="is-small" placeholder="Referral id" v-model="register_form.referral_id")
+              b-input(native-type="text" size="is-small" placeholder="Partner ID" v-model="register_form.referral_id")
                 //- span.validaton-error {{ errors[0] }}
             b-field
               ValidationProvider(rules="required|email" v-slot="{ errors }" name="email")
@@ -66,14 +66,9 @@
       async submit() {
         this.loading = true;
         let resp = await this.$store.dispatch('signUp', this.register_form);
-
-        if(!resp) {
-          this.$buefy.toast.open({message: 'Error: failed to register', type: 'is-danger'})
-        } else {
-          this.$buefy.toast.open({message: 'Successfully registered! Please check your email to activate your account.', type: 'is-success', duration: '6000'})
+        if(resp) {
           this.$nuxt.$router.replace({ path: '/'});
         }
-
         this.loading = false;
       }
     },

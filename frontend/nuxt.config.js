@@ -11,7 +11,9 @@ export default {
     link: [
       {rel: "icon", type: "image/x-icon", href: "/favicon.ico"},
       {rel:"stylesheet", href:"https://fonts.googleapis.com/css2?family=Roboto&display=swap"},
-      {href: "https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap", rel: "stylesheet"}
+      {href: "https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap", rel: "stylesheet"},
+      {href: "/favicon.ico", rel: "shortcut icon"},
+      // rel="shortcut icon" href="https://your-site.com/your-icon.png"
     ]
   },
 

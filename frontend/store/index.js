@@ -1,13 +1,13 @@
 import _, { stubArray } from "lodash";
-import { ToastProgrammatic as Toast } from 'buefy'
+import { ToastProgrammatic as Toast } from "buefy";
 
 export const state = () => ({
   user: null,
-  btc_address: '',
-  contract: '',
+  btc_address: "",
+  contract: "",
   tradeData: {
     operation: 1,
-    eth_address: '',
+    eth_address: "",
     simba: 0,
     btc: 0
   }
@@ -26,24 +26,29 @@ export const mutations = {
   deleteUser: state => (state.user = null),
   setContract: (state, data) => (state.contract = data),
   setTradeData: (state, payload) => {
-    state.tradeData[payload.prop] = payload.value
+    state.tradeData[payload.prop] = payload.value;
   },
-  setTwoFactor: (state, payload) => state.user.two_factor = payload,
-  setSignedAddresses: (state, payload) => state.user.signed_addresses.push(payload)
+  setTwoFactor: (state, payload) => (state.user.two_factor = payload),
+  setSignedAddresses: (state, payload) =>
+    state.user.signed_addresses.push(payload)
 };
 
 export const actions = {
   async changeAddresses({}, data) {
-    return await this.$axios.put('/account/user/', data)
+    return await this.$axios
+      .put("/account/user/", data)
       .then(() => true)
-      .catch(() => false)
+      .catch(() => false);
   },
 
-  async fetchContracts({commit}) {
-    return await this.$axios.get('/meta/eth/contract/').then(res => {
-      commit('setContract', res.data)
-      return true
-    }).catch(_ => false)
+  async fetchContracts({ commit }) {
+    return await this.$axios
+      .get("/meta/eth/contract/")
+      .then(res => {
+        commit("setContract", res.data);
+        return true;
+      })
+      .catch(_ => false);
   },
 
   async activateAccount({}, data) {
@@ -55,37 +60,44 @@ export const actions = {
         return true;
       })
       .catch(_ => {
-        return false
+        return false;
       });
   },
 
-  async getUser({commit}) {
-    return await this.$axios.get('/account/user/').then(resp => {
-      if(resp.status === 200 ){
-        commit('setUser', resp.data)
-        return true
-      }
+  async getUser({ commit }) {
+    return await this.$axios
+      .get("/account/user/")
+      .then(resp => {
+        if (resp.status === 200) {
+          commit("setUser", resp.data);
+          return true;
+        }
 
-      return false
-    }).catch(_ => false)
+        return false;
+      })
+      .catch(_ => false);
   },
 
   async fetchRefLink({}) {
-    return await this.$axios.get('/account/referral_link/').then(resp => {
-      if(resp.status === 200 ){
-        return resp.data
-      }
-      return false
-    }).catch(_ => false)
+    return await this.$axios
+      .get("/account/referral_link/")
+      .then(resp => {
+        if (resp.status === 200) {
+          return resp.data;
+        }
+        return false;
+      })
+      .catch(_ => false);
   },
 
-
   async getBtcAddress({ commit }) {
-    return await this.$axios.get('/account/btc-address/')
+    return await this.$axios
+      .get("/account/btc-address/")
       .then(resp => {
-        commit('setBtcAddress', resp.data.address);
+        commit("setBtcAddress", resp.data.address);
         return true;
-      }).catch(_ => false)
+      })
+      .catch(_ => false);
   },
 
   async signUp({ commit }, data) {
@@ -93,16 +105,28 @@ export const actions = {
     return await this.$axios
       .post("/account/signup/", data)
       .then(resp => {
+        Toast.open({
+          message:
+            "Successfully registered! Please check your email to activate your account.",
+          type: "is-success",
+          duration: "6000"
+        });
         return true;
       })
-      .catch(_ => {
-        return false
+      .catch(resp => {
+        Toast.open({
+          message: resp.response.data[0].message,
+          type: "is-danger",
+          duration: "6000"
+        });
+        return false;
       });
   },
   async changeProfile({}, data) {
     console.log(data);
 
-    return await this.$axios.put("/account/user/", JSON.stringify(data))
+    return await this.$axios
+      .put("/account/user/", JSON.stringify(data))
       .then(_ => {
         return true;
       })
@@ -111,7 +135,8 @@ export const actions = {
       });
   },
   async changePassword({}, data) {
-    return await this.$axios.post("/account/change_password/", data)
+    return await this.$axios
+      .post("/account/change_password/", data)
       .then(_ => {
         return true;
       })
@@ -120,7 +145,8 @@ export const actions = {
       });
   },
   async startRecover({}, data) {
-    return await this.$axios.post("/account/recover/", data)
+    return await this.$axios
+      .post("/account/recover/", data)
       .then(_ => {
         return true;
       })
@@ -129,7 +155,8 @@ export const actions = {
       });
   },
   async finishRecover({}, data) {
-    return await this.$axios.put("/account/recover/", data)
+    return await this.$axios
+      .put("/account/recover/", data)
       .then(_ => {
         return true;
       })
@@ -137,27 +164,36 @@ export const actions = {
         return false;
       });
   },
-  async confirm2fa({commit}, data) {
-    return await this.$axios.post('/account/2fa/', {
-      token: data.token,
-      pin_code: data.pin_code
-    }).then(() => {
-      commit('setTwoFactor', true)
-      Toast.open({message: '2FA successfuly enabled!', type: 'is-success'})
-    }).catch(() => {
-      Toast.open({message: 'Something went wrong!', type: 'is-danger'})
-    })
+  async confirm2fa({ commit }, data) {
+    return await this.$axios
+      .post("/account/2fa/", {
+        token: data.token,
+        pin_code: data.pin_code
+      })
+      .then(() => {
+        commit("setTwoFactor", true);
+        Toast.open({ message: "2FA successfuly enabled!", type: "is-success" });
+      })
+      .catch(() => {
+        Toast.open({ message: "Something went wrong!", type: "is-danger" });
+      });
   },
-  async delete2fa({commit}, pin_code) {
-    return await this.$axios.delete('/account/2fa/', {
-      data: {
-        pin_code: `${pin_code}`
-      }
-    }).then(() => {
-      commit('setTwoFactor', false)
-      Toast.open({message: '2FA successfuly disabled!', type: 'is-success'})
-    }).catch(() => {
-      Toast.open({message: 'Something went wrong!', type: 'is-danger'})
-    })
+  async delete2fa({ commit }, pin_code) {
+    return await this.$axios
+      .delete("/account/2fa/", {
+        data: {
+          pin_code: `${pin_code}`
+        }
+      })
+      .then(() => {
+        commit("setTwoFactor", false);
+        Toast.open({
+          message: "2FA successfuly disabled!",
+          type: "is-success"
+        });
+      })
+      .catch(() => {
+        Toast.open({ message: "Something went wrong!", type: "is-danger" });
+      });
   }
 };
