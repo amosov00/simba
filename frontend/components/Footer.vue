@@ -6,7 +6,7 @@
           InlineSvg(:src="require(`~/assets/images/socials/${soc.icon}`)").the-footer__icon
       div.the-footer__copyright © 2019–2020 SIMBA
       div.mt-1
-        a(href="#").the-footer__link Terms of Use
+        a(href="https://simba.storage/terms-and-conditions" target="_blank" rel="noopener").the-footer__link Terms of Use
         a(href="#").the-footer__link Privacy Policy
         a(href="#").the-footer__link Cookies Policy
 
