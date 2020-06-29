@@ -10,7 +10,7 @@
       div.column.is-6.has-text-right(v-if="user")
         div.mb-1.text-large
           nuxt-link(to="/profile/data/").link {{ user.first_name }} {{ user.last_name }}
-        div.has-text-weight-bold.text-large {{simbaBalance}} SIMBA
+        div.has-text-weight-bold.text-large {{numberWithCommas(simbaBalance)}} SIMBA
     div.header-menu.columns.is-flex(v-if="user")
       div.column.is-8
         nuxt-link(:to="menuItem.to" v-for="(menuItem, i) in menu" :key="i" active-class="link--active").menu-item.link {{ menuItem.title }}
@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import _ from 'lodash'
+import _ from "lodash";
 export default {
   name: "Header",
   computed: {
@@ -37,10 +37,15 @@ export default {
     ],
     simbaBalance: 0
   }),
+  methods: {
+    numberWithCommas(value) {
+      return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+  },
   async created() {
     if (_.isEmpty(this.$store.getters["contract/SIMBA"])) {
-    await this.$store.dispatch("contract/fetchContract");
-  }
+      await this.$store.dispatch("contract/fetchContract");
+    }
     this.$contract()
       .SIMBA.methods.balanceOf(window.ethereum.selectedAddress)
       .call()
