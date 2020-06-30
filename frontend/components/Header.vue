@@ -46,12 +46,14 @@ export default {
     if (_.isEmpty(this.$store.getters["contract/SIMBA"])) {
       await this.$store.dispatch("contract/fetchContract");
     }
-    this.$contract()
-      .SIMBA.methods.balanceOf(window.ethereum.selectedAddress)
-      .call()
-      .then(res => {
-        this.simbaBalance = res;
-      });
+    if (window.ethereum.selectedAddress) {
+      this.$contract()
+        .SIMBA.methods.balanceOf(window.ethereum.selectedAddress)
+        .call()
+        .then(res => {
+          this.simbaBalance = res;
+        });
+    }
   }
 };
 </script>
