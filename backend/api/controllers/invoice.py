@@ -35,7 +35,7 @@ async def create_invoice(user: User = Depends(get_user), data: InvoiceCreate = B
     if invoice.invoice_type == InvoiceType.BUY:
         invoice.target_btc_address = user.btc_address
     elif invoice.invoice_type == InvoiceType.SELL:
-        pass
+        invoice.target_eth_address = user.user_eth_addresses
 
     return await InvoiceCRUD.create_invoice(invoice)
 

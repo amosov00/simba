@@ -28,7 +28,7 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
     async def request(
             self,
             endpoint: str,
-            request_type: Literal["GET", "POST", "DELETE"] = "GET",
+            request_type: Literal["GET", "POST", "DELETE"] = "GET", # Noqa
             params: dict = None,
             data: dict = None,
             with_token: bool = False

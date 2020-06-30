@@ -8,6 +8,8 @@ from sentry_sdk import capture_message
 from .crypto import SimbaWrapper
 from .crypto.base import CryptoValidation
 from database.crud import BTCTransactionCRUD, InvoiceCRUD
+from core.mechanics.crypto.sst import SSTWrapper
+from database.crud import UserCRUD
 from schemas import (
     InvoiceInDB,
     InvoiceType,
@@ -102,6 +104,9 @@ class InvoiceMechanics(CryptoValidation):
         self.invoice.finised_at = datetime.now()
 
         await self.update_invoice()
+        sst_w = SSTWrapper()
+        user = UserCRUD.find_by_id(self.invoice.user_id)
+        sst_w.send_sst_to_referrals(user, self.invoice.btc_amount)
         # TODO: Call method which issue SST tokens (Try to call it without celery) (invomcing btc == simba )
         return True
 
@@ -152,6 +157,9 @@ class InvoiceMechanics(CryptoValidation):
             transaction: EthereumTransaction,
             **kwargs
     ):
+        print("DEBUG BELOW")
+        print(transaction)
+        print(kwargs)
         return False
 
     async def proceed_new_transaction(
