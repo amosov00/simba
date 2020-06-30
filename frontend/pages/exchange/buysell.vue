@@ -98,9 +98,11 @@
         if(single_res) {
 
           if(single_res.invoice_type === 1) {
-            this.operation = 'Buy'
+            this.operation = 'Buy';
+            this.multi_props["op"] = 'buy'
           } else {
             this.operation = 'Sell'
+            this.multi_props["op"] = 'sell'
             this.tradeData.steps.list.splice(3, 0, 'BtcSentStatus')
           }
 

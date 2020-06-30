@@ -11,12 +11,14 @@
           div {{ item.simba_amount }}
           div {{ (new Date(item.created_at)).toLocaleString() }}
           div {{ getType(item.invoice_type) }}
-          div {{ item.status }}
+          div {{ getStatus(item) }}
       div.has-text-centered
         button.mt-3.btn--outlined(@click="showMore" v-if="showBtn") More
 </template>
 
 <script>
+  import moment from 'moment';
+
   export default {
     name: "exchange-index",
     layout: 'main',
@@ -41,6 +43,36 @@
     },
 
     methods: {
+      getStatus(item) {
+        if(item.status === 'waiting') {
+          let current = +Date.now();
+          let dt = +moment.utc(item.created_at).toDate();
+
+          let plus2hours = +dt + (2*60*60*1000)
+
+
+          let diff = plus2hours - current;
+
+          if(diff < 0) {
+            return 'Expired'
+          }
+
+          let remain = moment.duration(diff);
+
+          const twoDigits = (n) => {
+            if(n < 10) {
+              return `0${n}`
+            }
+
+            return n
+          }
+
+          return `${remain.hours()}:${twoDigits(remain.minutes())}:${twoDigits(remain.seconds())}`
+        }
+
+        return item.status
+      },
+
       showMore() {
         this.amounToView += 10
 
@@ -59,7 +91,7 @@
       }
     },
 
-    async asyncData({store}) {
+    async asyncData({store}){
       await store.dispatch('invoices/fetchInvoices');
       return {
         billsList: JSON.parse(JSON.stringify(store.getters['invoices/invoices'])).reverse()
