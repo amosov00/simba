@@ -32,7 +32,7 @@ else:
     )
     SST_CONTRACT = EthereumContract(
         title="SST",
-        address="0xC17010E8d258631636827B3D8baC6830Fc5163Ff",
+        address="0xc17010e8d258631636827b3d8bac6830fc5163ff",
         abi_filepath=path.join(BASE_DIR, "config", "sst_abi_rinkeby.json"),
         is_test=IS_PRODUCTION is False,
         provider_http_link=INFURA_HTTP_URL,
