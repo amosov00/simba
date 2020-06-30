@@ -13,13 +13,13 @@
               span.list__item--value.blue {{simbaFormat(totalAssets)}} SIMBA
             li.list__item
               span.list__item--name Total USD equivalent:
-              span.list__item--value 50,000.78 USDT
+              span.list__item--value {{simbaFormat(totalEquivalent)}} USDT
             li.list__item
               span.list__item--name Issued:
-              span.list__item--value 850,000,000 SIMBA
+              span.list__item--value {{simbaFormat(issued)}} SIMBA
             li.list__item
               span.list__item--name Redeemed:
-              span.list__item--value 350,000,000 SIMBA
+              span.list__item--value {{simbaFormat(redeemed)}} SIMBA
             li.list__item
               span.list__item--name Quarantined:
               span.list__item--value 10,000,000 SIMBA
@@ -28,7 +28,7 @@
               span.list__item--value 490,000,000 SIMBA
             li.list__item
               span.list__item--name SIMBA holders:
-              span.list__item--value.blue 574
+              span.list__item--value.blue 0
             li.list__item
               span.list__item--name Ethereum Contract:
               a.list__item--value.blue(href="https://rinkeby.etherscan.io/address/0x60e1bf648580aafbff6c1bc122bb1ae6be7c1352" rel="nofollow noopener" target="_blank") SIMBA Stablecoin (SIMBA) 0x7806a1b2b6056cda57d3e889a9513615733e2b66
@@ -59,7 +59,7 @@
 
 <script>
 import List from "~/components/List";
-import formatCurrency from '~/mixins/formatCurrency'
+import formatCurrency from "~/mixins/formatCurrency";
 export default {
   name: "transparency",
   layout: "main",
@@ -70,16 +70,51 @@ export default {
   },
   data() {
     return {
-      totalAssets: 0
+      totalAssets: 0,
+      totalEquivalent: 0,
+      issued: 0,
+      redeemed: 0
     };
   },
-  created() {
-    this.$contract()
+  async created() {
+    await this.$contract().SIMBA.getPastEvents(
+      "OnIssued",
+      {
+        fromBlock: 0,
+        toBlock: "latest"
+      },
+      (err, events) => {
+        this.issued = events.reduce((total, el) => {
+          return total + el.returnValues.value * 1;
+        }, 0);
+      }
+    );
+    await this.$contract().SIMBA.getPastEvents(
+      "OnRedeemed",
+      {
+        fromBlock: 0,
+        toBlock: "latest"
+      },
+      (err, events) => {
+        this.redeemed = events.reduce((total, el) => {
+          return total + el.returnValues.value * 1;
+        }, 0);
+      }
+    );
+    await this.$contract()
       .SIMBA.methods.totalSupply()
       .call()
       .then(res => {
         this.totalAssets = res;
         return;
+      });
+    await this.$axios
+      .get("https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD")
+      .then(res => {
+        this.totalEquivalent = (
+          ((this.totalAssets * 1) / 100000000) *
+          res.data.USD
+        ).toFixed(2);
       });
   }
 };
