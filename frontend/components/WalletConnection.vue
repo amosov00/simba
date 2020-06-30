@@ -29,6 +29,7 @@ export default {
   methods: {
     signAddress() {
       this.$store.dispatch("metamask/signAddress");
+      this.$parent.close();
     }
   },
   computed: {

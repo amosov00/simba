@@ -17,7 +17,7 @@
                 span.validaton-error {{ errors[0] }}
             b-field
               //- ValidationProvider(rules="required|email" v-slot="{ errors }" name="email")
-              b-input(native-type="text" size="is-small" placeholder="Referral id" v-model="register_form.referral_id")
+              b-input(native-type="text" size="is-small" placeholder="Partner ID" v-model="register_form.referral_id")
                 //- span.validaton-error {{ errors[0] }}
             b-field
               ValidationProvider(rules="required|email" v-slot="{ errors }" name="email")
@@ -40,46 +40,47 @@
 </template>
 
 <script>
-  import { ValidationProvider, ValidationObserver } from 'vee-validate';
+import { ValidationProvider, ValidationObserver } from "vee-validate";
 
-  export default {
-    name: "register",
-    layout: "main",
-    components: {
-      ValidationProvider, ValidationObserver
-    },
-    data() {
-      return {
-        register_form: {
-          first_name: "",
-          last_name: "",
-          email: "",
-          repeat_password: "",
-          password: "",
-          referral_id: ""
-        },
-        terms_and_conditions: null,
-        loading: false
-      };
-    },
-    methods: {
-      async submit() {
-        this.loading = true;
-        let resp = await this.$store.dispatch('signUp', this.register_form);
-
-        if(!resp) {
-          this.$buefy.toast.open({message: 'Error: failed to register', type: 'is-danger'})
-        } else {
-          this.$buefy.toast.open({message: 'Successfully registered! Please check your email to activate your account.', type: 'is-success', duration: '6000'})
-          this.$nuxt.$router.replace({ path: '/'});
-        }
-
-        this.loading = false;
+export default {
+  name: "register",
+  layout: "main",
+  components: {
+    ValidationProvider,
+    ValidationObserver
+  },
+  data() {
+    return {
+      register_form: {
+        first_name: "",
+        last_name: "",
+        email: "",
+        repeat_password: "",
+        password: "",
+        referral_id: ""
+      },
+      terms_and_conditions: null,
+      loading: false
+    };
+  },
+  created() {
+    if (this.$route.query.referral_id) {
+      this.$cookies.set("referral_id", this.$route.query.referral_id);
+    }
+    this.register_form.referral_id =
+      this.$route.query.referral_id || this.$cookies.get("referral_id");
+  },
+  methods: {
+    async submit() {
+      this.loading = true;
+      let resp = await this.$store.dispatch("signUp", this.register_form);
+      if (resp) {
+        this.$nuxt.$router.replace({ path: "/" });
       }
-    },
-  };
+      this.loading = false;
+    }
+  }
+};
 </script>
 
-<style lang="sass" scoped>
-
-</style>
+<style lang="sass" scoped></style>

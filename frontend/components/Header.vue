@@ -9,7 +9,7 @@
           div.logo-subtext Swiss Quality Stablecoin
       div.column.is-6.has-text-right(v-if="user")
         ProfileDropdown(:name="`${user.first_name} ${user.last_name}`")
-        div.has-text-weight-bold.text-large 999 000 050 000 SIMBA
+        div.has-text-weight-bold.text-large {{simbaFormat(simbaBalance)}} SIMBA
     div.header-menu.columns.is-flex(v-if="user")
       div.column.is-8
         nuxt-link(:to="menuItem.to" v-for="(menuItem, i) in menu" :key="i" active-class="link--active").menu-item.link {{ menuItem.title }}
@@ -17,27 +17,46 @@
 </template>
 
 <script>
-  import ProfileDropdown from "~/components/ProfileDropdown";
-
-  export default {
-    name: 'Header',
-
-    components: {
-      ProfileDropdown
-    },
-
-    computed: {
-      user() {
-        return this.$store.getters.user;
+import ProfileDropdown from "~/components/ProfileDropdown";
+import _ from "lodash";
+import formatCurrency from "../mixins/formatCurrency";
+export default {
+  name: "Header",
+  mixins: [formatCurrency],
+  components: {
+    ProfileDropdown
+  },
+  computed: {
+    user() {
+      return this.$store.getters.user;
+    }
+  },
+  data: () => ({
+    menu: [
+      { title: "Exchange", to: "/exchange/" },
+      { title: "About", to: "/about" },
+      { title: "How to use", to: "/howtouse" },
+      { title: "Transparency", to: "/transparency" },
+      { title: "Wallet", to: "/wallet" },
+      { title: "Contacts", to: "/contacts" }
+    ],
+    simbaBalance: 0
+  }),
+  async created() {
+    if (this.$cookies.get("token")) {
+      if (_.isEmpty(this.$store.getters["contract/SIMBA"])) {
+        await this.$store.dispatch("contract/fetchContract");
+      if (window.ethereum.selectedAddress) {
+        this.$contract()
+          .SIMBA.methods.balanceOf(window.ethereum.selectedAddress)
+          .call()
+          .then(res => {
+            this.simbaBalance = res;
+          });
       }
-    },
-    data: () => ({
-      menu: [
-          { title: 'Exchange', to: '/exchange/' }, { title: 'About', to: '/about' }, { title: 'How to use', to: '/howtouse' },
-          { title: 'Transparency', to: '/transparency' }, { title: 'Wallet', to: '/wallet' }, { title: 'Contacts', to: '/contacts' }
-        ]
-    })
+    }
   }
+};
 </script>
 
 <style lang="sass">
