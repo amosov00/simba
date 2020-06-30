@@ -18,6 +18,8 @@
   import Status from "@/components/Trade/Status"
   import Final from "@/components/Trade/Final"
 
+  import { ToastProgrammatic as Toast } from 'buefy'
+
   export default {
     name: "exchange-buysell",
     layout: 'main',
@@ -55,6 +57,8 @@
       } else {
         console.log('metamask not found')
 
+        Toast.open({message: 'Metamask is not installed!', type:'is-warning', duration: 4000})
+
         redirect('/exchange/')
       }
     },
@@ -73,10 +77,13 @@
       if(this.$nuxt.$route.query['op']) {
         if(this.$nuxt.$route.query['op'] === 'buy') {
           this.operation = 'Buy';
-          this.$store.commit('setTradeData', {prop: 'operation', value: 1})
+          this.$store.commit('exchange/setTradeData', {prop: 'operation', value: 1})
+          this.multi_props["op"] = 'buy'
         } else {
           this.operation = 'Sell'
-          this.$store.commit('setTradeData', {prop: 'operation', value: 2})
+          this.$store.commit('exchange/setTradeData', {prop: 'operation', value: 2})
+
+          this.tradeData.steps.list.splice(3, 0, 'BtcSentStatus')
 
           this.multi_props["op"] = 'sell'
         }
@@ -89,6 +96,14 @@
         this.multi_props["invoice"] = single_res._id;
 
         if(single_res) {
+
+          if(single_res.invoice_type === 1) {
+            this.operation = 'Buy'
+          } else {
+            this.operation = 'Sell'
+            this.tradeData.steps.list.splice(3, 0, 'BtcSentStatus')
+          }
+
           if(single_res.status === 'waiting') {
             this.tradeData.steps.current = 'BillPayment'
           }
@@ -107,24 +122,13 @@
         }
 
       }
-
-/*      if(this.$nuxt.$route.query['op'])*/
-
-/*      let web3_metamask = new Web3(window.ethereum);
-
-      this.tradeData.ethAddress = await web3_metamask.eth.getAccounts().then(res => res[0]);*/
-
-/*      setTimeout(_ => {
-        this.tradeData.ethAddress = web3_metamask.selectedAddress;
-        console.log(window.ethereum.selectedAddress)
-      }, 300)*/
     },
 
     data: () => {
       return {
         stepFail: null,
         multi_props: {},
-        operation: 'Buy',
+        operation: '',
         tradeData: {
           ethAddress: '',
           steps: {

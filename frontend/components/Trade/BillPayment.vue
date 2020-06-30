@@ -2,7 +2,7 @@
   div
     div(v-if="!expired")
       h3.text-large.has-text-weight-bold Bill payment
-      div.mt-2
+      div.mt-2(v-if="isBuy")
         div.is-flex.align-items-center
           img(src="@/assets/images/bitcoin.svg").mr-2
           div.text-large.is-flex.align-items-center Send
@@ -14,12 +14,30 @@
             span {{ btc_address }}
         div.is-flex.align-items-center.mt-2
           img(src="@/assets/images/logo_sm.png").mr-2
-          div.text-large.is-flex.align-items-center To accept
+          div.text-large.is-flex.align-items-center Receive
             = ' '
             span.has-text-weight-bold.ml-1 {{ tradeData.simba }} SIMBA
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
             span {{ updated_invoice_data.target_eth_address }}
+      div.mt-2(v-else)
+        div.is-flex.align-items-center
+          img(src="@/assets/images/logo_sm.png").mr-2
+          div.text-large.is-flex.align-items-center Send
+            = ' '
+            span.has-text-weight-bold.ml-1 {{ tradeData.simba }} SIMBA
+            span.bill-arrow
+              img(:src="require('@/assets/images/arrow-right.svg')")
+            span {{ updated_invoice_data.target_eth_address }}
+        div.is-flex.align-items-center.mt-2
+          img(src="@/assets/images/bitcoin.svg").mr-2
+          div.text-large.is-flex.align-items-center Receive
+            = ' '
+            span.has-text-weight-bold.ml-1 {{ parseFloat(tradeData.btc) }} BTC
+            = ' '
+            span.bill-arrow
+              img(:src="require('@/assets/images/arrow-right.svg')")
+            span {{ btc_address }}
     div.mt-4(v-if="expired")
       div.has-text-weight-bold.is-size-5 Bill expired
       div.mt-3.is-flex.align-items-center
@@ -33,21 +51,6 @@
         div We verify payment automatically.
         div As soon as payment is made, the status of this state will change to another.
       div(v-if="expired") Time for each bill is limited with 2 hours.
-    //-- div.position-relative(style="margin-top: 120px")
-      div.mt-2 Created transaction: {{ created_transaction }}
-      div.mt-2 Checking your transaction every 10 sec...
-      div.mt-2 Status: {{ status }}
-      div.mt-4(v-if="Object.keys(updated_invoice_data).length !== 0") Recived info:
-        span(v-if="updated_invoice_data.btc_txs.length === 0") empty
-      div.mt-1(v-if="Object.keys(updated_invoice_data).length !== 0")
-        div(v-for="(item, i) in updated_invoice_data.btc_txs" :key="i").mt-4 {{ i+1 }}
-          |) {{ item._id }}
-          div.mt-2 simba_tokens_issued: {{ item.simba_tokens_issued }}
-          div.mt-2 confirmations: {{ item.confirmations }}
-          div.mt-2 total: {{ item.total }}
-      div.mt-4
-        b-input(placeholder="transaction hash" v-model="transaction_hash")
-        b-button.btn.mt-2(@click="setTransaction") Set transaction hash
 
 </template>
 
@@ -64,7 +67,14 @@
     },
 
     computed: {
+      isBuy(){
+        return this.multi_props.op === 'buy';
+      },
       btc_address() {
+        if(!this.isBuy) {
+          return this.updated_invoice_data.target_btc_address;
+        }
+
         return this.$store.getters.btc_address;
       },
       tradeData() {
@@ -124,13 +134,20 @@
         this.created_transaction = this.multi_props['invoice'];
       } else {
 
+
         let tradeData = this.$store.getters['exchange/tradeData'];
+
         let res = await this.$store.dispatch('invoices/createTransaction', tradeData.operation);
 
         this.created_transaction = res._id
 
         let eth_address = this.$store.getters['exchange/tradeData']['eth_address'];
         let btc_address = this.$store.getters['btc_address'];
+
+        if(this.multi_props.op === 'sell') {
+          btc_address = this.$store.getters['exchange/tradeData']['btc_target_wallet']
+        }
+
         let updateData = { id: this.created_transaction, eth_address, btc_address, simba_amount: tradeData.simba}
         let res2 = await this.$store.dispatch('invoices/updateTransaction', updateData)
 

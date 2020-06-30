@@ -2,17 +2,18 @@
   div
     h3.text-large.has-text-weight-bold Create payment bill
     div.is-flex.mt-2.align-items-center.space-between
-      div.is-flex.align-items-center
+      div.is-flex.align-items-center(:class="{ 'flex-row-reverse': isBuy}")
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
-          money(v-model="simba" v-bind="money" v-on:input="convert").smb-input
-          //- input(v-model="simba" type="text" v-money="money" v-on:input="convert").smb-input
+          //--money(v-model.lazy="simba" v-bind="money" change.native="convert").smb-input
+          input(v-model="simba" type="text" @input="convert").smb-input
         span.mr-2.ml-2
           | =
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
-          input(v-model="btc" type="text" v-on:input="convertBTCtoSimba").smb-input
-      b-button.btn(@click="confirm" :loading="loading") Confirm
-    div.is-flex.has-text-centered
-      div.smb-input-wrapper.mr-4.mt-2 SIMBA
+          input(v-model="btc" type="text" @input="convertBTCtoSimba($event)").smb-input
+      b-button.btn(@click="confirm") Create
+    div.is-flex.has-text-centered(:class="{ 'flex-row-reverse': isBuy, 'justify-content-end': isBuy}")
+      div.smb-input-wrapper.mt-2 SIMBA
+      span.mr-4
       div.smb-input-wrapper.mt-2 BTC
     div(v-if="errors").error.has-text-danger.mt-4 {{ errors[0] }}
 </template>
@@ -25,11 +26,15 @@
 
     components: {Money},
 
+    props: {
+      multi_props: Object
+    },
+
     data: () => ({
+      isConverting: false,
       errors: [],
       btc: 0.00200000,
       simba: 200000,
-      loading: false,
       money: {
         thousands: ' ',
         precision: 0,
@@ -37,6 +42,13 @@
       },
       invoice_id: ''
     }),
+
+    computed: {
+      isBuy() {
+        return this.multi_props.op === 'buy'
+      },
+    },
+
     methods: {
       async confirm() {
 
@@ -45,31 +57,6 @@
           return
         }
 
-        this.loading = true
-
-/*        this.$store.commit('exchange/setTradeData', { prop: 'simba', value: this.simba })
-        this.$store.commit('exchange/setTradeData', { prop: 'btc', value: +this.btc })
-
-        let tradeData = this.$store.getters['exchange/tradeData'];
-        let res = await this.$store.dispatch('invoices/createTransaction', tradeData.operation);
-
-        this.invoice_id = res._id
-
-        console.log(tradeData)
-
-        let eth_address = tradeData['eth_address'];
-        let updateData = { id: this.invoice_id, eth_address, simba_amount: tradeData.simba}
-
-        console.log(updateData);
-
-        let res2 = await this.$store.dispatch('invoices/updateTransaction', updateData)
-
-        console.log('update transaction: ', res2)
-
-        let res3 = await this.$store.dispatch('invoices/confirmTransaction', this.invoice_id)
-
-        console.log('confirm transaction: ', res3)*/
-
         this.$store.commit('exchange/setTradeData', { prop: 'simba', value: this.simba })
         this.$store.commit('exchange/setTradeData', { prop: 'btc', value: this.btc })
 
@@ -77,6 +64,11 @@
       },
 
       convert() {
+        console.log('convert()')
+
+        if(this.isConverting) {
+          return
+        }
 
         let test = (this.simba/100000000).toFixed(8);
 
@@ -87,14 +79,20 @@
         }
       },
 
-      convertBTCtoSimba() {
-        let test = (this.btc*100000000).toFixed(0);
+      convertBTCtoSimba(e) {
+        this.isConverting = true
+        //let test = (this.btc*100000000).toFixed(0);
+        let test = e.target.value;
 
         if(isNaN(test)) {
+          this.btc = 0
           this.simba = 0
         } else {
-          this.simba = test;
+          this.btc = test;
+          this.simba = (this.btc*100000000)
         }
+
+        this.isConverting = false
       }
     }
   }

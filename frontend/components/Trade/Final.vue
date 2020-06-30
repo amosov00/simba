@@ -10,7 +10,7 @@
         div.mt-2 Wallet:
           =' '
           a(:href="'https://etherscan.io/address/' + multi_props.buy_info.target_eth" target="_blank").link {{ multi_props.buy_info.target_eth }}
-        div.mt-2 Transaction hash:
+        div.mt-2 Simba token txHash:
           =' '
           a(:href="'https://etherscan.io/tx/' + multi_props.buy_info.tx_hash" target="_blank").link {{ multi_props.buy_info.tx_hash }}
     div.mt-4
