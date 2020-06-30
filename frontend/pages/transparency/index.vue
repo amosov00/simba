@@ -10,7 +10,7 @@
           List.mt-3
             li.list__item
               span.list__item--name Total Assets:
-              span.list__item--value.blue {{totalAssets}} SIMBA
+              span.list__item--value.blue {{simbaFormat(totalAssets)}} SIMBA
             li.list__item
               span.list__item--name Total USD equivalent:
               span.list__item--value 50,000.78 USDT
@@ -59,10 +59,12 @@
 
 <script>
 import List from "~/components/List";
+import formatCurrency from '~/mixins/formatCurrency'
 export default {
   name: "transparency",
   layout: "main",
   middleware: ["contract"],
+  mixins: [formatCurrency],
   components: {
     List
   },
