@@ -10,7 +10,7 @@
       div.column.is-6.has-text-right(v-if="user")
         div.mb-1.text-large
           nuxt-link(to="/profile/data/").link {{ user.first_name }} {{ user.last_name }}
-        div.has-text-weight-bold.text-large {{numberWithCommas(simbaBalance)}} SIMBA
+        div.has-text-weight-bold.text-large {{simbaFormat(simbaBalance)}} SIMBA
     div.header-menu.columns.is-flex(v-if="user")
       div.column.is-8
         nuxt-link(:to="menuItem.to" v-for="(menuItem, i) in menu" :key="i" active-class="link--active").menu-item.link {{ menuItem.title }}
@@ -19,8 +19,10 @@
 
 <script>
 import _ from "lodash";
+import formatCurrency from "../mixins/formatCurrency";
 export default {
   name: "Header",
+  mixins: [formatCurrency],
   computed: {
     user() {
       return this.$store.getters.user;
@@ -37,11 +39,6 @@ export default {
     ],
     simbaBalance: 0
   }),
-  methods: {
-    numberWithCommas(value) {
-      return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-  },
   async created() {
     if (this.$cookies.get("token")) {
       if (_.isEmpty(this.$store.getters["contract/SIMBA"])) {
