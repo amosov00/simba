@@ -11,9 +11,9 @@ services:
     depends_on:
       - backend
     expose:
-      - 3015
+      - "3015"
     ports:
-      - 3015:3015
+      - "3015:3015"
     env_file:
       - .env
       - .env.frontend
@@ -50,7 +50,7 @@ services:
 
   celerybeat:
     container_name: simba-celerybeat-local
-    command: sleep 40 && celery beat -A celery_app --scheduler celery_pool_asyncio:PersistentScheduler --loglevel=INFO
+    command: sh -c "sleep 40 && celery beat -A celery_app --scheduler celery_pool_asyncio:PersistentScheduler --loglevel=INFO"
     build:
       context: ./
       dockerfile: deployment/dockerfiles/Dockerfile.backend.local
