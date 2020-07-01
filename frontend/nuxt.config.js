@@ -31,6 +31,7 @@ export default {
     '~/plugins/vee-validate.js',
     '~/plugins/contract.js',
     '~/plugins/web3.js',
+    '~/plugins/i18n.js'
   ],
   modules: [
     '@nuxtjs/axios',
@@ -38,6 +39,20 @@ export default {
     '@nuxtjs/sentry',
     ['nuxt-buefy', {css: false}],
     'cookie-universal-nuxt',
+    ['nuxt-i18n', {
+      locales: [
+        {
+          code: 'ru',
+          file: 'rus.js'
+        },
+        {
+          code: 'en',
+          file: 'eng.js'
+        },
+      ],
+      lazy: true,
+      langDir: 'lang/'
+    }]
   ],
   axios: {
     baseURL: process.env.API_URL || 'https://simba-dev.elastoo.com/api/',
@@ -53,6 +68,15 @@ export default {
   } : {},
   sentry: {
     dsn: process.env.SENTRY_DNS_FRONT || '',
+  },
+  i18n: {
+    strategy: 'no_prefix',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'app_lang',
+      alwaysRedirect: false,
+      fallbackLocale: 'en'
+    },
   },
   build: {
     extend(config, ctx) {
