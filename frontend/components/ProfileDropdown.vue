@@ -47,6 +47,7 @@
     margin-left: auto
     position: absolute
     right: -20px
+    min-width: 140px
     &__wrapper
       position: relative
       text-align: right
