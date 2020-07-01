@@ -3,9 +3,11 @@
     div.main-content
       div
         n-link(to="/exchange/buysell?op=buy").btn.mr-2 Buy
-        n-link(to="/exchange/buysell?op=sell").btn.mr-2 Sell
+        //--n-link(to="/exchange/buysell?op=sell").btn.mr-2 Sell
+        button(disabled).btn.mr-2 Sell
       h3.title.is-5.mt-4 Last bills
       div.bills-table
+        div(v-if="billsToShow.length === 0").no-bills Your bills list is empty
         n-link(:to="'/exchange/buysell?id=' + item._id" v-for="(item, i) in billsToShow" :key="i").is-flex.bills-table__container
           div {{ item._id }}
           div {{ item.simba_amount }}
@@ -101,6 +103,11 @@
 </script>
 
 <style lang="sass" scoped>
+  .no-bills
+    text-align: center
+    padding: 60px
+    color: #bcbcbc
+
   .bills-table
     border: 1px solid #EBEBEC
     &__container

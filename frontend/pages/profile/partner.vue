@@ -18,6 +18,8 @@
       div The offer is limited by amount of provided SST tokens.
     div.has-text-weight-bold.is-size-5.mt-4 Invited
     b-table(:data="table1.data" :columns="table1.columns" focusable striped).mt-3
+    //--  template(slot-scope="props")
+        b-table-column field="id" label="ID" width="40" numeric {{ props.row.id }}
     div.has-text-weight-bold.is-size-5.mt-4 History of transactions
     b-table(:data="table2.data" :columns="table2.columns" focusable striped).mt-3
       template(slot="footer")
@@ -72,11 +74,20 @@
     },
 
     async asyncData({store}) {
-      let res = await store.dispatch('fetchRefLink');
+      let ref_link = await store.dispatch('fetchRefLink');
+      let referrals = await store.dispatch('fetchReferrals');
 
-      if(store.dispatch('fetchRefLink')) {
-        return { ref_link: res.URL }
+      let result = {}
+
+      if(ref_link) {
+        result['ref_link'] = ref_link.URL
       }
+
+      if(referrals) {
+        result['referrals'] = referrals
+      }
+
+      return result
     }
   };
 </script>

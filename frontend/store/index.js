@@ -34,6 +34,12 @@ export const mutations = {
 };
 
 export const actions = {
+  async fetchReferrals() {
+    return await this.$axios.get('/account/referrals/')
+      .then((res) => res.data["referrals"])
+      .catch(() => false)
+  },
+
   async changeAddresses({}, data) {
     return await this.$axios
       .put("/account/user/", data)
@@ -123,8 +129,6 @@ export const actions = {
       });
   },
   async changeProfile({}, data) {
-    console.log(data);
-
     return await this.$axios
       .put("/account/user/", JSON.stringify(data))
       .then(_ => {
