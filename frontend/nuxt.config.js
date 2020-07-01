@@ -40,7 +40,7 @@ export default {
     'cookie-universal-nuxt',
   ],
   axios: {
-    baseURL: process.env.API_URL || 'https://simba-dev.elastoo.com/api/',
+    baseURL: process.env.API_URL || 'https://my.simba.storage/api/',
   },
   buildModules: [
     '@nuxtjs/dotenv'
