@@ -16,13 +16,10 @@ scp .env.backend  "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
 scp .env.frontend "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
 scp .env.db       "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
 scp .env.rabbitmq "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
-echo $PROJECT_DIR
-echo $DOCKER_COMPOSE_FILENAME
 
 echo "########## Pull images from Gitlab Container Registry ##########"
 ssh "$SSH_USER"@"$SSH_HOST" "docker login -u '$CI_REGISTRY_USER' -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
-echo "$SSH_USER"@"$SSH_HOST" "cd '$PROJECT_DIR' && docker-compose -f '$DOCKER_COMPOSE_FILENAME' pull"
-ssh "$SSH_USER"@"$SSH_HOST" "cd '$PROJECT_DIR' && docker-compose -f '$DOCKER_COMPOSE_FILENAME' pull"
+ssh "$SSH_USER"@"$SSH_HOST" "cd '$PROJECT_DIR' && docker-compose -f $DOCKER_COMPOSE_FILENAME pull"
 ssh "$SSH_USER"@"$SSH_HOST" "docker logout $CI_REGISTRY"
 
 echo "########## Reload containers services ##########"
