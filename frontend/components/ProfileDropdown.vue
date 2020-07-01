@@ -6,11 +6,11 @@
           div.profile-dropdown__name {{ name }}
           InlineSvg(:src="require('@/assets/images/dropdown.svg')").profile-dropdown__icon
       div.profile-dropdown__content
-        n-link(to="/profile/bill/").profile-dropdown__link Bill details
-        n-link(to="/profile/data/").profile-dropdown__link Personal data
-        n-link(to="/profile/2fa/").profile-dropdown__link Security
+        n-link(to="/profile/bill/").profile-dropdown__link {{$t('dropdown.bill_details')}}
+        n-link(to="/profile/data/").profile-dropdown__link {{$t('dropdown.personal_data')}}
+        n-link(to="/profile/2fa/").profile-dropdown__link {{$t('dropdown.security')}}
       div.profile-dropdown__footer
-        a(href="#" @click="logout").profile-dropdown__logout Logout
+        a(href="#" @click="logout").profile-dropdown__logout {{$t('dropdown.logout')}}
 </template>
 
 <script>

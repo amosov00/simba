@@ -6,3 +6,29 @@
 .page-leave-to {
   opacity: 0;
 }
+
+.lang-switched-anim {
+  position: relative;
+  &:after {
+    left: 0;
+    bottom: 0;
+    top: 0;
+    right: 0;
+    position: fixed;
+    opacity: 1;
+    content: "";
+    display: block;
+    z-index: 100;
+    animation: 0.5s slideBox;
+    background: rgba(255, 255,255, 1);
+  }
+}
+
+@keyframes slideBox {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
