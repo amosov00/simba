@@ -56,8 +56,8 @@ class Invoice(BaseModel):
     )
 
     # User wallets
-    target_eth_address: str = Field(default=None, description="Address which will be scanned")
-    target_btc_address: str = Field(default=None, description="Address which will be scanned")
+    target_eth_address: Optional[str] = Field(default=None, description="Address which will be scanned")
+    target_btc_address: Optional[str] = Field(default=None, description="Address which will be scanned")
 
     # Connected transactions
     eth_tx_ids: List[ObjectIdPydantic] = Field(default=[])
