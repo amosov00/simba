@@ -22,10 +22,10 @@
               span.list__item--value {{simbaFormat(redeemed)}} SIMBA
             li.list__item
               span.list__item--name Quarantined:
-              span.list__item--value 10,000,000 SIMBA
+              span.list__item--value {{simbaFormat(quarantined)}} SIMBA
             li.list__item
               span.list__item--name Circulation:
-              span.list__item--value 490,000,000 SIMBA
+              span.list__item--value {{simbaFormat(circulation)}} SIMBA
             li.list__item
               span.list__item--name SIMBA holders:
               span.list__item--value.blue {{holders}}
@@ -75,7 +75,8 @@ export default {
       issued: 0,
       redeemed: 0,
       quarantined: 0,
-      holders: 0
+      holders: 0,
+      circulation: 0
     };
   },
   async created() {
@@ -87,6 +88,16 @@ export default {
       },
       (err, events) => {
         this.holders = [...new Set(events.map(item => item.returnValues.to))].length;
+      }
+    );
+    await this.$contract().SIMBA.getPastEvents(
+      "BlacklistedRemoved",
+      {
+        fromBlock: 0,
+        toBlock: "latest"
+      },
+      (err, events) => {
+        this.quarantined = events.length;
       }
     );
     await this.$contract().SIMBA.getPastEvents(
@@ -120,6 +131,7 @@ export default {
         this.totalAssets = res;
         return;
       });
+    this.circulation = this.issued - this.redeemed - this.quarantined
     await this.$axios
       .get("https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD")
       .then(res => {
