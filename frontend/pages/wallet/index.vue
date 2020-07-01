@@ -18,25 +18,26 @@
     hr.mt-4
     div.wallet-content__table
       h1.title.is-size-4 History of transactions
-      Table
+      WalletTable(:moreData="moreData")
       div.wallet-content__button
-        button.btn--outlined more
+        button.btn--outlined(@click="moreData += 10") more
 </template>
 
 <script>
-import Table from "~/components/Table";
+import WalletTable from "~/components/WalletTable";
 import WalletConnection from "~/components/WalletConnection";
 export default {
   name: "exchange-transfer",
   layout: "main",
   middleware: ["contract", "metamask"],
-  components: { Table, WalletConnection },
+  components: { WalletTable, WalletConnection },
   data: () => {
     return {
       transferData: {
         address: "",
         amount: 0
-      }
+      },
+      moreData: 10
     };
   },
   methods: {
@@ -56,10 +57,10 @@ export default {
   },
   computed: {
     selectedAddress() {
-      if(window.ethereum) {
+      if (window.ethereum) {
         return window.ethereum.selectedAddress;
       } else {
-        return false
+        return false;
       }
     },
     totalAmount() {
