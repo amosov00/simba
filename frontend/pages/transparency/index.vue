@@ -28,7 +28,7 @@
               span.list__item--value 490,000,000 SIMBA
             li.list__item
               span.list__item--name SIMBA holders:
-              span.list__item--value.blue 0
+              span.list__item--value.blue {{holders}}
             li.list__item
               span.list__item--name Ethereum Contract:
               a.list__item--value.blue(href="https://rinkeby.etherscan.io/address/0x60e1bf648580aafbff6c1bc122bb1ae6be7c1352" rel="nofollow noopener" target="_blank") SIMBA Stablecoin (SIMBA) 0x7806a1b2b6056cda57d3e889a9513615733e2b66
@@ -73,10 +73,22 @@ export default {
       totalAssets: 0,
       totalEquivalent: 0,
       issued: 0,
-      redeemed: 0
+      redeemed: 0,
+      quarantined: 0,
+      holders: 0
     };
   },
   async created() {
+    await this.$contract().SIMBA.getPastEvents(
+      "Transfer",
+      {
+        fromBlock: 0,
+        toBlock: "latest"
+      },
+      (err, events) => {
+        this.holders = [...new Set(events.map(item => item.returnValues.to))].length;
+      }
+    );
     await this.$contract().SIMBA.getPastEvents(
       "OnIssued",
       {
