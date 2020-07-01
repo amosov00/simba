@@ -6,7 +6,8 @@ TITLE = getenv("TITLE")
 VERSION = getenv("VERSION")
 COMMIT = getenv("COMMIT")
 ENV = getenv("ENV")
-IS_PRODUCTION = ENV == "production"
+IS_PRODUCTION = ENV == "production_"
+# TODO: CHANGE BEFORE DEPLOYING TO MAINNET
 
 HOST_URL = getenv("HOST_URL")
 
