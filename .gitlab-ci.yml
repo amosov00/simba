@@ -71,7 +71,7 @@ deploy-develop:
     - sh ./deployment/scripts/proceed-env.sh
     - sh ./deployment/scripts/deploy.sh
 
-.deploy-production:
+deploy-production:
   stage: deploy
   environment:
     name: production
