@@ -1,0 +1,45 @@
+.btn
+  display: inline-block
+  line-height: 1
+  padding-top: 13px
+  padding-bottom: 13px
+  min-width: 200px
+  background-color: #0060FF
+  text-align: center
+  color: #ffffff
+  font-weight: bold
+  border-radius: 4px
+  border: 0
+  &:disabled
+    background-color: #969696
+  &:not(:disabled)
+    &:hover
+      cursor: pointer
+      opacity: 0.9
+      color: #ffffff
+    &:active, &:focus
+      color: #ffffff
+
+.btn--outlined
+  border: 1px solid #70A6FF
+  width: 70px
+  height: 40px
+  border-radius: 4px
+  font-weight: bold
+  font-size: 14px
+  color: #70A6FF
+  background-color: #ffffff
+  cursor: pointer
+
+  &:hover
+    color: #0060FF
+    border-color: #0060FF
+
+.btn--inline
+  border: none
+  background-color: inherit
+  color: #70A6FF
+  padding: 14px 28px
+  font-size: 16px
+  cursor: pointer
+  display: inline-block

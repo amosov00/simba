@@ -14,7 +14,11 @@ async def pydantic_exception_handler_func(request: Request, exc: ValidationError
     resp = []
     for error in exc.errors():
         resp.append(
-            {"field": error["loc"][-1], "message": error.get("msg"), "type": error.get("type"),}
+            {
+                "field": error["loc"][-1],
+                "message": error.get("msg"),
+                "type": error.get("type"),
+            }
         )
     return responses.UJSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -24,9 +28,16 @@ async def pydantic_exception_handler_func(request: Request, exc: ValidationError
 
 
 async def http_exception_handler_func(request: Request, exception: HTTPException):
+    if isinstance(exception.detail, list):
+        content = [{"message": detail} for detail in exception.detail]
+    else:
+        content = [{"message": exception.detail}]
+
     return responses.UJSONResponse(
-        content=[{"message": exception.detail}],
-        status_code=getattr(exception, "status_code", status.HTTP_500_INTERNAL_SERVER_ERROR),
+        content=content,
+        status_code=getattr(
+            exception, "status_code", status.HTTP_500_INTERNAL_SERVER_ERROR
+        ),
         headers={"Access-Control-Allow-Origin": "*"},
     )
 

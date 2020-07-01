@@ -1,9 +1,0 @@
-FROM registry.gitlab.com/elastoo-lab/images/python:3.8.3-slim
-
-ENV PYTHONUNBUFFERED=1 DOCKER=1 DEBIAN_FRONTEND=noninteractive
-
-COPY ./backend/ /app/
-WORKDIR /app/
-
-# Install requirements
-RUN pip install -r requirements.txt

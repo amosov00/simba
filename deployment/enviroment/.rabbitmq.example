@@ -1,0 +1,4 @@
+## Save as ".env.rabbitmq"
+
+RABBITMQ_DEFAULT_USER=elastoo
+RABBITMQ_DEFAULT_PASS=elastoo

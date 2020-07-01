@@ -1,54 +1,29 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
 set -e
 
->.env
+echo "########## Deploying to server ##########"
 
-echo "CI_REGISTRY=$CI_REGISTRY" >> .env
-echo "CI_PROJECT_NAMESPACE=$CI_PROJECT_NAMESPACE" >> .env
-echo "CI_PROJECT_NAME=$CI_PROJECT_NAME" >> .env
-
-
-echo "########## Processing enviroment and pems ##########"
-if [[ "$CI_COMMIT_REF_SLUG" == "master" ]]; then
-    DOCKER_COMPOSE_FILENAME="docker-compose.prod.yml"
-    HOST_IP=$PROD_HOST_IP
-    PROJECT_DIR=''
-    HOST_USER=root
-
-elif [[ "$CI_COMMIT_REF_SLUG" == "develop" ]]; then
-    DOCKER_COMPOSE_FILENAME="docker-compose.develop.yml"
-    HOST_IP=$DEVELOP_HOST_IP
-    PROJECT_DIR='/home/netwood/_projects/simba'
-    HOST_USER=nikita
-    echo "$HETZNER_DEV_HOST_1_PEM" >> ./permission.pem
-fi
-
-chmod 400 ./permission.pem
-
-echo "########## Using '$DOCKER_COMPOSE_FILENAME' config ##########"
-echo "########## Ping $HOST_IP with settings $SSH_OPTION ##########"
-ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP"
+echo "########## Check is folder is created ##########"
+ssh "$SSH_USER"@"$SSH_HOST" "cd '$PROJECT_DIR' || mkdir -p '$PROJECT_DIR'"
 
 echo "########## Pull changes from gitlab repo ##########"
-ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" "cd $PROJECT_DIR && git pull $CI_REPOSITORY_URL $CI_COMMIT_REF_NAME"
+ssh "$SSH_USER"@"$SSH_HOST" "cd '$PROJECT_DIR' && git pull $CI_REPOSITORY_URL $CI_COMMIT_REF_NAME"
 
 echo "########## Copy .env files ##########"
-scp $SSH_OPTION -i ./permission.pem ./.env $HOST_USER@"$HOST_IP":$PROJECT_DIR
-
-ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" "cd $PROJECT_DIR &&
-'$ENV_BACKEND' > .env.backend && '$ENV_DB' > .env.db && '$ENV_FRONTEND' > .env.frontend"
+scp .env          "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
+scp .env.backend  "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
+scp .env.frontend "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
+scp .env.db       "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
+scp .env.rabbitmq "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
 
 echo "########## Pull images from Gitlab Container Registry ##########"
-ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
+ssh "$SSH_USER"@"$SSH_HOST" "docker login -u '$CI_REGISTRY_USER' -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
+ssh "$SSH_USER"@"$SSH_HOST" "cd '$PROJECT_DIR' && docker-compose -f $DOCKER_COMPOSE_FILENAME pull"
+ssh "$SSH_USER"@"$SSH_HOST" "docker logout $CI_REGISTRY"
 
-ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" "cd $PROJECT_DIR &&
-docker-compose -f ./$DOCKER_COMPOSE_FILENAME pull"
-
-echo "########## Start services ##########"
-ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" "cd $PROJECT_DIR &&
-docker-compose -f ./$DOCKER_COMPOSE_FILENAME up -d"
+echo "########## Reload containers services ##########"
+ssh "$SSH_USER"@"$SSH_HOST" "cd '$PROJECT_DIR' && docker-compose -f $DOCKER_COMPOSE_FILENAME up -d"
 
 echo "########## Remove docker <none> images ##########"
-ssh $SSH_OPTION -i ./permission.pem $HOST_USER@"$HOST_IP" 'docker rmi $(docker images --filter "dangling=true" -q --no-trunc)' ||
-echo "Docker none images is not found"
+ssh "$SSH_USER"@"$SSH_HOST" 'docker rmi $(docker images --filter "dangling=true" -q --no-trunc)' || echo "Docker none images is not found"

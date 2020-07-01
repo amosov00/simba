@@ -1,9 +1,10 @@
-export default ({ app, redirect }, inject) => {
-	inject('authLogin', async (email, password) => {
+export default ({ app, redirect, route }, inject) => {
+	inject('authLogin', async (email, password, pin_code) => {
 		return await app.$axios.post('/account/login/',
 			{
 				email: email,
 				password: password,
+				pin_code: pin_code
 			}
 		).then(resp => {
 			app.store.commit('setUser', resp.data.user);
@@ -12,7 +13,7 @@ export default ({ app, redirect }, inject) => {
 				path: '/',
 				maxAge: 60 * 60 * 24 * 7,
 			});
-			redirect('/profile/');
+			redirect('/exchange/');
 			return true;
 		}).catch(resp => {
 		  return false;

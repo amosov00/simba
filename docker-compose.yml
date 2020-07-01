@@ -1,45 +1,86 @@
 # docker-compose config for local development
 version: '3'
 services:
-    frontend:
-        container_name: simba-frontend-local
-        command: yarn dev
-        build:
-            context: ./
-            dockerfile: deployment/dockerfiles/Dockerfile.frontend.local
-        volumes:
-            - ./frontend:/frontend
-        depends_on:
-            - backend
-        expose:
-            - 3015
-        ports:
-            - 3015:3015
-        env_file:
-            - .env.frontend
+  frontend:
+    container_name: simba-frontend-local
+    command: yarn dev
+    build:
+      context: ./
+      dockerfile: deployment/dockerfiles/Dockerfile.frontend.local
+    volumes:
+      - ./frontend:/frontend
+    depends_on:
+      - backend
+    expose:
+      - "3015"
+    ports:
+      - "3015:3015"
+    env_file:
+      - .env
+      - .env.frontend
 
-    backend:
-        container_name: simba-backend-local
-        command: uvicorn main:app --host 0.0.0.0 --port 8010 --loop 'uvloop' --lifespan on --reload --proxy-headers
-        build:
-            context: ./
-            dockerfile: deployment/dockerfiles/Dockerfile.backend.local
-        volumes:
-            - ./backend:/backend
-        depends_on:
-            - db
-        expose:
-            - 8010
-        ports:
-            - 8010:8010
-        env_file:
-            - .env.backend
+  backend:
+    container_name: simba-backend-local
+    command: uvicorn main:app --host 0.0.0.0 --port 8010 --loop 'uvloop' --lifespan on --reload --proxy-headers
+    build:
+      context: ./
+      dockerfile: deployment/dockerfiles/Dockerfile.backend.local
+    volumes:
+      - ./backend:/backend
+    depends_on:
+      - db
+    expose:
+      - 8010
+    ports:
+      - 8010:8010
+    env_file:
+      - .env
+      - .env.backend
 
-    db:
-        container_name: simba-mongodb-local
-        image: mongo:4.2-bionic
-        command: mongod --port 27017
-        ports:
-            - 27017:27017
-        env_file:
-            - .env.db
+  celeryworker:
+    container_name: simba-celeryworker-local
+    command: sh -c "sleep 30 && celery worker -A celery_app -P celery_pool_asyncio:TaskPool --loglevel=INFO"
+    build:
+      context: ./
+      dockerfile: deployment/dockerfiles/Dockerfile.backend.local
+    volumes:
+      - ./backend:/backend
+    depends_on:
+      - db
+      - rabbitmq
+    env_file:
+      - .env
+      - .env.backend
+
+  celerybeat:
+    container_name: simba-celerybeat-local
+    command: sh -c "sleep 40 && celery beat -A celery_app --scheduler celery_pool_asyncio:PersistentScheduler --loglevel=INFO"
+    build:
+      context: ./
+      dockerfile: deployment/dockerfiles/Dockerfile.backend.local
+    volumes:
+      - ./backend:/backend
+    depends_on:
+      - db
+      - rabbitmq
+      - celeryworker
+    env_file:
+      - .env
+      - .env.backend
+
+  db:
+    container_name: simba-mongodb-local
+    image: mongo:4.2-bionic
+    command: mongod --port 27017
+    ports:
+      - 27017:27017
+    env_file:
+      - .env.db
+
+  rabbitmq:
+    container_name: simba-rabbitmq-local
+    image: rabbitmq:3.8.4-alpine
+    ports:
+      - 5672:5672
+    env_file:
+      - .env.rabbitmq

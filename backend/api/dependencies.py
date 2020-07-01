@@ -10,10 +10,11 @@ def get_db(request: Request):
 
 
 def get_user(request: Request):
+    # print(request.user.email_is_active)
     if isinstance(request.user, UnauthenticatedUser):
         raise HTTPException(401, "Auth is required")
 
-    elif request.user and not request.user.is_active:
+    elif request.user and not request.user.email_is_active:
         raise HTTPException(401, "User is not active")
 
     else:
