@@ -64,7 +64,6 @@ services:
       - .env
       - .env.backend
 
-
   db:
     container_name: simba-mongodb
     restart: always
