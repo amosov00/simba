@@ -1,6 +1,6 @@
 <template lang="pug">
   div
-    h3(v-if="multi_props.op !== 'sell'").text-large.has-text-weight-bold Confirm wallet
+    h3(v-if="multi_props.op !== 'sell'").text-large.has-text-weight-bold {{ $t('exchange.confirm_wallet')}}
     div(v-else).is-size-6
       span.has-text-weight-bold Choose BTC wallet
       = ' '
@@ -14,7 +14,7 @@
         b-select(placeholder="" expanded v-model="selectedOptions").flex-1.mr-3
           option(v-for="op in user.user_btc_addresses") {{ op }}
         a(href="#" @click="addNewWalletModal") add new
-      button.btn(@click="next") Confirm
+      button.btn(@click="next") {{ $t('exchange.confirm')}}
     div.mt-2.has-text-danger {{ errors[0] }}
     b-modal
       AddNewWallet

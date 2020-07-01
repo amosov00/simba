@@ -1,6 +1,6 @@
 <template lang="pug">
   div
-    h3.text-large.has-text-weight-bold Create payment bill
+    h3.text-large.has-text-weight-bold {{$t('exchange.cr_payment_bill')}}
     div.is-flex.mt-2.align-items-center.space-between
       div.is-flex.align-items-center(:class="{ 'flex-row-reverse': isBuy}")
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
@@ -10,12 +10,12 @@
           | =
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
           input(v-model="btc" type="text" @input="convertBTCtoSimba($event)").smb-input
-      b-button.btn(@click="confirm") Create
+      b-button.btn(@click="confirm") {{$t('exchange.create')}}
     div.is-flex.has-text-centered(:class="{ 'flex-row-reverse': isBuy, 'justify-content-end': isBuy}")
       div.smb-input-wrapper.mt-2 SIMBA
       span.mr-4
       div.smb-input-wrapper.mt-2 BTC
-    div(v-if="errors").error.has-text-danger.mt-4 {{ errors[0] }}
+    div(v-if="error").error.has-text-danger.mt-4 {{ $t('exchange.amount_err') }} 200,000 SIMBA
 </template>
 
 <script>
@@ -32,7 +32,7 @@
 
     data: () => ({
       isConverting: false,
-      errors: [],
+      error: false,
       btc: 0.00200000,
       simba: 200000,
       money: {
@@ -53,7 +53,7 @@
       async confirm() {
 
         if(this.btc < 0.002 || this.simba < 200000) {
-          this.errors.push('Minimum amount 200,000 SIMBA')
+          this.error = true
           return
         }
 

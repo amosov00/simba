@@ -6,12 +6,10 @@
           InlineSvg(:src="require(`~/assets/images/socials/${soc.icon}`)").the-footer__icon
       div.the-footer__copyright © 2019–2020 SIMBA
       div.mt-1.is-flex.align-items-center
-        a(href="https://simba.storage/terms-and-conditions" target="_blank" rel="noopener").the-footer__link Terms of Use
-        a(href="#").the-footer__link Privacy Policy
-        a(href="#").the-footer__link Cookies Policy
+        a(href="https://simba.storage/terms-and-conditions" target="_blank" rel="noopener").the-footer__link {{ $t('footer.tos') }}
+        a(href="#").the-footer__link {{ $t('footer.privacy') }}
+        a(href="#").the-footer__link {{ $t('footer.cookies') }}
         LangSwitcher
-
-
 </template>
 
 <script>

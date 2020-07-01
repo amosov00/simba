@@ -2,12 +2,12 @@
   div
     div.main-content
       div
-        n-link(to="/exchange/buysell?op=buy").btn.mr-2 Buy
-        //--n-link(to="/exchange/buysell?op=sell").btn.mr-2 Sell
-        button(disabled).btn.mr-2 Sell
-      h3.title.is-5.mt-4 Last bills
+        n-link(to="/exchange/buysell?op=buy").btn.mr-2 {{ $t('exchange.buy') }}
+        //--n-link(to="/exchange/buysell?op=sell").btn.mr-2 {{ $t('exchange.sell') }}
+        button(disabled).btn.mr-2 {{ $t('exchange.sell') }}
+      h3.title.is-5.mt-4 {{ $t('exchange.last_bills') }}
       div.bills-table
-        div(v-if="billsToShow.length === 0").no-bills Your bills list is empty
+        div(v-if="billsToShow.length === 0").no-bills {{ $t('exchange.empty_bills') }}
         n-link(:to="'/exchange/buysell?id=' + item._id" v-for="(item, i) in billsToShow" :key="i").is-flex.bills-table__container
           div {{ item._id }}
           div {{ item.simba_amount }}
@@ -15,7 +15,7 @@
           div {{ getType(item.invoice_type) }}
           div {{ getStatus(item) }}
       div.has-text-centered
-        button.mt-3.btn--outlined(@click="showMore" v-if="showBtn") More
+        button.mt-3.btn--outlined(@click="showMore" v-if="showBtn") {{ $t('exchange.more_bills') }}
 </template>
 
 <script>
