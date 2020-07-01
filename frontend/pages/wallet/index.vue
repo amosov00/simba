@@ -18,9 +18,9 @@
     hr.mt-4
     div.wallet-content__table
       h1.title.is-size-4 History of transactions
-      WalletTable
+      WalletTable(:moreData="moreData")
       div.wallet-content__button
-        button.btn--outlined more
+        button.btn--outlined(@click="moreData += 10") more
 </template>
 
 <script>
@@ -36,7 +36,8 @@ export default {
       transferData: {
         address: "",
         amount: 0
-      }
+      },
+      moreData: 10
     };
   },
   methods: {
