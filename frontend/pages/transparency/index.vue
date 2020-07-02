@@ -1,10 +1,10 @@
 <template lang="pug">
   div.transparency
     div.main-content
-      h1.title.is-size-4 Transparency
+      h1.title.is-size-5 {{$t('header_menu.transparency')}}
         //- section.transparency__section
           img(src="../../assets/images/chart.png")
-      h1.title.is-size-4 Current Balances
+      h3.title.is-size-5 {{ $t('transparency.curr_balances')}}
         section.transparency__section
           img(src="../../assets/images/logo-lg.png")
           List.mt-3
