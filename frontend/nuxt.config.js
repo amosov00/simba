@@ -1,3 +1,7 @@
+console.log(process.env)
+
+const API_URL = process.env.API_URL
+
 export default {
   mode: 'spa',
   head: {
@@ -56,7 +60,7 @@ export default {
     host: '0.0.0.0',
   },
   axios: {
-    baseURL: process.env.API_URL,
+    baseURL: API_URL,
   },
   sentry: {
     initialize: true,
