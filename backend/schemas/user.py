@@ -55,7 +55,7 @@ class User(BaseModel):
 
     email: str = Field(...)
     email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
-    verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
+    verification_code: Optional[str] = Field(default_factory=pwd.genword, description="Code which will send to email")
     recover_code: Optional[str] = Field(default=None, description="JWT token for password recover")
     secret_2fa: Optional[str] = Field(default=None, description="Code for 2fa generation")
     two_factor: Optional[bool] = Field(defaul=False, description="On/off 2fa")
@@ -179,7 +179,7 @@ class UserCreationNotSafe(BaseModel):
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
     email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
-    verification_code: Optional[str] = Field(default=pwd.genword(), description="Code which will send to email")
+    verification_code: Optional[str] = Field(default_factory=pwd.genword, description="Code which will send to email")
     referral_id: Optional[str] = Field(default=None)
     telegram_id: Optional[int] = Field(default=None)
     telegram_chat_id: Optional[int] = Field(default=None)

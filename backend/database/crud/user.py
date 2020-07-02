@@ -15,6 +15,7 @@ from .base import ObjectId
 from schemas.user import (
     User,
     UserCreationSafe,
+    UserCreationNotSafe,
     UserUpdateSafe,
     pwd_context,
     UserChangePassword,
@@ -179,6 +180,21 @@ class UserCRUD(BaseMongoCRUD):
         )
 
         return True
+
+    @classmethod
+    async def create_not_safe(cls, user: UserCreationNotSafe, **kwargs) -> Optional[dict]:
+        if await cls.find_by_email(user.email):
+            return None
+
+        await super().insert_one(
+            payload={
+                **user.dict(exclude=set(FIELDS_TO_EXCLUDE)),
+                "created_at": datetime.now(),
+                **kwargs
+            }
+        )
+
+        return {"success": True}
 
     @classmethod
     async def update_not_safe(
