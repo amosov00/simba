@@ -55,13 +55,16 @@ class UserCRUD(BaseMongoCRUD):
 
         user = await cls.find_one(query={"email": email})
 
-        if user and ("email_is_active" not in user or not user["email_is_active"]):
+        if not user:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "User with such email not found")
+
+        if not user.get("email_is_active"):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Activate your account")
 
         if user.get("two_factor") is True and not await cls.check_2fa(user["_id"], pin_code):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect 2FA pin code")
 
-        if user and pwd_context.verify(password, user["password"]):
+        if pwd_context.verify(password, user["password"]):
             token = encode_jwt_token({"id": str(user["_id"])})
             return {"token": token, "user": User(**user).dict()}
         else:
