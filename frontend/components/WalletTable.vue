@@ -1,18 +1,18 @@
 <template lang="pug">
   b-table(:data="cuttedData" hoverable :loading="loading" striped).table-fixed
     template(slot-scope="props")
-      b-table-column(field="timeStamp" label="Date" width="100") {{timestampToDate(props.row.timeStamp)}}
-      b-table-column(field="address" label="Address").overflow-reset
+      b-table-column(field="timeStamp" :label="$i18n.t('other.date')" width="100") {{timestampToDate(props.row.timeStamp)}}
+      b-table-column(field="address" :label="$i18n.t('other.address')").overflow-reset
         b-tooltip(:label="props.row.from" type="is-primary" position="is-bottom").w-100
           a(:href="'https://etherscan.io/address/' + props.row.from" target="_blank").text-clamp {{ props.row.from }}
       b-table-column(field="txHash" label="TxHash").overflow-reset
         b-tooltip(:label="props.row.hash" type="is-primary" position="is-bottom").w-100
           a(:href="'https://etherscan.io/tx/' + props.row.hash" target="_blank").text-clamp {{ props.row.hash }}
-      b-table-column(field="type" label="Type" width="50") Sent
-      b-table-column(field="amount" label="Amount, SIMBA" header-class="column-header-right").text-right {{simbaFormat(props.row.value)}}
+      b-table-column(field="type" :label="$i18n.t('other.type')") {{$t('other.sent')}}
+      b-table-column(field="amount" :label="$i18n.t('other.amount') + ', SIMBA'" header-class="column-header-right").text-right {{simbaFormat(props.row.value)}}
     template(slot="footer")
       div.is-flex.space-between.has-text-weight-bold.mt-3
-        div Total
+        div {{ $t('other.total')}}
         div {{ total }}
 </template>
 

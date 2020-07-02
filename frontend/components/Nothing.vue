@@ -13,12 +13,13 @@
 <style lang="sass">
   .nothing-block
     font-family: "Didact Gothic", "Roboto", sans-serif
-    font-size: 28px
+    font-size: 22px
+    color: #333333
     position: relative
     padding: 100px
     text-align: center
     &:after
-      opacity: 0.1
+      opacity: 0.05
       content: ""
       top: 0
       left: 0

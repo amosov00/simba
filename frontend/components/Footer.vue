@@ -7,8 +7,8 @@
       div.the-footer__copyright © 2019–2020 SIMBA
       div.mt-1.is-flex.align-items-center
         a(href="https://simba.storage/terms-of-use.pdf" target="_blank" rel="noopener noreferrer").the-footer__link {{ $t('footer.tos') }}
-        a(href="https://simba.storage/privacy-policy.pdf" target="_blank" rel="noopener noreferrer").the-footer__link {{ $t('footer.privacy') }}
-        a(href="https://simba.storage/cookies-policy.pdf" target="_blank" rel="noopener noreferrer").the-footer__link {{ $t('footer.cookies') }}
+        //--a(href="https://simba.storage/privacy-policy.pdf" target="_blank" rel="noopener noreferrer").the-footer__link {{ $t('footer.privacy') }}
+        //--a(href="https://simba.storage/cookies-policy.pdf" target="_blank" rel="noopener noreferrer").the-footer__link {{ $t('footer.cookies') }}
         LangSwitcher
 </template>
 
