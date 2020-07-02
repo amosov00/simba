@@ -1,6 +1,5 @@
 export default {
   mode: 'spa',
-
   head: {
     title: 'Simba — Swiss Quality Stablecoin',
     meta: [
@@ -35,10 +34,9 @@ export default {
   ],
   modules: [
     '@nuxtjs/axios',
-    '@nuxtjs/dotenv',
     '@nuxtjs/sentry',
-    ['nuxt-buefy', {css: false}],
     'cookie-universal-nuxt',
+    ['nuxt-buefy', {css: false}],
     ['nuxt-i18n', {
       locales: [
         {
@@ -54,12 +52,6 @@ export default {
       langDir: 'lang/'
     }]
   ],
-  axios: {
-    baseURL: process.env.API_URL || 'https://simba-dev.elastoo.com/api/',
-  },
-  buildModules: [
-    '@nuxtjs/dotenv'
-  ],
   server: {
     host: '0.0.0.0',
   },
@@ -67,7 +59,10 @@ export default {
     filename: '.env.local',
   } : {},
   sentry: {
-    dsn: process.env.SENTRY_DNS_FRONT || '',
+    initialize: true,
+    config: {
+      environment: process.env.ENV,
+    },
   },
   i18n: {
     strategy: 'no_prefix',
