@@ -1,15 +1,19 @@
 <template lang="pug">
-  b-table(:data="cuttedData" hoverable :loading="loading" striped)
-        template(slot-scope="props")
-          b-table-column(field="date" label="Date" sortable width="50") {{timestampToDate(props.row.timeStamp)}}
-          b-table-column(field="address" label="Address" width="70").has-text-primary.overflow-reset
-            b-tooltip(:label="props.row.from" type="is-black" position="is-bottom").w-100
-              a(:href="'https://etherscan.io/address/' + props.row.from" target="_blank").text-clamp {{ props.row.from }}
-          b-table-column(field="txHash" label="TxHash" width="70").has-text-primary.overflow-reset
-            b-tooltip(:label="props.row.hash" type="is-black" position="is-bottom").w-100
-              a(:href="'https://etherscan.io/tx/' + props.row.hash" target="_blank").text-clamp {{ props.row.hash }}
-          b-table-column(field="type" label="Type" width="50") Sent
-          b-table-column(field="amount" label="Amount, SIMBA" width="50") {{simbaFormat(props.row.value)}}
+  b-table(:data="cuttedData" hoverable :loading="loading" striped).table-fixed
+    template(slot-scope="props")
+      b-table-column(field="timeStamp" label="Date" width="100") {{timestampToDate(props.row.timeStamp)}}
+      b-table-column(field="address" label="Address").overflow-reset
+        b-tooltip(:label="props.row.from" type="is-primary" position="is-bottom").w-100
+          a(:href="'https://etherscan.io/address/' + props.row.from" target="_blank").text-clamp {{ props.row.from }}
+      b-table-column(field="txHash" label="TxHash").overflow-reset
+        b-tooltip(:label="props.row.hash" type="is-primary" position="is-bottom").w-100
+          a(:href="'https://etherscan.io/tx/' + props.row.hash" target="_blank").text-clamp {{ props.row.hash }}
+      b-table-column(field="type" label="Type" width="50") Sent
+      b-table-column(field="amount" label="Amount, SIMBA" header-class="column-header-right").text-right {{simbaFormat(props.row.value)}}
+    template(slot="footer")
+      div.is-flex.space-between.has-text-weight-bold.mt-3
+        div Total
+        div {{ total }}
 </template>
 
 <script>
@@ -24,7 +28,8 @@ export default {
     return {
       loading: false,
       tableData: [],
-      cuttedData: []
+      cuttedData: [],
+      total: ''
     };
   },
   watch: {
@@ -52,6 +57,12 @@ export default {
               el.contractAddress ===
               "0x60e1bf648580aafbff6c1bc122bb1ae6be7c1352"
           );
+        this.total = this.tableData.reduce((sum, current) => {
+          return (+sum) + (+current.value)
+        }, 0)
+
+        this.total = this.total ? this.simbaFormat(this.total) : ''
+
         this.cuttedData = this.tableData.slice(0, this.moreData)
       });
   }
@@ -65,5 +76,11 @@ export default {
 
 td {
   height: 40px;
+  word-break: break-all;
 }
+
+.word-break-all {
+  word-break: break-all;
+}
+
 </style>

@@ -10,18 +10,16 @@
         div.mr-2.has-text-weight-medium
           a(:href="ref_link").link {{ ref_link }}
         CopyToClipboard(:value_to_copy="ref_link")
-    div.mt-4.mb-2.is-size-6 Get tokens for each deposit of users invited via your link. How it works?
-    div.is-size-6
-      div 1. You copy the link and send it to your friend.
-      div 2. After sign up with your link, it will be tied to your account.
-      div 3. With each recharge, you will receive SST tokens that you can sell on an exchange at the current rate.
-      div The offer is limited by amount of provided SST tokens.
+    div.mt-4.mb-2(v-html="$t('partner.main')").is-size-6
     div.has-text-weight-bold.is-size-5.mt-4 Invited
     b-table(:data="table1.data" :columns="table1.columns" focusable striped).mt-3
     //--  template(slot-scope="props")
         b-table-column field="id" label="ID" width="40" numeric {{ props.row.id }}
     div.has-text-weight-bold.is-size-5.mt-4 History of transactions
-    b-table(:data="table2.data" :columns="table2.columns" focusable striped).mt-3
+    WalletTable(:moreData="history_more_data").mt-3
+    div.text-center
+      button.btn--outlined(@click="history_more_data += 10") more
+    //--b-table(:data="table2.data" :columns="table2.columns" focusable striped).mt-3
       template(slot="footer")
         div.is-flex.space-between.has-text-weight-bold.mt-3
           div Total
@@ -32,14 +30,18 @@
 
   import CopyToClipboard from "~/components/CopyToClipboard";
 
+  import WalletTable from "~/components/WalletTable";
+
   export default {
     name: "profile-partner",
     layout: "profile",
-    components: { CopyToClipboard },
+    components: { CopyToClipboard, WalletTable },
+    middleware: ["contract", "metamask"],
     computed: {
     },
     data: () => ({
       ref_code: '',
+      history_more_data: 5,
       table1: {
         data: [
           { date: '01/06/2020, 09:49:15', email: 'example@test.test', name: 'Константин Константинопольский', level: 1},
