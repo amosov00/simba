@@ -55,9 +55,9 @@ export default {
   server: {
     host: '0.0.0.0',
   },
-  dotenv: !process.env.ENV ? {
-    filename: '.env.local',
-  } : {},
+  axios: {
+    baseURL: 'https://simba-dev.elastoo.com/api/',
+  },
   sentry: {
     initialize: true,
     config: {
