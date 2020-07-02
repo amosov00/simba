@@ -23,7 +23,7 @@ from schemas.user import (
     UserRecoverLink,
     User2faConfirm,
     User2faDelete,
-
+    UserReferralInfo
 )
 
 __all__ = ["UserCRUD"]
@@ -308,6 +308,7 @@ class UserCRUD(BaseMongoCRUD):
     @classmethod
     async def referrals_info(cls, user: User):
         referral = await ReferralCRUD.find_by_user_id(user.id)
+        # TODO invalid logic
         if referral is None:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "No referral data")
         parsed_data = {
@@ -316,15 +317,15 @@ class UserCRUD(BaseMongoCRUD):
         for i in range(1, 6):
             user = await cls.find_by_id(referral[f"ref{i}"])
             if user is not None:
-                email = user["email"]
-                email = email.split('@')[0] + "@***.**"
-                parsed_data["referrals"].append({
-                    "created_at": user["created_at"],
-                    "email": email,
-                    "first_name": user["first_name"],
-                    "last_name": user["last_name"],
-                    "level": i
-                })
-        print(parsed_data)
-        return parsed_data
+                email = user["email"].split('@')[0] + "@***.**"
+                parsed_data["referrals"].append(
+                    UserReferralInfo(
+                        created_at=user["created_at"],
+                        email=email,
+                        first_name=user["first_name"],
+                        last_name=user["last_name"],
+                        level=i
+                    )
+                )
 
+        return parsed_data

@@ -59,6 +59,10 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
+    def redeem_coins(self):
+        """Simba contract"""
+        pass
+
     def freeze_and_transfer(self, customer_address: str, amount: int, period: int):
         """SST contract"""
         customer_address = Web3.toChecksumAddress(customer_address)

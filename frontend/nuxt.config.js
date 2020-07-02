@@ -58,7 +58,7 @@ export default {
     host: '0.0.0.0',
   },
   axios: {
-    baseURL: 'https://simba-dev.elastoo.com/api/',
+    baseURL: process.env.API_URL,
   },
   sentry: {
     initialize: true,

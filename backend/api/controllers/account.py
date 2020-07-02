@@ -13,7 +13,6 @@ from schemas.user import (
     UserUpdateSafe,
     UserChangePassword,
     UserVerifyEmail,
-    UserVerifyEmailResponse,
     UserCreationSafeResponse,
     UserRecover,
     UserRecoverLink,
@@ -21,7 +20,7 @@ from schemas.user import (
     User2faConfirm,
     UserReferralURLResponse,
     User2faDelete,
-    UserReferralsInfo
+    UserReferralsResponse
 )
 
 __all__ = ["router"]
@@ -29,25 +28,11 @@ __all__ = ["router"]
 router = APIRouter()
 
 
-@router.post("/recover/")
-async def account_recover_send(data: UserRecover = Body(...)):
-    return await UserCRUD.recover_send(data)
-
-
-@router.put("/recover/")
-async def account_recover(data: UserRecoverLink = Body(...)):
-    return await UserCRUD.recover(data)
-
-
 @router.post("/login/", response_model=UserLoginResponse, response_model_exclude={"recover_code", "secret_2fa"})
 async def account_login(
-        response: Response,
         data: UserLogin = Body(...),
 ):
-    resp = await UserCRUD.authenticate(data.email, data.password, data.pin_code)
-    # TODO Make secure cookie token
-    response.set_cookie(key="accessToken", value=resp["token"], secure=True, httponly=True)
-    return resp
+    return await UserCRUD.authenticate(data.email, data.password, data.pin_code)
 
 
 @router.post("/signup/", response_model=UserCreationSafeResponse)
@@ -60,17 +45,20 @@ async def account_verify_email(data: UserVerifyEmail = Body(...)):
     return await UserCRUD.verify_email(data.email, data.verification_code)
 
 
-# @router.post("/logout/", dependencies=[Depends(get_user)])
-# async def account_signup(
-#         response: Response,
-# ):
-#     response.delete_cookie(key="accessToken")
-#     return {"success": True}
+@router.post("/recover/")
+async def account_recover_send(data: UserRecover = Body(...)):
+    return await UserCRUD.recover_send(data)
+
+
+@router.put("/recover/")
+async def account_recover(data: UserRecoverLink = Body(...)):
+    return await UserCRUD.recover(data)
 
 
 @router.get("/referral_link/", response_model=UserReferralURLResponse)
 async def account_get_referral_link(user: User = Depends(get_user)):
     params = {f"referral_id": user.id}
+    # TODO вынести в функцию
     return {"URL": f'{HOST_URL}register?{urlencode(params)}'}
 
 
@@ -92,17 +80,17 @@ async def account_change_password(user: User = Depends(get_user), payload: UserC
 
 
 @router.get("/2fa/", response_model=User2faURL)
-async def create_2fa(user: User = Depends(get_user)):
+async def account_create_2fa(user: User = Depends(get_user)):
     return await UserCRUD.create_2fa(user)
 
 
 @router.post("/2fa/")
-async def confirm_2fa(user: User = Depends(get_user), payload: User2faConfirm = Body(...)):
+async def account_confirm_2fa(user: User = Depends(get_user), payload: User2faConfirm = Body(...)):
     return await UserCRUD.confirm_2fa(user, payload)
 
 
 @router.get("/btc-address/")
-async def account_get_user(
+async def account_btc_address(
         user: User = Depends(get_user)
 ):
     if not user.btc_address:
@@ -114,10 +102,10 @@ async def account_get_user(
 
 
 @router.delete("/2fa/")
-async def delete_2fa(user: User = Depends(get_user), payload: User2faDelete = Body(...)):
+async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDelete = Body(...)):
     return await UserCRUD.delete_2fa(user, payload)
 
 
-@router.get("/referrals/", response_model=UserReferralsInfo)
-async def get_referrals_info(user: User = Depends(get_user)):
+@router.get("/referrals/", response_model=UserReferralsResponse)
+async def account_referrals_info(user: User = Depends(get_user)):
     return await UserCRUD.referrals_info(user)
