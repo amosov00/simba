@@ -35,7 +35,7 @@ class UserCRUD(BaseMongoCRUD):
     collection: str = "users"
 
     @classmethod
-    async def find_by_id(cls, _id: str) -> Optional[dict]:
+    async def find_by_id(cls, _id: Union[str, ObjectId]) -> Optional[dict]:
         return await super().find_one(query={"_id": to_objectid(_id)}) if _id else None
 
     @classmethod
@@ -47,10 +47,7 @@ class UserCRUD(BaseMongoCRUD):
         user = await cls.find_by_id(user_id)
         totp = pyotp.TOTP(user["secret_2fa"])
         current_pin_code = totp.now()
-        if pin_code == current_pin_code:
-            return True
-        else:
-            return False
+        return pin_code == current_pin_code
 
     @classmethod
     async def authenticate(cls, email: str, password: str, pin_code: Optional[str] = None) -> dict:
@@ -61,8 +58,8 @@ class UserCRUD(BaseMongoCRUD):
         if user and ("email_is_active" not in user or not user["email_is_active"]):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Activate your account")
 
-        if "two_factor" in user and user["two_factor"] is True and not await cls.check_2fa(user["_id"], pin_code):
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin_code")
+        if user.get("two_factor") is True and not await cls.check_2fa(user["_id"], pin_code):
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect 2FA pin code")
 
         if user and pwd_context.verify(password, user["password"]):
             token = encode_jwt_token({"id": str(user["_id"])})
