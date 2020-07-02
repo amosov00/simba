@@ -4,18 +4,26 @@ import sentry_sdk
 from database.init import mongo_client
 from database.crud import UserCRUD
 from schemas import UserCreationNotSafe
-from config import DEBUG, ENV
+from config import DEBUG, ENV, IS_PRODUCTION
 
-test_user = {
-    "email": "admin@simba.com",
-    "first_name": "admin",
-    "last_name": "admin",
-    "password": "a439a4dAA",
-    "repeat_password": "a439a4dAA",
-}
-
-if DEBUG:
-    test_user = {
+if IS_PRODUCTION:
+    admin_user = {
+        "email": "admin@simba.storage",
+        "first_name": "admin",
+        "last_name": "admin",
+        "password": "77F2QQjcItQI",
+        "repeat_password": "77F2QQjcItQI",
+    }
+elif ENV == "develop":
+    admin_user = {
+        "email": "admin@simba.com",
+        "first_name": "admin",
+        "last_name": "admin",
+        "password": "a439a4dAA",
+        "repeat_password": "a439a4dAA",
+    }
+else:
+    admin_user = {
         "email": "test@test.com",
         "first_name": "test",
         "last_name": "test",
@@ -25,10 +33,12 @@ if DEBUG:
 
 
 async def prepopulate_users():
-    if not await UserCRUD.find_by_email(test_user["email"]):
-        await UserCRUD.create_safe(
-            user=UserCreationNotSafe(**test_user), is_active=True, is_superuser=True, email_is_active=True,
-            referral_id="admin"
+    if not await UserCRUD.find_by_email(admin_user["email"]):
+        await UserCRUD.create_not_safe(
+            user=UserCreationNotSafe(**admin_user),
+            is_active=True,
+            is_superuser=True,
+            email_is_active=True,
         )
 
     return True
