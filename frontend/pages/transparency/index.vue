@@ -36,25 +36,27 @@
           List.mt-3
             li.list__item
               span.list__item--name Total Assets:
-              span.list__item--value 14,847.8056 BTC
+              span.list__item--value 0 BTC
             li.list__item
               span.list__item--name Received:
-              nuxt-link.list__item--value(to="/transparency/btc-recieved") 18,357.9056 BTC
+              span.list__item--value 0 BTC
+              //- nuxt-link.list__item--value(to="/transparency/btc-recieved") 0 BTC
             li.list__item
               span.list__item--name Paid out:
-              nuxt-link.list__item--value(to="/transparency/btc-paid-out") 3,510.1000 BTC
+              span.list__item--value 0 BTC
+              //- nuxt-link.list__item--value(to="/transparency/btc-paid-out") 0 BTC
             li.list__item
               span.list__item--name Liechtenstein:
-              span.list__item--value  3,012.0051 BTC
+              span.list__item--value  0 BTC
             li.list__item
               span.list__item--name UAE:
-              span.list__item--value  1,531.8001 BTC
+              span.list__item--value  0 BTC
             li.list__item
               span.list__item--name New Zealand:
-              span.list__item--value  8,152.0002 BTC
+              span.list__item--value  0 BTC
             li.list__item
               span.list__item--name Switzerland:
-              span.list__item--value  2,152.0002 BTC
+              span.list__item--value  0 BTC
 </template>
 
 <script>

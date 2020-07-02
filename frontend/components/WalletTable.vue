@@ -42,7 +42,7 @@ export default {
     }
     await this.$axios
       .get(
-        `https://cors-anywhere.herokuapp.com/http://${networkAPI}.etherscan.io/api?module=account&action=tokentx&address=${window.ethereum.selectedAddress}&startblock=0&endblock=999999999&sort=asc&apikey=HSZVFZ1WQ255V3CIJYSPVI3PB3BGSSIYAH`
+        `https://cors-anywhere.herokuapp.com/http://${networkAPI}.etherscan.io/api?module=account&action=tokentx&address=${window.ethereum.selectedAddress}&startblock=0&endblock=999999999&sort=desc&apikey=HSZVFZ1WQ255V3CIJYSPVI3PB3BGSSIYAH`
       )
       .then(res => {
         this.loading = false;
