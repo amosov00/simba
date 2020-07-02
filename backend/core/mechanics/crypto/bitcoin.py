@@ -1,6 +1,9 @@
 from typing import Union, Optional, List, Tuple
+from http import HTTPStatus
 
 from pycoin.coins.tx_utils import create_signed_tx
+from sentry_sdk import capture_message
+from fastapi import HTTPException
 
 from core.integrations.blockcypher import BlockCypherAPIWrapper
 from database.crud import UserCRUD, BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
@@ -72,8 +75,10 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
 
     async def create_wallet_address(self, user: User):
         resp = await self.api_wrapper.create_wallet_address(1)
+
         if "errors" in resp:
-            pass
+            capture_message("error while creating wallet")
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "error while creating wallet")
 
         address = resp["chains"][0]["chain_addresses"][0]
         address_full_info = await self.api_wrapper.fetch_address_info(
