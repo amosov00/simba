@@ -15,7 +15,6 @@ class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
         )
 
     async def issue_tokens(self, customer_address: str, incoming_btc: int, comment: str) -> str:
-        # TODO валидировать количество
         simba_to_issue = incoming_btc
         self.validate_currency_rate(incoming_btc, simba_to_issue)
 

@@ -25,7 +25,9 @@ __all__ = [
     "User2faConfirm",
     "UserReferralURLResponse",
     "User2faDelete",
-    "UserReferralsInfo"
+    "UserReferralInfo",
+    "UserReferralsResponse",
+    "User2faURL"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -219,7 +221,5 @@ class UserReferralInfo(BaseModel):
     level: int = Field(...)
 
 
-class UserReferralsInfo(BaseModel):
-    referrals: Optional[List[Optional[UserReferralInfo]]] = Field(default=[])
-
-
+class UserReferralsResponse(BaseModel):
+    referrals: List[Optional[UserReferralInfo]] = Field(default=[])

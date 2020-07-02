@@ -104,5 +104,7 @@ class CryptoValidation(ABC):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc or simba amount")
         if btc <= 0 or simba <= 0:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc or simba amount")
+        if simba / btc != 1:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc or simba ratio")
 
-        return simba / btc == 1
+        return True
