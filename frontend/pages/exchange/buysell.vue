@@ -5,7 +5,7 @@
         n-link(to="/exchange/")
           img(src="~assets/images/back.svg").back-btn
       div.steps.is-flex.align-items-center
-        div.operation.mr-4 {{ operation }}
+        div.operation.mr-4 {{ $t(`exchange.${operation.toLowerCase()}`) }}
         span(v-for="(step, i) in tradeData.steps.list" :key="i" :class="{ 'steps-item--failed': failedStep(i), 'steps-item--active': activeStep(i)}").steps-item {{ i+1 }}
       div.trade-content
         component(:is="tradeData.steps.current" :multi_props="multi_props")

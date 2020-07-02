@@ -11,15 +11,30 @@ INFURA_WS_URL = getenv("INFURA_WS_URL")
 SIMBA_ADMIN_ADDRESS = getenv("SIMBA_ADMIN_ADDRESS")
 SIMBA_ADMIN_PRIVATE_KEY = getenv("SIMBA_ADMIN_PRIVATE_KEY")
 
-SST_ADMIN_ADDRESS = getenv("SST_ADMIN_ADDRESS")
-SST_ADMIN_PRIVATE_KEY = getenv("SST_ADMIN_PRIVATE_KEY")
+SST_ADMIN_ADDRESS = SIMBA_ADMIN_ADDRESS
+SST_ADMIN_PRIVATE_KEY = SIMBA_ADMIN_PRIVATE_KEY
 
 BTC_HOT_WALLET_ADDRESS = getenv("BTC_HOT_WALLET_ADDRESS")
 BTC_HOT_WALLET_WIF = getenv("BTC_HOT_WALLET_WIF")
 BTC_MINIMAL_CONFIRMATIONS = 3 if IS_PRODUCTION else 1
 
 if IS_PRODUCTION:
-    pass
+    SIMBA_CONTRACT = EthereumContract(
+        title="SIMBA",
+        address="0x7806A1b2B6056cda57d3E889a9513615733E2B66",
+        abi_filepath=path.join(BASE_DIR, "config", "simba_abi_mainnet.json"),
+        is_test=IS_PRODUCTION is False,
+        provider_http_link=INFURA_HTTP_URL,
+        provider_ws_link=INFURA_WS_URL
+    )
+    SST_CONTRACT = EthereumContract(
+        title="SST",
+        address="0x2863916C6ebDBBf0c6f02F87b7eB478509299868",
+        abi_filepath=path.join(BASE_DIR, "config", "sst_abi_mainnet.json"),
+        is_test=IS_PRODUCTION is False,
+        provider_http_link=INFURA_HTTP_URL,
+        provider_ws_link=INFURA_WS_URL
+    )
 
 else:
     SIMBA_CONTRACT = EthereumContract(

@@ -15,6 +15,7 @@ from .base import ObjectId
 from schemas.user import (
     User,
     UserCreationSafe,
+    UserCreationNotSafe,
     UserUpdateSafe,
     pwd_context,
     UserChangePassword,
@@ -23,7 +24,7 @@ from schemas.user import (
     UserRecoverLink,
     User2faConfirm,
     User2faDelete,
-
+    UserReferralInfo
 )
 
 __all__ = ["UserCRUD"]
@@ -35,7 +36,7 @@ class UserCRUD(BaseMongoCRUD):
     collection: str = "users"
 
     @classmethod
-    async def find_by_id(cls, _id: str) -> Optional[dict]:
+    async def find_by_id(cls, _id: Union[str, ObjectId]) -> Optional[dict]:
         return await super().find_one(query={"_id": to_objectid(_id)}) if _id else None
 
     @classmethod
@@ -47,10 +48,7 @@ class UserCRUD(BaseMongoCRUD):
         user = await cls.find_by_id(user_id)
         totp = pyotp.TOTP(user["secret_2fa"])
         current_pin_code = totp.now()
-        if pin_code == current_pin_code:
-            return True
-        else:
-            return False
+        return pin_code == current_pin_code
 
     @classmethod
     async def authenticate(cls, email: str, password: str, pin_code: Optional[str] = None) -> dict:
@@ -58,13 +56,16 @@ class UserCRUD(BaseMongoCRUD):
 
         user = await cls.find_one(query={"email": email})
 
-        if user and ("email_is_active" not in user or not user["email_is_active"]):
+        if not user:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "User with such email not found")
+
+        if not user.get("email_is_active"):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Activate your account")
 
-        if "two_factor" in user and user["two_factor"] is True and not await cls.check_2fa(user["_id"], pin_code):
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin_code")
+        if user.get("two_factor") is True and not await cls.check_2fa(user["_id"], pin_code):
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect 2FA pin code")
 
-        if user and pwd_context.verify(password, user["password"]):
+        if pwd_context.verify(password, user["password"]):
             token = encode_jwt_token({"id": str(user["_id"])})
             return {"token": token, "user": User(**user).dict()}
         else:
@@ -179,6 +180,21 @@ class UserCRUD(BaseMongoCRUD):
         )
 
         return True
+
+    @classmethod
+    async def create_not_safe(cls, user: UserCreationNotSafe, **kwargs) -> Optional[dict]:
+        if await cls.find_by_email(user.email):
+            return None
+
+        await super().insert_one(
+            payload={
+                **user.dict(exclude=set(FIELDS_TO_EXCLUDE)),
+                "created_at": datetime.now(),
+                **kwargs
+            }
+        )
+
+        return {"success": True}
 
     @classmethod
     async def update_not_safe(
@@ -308,6 +324,7 @@ class UserCRUD(BaseMongoCRUD):
     @classmethod
     async def referrals_info(cls, user: User):
         referral = await ReferralCRUD.find_by_user_id(user.id)
+        # TODO invalid logic
         if referral is None:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "No referral data")
         parsed_data = {
@@ -316,15 +333,15 @@ class UserCRUD(BaseMongoCRUD):
         for i in range(1, 6):
             user = await cls.find_by_id(referral[f"ref{i}"])
             if user is not None:
-                email = user["email"]
-                email = email.split('@')[0] + "@***.**"
-                parsed_data["referrals"].append({
-                    "created_at": user["created_at"],
-                    "email": email,
-                    "first_name": user["first_name"],
-                    "last_name": user["last_name"],
-                    "level": i
-                })
-        print(parsed_data)
-        return parsed_data
+                email = user["email"].split('@')[0] + "@***.**"
+                parsed_data["referrals"].append(
+                    UserReferralInfo(
+                        created_at=user["created_at"],
+                        email=email,
+                        first_name=user["first_name"],
+                        last_name=user["last_name"],
+                        level=i
+                    )
+                )
 
+        return parsed_data

@@ -12,7 +12,7 @@
         div.has-text-weight-bold.text-large {{simbaFormat(simbaBalance)}} SIMBA
     div.header-menu.columns.is-flex(v-if="user")
       div.column.is-8
-        nuxt-link(:to="menuItem.to" v-for="(menuItem, i) in menu" :key="i" active-class="link--active").menu-item.link {{ menuItem.title }}
+        nuxt-link(:to="menuItem.to" v-for="(menuItem, i) in menu" :key="i" active-class="link--active").menu-item.link {{ $t(menuItem.title) }}
       div.column.is-4.text-large.has-text-right 1 Bitcoin = 100 000 000 SIMBA
 </template>
 
@@ -32,17 +32,20 @@ export default {
     }
   },
   data: () => ({
-    menu: [
-      { title: "Exchange", to: "/exchange/" },
-      { title: "About", to: "/about" },
-      { title: "How to use", to: "/howtouse" },
-      { title: "Transparency", to: "/transparency" },
-      { title: "Wallet", to: "/wallet" },
-      { title: "Contacts", to: "/contacts" }
-    ],
+    menu: [],
     simbaBalance: 0
   }),
+
   async created() {
+    this.menu = [
+      { title: "header_menu.exchange", to: "/exchange/" },
+      { title: "header_menu.about", to: "/about" },
+      { title: "header_menu.howtouse", to: "/howtouse" },
+      { title: "header_menu.transparency", to: "/transparency" },
+      { title: "header_menu.wallet", to: "/wallet" },
+      { title: "header_menu.contacts", to: "/contacts" }
+    ]
+
     if (this.$cookies.get("token")) {
       if (_.isEmpty(this.$store.getters["contract/SIMBA"])) {
         await this.$store.dispatch("contract/fetchContract");

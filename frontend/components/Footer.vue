@@ -5,20 +5,21 @@
         a(:href="soc.url" v-for="soc in socials").the-footer__soc-link
           InlineSvg(:src="require(`~/assets/images/socials/${soc.icon}`)").the-footer__icon
       div.the-footer__copyright © 2019–2020 SIMBA
-      div.mt-1
-        a(href="https://simba.storage/terms-and-conditions" target="_blank" rel="noopener").the-footer__link Terms of Use
-        a(href="#").the-footer__link Privacy Policy
-        a(href="#").the-footer__link Cookies Policy
-
-
+      div.mt-1.is-flex.align-items-center
+        a(href="https://simba.storage/terms-and-conditions" target="_blank" rel="noopener").the-footer__link {{ $t('footer.tos') }}
+        a(href="#").the-footer__link {{ $t('footer.privacy') }}
+        a(href="#").the-footer__link {{ $t('footer.cookies') }}
+        LangSwitcher
 </template>
 
 <script>
+  import LangSwitcher from "~/components/LangSwitcher";
+
   import InlineSvg from 'vue-inline-svg';
 
   export default {
     name: 'Footer',
-    components: { InlineSvg },
+    components: { InlineSvg, LangSwitcher },
     data: () => ({
       socials: [
         { url: '#', icon: 'facebook.svg' },

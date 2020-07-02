@@ -1,6 +1,5 @@
 export default {
   mode: 'spa',
-
   head: {
     title: 'Simba — Swiss Quality Stablecoin',
     meta: [
@@ -31,28 +30,48 @@ export default {
     '~/plugins/vee-validate.js',
     '~/plugins/contract.js',
     '~/plugins/web3.js',
+    '~/plugins/i18n.js'
   ],
   modules: [
     '@nuxtjs/axios',
-    '@nuxtjs/dotenv',
     '@nuxtjs/sentry',
-    ['nuxt-buefy', {css: false}],
     'cookie-universal-nuxt',
-  ],
-  axios: {
-    baseURL: process.env.API_URL || 'https://my.simba.storage/api/',
-  },
-  buildModules: [
-    '@nuxtjs/dotenv'
+    ['nuxt-buefy', {css: false}],
+    ['nuxt-i18n', {
+      locales: [
+        {
+          code: 'ru',
+          file: 'rus.js'
+        },
+        {
+          code: 'en',
+          file: 'eng.js'
+        },
+      ],
+      lazy: true,
+      langDir: 'lang/'
+    }]
   ],
   server: {
     host: '0.0.0.0',
   },
-  dotenv: !process.env.ENV ? {
-    filename: '.env.local',
-  } : {},
+  axios: {
+    baseURL: process.env.API_URL,
+  },
   sentry: {
-    dsn: process.env.SENTRY_DNS_FRONT || '',
+    initialize: true,
+    config: {
+      environment: process.env.ENV,
+    },
+  },
+  i18n: {
+    strategy: 'no_prefix',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'app_lang',
+      alwaysRedirect: false,
+      fallbackLocale: 'en'
+    },
   },
   build: {
     extend(config, ctx) {

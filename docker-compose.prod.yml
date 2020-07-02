@@ -69,8 +69,6 @@ services:
     restart: always
     image: mongo:4.2-bionic
     command: mongod --port 27022 --auth
-    ports:
-      - 27022:27022
     env_file:
       - .env
       - .env.db
@@ -78,7 +76,6 @@ services:
   rabbitmq:
     container_name: simba-rabbitmq-local
     image: rabbitmq:3.8.4-alpine
-    ports:
-      - 5672:5672
     env_file:
+      - .env
       - .env.rabbitmq

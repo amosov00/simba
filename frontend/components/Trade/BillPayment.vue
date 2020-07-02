@@ -1,11 +1,11 @@
 <template lang="pug">
   div
     div(v-if="!expired")
-      h3.text-large.has-text-weight-bold Bill payment
+      h3.text-large.has-text-weight-bold {{ $t('exchange.bill_payment')}}
       div.mt-2(v-if="isBuy")
         div.is-flex.align-items-center
           img(src="@/assets/images/bitcoin.svg").mr-2
-          div.text-large.is-flex.align-items-center Send
+          div.text-large.is-flex.align-items-center {{ $t('exchange.send')}}
             = ' '
             span.has-text-weight-bold.ml-1 {{ parseFloat(tradeData.btc) }} BTC
             = ' '
@@ -14,7 +14,7 @@
             span {{ btc_address }}
         div.is-flex.align-items-center.mt-2
           img(src="@/assets/images/logo_sm.png").mr-2
-          div.text-large.is-flex.align-items-center Receive
+          div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
             = ' '
             span.has-text-weight-bold.ml-1 {{ tradeData.simba }} SIMBA
             span.bill-arrow
@@ -23,7 +23,7 @@
       div.mt-2(v-else)
         div.is-flex.align-items-center
           img(src="@/assets/images/logo_sm.png").mr-2
-          div.text-large.is-flex.align-items-center Send
+          div.text-large.is-flex.align-items-center {{ $t('exchange.send')}}
             = ' '
             span.has-text-weight-bold.ml-1 {{ tradeData.simba }} SIMBA
             span.bill-arrow
@@ -31,7 +31,7 @@
             span {{ updated_invoice_data.target_eth_address }}
         div.is-flex.align-items-center.mt-2
           img(src="@/assets/images/bitcoin.svg").mr-2
-          div.text-large.is-flex.align-items-center Receive
+          div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
             = ' '
             span.has-text-weight-bold.ml-1 {{ parseFloat(tradeData.btc) }} BTC
             = ' '
@@ -48,8 +48,8 @@
       div.countdown-refresh.mr-4(:class="{ 'rotate-anim': busyChecking }" @click="checkSingle")
         img(:src="require('@/assets/images/countdown-refresh.svg')")
       div(v-if="!expired")
-        div We verify payment automatically.
-        div As soon as payment is made, the status of this state will change to another.
+        div {{$t('exchange.verify_auto')}}
+        div {{$t('exchange.verify_asap')}}
       div(v-if="expired") Time for each bill is limited with 2 hours.
 
 </template>
