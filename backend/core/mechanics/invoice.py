@@ -109,7 +109,8 @@ class InvoiceMechanics(CryptoValidation):
         self.invoice.finised_at = datetime.now()
 
         await self.update_invoice()
-        user = UserCRUD.find_by_id(self.invoice.user_id)
+        user = await UserCRUD.find_by_id(self.invoice.user_id)
+        user = User(**user)
         await SSTWrapper().send_sst_to_referrals(user, self.invoice.btc_amount)
         # TODO: Call method which issue SST tokens (Try to call it without celery) (invomcing btc == simba )
         return True
