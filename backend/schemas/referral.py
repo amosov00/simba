@@ -9,12 +9,12 @@ from schemas.base import BaseModel, ObjectIdPydantic
 
 
 class Referral(BaseModel):
-    ref1: ObjectIdPydantic = Field(..., alias="_id", title="_id")
-    ref2: ObjectIdPydantic = Field(..., alias="_id", title="_id")
-    ref3: ObjectIdPydantic = Field(..., alias="_id", title="_id")
-    ref4: ObjectIdPydantic = Field(..., alias="_id", title="_id")
-    ref5: ObjectIdPydantic = Field(..., alias="_id", title="_id")
-    user_id: ObjectIdPydantic = Field(..., alias="_id", title="_id")
+    user_id: Optional[ObjectIdPydantic] = Field(delault=None)
+    ref1: Optional[ObjectIdPydantic] = Field(delault=None)
+    ref2: Optional[ObjectIdPydantic] = Field(delault=None)
+    ref3: Optional[ObjectIdPydantic] = Field(delault=None)
+    ref4: Optional[ObjectIdPydantic] = Field(delault=None)
+    ref5: Optional[ObjectIdPydantic] = Field(delault=None)
 
 
 class ReferralInDB(Referral):
