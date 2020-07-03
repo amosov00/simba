@@ -47,7 +47,7 @@ export default (context) => {
         "3. With each recharge, you will receive SST tokens that you can sell" +
         "on the exchange at the current rate. The offer is limited by amount of provided SST tokens.",
       invited: 'Invited',  your_ref_link: 'Your referral link',
-      your_ref_code: 'Your referral code', refs_empty: 'You don\'t have invited users yes'
+      your_ref_code: 'Your referral code', refs_empty: 'You don\'t have invited users yet'
     },
     password: {
       current: 'Current password', new: 'New password', confirm: 'Password confirmation'
@@ -58,7 +58,7 @@ export default (context) => {
     wallet: {
       transfer_simba: 'Transfer SIMBA tokens', your_wallet: 'Your wallet', recipient: 'Recipient',add_wallet: 'add new',
       txs_history: 'History of transactions', delete_wallet: 'delete',
-      delete_sure: 'Are you sure you want to delete this address'
+      delete_sure: 'Are you sure you want to delete this address', txs_history_empty: 'Your transaction history is empty.'
     },
     other: {
       date: 'Date', fee: 'Fee', total: 'Total', send: 'Send', address: 'Address', type: 'Type', amount: 'Amount',

@@ -16,9 +16,9 @@ export default {};
   &__item {
     width: 100%;
     padding: 6px 20px;
-    background-color: #efefef;
+    background-color: #f6f6f6;
     font-weight: 300;
-    font-size: 18px;
+    font-size: 17px;
     display: flex;
     justify-content: space-between;
 
