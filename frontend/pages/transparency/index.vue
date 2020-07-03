@@ -1,7 +1,7 @@
 <template lang="pug">
   div.transparency
     div.main-content
-      h1.title.is-size-5 {{$t('header_menu.transparency')}}
+      h1.title.is-size-4 {{$t('header_menu.transparency')}}
         //- section.transparency__section
           img(src="../../assets/images/chart.png")
       h3.title.is-size-5 {{ $t('transparency.curr_balances')}}

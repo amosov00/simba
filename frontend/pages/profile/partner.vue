@@ -21,8 +21,11 @@
         b-table-column(field="name" :label="$i18n.t('other.name')") {{ props.row.first_name }} {{ props.row.last_name }}
         b-table-column(field="referral_level" :label="$i18n.t('other.level')") {{ props.row.referral_level }}
     div.has-text-weight-bold.is-size-5.mt-4 {{$t('wallet.txs_history')}}
-    WalletTable(:moreData="history_more_data").mt-3
-    div.text-center
+    //--WalletTable(:moreData="history_more_data").mt-3
+    b-table(:data="[]" focusable striped).mt-3
+      template(slot="empty")
+        div.content.has-text-grey.has-text-centered {{$t('wallet.txs_history_empty')}}
+    //--div.text-center
       button.btn--outlined(@click="history_more_data += 10") {{$t('other.more')}}
 </template>
 

@@ -58,7 +58,7 @@ export default (context) => {
     wallet: {
       transfer_simba: 'Перевод SIMBA токенов', your_wallet: 'Ваш кошелек', recipient: 'Получатель',add_wallet: 'добавить',
       txs_history: 'История транзакций', delete_wallet: 'удалить',
-      delete_sure: 'Вы уверены что хотите удалить этот адрес'
+      delete_sure: 'Вы уверены что хотите удалить этот адрес', txs_history_empty: 'История транзакций пуста'
     },
     other: {
       date: 'Дата', fee: 'Комиссия', total: 'Итого', send: 'Отправить', address: 'Адрес', type: 'Тип', amount: 'Кол.-во',
