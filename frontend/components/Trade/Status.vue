@@ -8,7 +8,6 @@
     div.mt-2
       div Confirmation 1/1
     b-loading(:active.sync="confirms_loading" :is-full-page="false")
-    div {{ multi_props }}
 </template>
 
 <script>
@@ -41,6 +40,17 @@
         let res = await this.$store.dispatch('invoices/fetchSingle', this.multi_props['invoice'])
 
         if(res.status === 'completed') {
+
+          if(!this.$parent.multi_props.hasOwnProperty("buy_info")) {
+            this.$parent.multi_props["buy_info"] = {}
+          }
+
+          this.$parent.multi_props["buy_info"]["simba_issued"] = res.btc_amount_proceeded
+          this.$parent.multi_props["buy_info"]["target_eth"] = res.target_eth_address
+          this.$parent.multi_props["buy_info"]["tx_hash"] = res.btc_txs[0].hash
+
+          this.$parent.multi_props["invoice"] = res._id
+
           clearInterval(this.interval)
           this.$parent.$emit('nextStep')
         }
