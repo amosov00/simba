@@ -4,10 +4,11 @@ from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Res
 from urllib.parse import urlencode, urljoin
 
 from core.mechanics.crypto import BitcoinWrapper
+from core.mechanics.referrals import ReferralMechanics
 from config import HOST_URL
 from api.dependencies import get_user
 from database.crud import UserCRUD, ReferralCRUD
-from schemas.user import (
+from schemas import (
     UserLogin,
     User,
     UserLoginResponse,
@@ -22,7 +23,7 @@ from schemas.user import (
     User2faConfirm,
     UserReferralURLResponse,
     User2faDelete,
-    UserReferralInfo
+    UserReferralsResponse
 )
 
 __all__ = ["router"]
@@ -120,19 +121,13 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
     return await UserCRUD.delete_2fa(user, payload)
 
 
-@router.get("/referrals/", response_model=List[UserReferralInfo])
+@router.get("/referrals/", response_model=UserReferralsResponse)
 async def account_referrals_info(user: User = Depends(get_user)):
-    resp = []
+    ref_obj = ReferralMechanics(user)
+    referrals = await ref_obj.fetch_referrals()
+    transactions = []
 
-    for ref_level in range(1, 6):
-        ref_objects = await ReferralCRUD.find_many({f"ref{ref_level}": user.id})
-        users_ids = [i["user_id"] for i in ref_objects]
-
-        if users_ids:
-            users = await UserCRUD.aggregate([
-                {"$match": {"_id": {"$in": users_ids}}},
-                {"$addFields": {"level": ref_level}},
-            ])
-            resp.extend(users)
-
-    return resp
+    return {
+        "referrals": referrals,
+        "transactions": transactions
+    }

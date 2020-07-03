@@ -6,4 +6,4 @@ from .eth_contract import *
 from .eth_transaction import *
 from .invoice import *
 from .blockcypher_webhooks import *
-from .referral import Referral, ReferralInDB
+from .referral import *

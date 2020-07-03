@@ -11,6 +11,7 @@ from database.crud import BTCTransactionCRUD, InvoiceCRUD
 from core.mechanics.crypto.sst import SSTWrapper
 from database.crud import UserCRUD
 from schemas import (
+    User,
     InvoiceInDB,
     InvoiceType,
     InvoiceStatus,
@@ -23,11 +24,15 @@ from config import BTC_MINIMAL_CONFIRMATIONS
 
 
 class InvoiceMechanics(CryptoValidation):
-    def __init__(self, invoice: Union[dict, InvoiceInDB]):
+    def __init__(self, invoice: Union[dict, InvoiceInDB], user: Union[dict, User] = None):
         if isinstance(invoice, dict):
             invoice = InvoiceInDB(**invoice)
 
+        if user and isinstance(user, dict):
+            user = User(**user)
+
         self.invoice = invoice
+        self.user = user
         self.errors = []
 
     def _raise_exception_if_exists(self):
@@ -104,9 +109,8 @@ class InvoiceMechanics(CryptoValidation):
         self.invoice.finised_at = datetime.now()
 
         await self.update_invoice()
-        sst_w = SSTWrapper()
         user = UserCRUD.find_by_id(self.invoice.user_id)
-        sst_w.send_sst_to_referrals(user, self.invoice.btc_amount)
+        await SSTWrapper().send_sst_to_referrals(user, self.invoice.btc_amount)
         # TODO: Call method which issue SST tokens (Try to call it without celery) (invomcing btc == simba )
         return True
 
@@ -119,6 +123,8 @@ class InvoiceMechanics(CryptoValidation):
             self.errors.append("transaction is not confirmed yet")
 
         transaction.invoice_id = self.invoice.id
+        transaction.user_id = self.user.id if self.user else self.invoice.user_id
+
         incoming_btc = self.get_incoming_btc_from_outputs(transaction.outputs, self.invoice.target_btc_address)
 
         if not incoming_btc:
@@ -157,9 +163,6 @@ class InvoiceMechanics(CryptoValidation):
             transaction: EthereumTransaction,
             **kwargs
     ):
-        print("DEBUG BELOW")
-        print(transaction)
-        print(kwargs)
         return False
 
     async def proceed_new_transaction(

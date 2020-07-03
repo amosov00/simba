@@ -1,11 +1,12 @@
-from typing import Optional
-from datetime import datetime
+from typing import Optional, List
 
-from pydantic import Field, validator
-from passlib.context import CryptContext
-from passlib import pwd
+from pydantic import Field
 
 from schemas.base import BaseModel, ObjectIdPydantic
+from schemas.user import UserReferralInfo
+from schemas.eth_transaction import EthereumTransactionReferral
+
+__all__ = ["Referral", "ReferralInDB", "UserReferralsResponse"]
 
 
 class Referral(BaseModel):
@@ -19,3 +20,8 @@ class Referral(BaseModel):
 
 class ReferralInDB(Referral):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
+
+
+class UserReferralsResponse(BaseModel):
+    referrals: List[UserReferralInfo] = Field(default=[])
+    transactions: List[EthereumTransactionReferral] = Field(default=[])
