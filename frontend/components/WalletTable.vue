@@ -26,9 +26,13 @@
 import formatDate from "~/mixins/formatDate";
 import formatCurrency from "~/mixins/formatCurrency";
 export default {
+  name: 'WalletTable',
   mixins: [formatDate, formatCurrency],
   props: {
-    moreData: Number
+    moreData: {
+      type: Number,
+      default: 0
+    }
   },
   data() {
     return {
@@ -44,6 +48,11 @@ export default {
     }
   },
   async created() {
+
+    if(window.ethereum === undefined) {
+      return
+    }
+
     this.loading = true;
     let networkAPI;
     if(this.$store.getters["contract/SIMBA"].is_test) {

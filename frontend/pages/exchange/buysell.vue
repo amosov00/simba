@@ -110,12 +110,13 @@
             this.tradeData.steps.current = 'BillPayment'
           }
           else if(single_res.status === 'completed') {
+            //this.tradeData.steps.current = 'BillPayment'
             this.tradeData.steps.current = 'Final'
             this.multi_props["buy_info"] = {
-              simba_issued: single_res.btc_txs[0].outputs[0].value,
+              btc_amount_proceeded: single_res.btc_amount_proceeded,
               target_eth: single_res.target_eth_address,
               tx_hash: single_res.btc_txs[0].hash,
-              btc_amount_proceeded: single_res.btc_amount_proceeded
+              simba_issued: single_res.btc_amount_proceeded
             }
           }
         } else {
