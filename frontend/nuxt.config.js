@@ -1,3 +1,5 @@
+console.log(process.env)
+
 export default {
   mode: 'spa',
   head: {
@@ -54,9 +56,6 @@ export default {
   ],
   server: {
     host: '0.0.0.0',
-  },
-  axios: {
-    baseURL: "https://simba-dev.elastoo.com/api",
   },
   sentry: {
     initialize: true,
