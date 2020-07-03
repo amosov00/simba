@@ -12,12 +12,14 @@
         CopyToClipboard(:value_to_copy="ref_link")
     div.mt-4.mb-2(v-html="$t('partner.main')").is-size-6
     div.has-text-weight-bold.is-size-5.mt-4 {{$t('partner.invited')}}
-    b-table(:data="table1.data" focusable striped).mt-3
+    b-table(:data="referrals" focusable striped).mt-3
+      template(slot="empty")
+        div.content.has-text-grey.has-text-centered {{$t('partner.refs_empty')}}
       template(slot-scope="props")
-        b-table-column(field="date" :label="$i18n.t('other.reg_date')") {{ props.row.date }}
-        b-table-column(field="email" email="Email") {{ props.row.email }}
-        b-table-column(field="name" :label="$i18n.t('other.name')") {{ props.row.name }}
-        b-table-column(field="level" :label="$i18n.t('other.level')") {{ props.row.level }}
+        b-table-column(field="created_at" :label="$i18n.t('other.reg_date')") {{ formatDate(props.row.created_at) }}
+        b-table-column(field="ref_email" label="Email") {{ props.row.email }}
+        b-table-column(field="name" :label="$i18n.t('other.name')") {{ props.row.first_name }} {{ props.row.last_name }}
+        b-table-column(field="referral_level" :label="$i18n.t('other.level')") {{ props.row.referral_level }}
     div.has-text-weight-bold.is-size-5.mt-4 {{$t('wallet.txs_history')}}
     WalletTable(:moreData="history_more_data").mt-3
     div.text-center
@@ -29,6 +31,8 @@
   import CopyToClipboard from "~/components/CopyToClipboard";
 
   import WalletTable from "~/components/WalletTable";
+
+  import moment from 'moment'
 
   export default {
     name: "profile-partner",
@@ -49,9 +53,14 @@
       },
     }),
     methods: {
+      formatDate(date_str) {
+        return moment(String(date_str)).format(("DD/MM/YYYY, h:mm:ss"))
+      }
     },
 
     created() {
+      this.formatDate()
+
       if(this.ref_link) {
         let url_data = new URL(this.ref_link)
         this.ref_code = url_data.searchParams.get("referral_id")
