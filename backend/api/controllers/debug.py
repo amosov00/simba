@@ -6,13 +6,18 @@ from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper, BlockCypherAPIWrapper
 from core.mechanics.crypto import SimbaWrapper
 from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD, ReferralCRUD
-from schemas import BlockCypherWebhookInDB, User, ReferralInDB
+from schemas import BlockCypherWebhookInDB, User, ReferralInDB, InvoiceInDB
 from api.dependencies import get_user
 from celery_app.tasks import delete_unused_webhooks
 
 __all__ = ["router"]
 
 router = APIRouter()
+
+
+@router.get("/invoices/", response_model=List[InvoiceInDB])
+async def debug_get():
+    return await InvoiceCRUD.find_many({})
 
 
 @router.get("/webhooks/")

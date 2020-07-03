@@ -3,7 +3,8 @@ from datetime import datetime, timedelta
 
 from celery_app.celeryconfig import app
 from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
-from schemas import InvoiceExtended, InvoiceType, InvoiceStatus
+from schemas import InvoiceExtended, InvoiceStatus
+from core.mechanics import BlockCypherWebhookHandler
 import logging
 
 __all__ = ['finish_invoices_cron']
@@ -16,8 +17,7 @@ __all__ = ['finish_invoices_cron']
     time_limit=300,
 )
 async def finish_invoices_cron(self, *args, **kwargs):
-    """Крон для завершения счетов, которые неактивны > 2 часов"""
-    # TODO Complete
+    """Крон для завершения счетов, которые неактивны > 2 часов и у которых нет транзакций"""
     invoices = await InvoiceCRUD.aggregate([
         {"$match": {
             "status": InvoiceStatus.WAITING
@@ -36,6 +36,7 @@ async def finish_invoices_cron(self, *args, **kwargs):
         }},
     ])
     tasks = []
+    counter = 0
 
     for invoice in invoices:
         invoice = InvoiceExtended(**invoice)
@@ -44,13 +45,20 @@ async def finish_invoices_cron(self, *args, **kwargs):
             bool(invoice.eth_txs),
             bool(invoice.btc_txs),
         ]):
-            tasks.append(InvoiceCRUD.update_one(
-                {"_id": invoice.id},
-                {"status": InvoiceStatus.CANCELLED}
-            ))
+            # Change status
+            tasks.append(
+                InvoiceCRUD.update_one(
+                    {"_id": invoice.id},
+                    {"status": InvoiceStatus.CANCELLED}
+                )
+            )
+            # Delete webhook
+            tasks.append(BlockCypherWebhookHandler().delete_webhook(invoice))
+            counter += 1
 
     if tasks:
         await asyncio.gather(*tasks)
-        logging.info(f"Closed {len(tasks)} invoices")
+
+    logging.info(f"Closed {counter} invoices")
 
     return True
