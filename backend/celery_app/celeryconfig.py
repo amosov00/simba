@@ -1,4 +1,5 @@
 from celery import Celery
+from celery.schedules import crontab
 
 import celery_decorator_taskcls
 import celery_pool_asyncio  # noqa
@@ -29,9 +30,14 @@ app.conf.update(
 )
 
 app.conf.beat_schedule = {
-    # 'delete_unused_webhooks': {
-    #     'task': 'delete_unused_webhooks',
-    #     'schedule': 10.0,
-    #     'args': (),
-    # },
+    'finish_overdue_invoices': {
+        'task': 'finish_overdue_invoices',
+        'schedule': crontab(minute="*/1"),
+        'args': (),
+    },
+    'delete_unused_webhooks': {
+        'task': 'delete_unused_webhooks',
+        'schedule': crontab(hour="*/5"),
+        'args': (),
+    },
 }

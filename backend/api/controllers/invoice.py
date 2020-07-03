@@ -131,7 +131,9 @@ async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
     )
     return invoice
 
+
 # TODO update_invoice was change, need to refactor it
-# @router.post("/{invoice_id}/cancel/")
-# async def invoice_cancel(invoice_id: str, user: User = Depends(get_user)):
-#     return await InvoiceCRUD.update_invoice(invoice_id, user, {"status": InvoiceStatus.CANCELLED})
+@router.post("/{invoice_id}/cancel/")
+async def invoice_cancel(invoice_id: str, user: User = Depends(get_user)):
+    await InvoiceCRUD.update_invoice_not_safe(ObjectId(invoice_id), user.id, {"status": InvoiceStatus.CANCELLED})
+    return True
