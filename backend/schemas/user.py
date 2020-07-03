@@ -26,7 +26,6 @@ __all__ = [
     "UserReferralURLResponse",
     "User2faDelete",
     "UserReferralInfo",
-    "UserReferralsResponse",
     "User2faURL"
 ]
 
@@ -96,11 +95,11 @@ class User(BaseModel):
 
 
 class UserRecover(BaseModel):
-    email: str = Field(..., example="email")
+    email: str = Field(...)
 
 
 class UserReferralURLResponse(BaseModel):
-    URL: str = Field(..., exmaple="URL")
+    URL: str = Field(...)
 
 
 class UserRecoverLink(BaseModel):
@@ -128,7 +127,6 @@ class UserLogin(BaseModel):
 
 class UserLoginResponse(BaseModel):
     token: str = Field(..., description="JWT token")
-    user: User
 
 
 class UserChangePassword(BaseModel):
@@ -214,12 +212,12 @@ class User2faDelete(BaseModel):
 
 
 class UserReferralInfo(BaseModel):
-    created_at: datetime = Field(...)
     email: str = Field(...)
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
     level: int = Field(...)
+    created_at: datetime = Field(...)
 
-
-class UserReferralsResponse(BaseModel):
-    referrals: List[Optional[UserReferralInfo]] = Field(default=[])
+    @validator("email")
+    def hide_email(cls, v):
+        return v.split('@')[0] + "@***.**"

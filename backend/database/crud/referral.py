@@ -1,37 +1,40 @@
 from typing import Union, Optional, List
+from http import HTTPStatus
 
+from bson import ObjectId
+from sentry_sdk import capture_message
+from fastapi import HTTPException
+
+from schemas import ReferralInDB
 from database.crud.base import BaseMongoCRUD
 from core.utils import to_objectid
-
 
 __all__ = ["ReferralCRUD"]
 
 
 class ReferralCRUD(BaseMongoCRUD):
-    collection: str = "referrals"
+    collection: str = "referral"
 
     @classmethod
-    async def find_by_user_id(cls, _id: str) -> Optional[dict]:
+    async def find_by_user_id(cls, _id: Union[str, ObjectId]) -> Optional[dict]:
         return (
             await super().find_one(query={"user_id": to_objectid(_id)}) if _id else None
         )
 
     @classmethod
-    async def add_referral(cls, new_user_id: str, ref_user_id: str):
+    async def add_referral(cls, user_id: ObjectId, referral_id: ObjectId):
+        referral_obj = await cls.find_by_user_id(referral_id)
 
-        referral = await cls.find_by_user_id(ref_user_id)
+        if not referral_obj:
+            capture_message("Referral obj is not found")
 
-        inserted_id = (
-            await cls.insert_one(
-                payload={
-                    "user_id": new_user_id,
-                    "ref1": ref_user_id,
-                    "ref2": referral["ref1"] if (referral and "ref1" in referral) else None,
-                    "ref3": referral["ref2"] if (referral and "ref2" in referral) else None,
-                    "ref4": referral["ref3"] if (referral and "ref3" in referral) else None,
-                    "ref5": referral["ref4"] if (referral and "ref4" in referral) else None
-                }
-            )
-        ).inserted_id
+        referral_obj = ReferralInDB(**referral_obj) if referral_obj else None
 
-        return inserted_id
+        return await super().insert_one({
+            "user_id": user_id,
+            "ref1": referral_id,
+            "ref2": referral_obj.ref1 if referral_obj else None,
+            "ref3": referral_obj.ref2 if referral_obj else None,
+            "ref4": referral_obj.ref3 if referral_obj else None,
+            "ref5": referral_obj.ref4 if referral_obj else None,
+        })

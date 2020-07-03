@@ -1,9 +1,10 @@
+import asyncio
 from typing import Optional, Union
 from passlib import pwd
 from datetime import datetime, timedelta
 from http import HTTPStatus
-import pyotp
 
+import pyotp
 from fastapi.exceptions import HTTPException
 
 from database.crud.base import BaseMongoCRUD
@@ -67,7 +68,7 @@ class UserCRUD(BaseMongoCRUD):
 
         if pwd_context.verify(password, user["password"]):
             token = encode_jwt_token({"id": str(user["_id"])})
-            return {"token": token, "user": User(**user).dict()}
+            return {"token": token}
         else:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Invalid user data")
 
@@ -116,39 +117,14 @@ class UserCRUD(BaseMongoCRUD):
                 HTTPStatus.BAD_REQUEST, "User with this email is already exists",
             )
 
-        if kwargs.get("referral_id") != "admin":
-            ref_user = await cls.find_by_id(user.referral_id)
+        referral_user = await cls.find_by_id(user.referral_id)
 
-            if ref_user is None:
-                raise HTTPException(
-                    HTTPStatus.BAD_REQUEST, "Referral link invalid"
-                )
-
-        if "email_is_active" in kwargs and kwargs["email_is_active"]:
-            inserted_id = (
-                await cls.insert_one(
-                    payload={
-                        **user.dict(exclude=set(FIELDS_TO_EXCLUDE)),
-                        "created_at": datetime.now(),
-                        "is_active": True,
-                        "email_is_active": True
-                    }
-                )
-            ).inserted_id
-
-            return {"success": True}
+        if not referral_user:
+            raise HTTPException(
+                HTTPStatus.BAD_REQUEST, "Referral link invalid"
+            )
 
         verification_code = pwd.genword()
-        user_email = user.dict()["email"]
-        try:
-            email_obj = Email()
-            await email_obj.send_verification_code(
-                user_email, verification_code
-            )
-        except Exception as a:
-            raise HTTPException(
-                HTTPStatus.BAD_REQUEST, "Error while sending email",
-            )
 
         inserted_id = (
             await cls.insert_one(
@@ -162,8 +138,9 @@ class UserCRUD(BaseMongoCRUD):
             )
         ).inserted_id
 
-        if user.referral_id is not None:
-            await ReferralCRUD.add_referral(inserted_id, user.referral_id)
+        asyncio.create_task(Email().send_verification_code(user.email, verification_code))
+
+        await ReferralCRUD.add_referral(inserted_id, referral_user["_id"])
 
         return {"success": True}
 
@@ -235,23 +212,14 @@ class UserCRUD(BaseMongoCRUD):
     @classmethod
     async def recover_send(cls, payload: UserRecover):
         user = await cls.find_by_email(payload.email)
+
         if not user:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "No such user")
 
         recover_code = encode_jwt_token({"_id": user["_id"]}, timedelta(hours=3))
 
-        await cls.update_one(
-            {
-                "_id": user["_id"],
-            },
-            {
-                "recover_code": recover_code
-            }
-        )
-
-        emailobj = Email()
-        await emailobj.send_recover_code(user["email"], recover_code)
-
+        await cls.update_one({"_id": user["_id"]}, {"recover_code": recover_code})
+        asyncio.create_task(Email().send_recover_code(user["email"], recover_code))
         return True
 
     @classmethod
