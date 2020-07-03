@@ -63,7 +63,6 @@ class Email:
         self.mailserver.quit()
         return None
 
-    # TODO: Do smth with code repetion
     async def send_recover_code(self, to: str, code: str) -> None:
         self.login()
         msg = self.create_message(
