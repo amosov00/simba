@@ -215,7 +215,7 @@ class UserReferralInfo(BaseModel):
     email: str = Field(...)
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
-    level: int = Field(...)
+    referral_level: int = Field(...)
     created_at: datetime = Field(...)
 
     @validator("email")
