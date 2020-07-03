@@ -35,4 +35,9 @@ app.conf.beat_schedule = {
         'schedule': crontab(minute="*/1"),
         'args': (),
     },
+    'delete_unused_webhooks': {
+        'task': 'delete_unused_webhooks',
+        'schedule': crontab(hour="*/5"),
+        'args': (),
+    },
 }
