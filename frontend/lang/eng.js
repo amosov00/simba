@@ -47,7 +47,7 @@ export default (context) => {
         "3. With each recharge, you will receive SST tokens that you can sell" +
         "on the exchange at the current rate. The offer is limited by amount of provided SST tokens.",
       invited: 'Invited',  your_ref_link: 'Your referral link',
-      your_ref_code: 'Your referral code'
+      your_ref_code: 'Your referral code', refs_empty: 'You don\'t have invited users yes'
     },
     password: {
       current: 'Current password', new: 'New password', confirm: 'Password confirmation'
