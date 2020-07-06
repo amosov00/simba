@@ -50,7 +50,7 @@ export default {
       if (_.isEmpty(this.$store.getters["contract/SIMBA"])) {
         await this.$store.dispatch("contract/fetchContract");
       }
-      if (window.ethereum.selectedAddress) {
+      if (window.ethereum) {
         this.$contract()
           .SIMBA.methods.balanceOf(window.ethereum.selectedAddress)
           .call()

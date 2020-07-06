@@ -82,7 +82,7 @@ export default {
       if (window.ethereum) {
         return window.ethereum.selectedAddress;
       } else {
-        return false;
+        return '';
       }
     },
     totalAmount() {
