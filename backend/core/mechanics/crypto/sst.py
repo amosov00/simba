@@ -39,7 +39,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
         sst_tokens = self.simba_to_sst(simba_tokens)
         referral = await ReferralCRUD.find_by_user_id(user.id)
         for i in range(1, 6):
-            user = await UserCRUD.find_by_id(referral[f"ref{i}"])
+            user = await UserCRUD.find_by_id(ObjectId(referral[f"ref{i}"]))
             wallet: str = user["user_eth_addresses"][0] if len(user["user_eth_addresses"]) > 0 else None
             if wallet is not None:
                 self.api_wrapper.freeze_and_transfer(
