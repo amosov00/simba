@@ -25,11 +25,11 @@ class BlockCypherWebhookHandler:
         return urljoin(HOST_URL, f"/api/meta/{path}/")
 
     async def create_webhook(
-            self,
-            invoice: InvoiceInDB,
-            event: Literal[BlockCypherWebhookEvents.ALL],  # noqa
-            wallet_address: str = None,
-            transaction_hash: str = None,
+        self,
+        invoice: InvoiceInDB,
+        event: Literal[BlockCypherWebhookEvents.ALL],  # noqa
+        wallet_address: str = None,
+        transaction_hash: str = None,
     ):
         secret_path = pwd.genword(length=10)
 

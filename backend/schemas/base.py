@@ -29,9 +29,9 @@ def validate_btc_address(address_hash: str):
         n = 0
         for char in bc:
             n = n * 58 + chars.index(char)
-        return n.to_bytes(length, 'big')
+        return n.to_bytes(length, "big")
 
-    chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+    chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
     status = False
 
     try:

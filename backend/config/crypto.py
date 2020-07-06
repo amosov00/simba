@@ -25,7 +25,7 @@ if IS_PRODUCTION:
         abi_filepath=path.join(BASE_DIR, "config", "simba_abi_mainnet.json"),
         is_test=IS_PRODUCTION is False,
         provider_http_link=INFURA_HTTP_URL,
-        provider_ws_link=INFURA_WS_URL
+        provider_ws_link=INFURA_WS_URL,
     )
     SST_CONTRACT = EthereumContract(
         title="SST",
@@ -33,7 +33,7 @@ if IS_PRODUCTION:
         abi_filepath=path.join(BASE_DIR, "config", "sst_abi_mainnet.json"),
         is_test=IS_PRODUCTION is False,
         provider_http_link=INFURA_HTTP_URL,
-        provider_ws_link=INFURA_WS_URL
+        provider_ws_link=INFURA_WS_URL,
     )
 
 else:
@@ -43,7 +43,7 @@ else:
         abi_filepath=path.join(BASE_DIR, "config", "simba_abi_rinkeby.json"),
         is_test=IS_PRODUCTION is False,
         provider_http_link=INFURA_HTTP_URL,
-        provider_ws_link=INFURA_WS_URL
+        provider_ws_link=INFURA_WS_URL,
     )
     SST_CONTRACT = EthereumContract(
         title="SST",
@@ -51,5 +51,5 @@ else:
         abi_filepath=path.join(BASE_DIR, "config", "sst_abi_rinkeby.json"),
         is_test=IS_PRODUCTION is False,
         provider_http_link=INFURA_HTTP_URL,
-        provider_ws_link=INFURA_WS_URL
+        provider_ws_link=INFURA_WS_URL,
     )

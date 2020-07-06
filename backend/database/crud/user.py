@@ -25,7 +25,7 @@ from schemas.user import (
     UserRecoverLink,
     User2faConfirm,
     User2faDelete,
-    UserReferralInfo
+    UserReferralInfo,
 )
 
 __all__ = ["UserCRUD"]
@@ -120,9 +120,7 @@ class UserCRUD(BaseMongoCRUD):
         referral_user = await cls.find_by_id(user.referral_id)
 
         if not referral_user:
-            raise HTTPException(
-                HTTPStatus.BAD_REQUEST, "Referral link invalid"
-            )
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Referral link invalid")
 
         verification_code = pwd.genword()
 
@@ -152,8 +150,7 @@ class UserCRUD(BaseMongoCRUD):
             )
 
         await cls.update_one(
-            query={"_id": user.id},
-            payload=payload.dict(exclude=set(FIELDS_TO_EXCLUDE), exclude_unset=True),
+            query={"_id": user.id}, payload=payload.dict(exclude=set(FIELDS_TO_EXCLUDE), exclude_unset=True),
         )
 
         return True
@@ -164,19 +161,13 @@ class UserCRUD(BaseMongoCRUD):
             return None
 
         await super().insert_one(
-            payload={
-                **user.dict(exclude=set(FIELDS_TO_EXCLUDE)),
-                "created_at": datetime.now(),
-                **kwargs
-            }
+            payload={**user.dict(exclude=set(FIELDS_TO_EXCLUDE)), "created_at": datetime.now(), **kwargs}
         )
 
         return {"success": True}
 
     @classmethod
-    async def update_not_safe(
-            cls, user_id: str, payload: UserUpdateNotSafe
-    ) -> Union[dict, User]:
+    async def update_not_safe(cls, user_id: str, payload: UserUpdateNotSafe) -> Union[dict, User]:
         user = await cls.find_by_id(user_id)
 
         if not user:
@@ -203,9 +194,7 @@ class UserCRUD(BaseMongoCRUD):
         if not pwd_context.verify(payload.old_password, old_password_obj["password"]):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Old password doesn't match")
 
-        await cls.update_one(
-            query={"_id": user.id}, payload={"password": payload.password}
-        )
+        await cls.update_one(query={"_id": user.id}, payload={"password": payload.password})
 
         return True
 
@@ -231,20 +220,13 @@ class UserCRUD(BaseMongoCRUD):
 
         user_id = data["_id"]
 
-        user = await cls.find_one(
-            {
-                "_id": ObjectId(user_id)
-            }
-        )
+        user = await cls.find_one({"_id": ObjectId(user_id)})
 
         if "recover_code" not in user or user["recover_code"] != payload.recover_code:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect code")
 
         await cls.update_one(
-            query={"_id": user["_id"]}, payload={
-                "password": payload.password,
-                "recover_code": None
-            }
+            query={"_id": user["_id"]}, payload={"password": payload.password, "recover_code": None}
         )
 
         return True
@@ -261,15 +243,7 @@ class UserCRUD(BaseMongoCRUD):
         current_pin_code = totp.now()
         if current_pin_code != payload.pin_code:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin-code")
-        await cls.update_one(
-            query={
-                "_id": user.id
-            },
-            payload={
-                "secret_2fa": payload.token,
-                "two_factor": True
-            }
-        )
+        await cls.update_one(query={"_id": user.id}, payload={"secret_2fa": payload.token, "two_factor": True})
         return True
 
     @classmethod
@@ -278,15 +252,7 @@ class UserCRUD(BaseMongoCRUD):
         current_pin_code = totp.now()
         if current_pin_code != payload.pin_code:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin-code")
-        await cls.update_one(
-            query={
-                "_id": user.id
-            },
-            payload={
-                "secret_2fa": None,
-                "two_factor": False
-            }
-        )
+        await cls.update_one(query={"_id": user.id}, payload={"secret_2fa": None, "two_factor": False})
         return True
 
     @classmethod
@@ -295,20 +261,18 @@ class UserCRUD(BaseMongoCRUD):
         # TODO invalid logic
         if referral is None:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "No referral data")
-        parsed_data = {
-            "referrals": []
-        }
+        parsed_data = {"referrals": []}
         for i in range(1, 6):
             user = await cls.find_by_id(referral[f"ref{i}"])
             if user is not None:
-                email = user["email"].split('@')[0] + "@***.**"
+                email = user["email"].split("@")[0] + "@***.**"
                 parsed_data["referrals"].append(
                     UserReferralInfo(
                         created_at=user["created_at"],
                         email=email,
                         first_name=user["first_name"],
                         last_name=user["last_name"],
-                        level=i
+                        level=i,
                     )
                 )
 

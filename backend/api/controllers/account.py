@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Response
 from urllib.parse import urlencode, urljoin
 
@@ -23,37 +21,29 @@ from schemas import (
     User2faConfirm,
     UserReferralURLResponse,
     User2faDelete,
-    UserReferralsResponse
+    UserReferralsResponse,
+    USER_MODEL_INCLUDE_FIELDS,
 )
 
 __all__ = ["router"]
 
 router = APIRouter()
 
-USER_MODEL_INCLUDE_FIELDS = frozenset((
-    "email", "two_factor", "first_name", "last_name", "signed_addresses", "user_btc_addresses", "user_eth_addresses",
-    "btc_address", "telegram_chat_id", "telegram_id", "is_staff", "is_superuser", "is_active", "terms_and_condition",
-    "created_at"
-))
-
 
 @router.get(
     "/user/",
     response_model=User,
     # TODO update
-    response_model_include=USER_MODEL_INCLUDE_FIELDS
+    response_model_include=USER_MODEL_INCLUDE_FIELDS,
 )
 async def account_get_user(user: User = Depends(get_user)):
     return user
 
 
 @router.post(
-    "/login/",
-    response_model=UserLoginResponse,
+    "/login/", response_model=UserLoginResponse,
 )
-async def account_login(
-        data: UserLogin = Body(...),
-):
+async def account_login(data: UserLogin = Body(...),):
     return await UserCRUD.authenticate(data.email, data.password, data.pin_code)
 
 
@@ -105,9 +95,7 @@ async def account_confirm_2fa(user: User = Depends(get_user), payload: User2faCo
 
 
 @router.get("/btc-address/")
-async def account_btc_address(
-        user: User = Depends(get_user)
-):
+async def account_btc_address(user: User = Depends(get_user)):
     if not user.btc_address:
         address = await BitcoinWrapper().create_wallet_address(user)
     else:
@@ -127,7 +115,4 @@ async def account_referrals_info(user: User = Depends(get_user)):
     referrals = await ref_obj.fetch_referrals()
     transactions = []
 
-    return {
-        "referrals": referrals,
-        "transactions": transactions
-    }
+    return {"referrals": referrals, "transactions": transactions}

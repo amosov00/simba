@@ -14,24 +14,24 @@ from config import IS_PRODUCTION, BLOCKCYPHER_TOKEN, BLOCKCYPHER_WALLET_TITLE
 class BlockCypherBaseAPIWrapper(BlockcypherProvider):
     def __init__(self):
         self.api_token = BLOCKCYPHER_TOKEN
-        self.api_url = "https://api.blockcypher.com/v1/btc/main" \
-            if IS_PRODUCTION else "https://api.blockcypher.com/v1/btc/test3"
+        self.api_url = (
+            "https://api.blockcypher.com/v1/btc/main"
+            if IS_PRODUCTION
+            else "https://api.blockcypher.com/v1/btc/test3"
+        )
 
         self.blockcypher_wallet_name = BLOCKCYPHER_WALLET_TITLE
         self.netcode = "BTC" if IS_PRODUCTION else "XTN"
         self.network = btc.network if IS_PRODUCTION else tbtx.network
-        super().__init__(
-            self.api_token,
-            self.netcode
-        )
+        super().__init__(self.api_token, self.netcode)
 
     async def request(
-            self,
-            endpoint: str,
-            request_type: Literal["GET", "POST", "DELETE"] = "GET", # Noqa
-            params: dict = None,
-            data: dict = None,
-            with_token: bool = False
+        self,
+        endpoint: str,
+        request_type: Literal["GET", "POST", "DELETE"] = "GET",  # Noqa
+        params: dict = None,
+        data: dict = None,
+        with_token: bool = False,
     ) -> Union[list, dict, str, None]:
 
         url = self.api_url + endpoint

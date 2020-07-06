@@ -1,7 +1,7 @@
 from typing import List
 from http import HTTPStatus
 
-from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Response
+from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Response, BackgroundTasks
 from bson import ObjectId
 
 from api.dependencies import get_user
@@ -15,6 +15,7 @@ from schemas import (
     InvoiceStatus,
     InvoiceType,
     InvoiceTransactionManual,
+    INVOICE_MODEL_EXCLUDE_FIELDS,
     BlockCypherWebhookEvents,
 )
 from schemas.user import User
@@ -25,66 +26,67 @@ __all__ = ["router"]
 router = APIRouter()
 
 
-@router.post("/", response_model=InvoiceInDB, response_model_exclude={"validation_md5_hash"})
-async def create_invoice(user: User = Depends(get_user), data: InvoiceCreate = Body(...)):
-    invoice = Invoice(
-        user_id=user.id,
-        status=InvoiceStatus.CREATED,
-        invoice_type=data.invoice_type,
-    )
+@router.post("/", response_model=InvoiceInDB, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS)
+async def create_invoice(
+    background_tasks: BackgroundTasks, user: User = Depends(get_user), data: InvoiceCreate = Body(...),
+):
+    invoice = Invoice(user_id=user.id, status=InvoiceStatus.CREATED, invoice_type=data.invoice_type,)
+
+    if invoice.invoice_type == InvoiceType.SELL:
+        invoice.target_eth_address = data.target_eth_address
+
+    created_invoice = await InvoiceCRUD.create_invoice(invoice)
+
     if invoice.invoice_type == InvoiceType.BUY:
-        invoice.target_btc_address = user.btc_address
-    elif invoice.invoice_type == InvoiceType.SELL:
-        invoice.target_eth_address = user.user_eth_addresses
+        background_tasks.add_task(BitcoinWrapper().create_wallet_address, created_invoice)
 
-    return await InvoiceCRUD.create_invoice(invoice)
+    return created_invoice
 
 
-@router.get("/", response_model=List[InvoiceInDB])
+@router.get("/", response_model=List[InvoiceInDB], response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS)
 async def invoice_fetch_all(user: User = Depends(get_user)):
     return await InvoiceCRUD.find_invoices_by_user_id(user.id)
 
 
-@router.get("/{invoice_id}/", response_model=InvoiceExtended)
+@router.get(
+    "/{invoice_id}/", response_model=InvoiceExtended, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS
+)
 async def invoice_fetch_one(invoice_id: str, user: User = Depends(get_user)):
-    resp = await InvoiceCRUD.aggregate([
-        {"$match": {
-            "_id": ObjectId(invoice_id),
-            "user_id": user.id
-        }},
-        {"$lookup": {
-            "from": BTCTransactionCRUD.collection,
-            "localField": "_id",
-            "foreignField": "invoice_id",
-            "as": "btc_txs",
-        }},
-        {"$lookup": {
-            "from": EthereumTransactionCRUD.collection,
-            "localField": "_id",
-            "foreignField": "invoice_id",
-            "as": "eth_txs",
-        }},
-    ])
+    resp = await InvoiceCRUD.aggregate(
+        [
+            {"$match": {"_id": ObjectId(invoice_id), "user_id": user.id}},
+            {
+                "$lookup": {
+                    "from": BTCTransactionCRUD.collection,
+                    "localField": "_id",
+                    "foreignField": "invoice_id",
+                    "as": "btc_txs",
+                }
+            },
+            {
+                "$lookup": {
+                    "from": EthereumTransactionCRUD.collection,
+                    "localField": "_id",
+                    "foreignField": "invoice_id",
+                    "as": "eth_txs",
+                }
+            },
+        ]
+    )
     return resp[0] if resp else Response(status_code=404)
 
 
 @router.put("/{invoice_id}/")
 async def invoice_update(invoice_id: str, user: User = Depends(get_user), payload: InvoiceUpdate = Body(...)):
-    return await InvoiceCRUD.update_invoice(
-        invoice_id, user, payload, statuses=(InvoiceStatus.CREATED,),
-    )
+    return await InvoiceCRUD.update_invoice(invoice_id, user, payload, statuses=(InvoiceStatus.CREATED,),)
 
 
 @router.post("/{invoice_id}/transaction/")
 async def invoice_add_transaction(
-        invoice_id: str,
-        user: User = Depends(get_user),
-        payload: InvoiceTransactionManual = Body(...)
+    invoice_id: str, user: User = Depends(get_user), payload: InvoiceTransactionManual = Body(...)
 ):
     invoice = await InvoiceCRUD.find_invoice_safely(
-        invoice_id,
-        user.id,
-        statuses=(InvoiceStatus.WAITING, InvoiceStatus.COMPLETED),
+        invoice_id, user.id, statuses=(InvoiceStatus.WAITING, InvoiceStatus.COMPLETED),
     )
 
     invoice = InvoiceInDB(**invoice)
@@ -99,9 +101,9 @@ async def invoice_add_transaction(
         invoice_mechanics.validate()
         await invoice_mechanics.proceed_new_transaction(btc_transaction)
 
-        response.update({
-            "success": True,
-        })
+        response.update(
+            {"success": True,}
+        )
 
     elif invoice.invoice_type == InvoiceType.SELL and payload.eth_transaction_hash:
         pass
@@ -112,7 +114,9 @@ async def invoice_add_transaction(
     return response
 
 
-@router.post("/{invoice_id}/confirm/", response_model=InvoiceInDB)
+@router.post(
+    "/{invoice_id}/confirm/", response_model=InvoiceInDB, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS
+)
 async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
     invoice = await InvoiceCRUD.find_invoice_safely(invoice_id, user.id)
 
@@ -127,7 +131,7 @@ async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
     await BlockCypherWebhookHandler().create_webhook(
         invoice=invoice,
         event=BlockCypherWebhookEvents.TX_CONFIMATION,
-        wallet_address=invoice.target_btc_address
+        wallet_address=invoice.target_btc_address,
     )
     return invoice
 
@@ -135,5 +139,7 @@ async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
 # TODO update_invoice was change, need to refactor it
 @router.post("/{invoice_id}/cancel/")
 async def invoice_cancel(invoice_id: str, user: User = Depends(get_user)):
-    await InvoiceCRUD.update_invoice_not_safe(ObjectId(invoice_id), user.id, {"status": InvoiceStatus.CANCELLED})
+    await InvoiceCRUD.update_invoice_not_safe(
+        ObjectId(invoice_id), user.id, {"status": InvoiceStatus.CANCELLED}
+    )
     return True

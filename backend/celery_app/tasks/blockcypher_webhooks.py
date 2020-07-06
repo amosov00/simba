@@ -6,14 +6,11 @@ from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
 from schemas import InvoiceStatus, InvoiceInDB
 import logging
 
-__all__ = ['delete_unused_webhooks']
+__all__ = ["delete_unused_webhooks"]
 
 
 @app.task(
-    name="delete_unused_webhooks",
-    bind=True,
-    soft_time_limit=42,
-    time_limit=300,
+    name="delete_unused_webhooks", bind=True, soft_time_limit=42, time_limit=300,
 )
 async def delete_unused_webhooks(self, *args, **kwargs):
     counter = 0
@@ -32,10 +29,9 @@ async def delete_unused_webhooks(self, *args, **kwargs):
         breakpoint()
         invoice = InvoiceInDB(**invoice)
 
-        if any([
-            invoice.status != InvoiceStatus.WAITING,
-            invoice.created_at + timedelta(hours=4) < datetime.now(),
-        ]):
+        if any(
+            [invoice.status != InvoiceStatus.WAITING, invoice.created_at + timedelta(hours=4) < datetime.now(),]
+        ):
             await BlockCypherWebhookAPIWrapper().delete_webhook(webhook_in_db["id"])
             await BlockCypherWebhookCRUD.delete_one({"_id": webhook_in_db["_id"]})
             counter += 1

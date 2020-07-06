@@ -22,10 +22,10 @@ class Email:
     def _get_link(code: str, email: str, method: str) -> str:
         if method == "verification":
             params = {f"{method}_code": code, "email": email}
-            return f'{HOST_URL}activate?{urlencode(params)}'
+            return f"{HOST_URL}activate?{urlencode(params)}"
         if method == "recover":
             params = {f"{method}_code": code}
-            return f'{HOST_URL}recover?{urlencode(params)}'
+            return f"{HOST_URL}recover?{urlencode(params)}"
 
     def login(self) -> None:
         try:
@@ -37,10 +37,10 @@ class Email:
 
     def create_message(self, to: str, body: str) -> MIMEMultipart:
         msg = MIMEMultipart()
-        msg['From'] = self.email_from
-        msg['Subject'] = "Simba"
-        msg['To'] = to
-        msg.attach(MIMEText(body, 'html'))
+        msg["From"] = self.email_from
+        msg["Subject"] = "Simba"
+        msg["To"] = to
+        msg.attach(MIMEText(body, "html"))
         return msg
 
     def send_message(self, to: str, text: str):
@@ -55,9 +55,9 @@ class Email:
         self.login()
         msg = self.create_message(
             to,
-            "Добрый день! <br>\n" \
-            'Перейдите по <a href="{}">этой</a> ссылке для регистрации в Simba<br>\n' \
-            "Надеемся вам понравится! До встречи!".format(Email._get_link(code, to, method='verification'))
+            "Добрый день! <br>\n"
+            'Перейдите по <a href="{}">этой</a> ссылке для регистрации в Simba<br>\n'
+            "Надеемся вам понравится! До встречи!".format(Email._get_link(code, to, method="verification")),
         )
         self.send_message(to, msg.as_string())
         self.mailserver.quit()
@@ -67,9 +67,9 @@ class Email:
         self.login()
         msg = self.create_message(
             to,
-            "Добрый день! <br>\n" \
-            'Перейдите по <a href="{}">этой</a> ссылке для восстановления пароля в Simba<br>\n' \
-            "До встречи!".format(Email._get_link(code, "", method="recover"))
+            "Добрый день! <br>\n"
+            'Перейдите по <a href="{}">этой</a> ссылке для восстановления пароля в Simba<br>\n'
+            "До встречи!".format(Email._get_link(code, "", method="recover")),
         )
         self.send_message(to, msg.as_string())
         self.mailserver.quit()

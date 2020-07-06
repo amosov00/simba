@@ -3,7 +3,7 @@ from typing import List, Union
 from database.crud import UserCRUD, ReferralCRUD
 from schemas import UserLogin, User, UserReferralInfo
 
-__all__ = ['ReferralMechanics']
+__all__ = ["ReferralMechanics"]
 
 
 class ReferralMechanics:
@@ -21,10 +21,9 @@ class ReferralMechanics:
             users_ids = [i["user_id"] for i in ref_objects]
 
             if users_ids:
-                users = await UserCRUD.aggregate([
-                    {"$match": {"_id": {"$in": users_ids}}},
-                    {"$addFields": {"referral_level": ref_level}},
-                ])
+                users = await UserCRUD.aggregate(
+                    [{"$match": {"_id": {"$in": users_ids}}}, {"$addFields": {"referral_level": ref_level}},]
+                )
                 self.referrals.extend(users)
 
         return self.referrals
