@@ -8,7 +8,7 @@ from web3.contract import prepare_transaction, build_transaction_for_function
 from web3.datastructures import AttributeDict
 from fastapi import HTTPException
 
-from .base_wrapper import EthereumBaseWrapper
+from .base_wrapper import EthereumBaseContractWrapper
 from schemas import EthereumContract
 
 GAS = 250000
@@ -19,7 +19,7 @@ GAS_PRICE = Web3.toWei("24", "gwei")
 SIMBA_MIN_BASE_AMOUNT = 50000
 
 
-class ContractFunctionsWrapper(EthereumBaseWrapper):
+class FunctionsContractWrapper(EthereumBaseContractWrapper):
     def __init__(self, contract: EthereumContract, admin_address: str, admin_private_key: str):
         super().__init__(contract)
         self.admin_address = Web3.toChecksumAddress(admin_address)

@@ -1,3 +1,4 @@
+import asyncio
 from typing import Union, List, Tuple, Optional
 from http import HTTPStatus
 from datetime import datetime
@@ -103,12 +104,13 @@ class InvoiceMechanics(CryptoValidation):
         self.invoice.status = InvoiceStatus.COMPLETED
         self.invoice.btc_amount_proceeded += incoming_btc
         self.invoice.finised_at = datetime.now()
+        self.invoice.eth_txs = list({*self.invoice.eth_txs, eth_tx_hash})
+        self.invoice.btc_txs = list({*self.invoice.btc_txs, transaction.hash})
 
         await self.update_invoice()
         user = await UserCRUD.find_by_id(self.invoice.user_id)
         user = User(**user)
-        await SSTWrapper().send_sst_to_referrals(user, self.invoice.btc_amount)
-        # TODO: Call method which issue SST tokens (Try to call it without celery) (invomcing btc == simba )
+        asyncio.create_task(await SSTWrapper().send_sst_to_referrals(user, self.invoice.btc_amount))
         return True
 
     async def proceed_new_btc_transaction(self, transaction: BTCTransaction, **kwargs):

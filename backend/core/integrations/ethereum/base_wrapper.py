@@ -1,5 +1,5 @@
-from abc import ABC
-from typing import Union, List
+from abc import ABC, abstractmethod
+from typing import Union, List, Literal
 
 from sys import getsizeof
 from decimal import Decimal
@@ -11,27 +11,20 @@ from web3 import Web3
 from web3.datastructures import AttributeDict
 
 from schemas import EthereumContract, EthereumTransaction
-from config import INFURA_WS_URL
+from config import INFURA_WS_URL, INFURA_HTTP_URL
+
+__all__ = ["EthereumBaseCommonWrapper", "EthereumBaseContractWrapper"]
 
 
 class EthereumBaseWrapper(ABC):
-    def __init__(self, contract: EthereumContract):
-        _abi = []
-        _bin = None
-        self.w3 = Web3(Web3.WebsocketProvider(contract.provider_ws_link, websocket_timeout=60))
-        self.contract_meta = contract
-        self.contract_address = Web3.toChecksumAddress(contract.address)
-
-        if contract.abi_filepath:
-            with open(contract.abi_filepath) as f:
-                self.abi = ujson.load(f)
-
-        self.contract = self.w3.eth.contract(address=self.contract_address, abi=self.abi)
-
-        self.contract_events = []
-        self.blocks: List[EthereumTransaction] = []
-        self.filters = []
-        self.last_block = None
+    @classmethod
+    def init_web3_provider(cls, provider_type: Literal["http", "ws"], provider_url: str, websocket_timeout: int = 60):
+        if provider_type == "http":
+            return Web3.HTTPProvider(provider_url)
+        elif provider_type == "ws":
+            return Web3.WebsocketProvider(provider_url, websocket_timeout=websocket_timeout)
+        else:
+            raise ValueError("Invalid provider type")
 
     @classmethod
     def serialize(cls, obj) -> dict:
@@ -49,7 +42,31 @@ class EthereumBaseWrapper(ABC):
 
         return obj
 
+
+class EthereumBaseCommonWrapper(EthereumBaseWrapper):
+    def __init__(self):
+        self.w3 = Web3(self.init_web3_provider("ws", INFURA_WS_URL))
+        self.blocks: List[EthereumTransaction] = []
+
+
+class EthereumBaseContractWrapper(EthereumBaseWrapper):
+    def __init__(self, contract: EthereumContract):
+        _abi = []
+        _bin = None
+        self.w3 = Web3(self.init_web3_provider("ws", contract.provider_ws_link))
+        self.contract_meta = contract
+        self.contract_address = Web3.toChecksumAddress(contract.address)
+
+        if contract.abi_filepath:
+            with open(contract.abi_filepath) as f:
+                self.abi = ujson.load(f)
+
+        self.contract = self.w3.eth.contract(address=self.contract_address, abi=self.abi)
+
+        self.contract_events = []
+        self.blocks: List[EthereumTransaction] = []
+        self.filters = []
+        self.last_block = None
+
     def fetch_transaction_by_hash(self, transaction_hash: Union[str, HexBytes]):
-        # if isinstance(transaction_hash, str):
-        #     transaction_hash = Web3.toHex(transaction_hash)
         return self.w3.eth.getBlock(transaction_hash, full_transactions=True)
