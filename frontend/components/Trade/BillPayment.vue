@@ -71,11 +71,13 @@
         return this.multi_props.op === 'buy';
       },
       btc_address() {
-        if(!this.isBuy) {
+/*        if(!this.isBuy) {
           return this.updated_invoice_data.target_btc_address;
         }
 
-        return this.$store.getters.btc_address;
+        return this.$store.getters.btc_address;*/
+
+        return this.updated_invoice_data.target_btc_address;
       },
       tradeData() {
         return this.$store.getters['exchange/tradeData'];
@@ -139,7 +141,7 @@
       })
 
       // Preload 'Hot' BTC address
-      await this.$store.dispatch('getBtcAddress')
+      //await this.$store.dispatch('getBtcAddress')
 
       if(this.multi_props['no_create']) {
         this.created_transaction = this.multi_props['invoice'];
@@ -153,7 +155,8 @@
         this.created_transaction = res._id
 
         let eth_address = this.$store.getters['exchange/tradeData']['eth_address'];
-        let btc_address = this.$store.getters['btc_address'];
+        //let btc_address = this.$store.getters['btc_address'];
+        let btc_address = res.target_btc_address
 
         if(this.multi_props.op === 'sell') {
           btc_address = this.$store.getters['exchange/tradeData']['btc_target_wallet']
@@ -162,7 +165,11 @@
         let updateData = { id: this.created_transaction, eth_address, btc_address, simba_amount: tradeData.simba}
         let res2 = await this.$store.dispatch('invoices/updateTransaction', updateData)
 
+        console.log('id', this.created_transaction)
+
         let res3 = await this.$store.dispatch('invoices/confirmTransaction', this.created_transaction)
+
+        console.log(res3);
 
         this.$nuxt.$router.push({ path: '/exchange/buysell', query: {id: this.created_transaction }})
       }
