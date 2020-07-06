@@ -1,2 +1,3 @@
-from .events_wrapper import ContractEventsWrapper
-from .functions_wrapper import ContractFunctionsWrapper
+from .contract_events_wrapper import EventsContractWrapper
+from .contract_functions_wrapper import FunctionsContractWrapper
+from .common_wrapper import EthereumCommonWrapper

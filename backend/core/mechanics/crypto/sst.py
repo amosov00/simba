@@ -1,7 +1,7 @@
 from hexbytes import HexBytes
 
 from .base import CryptoValidation, CryptoCurrencyRate
-from core.integrations.ethereum import ContractFunctionsWrapper, ContractEventsWrapper
+from core.integrations.ethereum import FunctionsContractWrapper, EventsContractWrapper
 from schemas import InvoiceInDB, InvoiceStatus, User
 from config import SST_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
 from database.crud.referral import ReferralCRUD
@@ -18,7 +18,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
     PERIOD: int = 2500000
 
     def __init__(self):
-        self.api_wrapper = ContractFunctionsWrapper(SST_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY)
+        self.api_wrapper = FunctionsContractWrapper(SST_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY)
 
     @classmethod
     def _calculate_referrals_accurals(cls, ref_level: int, sst_tokens: int) -> int:

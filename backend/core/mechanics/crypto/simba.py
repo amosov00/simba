@@ -1,14 +1,14 @@
 from hexbytes import HexBytes
 
 from .base import CryptoValidation, CryptoCurrencyRate
-from core.integrations.ethereum import ContractFunctionsWrapper, ContractEventsWrapper
+from core.integrations.ethereum import FunctionsContractWrapper, EventsContractWrapper
 from schemas import InvoiceInDB, InvoiceStatus
 from config import SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
 
 
 class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
     def __init__(self):
-        self.api_wrapper = ContractFunctionsWrapper(
+        self.api_wrapper = FunctionsContractWrapper(
             SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
         )
 

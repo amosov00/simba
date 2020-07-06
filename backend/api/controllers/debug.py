@@ -4,6 +4,7 @@ import asyncio
 from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request
 
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper, BlockCypherAPIWrapper
+from core.integrations.ethereum import EthereumCommonWrapper
 from core.mechanics.crypto import SimbaWrapper
 from celery_app.tasks import delete_unused_webhooks, finish_overdue_invoices
 from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD, ReferralCRUD
@@ -46,13 +47,15 @@ async def debug_get(user: User = Depends(get_user)):
     return await ReferralCRUD.find_by_user_id(user.id)
 
 
-# @router.get("/eth/")
-# async def debug_get():
-#     return await SimbaWrapper().issue_tokens(
-#         "0xbeb3ec5bce587420c00ec547ca2dd5626f497b73",
-#         100000,
-#         "manual-test"
-#     )
+@router.get("/eth/")
+async def debug_get():
+    blocks = EthereumCommonWrapper()._fetch_blocks(
+        "0xE22caEB9D0845AafB66474c0Dea06a744f6aCA91",
+        6785718,
+        None
+    )
+    breakpoint()
+    return None
 
 
 @router.get("/")
