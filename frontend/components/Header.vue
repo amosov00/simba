@@ -98,6 +98,8 @@ export default {
   padding-bottom: 14px
 .logo
   margin-right: 20px
+  height: 70px
+  width: 70px
 .logo-text
   font-weight: bold
   font-size: 22px
