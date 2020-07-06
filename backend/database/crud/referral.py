@@ -16,8 +16,8 @@ class ReferralCRUD(BaseMongoCRUD):
     collection: str = "referral"
 
     @classmethod
-    async def find_by_user_id(cls, _id: Union[str, ObjectId]) -> Optional[dict]:
-        return await super().find_one(query={"user_id": to_objectid(_id)}) if _id else None
+    async def find_by_user_id(cls, user_id: Union[str, ObjectId]) -> Optional[dict]:
+        return await cls.find_one(query={"user_id": ObjectId(user_id)}) if user_id else None
 
     @classmethod
     async def add_referral(cls, user_id: ObjectId, referral_id: ObjectId):
