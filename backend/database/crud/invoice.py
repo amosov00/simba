@@ -24,7 +24,7 @@ class InvoiceCRUD(BaseMongoCRUD):
     @classmethod
     async def find_invoices_by_type_and_status(
         cls,
-        invoice_type: Literal[InvoiceType.BUY, InvoiceType.SELL],
+        invoice_type: Literal[InvoiceType.BUY, InvoiceType.SELL],  # noqa
         status: Literal[InvoiceStatus.ALL],  # noqa
     ):
         return await super().find_many({"status": status, "invoice_type": invoice_type})
@@ -35,7 +35,9 @@ class InvoiceCRUD(BaseMongoCRUD):
 
     @classmethod
     async def find_invoice_by_id(
-        cls, invoice_id: Union[str, ObjectId], user_id: Union[ObjectId, ObjectIdPydantic]
+        cls,
+        invoice_id: Union[str, ObjectId],
+        user_id: Union[ObjectId, ObjectIdPydantic],
     ):
         return await super().find_one({"_id": ObjectId(invoice_id), "user_id": user_id})
 
@@ -46,12 +48,16 @@ class InvoiceCRUD(BaseMongoCRUD):
         user_id: Union[ObjectId, ObjectIdPydantic],
         statuses: tuple = (InvoiceStatus.CREATED,),
     ):
-        invoice = await super().find_one({"_id": ObjectId(invoice_id), "user_id": user_id,})
+        invoice = await super().find_one(
+            {"_id": ObjectId(invoice_id), "user_id": user_id,}
+        )
         if not invoice:
             raise HTTPException(HTTPStatus.NOT_FOUND, "Invoice not found")
 
         if invoice["status"] not in statuses:
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "This operation is not permitted")
+            raise HTTPException(
+                HTTPStatus.BAD_REQUEST, "This operation is not permitted"
+            )
 
         return invoice
 
@@ -66,7 +72,9 @@ class InvoiceCRUD(BaseMongoCRUD):
         return created_invoice
 
     @classmethod
-    async def update_invoice(cls, invoice_id: str, user: User, payload: InvoiceUpdate, statuses: tuple = None):
+    async def update_invoice(
+        cls, invoice_id: str, user: User, payload: InvoiceUpdate, statuses: tuple = None
+    ):
         if not payload.dict(exclude_unset=True):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Payload is required")
 
@@ -78,7 +86,9 @@ class InvoiceCRUD(BaseMongoCRUD):
             payload = payload.dict(exclude={"target_eth_address"}, exclude_none=True)
 
         modified_count = (
-            await cls.update_one(query={"user_id": user.id, "_id": invoice["_id"],}, payload=payload,)
+            await cls.update_one(
+                query={"user_id": user.id, "_id": invoice["_id"],}, payload=payload,
+            )
         ).modified_count
         return bool(modified_count)
 
@@ -89,4 +99,23 @@ class InvoiceCRUD(BaseMongoCRUD):
         user_id: Union[ObjectId, ObjectIdPydantic],
         payload: dict,
     ) -> bool:
-        return await super().update_one({"_id": invoice_id, "user_id": user_id}, payload)
+        return await super().update_one(
+            {"_id": invoice_id, "user_id": user_id}, payload
+        )
+
+    @classmethod
+    async def need_to_update(
+        cls,
+        invoice_id: Union[ObjectId, ObjectIdPydantic],
+        user: User,
+        payload: InvoiceUpdate,
+    ):
+        invoice = await cls.find_by_id(ObjectId(invoice_id))
+        if invoice is None:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Invalid invoice id")
+        if invoice['invoice_type'] == InvoiceType.BUY:
+            if payload.target_eth_address is not None and user.user_eth_addresses == []:
+                return True
+            else:
+                return False
+        return False
