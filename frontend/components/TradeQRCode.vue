@@ -1,34 +1,37 @@
 <template lang="pug">
-  div.copy-button__wrapper
-    div.copy-button(@click="copy")
-      img(:src="require('~/assets/images/copy.svg')").copy-button__icon
-    input(:value="value_to_copy" ref="reflink").hidden-input
-
+  div.qr-button__wrapper
+    div.qr-button(@click="qrCodeModal")
+      img(:src="require('~/assets/images/qr.svg')").qr-button__icon
 </template>
 
 <script>
+  import AddressQRCode from "~/components/AddressQRCode";
+
   export default {
-    name: 'CopyToClipboard',
+    name: 'TradeQRCode',
     props: {
-      value_to_copy: {
-        default: '',
-        type: String
-      }
+      qrcode_value: String,
+      amount: null
     },
+    components: {AddressQRCode},
     methods: {
-      copy() {
-        this.$refs.reflink.select();
-        this.$buefy.toast.open({ message: 'Copied to clipboard', type: 'is-primary' });
-        document.execCommand('copy');
-      }
+      qrCodeModal() {
+        this.$buefy.modal.open({
+          parent: this,
+          component: AddressQRCode,
+          hasModalCard: true,
+          trapFocus: true,
+          props: { qrcode_value: this.qrcode_value, amount: this.amount }
+        });
+      },
     }
   }
 </script>
 
 <style lang="sass">
-  .copy-button
+  .qr-button
     width: 36px
-    height: 15px
+    height: 36px
     display: flex
     align-items: center
     justify-content: center
@@ -60,8 +63,4 @@
       position: relative
       width: 36px
       height: 15px
-
-  .hidden-input
-    position: absolute
-    left: -9999px
 </style>
