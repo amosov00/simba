@@ -21,7 +21,10 @@ __all__ = [
     "InvoiceInDB",
     "InvoiceExtended",
     "InvoiceTransactionManual",
+    "INVOICE_MODEL_EXCLUDE_FIELDS",
 ]
+
+INVOICE_MODEL_EXCLUDE_FIELDS = frozenset(("validation_md5_hash",))
 
 
 class InvoiceStatus:
@@ -81,13 +84,15 @@ class InvoiceExtended(InvoiceInDB):
 
 
 class InvoiceCreate(BaseModel):
-    invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")  # noqa
+    invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")
+    # TODO make strict
+    target_eth_address: Optional[str] = Field(default=None, description="Address which will be scanned")
 
 
 class InvoiceUpdate(BaseModel):
-    target_eth_address: Optional[str] = Field(..., description="Address which will be scanned")
-    target_btc_address: Optional[str] = Field(..., description="Address which will be scanned")
-    # TODO: Make nice validation of this
+    target_eth_address: Optional[str] = Field(default=None, description="Address which will be scanned")
+    target_btc_address: Optional[str] = Field(default=None, description="Address which will be scanned")
+
     btc_amount: Union[int, DecimalPydantic] = Field(..., description="Planned amount to receive / send", gt=0)
     simba_amount: Union[int, DecimalPydantic] = Field(..., description="Planned amount to receive / send", gt=0)
 

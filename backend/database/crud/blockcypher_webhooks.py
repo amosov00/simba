@@ -1,6 +1,6 @@
 from .base import BaseMongoCRUD
 
-__all__ = ['BlockCypherWebhookCRUD']
+__all__ = ["BlockCypherWebhookCRUD"]
 
 
 class BlockCypherWebhookCRUD(BaseMongoCRUD):

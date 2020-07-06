@@ -55,13 +55,10 @@ export default {
   server: {
     host: '0.0.0.0',
   },
-  axios: {
-    baseURL: "https://my.simba.storage/api",
-  },
   sentry: {
     initialize: true,
     config: {
-      environment: process.env.ENV,
+      environment: process.env.NODE_ENV,
     },
   },
   i18n: {

@@ -1,11 +1,12 @@
 from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Response
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urljoin
 
 from core.mechanics.crypto import BitcoinWrapper
+from core.mechanics.referrals import ReferralMechanics
 from config import HOST_URL
 from api.dependencies import get_user
-from database.crud import UserCRUD
-from schemas.user import (
+from database.crud import UserCRUD, ReferralCRUD
+from schemas import (
     UserLogin,
     User,
     UserLoginResponse,
@@ -20,7 +21,8 @@ from schemas.user import (
     User2faConfirm,
     UserReferralURLResponse,
     User2faDelete,
-    UserReferralsResponse
+    UserReferralsResponse,
+    USER_MODEL_INCLUDE_FIELDS,
 )
 
 __all__ = ["router"]
@@ -28,16 +30,36 @@ __all__ = ["router"]
 router = APIRouter()
 
 
-@router.post("/login/", response_model=UserLoginResponse, response_model_exclude={"recover_code", "secret_2fa"})
-async def account_login(
-        data: UserLogin = Body(...),
-):
+@router.get(
+    "/user/",
+    response_model=User,
+    # TODO update
+    response_model_include=USER_MODEL_INCLUDE_FIELDS,
+)
+async def account_get_user(user: User = Depends(get_user)):
+    return user
+
+
+@router.post(
+    "/login/", response_model=UserLoginResponse,
+)
+async def account_login(data: UserLogin = Body(...),):
     return await UserCRUD.authenticate(data.email, data.password, data.pin_code)
 
 
 @router.post("/signup/", response_model=UserCreationSafeResponse)
 async def account_signup(data: UserCreationSafe = Body(...)):
     return await UserCRUD.create_safe(data)
+
+
+@router.put("/user/")
+async def account_update_user(user: User = Depends(get_user), payload: UserUpdateSafe = Body(...)):
+    return await UserCRUD.update_safe(user, payload) if payload.dict(exclude_unset=True) else {}
+
+
+@router.post("/change_password/")
+async def account_change_password(user: User = Depends(get_user), payload: UserChangePassword = Body(...)):
+    return await UserCRUD.change_password(user, payload)
 
 
 @router.post("/verify/", response_model=UserLoginResponse)
@@ -57,26 +79,9 @@ async def account_recover(data: UserRecoverLink = Body(...)):
 
 @router.get("/referral_link/", response_model=UserReferralURLResponse)
 async def account_get_referral_link(user: User = Depends(get_user)):
-    params = {f"referral_id": user.id}
-    # TODO вынести в функцию
-    return {"URL": f'{HOST_URL}register?{urlencode(params)}'}
-
-
-@router.get("/user/", response_model=User, response_model_exclude={"_id", "recover_code", "secret_2fa"})
-async def account_get_user(user: User = Depends(get_user)):
-    return user
-
-
-@router.put("/user/")
-async def account_update_user(user: User = Depends(get_user), payload: UserUpdateSafe = Body(...)):
-    resp = await UserCRUD.update_safe(user, payload) if payload.dict(exclude_unset=True) else {}
-    return resp
-
-
-@router.post("/change_password/")
-async def account_change_password(user: User = Depends(get_user), payload: UserChangePassword = Body(...)):
-    resp = await UserCRUD.change_password(user, payload)
-    return resp
+    params = {"referral_id": user.id}
+    url = urljoin(HOST_URL, "register") + "?" + urlencode(params)
+    return {"URL": url}
 
 
 @router.get("/2fa/", response_model=User2faURL)
@@ -90,9 +95,7 @@ async def account_confirm_2fa(user: User = Depends(get_user), payload: User2faCo
 
 
 @router.get("/btc-address/")
-async def account_btc_address(
-        user: User = Depends(get_user)
-):
+async def account_btc_address(user: User = Depends(get_user)):
     if not user.btc_address:
         address = await BitcoinWrapper().create_wallet_address(user)
     else:
@@ -108,4 +111,8 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
 
 @router.get("/referrals/", response_model=UserReferralsResponse)
 async def account_referrals_info(user: User = Depends(get_user)):
-    return await UserCRUD.referrals_info(user)
+    ref_obj = ReferralMechanics(user)
+    referrals = await ref_obj.fetch_referrals()
+    transactions = []
+
+    return {"referrals": referrals, "transactions": transactions}

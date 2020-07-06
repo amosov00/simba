@@ -18,11 +18,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
     PERIOD: int = 2500000
 
     def __init__(self):
-        self.api_wrapper = ContractFunctionsWrapper(
-            SST_CONTRACT,
-            SIMBA_ADMIN_ADDRESS,
-            SIMBA_ADMIN_PRIVATE_KEY
-        )
+        self.api_wrapper = ContractFunctionsWrapper(SST_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY)
 
     @classmethod
     def _calculate_referrals_accurals(cls, ref_level: int, sst_tokens: int) -> int:
@@ -47,8 +43,6 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
             wallet: str = user["user_eth_addresses"][0] if len(user["user_eth_addresses"]) > 0 else None
             if wallet is not None:
                 self.api_wrapper.freeze_and_transfer(
-                    wallet,
-                    self._calculate_referrals_accurals(i, sst_tokens),
-                    self.PERIOD
+                    wallet, self._calculate_referrals_accurals(i, sst_tokens), self.PERIOD
                 )
         return True

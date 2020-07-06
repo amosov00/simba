@@ -29,14 +29,9 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
         return self.w3.eth.getTransactionCount(self.admin_address)
 
     def _approve(self, amount: int, nonce: int) -> HexBytes:
-        tx = self.contract.functions.approve(
-            self.admin_address, amount
-        ).buildTransaction({
-            'gas': GAS,
-            'gasPrice': GAS_PRICE,
-            'from': self.admin_address,
-            'nonce': nonce,
-        })
+        tx = self.contract.functions.approve(self.admin_address, amount).buildTransaction(
+            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce,}
+        )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
@@ -48,14 +43,9 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
         customer_address = Web3.toChecksumAddress(customer_address)
         nonce = self._get_nonce()
         self._approve(amount, nonce)
-        tx = self.contract.functions.issue(
-            customer_address, amount, comment
-        ).buildTransaction({
-            'gas': GAS,
-            'gasPrice': GAS_PRICE,
-            'from': self.admin_address,
-            'nonce': nonce + 1,
-        })
+        tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
+            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce + 1,}
+        )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
@@ -66,13 +56,8 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
     def freeze_and_transfer(self, customer_address: str, amount: int, period: int):
         """SST contract"""
         customer_address = Web3.toChecksumAddress(customer_address)
-        tx = self.contract.functions.freezeAndTransfer(
-            customer_address, amount, period
-        ).buildTransaction({
-            'gas': GAS,
-            'gasPrice': GAS_PRICE,
-            'from': self.admin_address,
-            'nonce': self._get_nonce(),
-        })
+        tx = self.contract.functions.freezeAndTransfer(customer_address, amount, period).buildTransaction(
+            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": self._get_nonce(),}
+        )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)

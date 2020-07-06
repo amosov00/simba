@@ -22,7 +22,8 @@ class BTCAddressTransactions(BaseModel):
 
 
 class BTCAddress(BaseModel):
-    user_id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
+    user_id: ObjectIdPydantic = Field(default=None)
+    invoice_id: ObjectIdPydantic = Field(default=None)
     address: str = Field(...)
     public_key: str = Field(default=None)
     path: str = Field(default=None)
@@ -36,4 +37,3 @@ class BTCAddress(BaseModel):
 
 class BTCAddressInDB(BTCAddress):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
-

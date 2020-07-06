@@ -47,6 +47,5 @@ export default {
 <style lang="sass" scoped>
 .metamask-window
   width: 650px
-  height: 300px
   padding: 20px 40px
 </style>
