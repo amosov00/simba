@@ -100,7 +100,9 @@ export default {
         toBlock: "latest"
       },
       (err, events) => {
-        this.quarantined = events.length;
+        this.quarantined = events.reduce((total, el) => {
+          return total + el.returnValues.amount * 1;
+        }, 0);
       }
     );
     await this.$contract().SIMBA.getPastEvents(
