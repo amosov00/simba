@@ -89,11 +89,12 @@ export default {
         toBlock: "latest"
       },
       (err, events) => {
-        this.holders = [...new Set(events.map(item => item.returnValues.to))].length;
+        this.holders =
+          [...new Set(events.map(item => item.returnValues.to))].length - 1;
       }
     );
     await this.$contract().SIMBA.getPastEvents(
-      "BlacklistedRemoved",
+      "BlacklistedAdded",
       {
         fromBlock: 0,
         toBlock: "latest"
@@ -110,7 +111,7 @@ export default {
       },
       (err, events) => {
         this.issued = events.reduce((total, el) => {
-          return total + el.returnValues.value * 1;
+          return total + el.returnValues.amount * 1;
         }, 0);
       }
     );
@@ -122,7 +123,7 @@ export default {
       },
       (err, events) => {
         this.redeemed = events.reduce((total, el) => {
-          return total + el.returnValues.value * 1;
+          return total + el.returnValues.amount * 1;
         }, 0);
       }
     );
@@ -133,7 +134,7 @@ export default {
         this.totalAssets = res;
         return;
       });
-    this.circulation = this.issued - this.redeemed - this.quarantined
+    this.circulation = this.totalAssets - this.quarantined;
     await this.$axios
       .get("https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD")
       .then(res => {
