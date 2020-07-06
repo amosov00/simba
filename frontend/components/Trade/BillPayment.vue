@@ -16,7 +16,7 @@
           img(src="@/assets/images/logo_sm.png").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
             = ' '
-            span.has-text-weight-bold.ml-1 {{ tradeData.simba }} SIMBA
+            span.has-text-weight-bold.ml-1 {{ simbaFormat(tradeData.simba) }} SIMBA
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
             span {{ updated_invoice_data.target_eth_address }}
@@ -56,12 +56,12 @@
 
 <script>
   import Countdown from "~/components/Countdown";
-
+  import formatCurrency from '~/mixins/formatCurrency'
   export default {
     name: 'trade-bill-payment',
 
     components: {Countdown},
-
+    mixins: [formatCurrency],
     props: {
       multi_props: Object
     },
