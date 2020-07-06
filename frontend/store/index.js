@@ -3,7 +3,6 @@ import { ToastProgrammatic as Toast } from "buefy";
 
 export const state = () => ({
   user: null,
-  btc_address: "",
   contract: "",
   tradeData: {
     operation: 1,
@@ -15,14 +14,12 @@ export const state = () => ({
 
 export const getters = {
   user: s => s.user,
-  btc_address: s => s.btc_address,
   contract: s => s.contract,
   tradeData: s => s.tradeData
 };
 
 export const mutations = {
   setUser: (state, user) => (state.user = user),
-  setBtcAddress: (state, btc_address) => (state.btc_address = btc_address),
   deleteUser: state => (state.user = null),
   setContract: (state, data) => (state.contract = data),
   setTradeData: (state, payload) => {
