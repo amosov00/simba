@@ -6,7 +6,7 @@
       =' '
       a(:href="'https://etherscan.io/tx/' + tx_hash" target="_blank").link {{ tx_hash }}
     div.mt-2
-      div Confirmation 1/1
+      div Confirmation 1/{{min_confirms}}
     b-loading(:active.sync="confirms_loading" :is-full-page="false")
 </template>
 
@@ -21,40 +21,35 @@
       min_confirms: 1
     }),
 
-    props: {
-      multi_props: Object,
+    computed: {
+      tradeData() {
+        return this.$store.getters['exchange/tradeData']
+      }
     },
 
     async created() {
-      let res = await this.$store.dispatch('invoices/fetchSingle', this.multi_props['invoice']);
+      let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id);
       this.received_payment_amount = res.btc_amount_proceeded
 
       if(res.btc_txs.length > 0) {
-        this.tx_hash = res.btc_txs[0].hash || ''
+        this.tx_hash = res.eth_txs[0]?.hash || ''
       }
     },
 
     mounted() {
       this.interval = setInterval(async () => {
         this.loadingSpinner()
-        let res = await this.$store.dispatch('invoices/fetchSingle', this.multi_props['invoice'])
+        let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id)
 
-        if(res.status === 'completed') {
+        if(res.status === 'completed' || res.btc_txs[0].confirmations >= this.min_confirms) {
 
-          if(!this.$parent.multi_props.hasOwnProperty("buy_info")) {
-            this.$parent.multi_props["buy_info"] = {}
-          }
-
-          this.$parent.multi_props["buy_info"]["simba_issued"] = res.btc_amount_proceeded
-          this.$parent.multi_props["buy_info"]["target_eth"] = res.target_eth_address
-          this.$parent.multi_props["buy_info"]["tx_hash"] = res.btc_txs[0].hash
-
-          this.$parent.multi_props["invoice"] = res._id
+          this.$store.commit('exchange/setTradeData', { prop: 'simba_issued', value: res.btc_amount_proceeded})
+          this.$store.commit('exchange/setTradeData', { prop: 'target_eth', value: res.target_eth_address})
+          this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: res.eth_txs[0]?.hash || ''})
 
           clearInterval(this.interval)
           this.$parent.$emit('nextStep')
         }
-        console.log('checking on Status comp')
       }, 10000)
     },
 

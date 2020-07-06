@@ -62,44 +62,32 @@
 
     components: {Countdown},
     mixins: [formatCurrency],
-    props: {
-      multi_props: Object
-    },
 
     computed: {
       isBuy(){
-        return this.multi_props.op === 'buy';
+        return this.$store.getters['exchange/tradeData']['operation'] === 1;
       },
       btc_address() {
-/*        if(!this.isBuy) {
-          return this.updated_invoice_data.target_btc_address;
-        }
-
-        return this.$store.getters.btc_address;*/
-
-        if(this.updated_invoice_data.status === 'created') {
-          return ''
-        }
-
         return this.updated_invoice_data.target_btc_address;
       },
       tradeData() {
         return this.$store.getters['exchange/tradeData'];
+      },
+      created_invoice_id() {
+        return this.$store.getters['exchange/tradeData']['invoice_id']
       }
     },
     data: () => ({
       expired: false,
       busyChecking: false,
-      status: '',
       transaction_hash: '',
-      created_transaction: '',
       updated_invoice_data: {
       },
       check: {},
       showCountdown: false,
       countdown: null,
       goneToNextStep: false,
-      confirmInterval: null
+      confirmInterval: null,
     }),
     methods: {
       stopCountdown() {
@@ -108,34 +96,30 @@
         }
       },
 
-      async setTransaction() {
-
-        let res = await this.$store.dispatch('invoices/manualTransaction', { id: this.created_transaction, transaction_hash: this.transaction_hash });
-        console.log(res);
-      },
-
       async checkSingle() {
         if(!this.busyChecking) {
           this.busyChecking = true
-          this.check = await this.$store.dispatch('invoices/fetchSingle', this.created_transaction)
-          this.status = this.check.status
+
+          this.check = await this.$store.dispatch('invoices/fetchSingle', this.created_invoice_id)
 
           if(this.check.btc_txs.length > 0) {
-            if(this.check.btc_txs[0].confirmations > 0 ) {
-              this.$parent.multi_props["invoice"] = this.check._id
+            this.goneToNextStep = true
+            this.stopCountdown();
+            this.$parent.$emit('nextStep')
+            return;
+/*            if(this.check.btc_txs[0].confirmations > 0 ) {
               this.goneToNextStep = true
               this.stopCountdown();
               this.$parent.$emit('nextStep')
               return;
-            }
+            }*/
           }
 
           this.updated_invoice_data = JSON.parse(JSON.stringify(this.check));
 
-          //console.log(this.updated_invoice_data)
-
+          // Confirm if invoice is not confirmed
           if(this.updated_invoice_data.target_btc_address && this.updated_invoice_data.status === 'created') {
-            await this.$store.dispatch('invoices/confirmTransaction', this.created_transaction)
+            await this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
           }
 
           await setTimeout(() => {
@@ -152,33 +136,9 @@
         this.$parent.$emit('step_failed')
       })
 
-      // Preload 'Hot' BTC address
-      //await this.$store.dispatch('getBtcAddress')
-
-      if(this.multi_props['no_create']) {
+      /*if(this.multi_props['no_create']) {
         this.created_transaction = this.multi_props['invoice'];
-      } else {
-
-
-        let tradeData = this.$store.getters['exchange/tradeData'];
-
-        let res = await this.$store.dispatch('invoices/createTransaction', tradeData.operation);
-
-        this.created_transaction = res._id
-
-        let eth_address = this.$store.getters['exchange/tradeData']['eth_address'];
-        //let btc_address = this.$store.getters['btc_address'];
-        let btc_address = res.target_btc_address
-
-        if(this.multi_props.op === 'sell') {
-          btc_address = this.$store.getters['exchange/tradeData']['btc_target_wallet']
-        }
-
-        let updateData = { id: this.created_transaction, eth_address, btc_address, simba_amount: tradeData.simba}
-        let res2 = await this.$store.dispatch('invoices/updateTransaction', updateData)
-
-        this.$nuxt.$router.push({ path: '/exchange/buysell', query: {id: this.created_transaction }})
-      }
+      }*/
 
       await this.checkSingle()
 
