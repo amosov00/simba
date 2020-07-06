@@ -94,14 +94,15 @@ async def account_confirm_2fa(user: User = Depends(get_user), payload: User2faCo
     return await UserCRUD.confirm_2fa(user, payload)
 
 
-@router.get("/btc-address/")
-async def account_btc_address(user: User = Depends(get_user)):
-    if not user.btc_address:
-        address = await BitcoinWrapper().create_wallet_address(user)
-    else:
-        address = user.btc_address
-
-    return {"address": address}
+# TODO deprecated, delete after 07/09/20
+# @router.get("/btc-address/")
+# async def account_btc_address(user: User = Depends(get_user)):
+#     if not user.btc_address:
+#         address = await BitcoinWrapper().create_wallet_address(user)
+#     else:
+#         address = user.btc_address
+#
+#     return {"address": address}
 
 
 @router.delete("/2fa/")

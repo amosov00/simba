@@ -60,7 +60,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
             self.api_wrapper.network,
             spendables=spendables,
             payables=payables,
-            wifs=[self.BTC_HOT_WALLET_WIF,],
+            wifs=[self.BTC_HOT_WALLET_WIF, ],
             fee=fee,
         )
         return await self.api_wrapper.push_raw_tx(tx)

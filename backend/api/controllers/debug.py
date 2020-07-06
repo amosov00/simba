@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request
 
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper, BlockCypherAPIWrapper
 from core.integrations.ethereum import EthereumCommonWrapper
-from core.mechanics.crypto import SimbaWrapper
+from core.mechanics.crypto import SimbaWrapper, SSTWrapper
 from celery_app.tasks import delete_unused_webhooks, finish_overdue_invoices
 from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD, ReferralCRUD
 from schemas import BlockCypherWebhookInDB, User, ReferralInDB, InvoiceInDB
