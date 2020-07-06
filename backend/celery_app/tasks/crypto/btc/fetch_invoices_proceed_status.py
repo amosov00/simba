@@ -4,14 +4,11 @@ from core.mechanics import BitcoinWrapper
 from database.crud import InvoiceCRUD
 from schemas import InvoiceInDB, BTCAddressInDB, InvoiceType, InvoiceStatus
 
-__all__ = ['invoice_processing_status']
+__all__ = ["invoice_processing_status"]
 
 
 @app.task(
-    name="invoice_waiting_status",
-    bind=True,
-    soft_time_limit=42,
-    time_limit=300,
+    name="invoice_waiting_status", bind=True, soft_time_limit=42, time_limit=300,
 )
 async def invoice_processing_status(self, *args, **kwargs):
     # TODO Complete, only SELL status
@@ -25,6 +22,5 @@ async def invoice_processing_status(self, *args, **kwargs):
         #     wifs=['wif'],
         #     test=True,
         # )
-
 
     return True

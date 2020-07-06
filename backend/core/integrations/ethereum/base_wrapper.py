@@ -52,7 +52,4 @@ class EthereumBaseWrapper(ABC):
     def fetch_transaction_by_hash(self, transaction_hash: Union[str, HexBytes]):
         # if isinstance(transaction_hash, str):
         #     transaction_hash = Web3.toHex(transaction_hash)
-        return self.w3.eth.getBlock(
-            transaction_hash,
-            full_transactions=True
-        )
+        return self.w3.eth.getBlock(transaction_hash, full_transactions=True)

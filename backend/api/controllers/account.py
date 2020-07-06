@@ -22,7 +22,7 @@ from schemas import (
     UserReferralURLResponse,
     User2faDelete,
     UserReferralsResponse,
-    USER_MODEL_INCLUDE_FIELDS
+    USER_MODEL_INCLUDE_FIELDS,
 )
 
 __all__ = ["router"]
@@ -34,19 +34,16 @@ router = APIRouter()
     "/user/",
     response_model=User,
     # TODO update
-    response_model_include=USER_MODEL_INCLUDE_FIELDS
+    response_model_include=USER_MODEL_INCLUDE_FIELDS,
 )
 async def account_get_user(user: User = Depends(get_user)):
     return user
 
 
 @router.post(
-    "/login/",
-    response_model=UserLoginResponse,
+    "/login/", response_model=UserLoginResponse,
 )
-async def account_login(
-        data: UserLogin = Body(...),
-):
+async def account_login(data: UserLogin = Body(...),):
     return await UserCRUD.authenticate(data.email, data.password, data.pin_code)
 
 
@@ -98,9 +95,7 @@ async def account_confirm_2fa(user: User = Depends(get_user), payload: User2faCo
 
 
 @router.get("/btc-address/")
-async def account_btc_address(
-        user: User = Depends(get_user)
-):
+async def account_btc_address(user: User = Depends(get_user)):
     if not user.btc_address:
         address = await BitcoinWrapper().create_wallet_address(user)
     else:
@@ -120,7 +115,4 @@ async def account_referrals_info(user: User = Depends(get_user)):
     referrals = await ref_obj.fetch_referrals()
     transactions = []
 
-    return {
-        "referrals": referrals,
-        "transactions": transactions
-    }
+    return {"referrals": referrals, "transactions": transactions}

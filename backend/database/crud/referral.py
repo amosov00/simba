@@ -17,9 +17,7 @@ class ReferralCRUD(BaseMongoCRUD):
 
     @classmethod
     async def find_by_user_id(cls, _id: Union[str, ObjectId]) -> Optional[dict]:
-        return (
-            await super().find_one(query={"user_id": to_objectid(_id)}) if _id else None
-        )
+        return await super().find_one(query={"user_id": to_objectid(_id)}) if _id else None
 
     @classmethod
     async def add_referral(cls, user_id: ObjectId, referral_id: ObjectId):
@@ -30,11 +28,13 @@ class ReferralCRUD(BaseMongoCRUD):
 
         referral_obj = ReferralInDB(**referral_obj) if referral_obj else None
 
-        return await super().insert_one({
-            "user_id": user_id,
-            "ref1": referral_id,
-            "ref2": referral_obj.ref1 if referral_obj else None,
-            "ref3": referral_obj.ref2 if referral_obj else None,
-            "ref4": referral_obj.ref3 if referral_obj else None,
-            "ref5": referral_obj.ref4 if referral_obj else None,
-        })
+        return await super().insert_one(
+            {
+                "user_id": user_id,
+                "ref1": referral_id,
+                "ref2": referral_obj.ref1 if referral_obj else None,
+                "ref3": referral_obj.ref2 if referral_obj else None,
+                "ref4": referral_obj.ref3 if referral_obj else None,
+                "ref5": referral_obj.ref4 if referral_obj else None,
+            }
+        )

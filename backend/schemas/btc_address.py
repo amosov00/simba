@@ -37,4 +37,3 @@ class BTCAddress(BaseModel):
 
 class BTCAddressInDB(BTCAddress):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
-
