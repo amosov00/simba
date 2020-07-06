@@ -6,6 +6,7 @@ from schemas import InvoiceInDB, InvoiceStatus, User
 from config import SST_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
 from database.crud.referral import ReferralCRUD
 from database.crud.user import UserCRUD
+from bson import ObjectId
 
 
 class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
