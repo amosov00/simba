@@ -77,6 +77,10 @@
 
         return this.$store.getters.btc_address;*/
 
+        if(this.updated_invoice_data.status === 'created') {
+          return ''
+        }
+
         return this.updated_invoice_data.target_btc_address;
       },
       tradeData() {
@@ -94,7 +98,8 @@
       check: {},
       showCountdown: false,
       countdown: null,
-      goneToNextStep: false
+      goneToNextStep: false,
+      confirmInterval: null
     }),
     methods: {
       stopCountdown() {
@@ -126,6 +131,13 @@
           }
 
           this.updated_invoice_data = JSON.parse(JSON.stringify(this.check));
+
+          //console.log(this.updated_invoice_data)
+
+          if(this.updated_invoice_data.target_btc_address && this.updated_invoice_data.status === 'created') {
+            await this.$store.dispatch('invoices/confirmTransaction', this.created_transaction)
+          }
+
           await setTimeout(() => {
             this.busyChecking = false;
           }, 1000)
@@ -164,12 +176,6 @@
 
         let updateData = { id: this.created_transaction, eth_address, btc_address, simba_amount: tradeData.simba}
         let res2 = await this.$store.dispatch('invoices/updateTransaction', updateData)
-
-        console.log('id', this.created_transaction)
-
-        let res3 = await this.$store.dispatch('invoices/confirmTransaction', this.created_transaction)
-
-        console.log(res3);
 
         this.$nuxt.$router.push({ path: '/exchange/buysell', query: {id: this.created_transaction }})
       }
