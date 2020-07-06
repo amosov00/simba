@@ -30,6 +30,17 @@ async def debug_get():
     return await BlockCypherWebhookCRUD.find_many({})
 
 
+@router.delete("/webhooks/")
+async def debug_get():
+    hooks = await BlockCypherWebhookAPIWrapper().list_webhooks()
+    for hook in hooks:
+        await BlockCypherWebhookAPIWrapper().delete_webhook(hook["id"])
+        print(hook["id"] + " deleted")
+        await asyncio.sleep(0.5)
+
+    return True
+
+
 @router.get("/refs/", response_model=ReferralInDB)
 async def debug_get(user: User = Depends(get_user)):
     return await ReferralCRUD.find_by_user_id(user.id)

@@ -73,7 +73,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         )
         return await self.api_wrapper.push_raw_tx(tx)
 
-    async def create_wallet_address(self, user: User):
+    async def create_wallet_address(self, invoice: dict):
         resp = await self.api_wrapper.create_wallet_address(1)
 
         if "errors" in resp:
@@ -84,12 +84,12 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         address_full_info = await self.api_wrapper.fetch_address_info(
             address.get("address")
         )
-        address_full_info.user_id = user.id
+        address_full_info.invoice_id = invoice["_id"]
         address_full_info.public_key = address.get("public")
         address_full_info.path = address.get("path")
 
         await BTCAddressCRUD.insert_one(address_full_info.dict())
-        await UserCRUD.update_one({"_id": user.id}, {"btc_address": address_full_info.address})
+        await InvoiceCRUD.update_one({"_id": invoice["_id"]}, {"target_btc_address": address_full_info.address})
 
         return address_full_info.address
 

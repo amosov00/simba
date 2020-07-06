@@ -1,8 +1,9 @@
 from typing import List
 from http import HTTPStatus
 
-from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Response
+from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Response, BackgroundTasks
 from bson import ObjectId
+from sentry_sdk import capture_message
 
 from api.dependencies import get_user
 from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
@@ -26,18 +27,26 @@ router = APIRouter()
 
 
 @router.post("/", response_model=InvoiceInDB, response_model_exclude={"validation_md5_hash"})
-async def create_invoice(user: User = Depends(get_user), data: InvoiceCreate = Body(...)):
+async def create_invoice(
+        background_tasks: BackgroundTasks,
+        user: User = Depends(get_user),
+        data: InvoiceCreate = Body(...),
+):
     invoice = Invoice(
         user_id=user.id,
         status=InvoiceStatus.CREATED,
         invoice_type=data.invoice_type,
     )
-    if invoice.invoice_type == InvoiceType.BUY:
-        invoice.target_btc_address = user.btc_address
-    elif invoice.invoice_type == InvoiceType.SELL:
-        invoice.target_eth_address = user.user_eth_addresses
 
-    return await InvoiceCRUD.create_invoice(invoice)
+    if invoice.invoice_type == InvoiceType.SELL:
+        invoice.target_eth_address = data.target_eth_address
+
+    created_invoice = await InvoiceCRUD.create_invoice(invoice)
+
+    if invoice.invoice_type == InvoiceType.BUY:
+        background_tasks.add_task(BitcoinWrapper().create_wallet_address, created_invoice)
+
+    return created_invoice
 
 
 @router.get("/", response_model=List[InvoiceInDB])
