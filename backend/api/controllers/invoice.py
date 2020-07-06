@@ -3,7 +3,6 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Response, BackgroundTasks
 from bson import ObjectId
-from sentry_sdk import capture_message
 
 from api.dependencies import get_user
 from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
@@ -16,6 +15,7 @@ from schemas import (
     InvoiceStatus,
     InvoiceType,
     InvoiceTransactionManual,
+    INVOICE_MODEL_EXCLUDE_FIELDS,
     BlockCypherWebhookEvents,
 )
 from schemas.user import User
@@ -26,7 +26,7 @@ __all__ = ["router"]
 router = APIRouter()
 
 
-@router.post("/", response_model=InvoiceInDB, response_model_exclude={"validation_md5_hash"})
+@router.post("/", response_model=InvoiceInDB, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS)
 async def create_invoice(
         background_tasks: BackgroundTasks,
         user: User = Depends(get_user),
@@ -49,12 +49,12 @@ async def create_invoice(
     return created_invoice
 
 
-@router.get("/", response_model=List[InvoiceInDB])
+@router.get("/", response_model=List[InvoiceInDB], response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS)
 async def invoice_fetch_all(user: User = Depends(get_user)):
     return await InvoiceCRUD.find_invoices_by_user_id(user.id)
 
 
-@router.get("/{invoice_id}/", response_model=InvoiceExtended)
+@router.get("/{invoice_id}/", response_model=InvoiceExtended, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS)
 async def invoice_fetch_one(invoice_id: str, user: User = Depends(get_user)):
     resp = await InvoiceCRUD.aggregate([
         {"$match": {
@@ -121,7 +121,7 @@ async def invoice_add_transaction(
     return response
 
 
-@router.post("/{invoice_id}/confirm/", response_model=InvoiceInDB)
+@router.post("/{invoice_id}/confirm/", response_model=InvoiceInDB, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS)
 async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
     invoice = await InvoiceCRUD.find_invoice_safely(invoice_id, user.id)
 

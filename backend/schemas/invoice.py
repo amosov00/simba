@@ -21,7 +21,12 @@ __all__ = [
     "InvoiceInDB",
     "InvoiceExtended",
     "InvoiceTransactionManual",
+    "INVOICE_MODEL_EXCLUDE_FIELDS"
 ]
+
+INVOICE_MODEL_EXCLUDE_FIELDS = frozenset((
+    "validation_md5_hash",
+))
 
 
 class InvoiceStatus:

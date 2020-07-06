@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Response
 from urllib.parse import urlencode, urljoin
 
@@ -23,18 +21,13 @@ from schemas import (
     User2faConfirm,
     UserReferralURLResponse,
     User2faDelete,
-    UserReferralsResponse
+    UserReferralsResponse,
+    USER_MODEL_INCLUDE_FIELDS
 )
 
 __all__ = ["router"]
 
 router = APIRouter()
-
-USER_MODEL_INCLUDE_FIELDS = frozenset((
-    "email", "two_factor", "first_name", "last_name", "signed_addresses", "user_btc_addresses", "user_eth_addresses",
-    "btc_address", "telegram_chat_id", "telegram_id", "is_staff", "is_superuser", "is_active", "terms_and_condition",
-    "created_at"
-))
 
 
 @router.get(

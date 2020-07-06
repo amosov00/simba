@@ -26,10 +26,17 @@ __all__ = [
     "UserReferralURLResponse",
     "User2faDelete",
     "UserReferralInfo",
-    "User2faURL"
+    "User2faURL",
+    "USER_MODEL_INCLUDE_FIELDS"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+USER_MODEL_INCLUDE_FIELDS = frozenset((
+    "email", "two_factor", "first_name", "last_name", "signed_addresses", "user_btc_addresses", "user_eth_addresses",
+    "btc_address", "telegram_chat_id", "telegram_id", "is_staff", "is_superuser", "is_active", "terms_and_condition",
+    "created_at"
+))
 
 
 def validate_email(v: str) -> str:
