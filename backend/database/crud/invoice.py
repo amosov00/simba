@@ -46,7 +46,7 @@ class InvoiceCRUD(BaseMongoCRUD):
         cls,
         invoice_id: str,
         user_id: Union[ObjectId, ObjectIdPydantic],
-        statuses: tuple = (InvoiceStatus.CREATED,),
+        filtering_statuses: tuple = (InvoiceStatus.CREATED,),
     ):
         invoice = await super().find_one(
             {"_id": ObjectId(invoice_id), "user_id": user_id,}
@@ -54,10 +54,8 @@ class InvoiceCRUD(BaseMongoCRUD):
         if not invoice:
             raise HTTPException(HTTPStatus.NOT_FOUND, "Invoice not found")
 
-        if invoice["status"] not in statuses:
-            raise HTTPException(
-                HTTPStatus.BAD_REQUEST, "This operation is not permitted"
-            )
+        if invoice["status"] not in filtering_statuses:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "This operation is not permitted")
 
         return invoice
 
@@ -72,13 +70,11 @@ class InvoiceCRUD(BaseMongoCRUD):
         return created_invoice
 
     @classmethod
-    async def update_invoice(
-        cls, invoice_id: str, user: User, payload: InvoiceUpdate, statuses: tuple = None
-    ):
+    async def update_invoice(cls, invoice_id: str, user: User, payload: InvoiceUpdate, filtering_statuses: tuple = None):
         if not payload.dict(exclude_unset=True):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Payload is required")
 
-        invoice = await cls.find_invoice_safely(invoice_id, user.id, statuses)
+        invoice = await cls.find_invoice_safely(invoice_id, user.id, filtering_statuses)
 
         if invoice["invoice_type"] == InvoiceType.BUY:
             payload = payload.dict(exclude={"target_btc_address"}, exclude_unset=True)

@@ -30,19 +30,12 @@ __all__ = ["router"]
 router = APIRouter()
 
 
-@router.get(
-    "/user/",
-    response_model=User,
-    # TODO update
-    response_model_include=USER_MODEL_INCLUDE_FIELDS,
-)
+@router.get("/user/", response_model=User, response_model_include=USER_MODEL_INCLUDE_FIELDS)
 async def account_get_user(user: User = Depends(get_user)):
     return user
 
 
-@router.post(
-    "/login/", response_model=UserLoginResponse,
-)
+@router.post("/login/", response_model=UserLoginResponse,)
 async def account_login(data: UserLogin = Body(...),):
     return await UserCRUD.authenticate(data.email, data.password, data.pin_code)
 

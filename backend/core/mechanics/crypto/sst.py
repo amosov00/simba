@@ -36,7 +36,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
             result_sst *= cls.REF4_PROF
         if ref_level == 5:
             result_sst *= cls.REF5_PROF
-        return result_sst
+        return round(result_sst)
 
     async def send_sst_to_referrals(self, user: User, simba_tokens: int):
         sst_tokens = self.simba_to_sst(simba_tokens)

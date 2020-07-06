@@ -87,7 +87,8 @@ class InvoiceCreate(BaseModel):
     invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")
     target_eth_address: Optional[str] = Field(default=None, description="Address which will be scanned")
     btc_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send", gt=0)
-    simba_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send", gt=0)
+    simba_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send",
+                                                      gt=0)
 
 
 class InvoiceUpdate(BaseModel):

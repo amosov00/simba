@@ -15,6 +15,7 @@ __all__ = ['EthereumCommonWrapper']
 
 
 class EthereumCommonWrapper(EthereumBaseCommonWrapper):
+    # TODO deprecated, delete after 10/07/2020
     def _create_filter(self, address: str, from_block: Union[str, int] = None, to_block: Union[str, int] = None):
         return self.w3.eth.filter({
             "address": SIMBA_CONTRACT.address, "fromBlock": from_block, "toBlock": to_block, "from": address
