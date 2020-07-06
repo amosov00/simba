@@ -39,7 +39,7 @@
     font-weight: 300
     font-size: 16px
     line-height: 100%
-    text-align: right
+    text-align: left
     display: flex
     flex-direction: column
     border-radius: 10px
@@ -49,7 +49,7 @@
     right: -20px
     &__wrapper
       position: relative
-      text-align: right
+      text-align: left
       height: 36px
       margin-bottom: 6px
     &__logout
@@ -79,7 +79,7 @@
       bottom: 2px
       position: relative
     &__header
-      text-align: right
+      text-align: left
       padding: 13px 20px 13px 20px
     &__name
       color: #0060FF
@@ -89,7 +89,7 @@
     &__name-wrapper
       display: flex
       align-items: center
-      justify-content: flex-end
+      justify-content: space-between
       border-bottom: 1px dashed #0060FF
     &__footer
       display: none
