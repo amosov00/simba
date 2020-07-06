@@ -1,13 +1,5 @@
 FROM node:13.8-buster
 
-ENV DEBUG=true
-ENV ENV=development
-ENV NODE_ENV=development
-ENV NUXT_HOST=0.0.0.0
-ENV NUXT_PORT=3015
-ENV API_URL=https://simba-dev.elastoo.com/api
-ENV API_URL_BROWSER=https://simba-dev.elastoo.com/api
-
 RUN mkdir /frontend/
 WORKDIR /frontend/
 

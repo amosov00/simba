@@ -1,45 +1,30 @@
 <template lang="pug">
-  div
-    //--div.is-flex
-      div.column.is-12
-        b-loading(:is-full-page="false" :active="true" :can-cancel="true")
-    b-table(:data="cuttedData" hoverable :loading="loading" striped :class="{'loading-height': loading}").table-fixed.position-relative
-      template(slot="empty")
-        div.content.has-text-grey.has-text-centered(v-if="!loading") {{$t('wallet.txs_history_empty')}}
-      template(slot-scope="props")
-        b-table-column(field="timeStamp" :label="$i18n.t('other.date')" width="100") {{timestampToDate(props.row.timeStamp)}}
-        b-table-column(field="address" :label="$i18n.t('other.address')").overflow-reset
-          b-tooltip(:label="props.row.from" type="is-primary" position="is-bottom").w-100
-            a(:href="'https://etherscan.io/address/' + props.row.from" target="_blank").text-clamp {{ props.row.from }}
-        b-table-column(field="txHash" label="TxHash").overflow-reset
-          b-tooltip(:label="props.row.hash" type="is-primary" position="is-bottom").w-100
-            a(:href="'https://etherscan.io/tx/' + props.row.hash" target="_blank").text-clamp {{ props.row.hash }}
-        b-table-column(field="type" :label="$i18n.t('other.type')") {{$t('other.sent')}}
-        b-table-column(field="amount" :label="$i18n.t('other.amount') + ', SIMBA'" header-class="column-header-right").text-right {{simbaFormat(props.row.value)}}
-      template(slot="footer")
-        div(v-if="cuttedData.length > 0").is-flex.space-between.has-text-weight-bold.mt-3
-          div {{ $t('other.total')}}
-          div {{ total }}
+  b-table(:data="cuttedData" hoverable :loading="loading" striped)
+        template(slot-scope="props")
+          b-table-column(field="date" label="Date" sortable width="50") {{timestampToDate(props.row.timeStamp)}}
+          b-table-column(field="address" label="Address" width="70").has-text-primary.overflow-reset
+            b-tooltip(:label="props.row.from" type="is-black" position="is-bottom").w-100
+              a(:href="'https://etherscan.io/address/' + props.row.from" target="_blank").text-clamp {{ props.row.from }}
+          b-table-column(field="txHash" label="TxHash" width="70").has-text-primary.overflow-reset
+            b-tooltip(:label="props.row.hash" type="is-black" position="is-bottom").w-100
+              a(:href="'https://etherscan.io/tx/' + props.row.hash" target="_blank").text-clamp {{ props.row.hash }}
+          b-table-column(field="type" label="Type" width="50") Sent
+          b-table-column(field="amount" label="Amount, SIMBA" width="50") {{simbaFormat(props.row.value)}}
 </template>
 
 <script>
 import formatDate from "~/mixins/formatDate";
 import formatCurrency from "~/mixins/formatCurrency";
 export default {
-  name: 'WalletTable',
   mixins: [formatDate, formatCurrency],
   props: {
-    moreData: {
-      type: Number,
-      default: 0
-    }
+    moreData: Number
   },
   data() {
     return {
       loading: false,
       tableData: [],
-      cuttedData: [],
-      total: ''
+      cuttedData: []
     };
   },
   watch: {
@@ -48,11 +33,6 @@ export default {
     }
   },
   async created() {
-
-    if(window.ethereum === undefined) {
-      return
-    }
-
     this.loading = true;
     let networkAPI;
     if(this.$store.getters["contract/SIMBA"].is_test) {
@@ -65,23 +45,15 @@ export default {
         `https://cors-anywhere.herokuapp.com/http://${networkAPI}.etherscan.io/api?module=account&action=tokentx&address=${window.ethereum.selectedAddress}&startblock=0&endblock=999999999&sort=desc&apikey=HSZVFZ1WQ255V3CIJYSPVI3PB3BGSSIYAH`
       )
       .then(res => {
+        this.loading = false;
         this.tableData = res.data.result
           .filter(
             el =>
               el.contractAddress ===
               "0x60e1bf648580aafbff6c1bc122bb1ae6be7c1352"
           );
-        this.total = this.tableData.reduce((sum, current) => {
-          return (+sum) + (+current.value)
-        }, 0)
-
-        this.total = this.total ? this.simbaFormat(this.total) : ''
         this.cuttedData = this.tableData.slice(0, this.moreData)
-        this.loading = false;
-      }).catch(() => {
-        this.cuttedData = []
-        this.loading = false;
-      })
+      });
   }
 };
 </script>
@@ -93,15 +65,5 @@ export default {
 
 td {
   height: 40px;
-  word-break: break-all;
 }
-
-.word-break-all {
-  word-break: break-all;
-}
-
-.loading-height {
-  min-height: 200px;
-}
-
 </style>

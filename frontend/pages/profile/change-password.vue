@@ -4,18 +4,18 @@
       div
         b-field
           ValidationProvider(rules="required" v-slot="{ errors }" name="Current password")
-            b-input(type="password" v-model="form.old_password" :placeholder="$i18n.t('password.current')")
+            b-input(type="password" v-model="form.old_password" placeholder="Current password")
             span.validaton-error {{ errors[0] }}
         b-field
           ValidationProvider(rules="required|min:8|confirmed:confirmation" v-slot="{ errors }" name="New password")
-            b-input(type="password" v-model="form.password" :placeholder="$i18n.t('password.new')")
+            b-input(type="password" v-model="form.password" placeholder="New password")
             span.validaton-error {{ errors[0] }}
         b-field
           ValidationProvider(rules="required" v-slot="{ errors }" vid="confirmation" name="Password confirmation")
-            b-input(type="password" v-model="form.repeat_password" :placeholder="$i18n.t('password.confirm')")
+            b-input(type="password" v-model="form.repeat_password" placeholder="Password confirmation")
             span.validaton-error {{ errors[0] }}
         div.has-text-right
-          b-button(type="is-primary" native-type="submit" :loading="isLoading" style="width: 50%") {{$t('other.change')}}
+          b-button(type="is-primary" native-type="submit" :loading="isLoading" style="width: 50%") Change
 </template>
 
 <script>

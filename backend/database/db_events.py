@@ -35,7 +35,10 @@ else:
 async def prepopulate_users():
     if not await UserCRUD.find_by_email(admin_user["email"]):
         await UserCRUD.create_not_safe(
-            user=UserCreationNotSafe(**admin_user), is_active=True, is_superuser=True, email_is_active=True,
+            user=UserCreationNotSafe(**admin_user),
+            is_active=True,
+            is_superuser=True,
+            email_is_active=True,
         )
 
     return True

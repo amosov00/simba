@@ -22,5 +22,10 @@ class CustomEncoder(json.JSONEncoder):
 class CustomJSONResponse(JSONResponse):
     def render(self, content: Any) -> bytes:
         return json.dumps(
-            content, ensure_ascii=False, allow_nan=False, indent=None, separators=(",", ":"), cls=CustomEncoder,
+            content,
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=None,
+            separators=(",", ":"),
+            cls=CustomEncoder,
         ).encode("utf-8")

@@ -5,19 +5,16 @@ from pydantic import HttpUrl
 
 from .base import BaseModel, ObjectIdPydantic, Field
 
-__all__ = [
-    "BlockCypherWebhook",
-    "BlockCypherWebhookInDB",
-    "BlockCypherWebhookEvents",
-    "BlockCypherWebhookCreate",
-]
+__all__ = ["BlockCypherWebhook", "BlockCypherWebhookInDB", "BlockCypherWebhookEvents", "BlockCypherWebhookCreate"]
 
 
 class BlockCypherWebhookEvents:
     CONFIRMED_TX = "confirmed-tx"
     UNCONFIRMED_TX = "unconfirmed-tx"
     TX_CONFIMATION = "tx-confirmation"
-    ALL = (CONFIRMED_TX, UNCONFIRMED_TX, TX_CONFIMATION)
+    ALL = (
+        CONFIRMED_TX, UNCONFIRMED_TX, TX_CONFIMATION
+    )
 
 
 class BlockCypherWebhook(BaseModel):

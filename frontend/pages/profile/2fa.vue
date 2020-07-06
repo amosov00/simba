@@ -1,8 +1,8 @@
 <template lang="pug">
   div
     div
-      button.mt-4.btn(type="button" v-if="!is2fa" @click="show2faModal") {{$t('other.enable')}} 2FA
-      button.mt-4.btn(type="button" v-else @click="disableConfirmation") {{$t('other.disable')}} 2FA
+      button.mt-4.btn(type="button" v-if="!is2fa" @click="show2faModal") Enable 2FA
+      button.mt-4.btn(type="button" v-else @click="disableConfirmation") Disable 2FA
     div
       b-modal(:active.sync="modal2FA" has-modal-card)
         Modal2FA

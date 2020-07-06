@@ -5,13 +5,7 @@ from pydantic import Field, validator
 
 from schemas.base import BaseModel, DecimalPydantic, ObjectIdPydantic
 
-__all__ = [
-    "EthereumTransaction",
-    "EthereumTransactionInDB",
-    "EthereumTransactionReferral",
-    "SimbaContractEvents",
-    "SSTContractEvents",
-]
+__all__ = ["EthereumTransaction", "EthereumTransactionInDB", "SimbaContractEvents", "SSTContractEvents"]
 
 
 class SimbaContractEvents:
@@ -19,7 +13,6 @@ class SimbaContractEvents:
     OnRedeemed = "OnRedeemed"
 
     ALL = (OnIssued, OnRedeemed)
-
 
 class SSTContractEvents:
     pass
@@ -42,7 +35,3 @@ class EthereumTransaction(BaseModel):
 
 class EthereumTransactionInDB(EthereumTransaction):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
-
-
-class EthereumTransactionReferral(EthereumTransactionInDB):
-    referral_level: int = None

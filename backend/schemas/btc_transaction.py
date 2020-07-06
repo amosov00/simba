@@ -27,7 +27,6 @@ class BTCTransactionOutputs(BaseModel):
 
 class BTCTransaction(BaseModel):
     invoice_id: ObjectIdPydantic = None
-    user_id: Optional[ObjectIdPydantic] = None
     simba_tokens_issued: bool = False
     addresses: List[str] = None
     block_hash: str = None
@@ -49,7 +48,3 @@ class BTCTransaction(BaseModel):
 
 class BTCTransactionInDB(BTCTransaction):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
-
-
-class BTCTransactionReferral(BTCTransactionInDB):
-    referral_level: int = None

@@ -4,7 +4,9 @@ from bson import ObjectId
 
 from database import mongo_db
 
-__all__ = ["BaseMongoCRUD", "ObjectId"]
+__all__ = [
+    "BaseMongoCRUD", "ObjectId"
+]
 
 
 class BaseMongoCRUD(ABC):
@@ -17,7 +19,7 @@ class BaseMongoCRUD(ABC):
 
     @classmethod
     async def find_one(cls, query: dict):
-        return await cls.db[cls.collection].find_one(filter=query,)
+        return await cls.db[cls.collection].find_one(filter=query, )
 
     @classmethod
     async def find_many(cls, query: dict, options: dict = None):
@@ -29,7 +31,7 @@ class BaseMongoCRUD(ABC):
 
     @classmethod
     async def insert_many(cls, payload: list, options: dict = None):
-        return await cls.db[cls.collection].insert_many(payload, options,)
+        return await cls.db[cls.collection].insert_many(payload, options, )
 
     @classmethod
     async def update_one(cls, query: dict, payload: dict, with_set_option: bool = True, **kwargs):
@@ -39,7 +41,7 @@ class BaseMongoCRUD(ABC):
     @classmethod
     async def update_many(cls, query: dict, payload: dict, with_set_option: bool = True, **kwargs):
         payload = {"$set": payload} if with_set_option else payload
-        return [i async for i in cls.db[cls.collection].update_many(query, payload, **kwargs,)]
+        return [i async for i in cls.db[cls.collection].update_many(query, payload, **kwargs, )]
 
     @classmethod
     async def update_or_insert(cls, query: dict, payload: dict, with_set_option: bool = True, **kwargs):

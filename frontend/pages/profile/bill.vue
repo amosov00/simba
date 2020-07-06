@@ -6,24 +6,24 @@
       div
         div.is-flex.align-items-center
           div.is-size-5.has-text-weight-bold BTC Address list
-          a(href="#" @click="addNewWalletModal('btc')").link.ml-2 {{$t('wallet.add_wallet')}}
+          a(href="#" @click="addNewWalletModal('btc')").link.ml-2 add new
         div.is-italic.has-text-grey-light for withdrawal Bitcoin when redeem SIMBA
     div.mt-3
       div(v-for="(addr, i) in user.user_btc_addresses").mb-2.addr
         div {{ addr }}
-        div(@click="removeAddress(i, 'user_btc_addresses')").has-text-danger.addr__delete {{$t('wallet.delete_wallet')}}
+        div(@click="removeAddress(i, 'user_btc_addresses')").has-text-danger.addr__delete delete
     div.is-flex.align-items-center.mt-4
       div.mr-3
         img(:src="require('~/assets/images/eth.svg')" width="36")
       div
         div.is-flex.align-items-center
           div.is-size-5.has-text-weight-bold ETH Address list
-          a(href="#" @click="addNewWalletModal('eth')").link.ml-2 {{$t('wallet.add_wallet')}}
+          a(href="#" @click="addNewWalletModal('eth')").link.ml-2 add new
         div.is-italic.has-text-grey-light for issue SIMBA
     div.mt-3
       div(v-for="(addr, i) in user.user_eth_addresses").mb-2.addr
         div {{ addr }}
-        div(@click="removeAddress(i, 'user_eth_addresses')").has-text-danger.addr__delete {{$t('wallet.delete_wallet')}}
+        div(@click="removeAddress(i, 'user_eth_addresses')").has-text-danger.addr__delete delete
 </template>
 
 <script>
@@ -58,10 +58,10 @@
 
       removeAddress(index, type) {
         this.$buefy.dialog.confirm({
-          title: this.$i18n.t('other.delete'),
-          message: "<span class='is-size-6' style='line-height: 150%'>" + this.$i18n.t('wallet.delete_sure') + ": <strong>" + this.user[type][index] + "</strong><span>",
-          confirmText: this.$i18n.t('other.delete'),
-          cancelText: this.$i18n.t('other.cancel'),
+          title: "Delete",
+          message: "<span class='is-size-6' style='line-height: 150%'>Are you sure you want to delete this address: <strong>" + this.user[type][index] + "</strong><span>",
+          confirmText: "Delete",
+          cancelText: "Cancel",
           type: 'is-danger',
           onConfirm: async () => {
             let addr_list = JSON.parse(JSON.stringify(this.user[type]));

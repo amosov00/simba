@@ -1,10 +1,9 @@
-import asyncio
 from typing import Optional, Union
 from passlib import pwd
 from datetime import datetime, timedelta
 from http import HTTPStatus
-
 import pyotp
+
 from fastapi.exceptions import HTTPException
 
 from database.crud.base import BaseMongoCRUD
@@ -25,7 +24,7 @@ from schemas.user import (
     UserRecoverLink,
     User2faConfirm,
     User2faDelete,
-    UserReferralInfo,
+    UserReferralInfo
 )
 
 __all__ = ["UserCRUD"]
@@ -68,7 +67,7 @@ class UserCRUD(BaseMongoCRUD):
 
         if pwd_context.verify(password, user["password"]):
             token = encode_jwt_token({"id": str(user["_id"])})
-            return {"token": token}
+            return {"token": token, "user": User(**user).dict()}
         else:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Invalid user data")
 
@@ -117,12 +116,39 @@ class UserCRUD(BaseMongoCRUD):
                 HTTPStatus.BAD_REQUEST, "User with this email is already exists",
             )
 
-        referral_user = await cls.find_by_id(user.referral_id)
+        if kwargs.get("referral_id") != "admin":
+            ref_user = await cls.find_by_id(user.referral_id)
 
-        if not referral_user:
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "Referral link invalid")
+            if ref_user is None:
+                raise HTTPException(
+                    HTTPStatus.BAD_REQUEST, "Referral link invalid"
+                )
+
+        if "email_is_active" in kwargs and kwargs["email_is_active"]:
+            inserted_id = (
+                await cls.insert_one(
+                    payload={
+                        **user.dict(exclude=set(FIELDS_TO_EXCLUDE)),
+                        "created_at": datetime.now(),
+                        "is_active": True,
+                        "email_is_active": True
+                    }
+                )
+            ).inserted_id
+
+            return {"success": True}
 
         verification_code = pwd.genword()
+        user_email = user.dict()["email"]
+        try:
+            email_obj = Email()
+            await email_obj.send_verification_code(
+                user_email, verification_code
+            )
+        except Exception as a:
+            raise HTTPException(
+                HTTPStatus.BAD_REQUEST, "Error while sending email",
+            )
 
         inserted_id = (
             await cls.insert_one(
@@ -136,9 +162,8 @@ class UserCRUD(BaseMongoCRUD):
             )
         ).inserted_id
 
-        asyncio.create_task(Email().send_verification_code(user.email, verification_code))
-
-        await ReferralCRUD.add_referral(inserted_id, referral_user["_id"])
+        if user.referral_id is not None:
+            await ReferralCRUD.add_referral(inserted_id, user.referral_id)
 
         return {"success": True}
 
@@ -150,7 +175,8 @@ class UserCRUD(BaseMongoCRUD):
             )
 
         await cls.update_one(
-            query={"_id": user.id}, payload=payload.dict(exclude=set(FIELDS_TO_EXCLUDE), exclude_unset=True),
+            query={"_id": user.id},
+            payload=payload.dict(exclude=set(FIELDS_TO_EXCLUDE), exclude_unset=True),
         )
 
         return True
@@ -161,13 +187,19 @@ class UserCRUD(BaseMongoCRUD):
             return None
 
         await super().insert_one(
-            payload={**user.dict(exclude=set(FIELDS_TO_EXCLUDE)), "created_at": datetime.now(), **kwargs}
+            payload={
+                **user.dict(exclude=set(FIELDS_TO_EXCLUDE)),
+                "created_at": datetime.now(),
+                **kwargs
+            }
         )
 
         return {"success": True}
 
     @classmethod
-    async def update_not_safe(cls, user_id: str, payload: UserUpdateNotSafe) -> Union[dict, User]:
+    async def update_not_safe(
+            cls, user_id: str, payload: UserUpdateNotSafe
+    ) -> Union[dict, User]:
         user = await cls.find_by_id(user_id)
 
         if not user:
@@ -194,21 +226,32 @@ class UserCRUD(BaseMongoCRUD):
         if not pwd_context.verify(payload.old_password, old_password_obj["password"]):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Old password doesn't match")
 
-        await cls.update_one(query={"_id": user.id}, payload={"password": payload.password})
+        await cls.update_one(
+            query={"_id": user.id}, payload={"password": payload.password}
+        )
 
         return True
 
     @classmethod
     async def recover_send(cls, payload: UserRecover):
         user = await cls.find_by_email(payload.email)
-
         if not user:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "No such user")
 
         recover_code = encode_jwt_token({"_id": user["_id"]}, timedelta(hours=3))
 
-        await cls.update_one({"_id": user["_id"]}, {"recover_code": recover_code})
-        asyncio.create_task(Email().send_recover_code(user["email"], recover_code))
+        await cls.update_one(
+            {
+                "_id": user["_id"],
+            },
+            {
+                "recover_code": recover_code
+            }
+        )
+
+        emailobj = Email()
+        await emailobj.send_recover_code(user["email"], recover_code)
+
         return True
 
     @classmethod
@@ -220,13 +263,20 @@ class UserCRUD(BaseMongoCRUD):
 
         user_id = data["_id"]
 
-        user = await cls.find_one({"_id": ObjectId(user_id)})
+        user = await cls.find_one(
+            {
+                "_id": ObjectId(user_id)
+            }
+        )
 
         if "recover_code" not in user or user["recover_code"] != payload.recover_code:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect code")
 
         await cls.update_one(
-            query={"_id": user["_id"]}, payload={"password": payload.password, "recover_code": None}
+            query={"_id": user["_id"]}, payload={
+                "password": payload.password,
+                "recover_code": None
+            }
         )
 
         return True
@@ -243,7 +293,15 @@ class UserCRUD(BaseMongoCRUD):
         current_pin_code = totp.now()
         if current_pin_code != payload.pin_code:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin-code")
-        await cls.update_one(query={"_id": user.id}, payload={"secret_2fa": payload.token, "two_factor": True})
+        await cls.update_one(
+            query={
+                "_id": user.id
+            },
+            payload={
+                "secret_2fa": payload.token,
+                "two_factor": True
+            }
+        )
         return True
 
     @classmethod
@@ -252,7 +310,15 @@ class UserCRUD(BaseMongoCRUD):
         current_pin_code = totp.now()
         if current_pin_code != payload.pin_code:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin-code")
-        await cls.update_one(query={"_id": user.id}, payload={"secret_2fa": None, "two_factor": False})
+        await cls.update_one(
+            query={
+                "_id": user.id
+            },
+            payload={
+                "secret_2fa": None,
+                "two_factor": False
+            }
+        )
         return True
 
     @classmethod
@@ -261,18 +327,20 @@ class UserCRUD(BaseMongoCRUD):
         # TODO invalid logic
         if referral is None:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "No referral data")
-        parsed_data = {"referrals": []}
+        parsed_data = {
+            "referrals": []
+        }
         for i in range(1, 6):
             user = await cls.find_by_id(referral[f"ref{i}"])
             if user is not None:
-                email = user["email"].split("@")[0] + "@***.**"
+                email = user["email"].split('@')[0] + "@***.**"
                 parsed_data["referrals"].append(
                     UserReferralInfo(
                         created_at=user["created_at"],
                         email=email,
                         first_name=user["first_name"],
                         last_name=user["last_name"],
-                        level=i,
+                        level=i
                     )
                 )
 

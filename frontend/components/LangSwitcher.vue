@@ -104,8 +104,7 @@
       height: 16px
       margin-left: 10px
       position: relative
-      //border: 1px solid #e7e7e7
-      box-shadow: 0 -1px 2px rgba(0,0,0,0.15)
+      border: 1px solid #f6f6f6
     &__button
       position: relative
       display: flex

@@ -59,9 +59,7 @@ class CryptoValidation(ABC):
     SIMBA_TOKENS_MINIMAL_AMOUNT = 200000
 
     @classmethod
-    async def validate_btc_transaction_with_invoice(
-        cls, invoice: InvoiceInDB, transaction: BTCTransaction
-    ) -> bool:
+    async def validate_btc_transaction_with_invoice(cls, invoice: InvoiceInDB, transaction: BTCTransaction) -> bool:
         errors = []
 
         if invoice.status not in [InvoiceStatus.WAITING, InvoiceStatus.PROCESSING]:

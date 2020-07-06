@@ -26,31 +26,11 @@ __all__ = [
     "UserReferralURLResponse",
     "User2faDelete",
     "UserReferralInfo",
-    "User2faURL",
-    "USER_MODEL_INCLUDE_FIELDS",
+    "UserReferralsResponse",
+    "User2faURL"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-USER_MODEL_INCLUDE_FIELDS = frozenset(
-    (
-        "email",
-        "two_factor",
-        "first_name",
-        "last_name",
-        "signed_addresses",
-        "user_btc_addresses",
-        "user_eth_addresses",
-        "btc_address",
-        "telegram_chat_id",
-        "telegram_id",
-        "is_staff",
-        "is_superuser",
-        "is_active",
-        "terms_and_condition",
-        "created_at",
-    )
-)
 
 
 def validate_email(v: str) -> str:
@@ -75,9 +55,7 @@ class User(BaseModel):
 
     email: str = Field(...)
     email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
-    verification_code: Optional[str] = Field(
-        default_factory=pwd.genword, description="Code which will send to email"
-    )
+    verification_code: Optional[str] = Field(default_factory=pwd.genword, description="Code which will send to email")
     recover_code: Optional[str] = Field(default=None, description="JWT token for password recover")
     secret_2fa: Optional[str] = Field(default=None, description="Code for 2fa generation")
     two_factor: Optional[bool] = Field(defaul=False, description="On/off 2fa")
@@ -97,7 +75,9 @@ class User(BaseModel):
     is_superuser: Optional[bool] = Field(default=False, description="Superuser role")
     is_active: Optional[bool] = Field(default=True, description="User is active")
 
-    terms_and_condition: Optional[bool] = Field(default=False, description="Terms and conditions checkbox")
+    terms_and_condition: Optional[bool] = Field(
+        default=False, description="Terms and conditions checkbox"
+    )
 
     created_at: Optional[datetime] = Field(default=None)
 
@@ -116,11 +96,11 @@ class User(BaseModel):
 
 
 class UserRecover(BaseModel):
-    email: str = Field(...)
+    email: str = Field(..., example="email")
 
 
 class UserReferralURLResponse(BaseModel):
-    URL: str = Field(...)
+    URL: str = Field(..., exmaple="URL")
 
 
 class UserRecoverLink(BaseModel):
@@ -148,6 +128,7 @@ class UserLogin(BaseModel):
 
 class UserLoginResponse(BaseModel):
     token: str = Field(..., description="JWT token")
+    user: User
 
 
 class UserChangePassword(BaseModel):
@@ -185,12 +166,12 @@ class UserUpdateSafe(BaseModel):
 
     _validate_email = validator("email", allow_reuse=True)(validate_email)
 
-    _validate_user_btc_addresses = validator("user_btc_addresses", allow_reuse=True, each_item=True)(
-        validate_btc_address
-    )
-    _validate_user_eth_addresses = validator("user_eth_addresses", allow_reuse=True, each_item=True)(
-        validate_eth_address
-    )
+    _validate_user_btc_addresses = validator(
+        "user_btc_addresses", allow_reuse=True, each_item=True
+    )(validate_btc_address)
+    _validate_user_eth_addresses = validator(
+        "user_eth_addresses", allow_reuse=True, each_item=True
+    )(validate_eth_address)
 
 
 class UserCreationNotSafe(BaseModel):
@@ -198,9 +179,7 @@ class UserCreationNotSafe(BaseModel):
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
     email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
-    verification_code: Optional[str] = Field(
-        default_factory=pwd.genword, description="Code which will send to email"
-    )
+    verification_code: Optional[str] = Field(default_factory=pwd.genword, description="Code which will send to email")
     referral_id: Optional[str] = Field(default=None)
     telegram_id: Optional[int] = Field(default=None)
     telegram_chat_id: Optional[int] = Field(default=None)
@@ -235,12 +214,12 @@ class User2faDelete(BaseModel):
 
 
 class UserReferralInfo(BaseModel):
+    created_at: datetime = Field(...)
     email: str = Field(...)
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
-    referral_level: int = Field(...)
-    created_at: datetime = Field(...)
+    level: int = Field(...)
 
-    @validator("email")
-    def hide_email(cls, v):
-        return v.split("@")[0] + "@***.**"
+
+class UserReferralsResponse(BaseModel):
+    referrals: List[Optional[UserReferralInfo]] = Field(default=[])
