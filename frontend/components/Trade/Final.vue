@@ -7,7 +7,7 @@
         =' '
         span.has-text-grey-light {{$t('exchange.issued')}}
       div.is-size-6
-        div.mt-2 {{$t('exchange.wallet')}}:
+        div.mt-2 {{$t('wallet')}}:
           =' '
           a(:href="'https://etherscan.io/address/' + multi_props.buy_info.target_eth" target="_blank").link {{ multi_props.buy_info.target_eth }}
         div.mt-2 Simba token txHash:

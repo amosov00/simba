@@ -1,48 +1,26 @@
 <template lang="pug">
-  div.main-content
+  div.site-wrapper
     div.wallet-content--hero
-      h1.title.is-size-4 {{ $t('wallet.transfer_simba') }}
+      h1.title.is-size-4 Transfer SIMBA tokens
       div
-        div.wallet-field
-          div.wallet-field__label {{ $t('wallet.your_wallet') }}
-          div.wallet-field__body
-            b-field
-              b-input(size="is-small" v-model="selectedAddress" disabled)
-          div.wallet-field__action
-            a(href="#" @click="metamaskModal" v-if="selectedAddress").link {{$t('wallet.add_wallet')}}
-        div.wallet-field
-          div.wallet-field__label {{ $t('wallet.recipient') }}
-          div.wallet-field__body
-            b-field
-              b-input(size="is-small" v-model="transferData.address")
-          div.wallet-field__action
-            //--a(href="#").link save address
-        div.wallet-field
-          div.wallet-field__label {{ $t('other.amount') }}
-          div.wallet-field__body
-            b-field
-              b-input(size="is-small" type="number" min="0" step="10000" v-model="transferData.amount")
-        //--div
-          b-field(label="Your wallet (selected MetaMask address)")
-            b-input(size="is-small" v-model="selectedAddress" disabled)
-          button.btn--inline(@click="metamaskModal" v-if="selectedAddress") add new
-          b-field(label="Recipient")
-            b-input(size="is-small" v-model="transferData.address")
-          b-field(label="Amount")
-            b-input(size="is-small" type="number" min="0" step="10000" v-model="transferData.amount")
+        b-field(label="Your wallet (selected MetaMask address)")
+          b-input(size="is-small" v-model="selectedAddress" disabled)
+        button.btn--inline(@click="metamaskModal" v-if="selectedAddress") add new
+        b-field(label="Recipient")
+          b-input(size="is-small" v-model="transferData.address")
+        b-field(label="Amount")
+          b-input(size="is-small" type="number" min="0" step="10000" v-model="transferData.amount")
         div.wallet-content__totals
-          div.wallet-content__fee {{ $t('other.fee') }}: 5,000 SIMBA
-          div.is-size-6.has-text-weight-bold {{ $t('other.total') }}: {{totalAmount}} SIMBA
-            =' '
-            span.subtitle.is-size-6.has-text-grey (0 USDT / {{totalBTC}} BTC)
-        div.wallet-content__btn-wrap
-          button(@click="transferFunds").btn.w-100 {{ $t('other.send') }} SIMBA
+          p.subtitle.is-size-6 Fee: 5,000 SIMBA
+          p.title.is-size-6 Total: {{totalAmount}} SIMBA
+            span.subtitle.is-size-6 (0 USDT / {{totalBTC}} BTC)
+        button(@click="transferFunds").btn.w-100 Send SIMBA
     hr.mt-4
-    div
-      h1.title.is-size-4 {{ $t('wallet.txs_history') }}
+    div.wallet-content__table
+      h1.title.is-size-4 History of transactions
       WalletTable(:moreData="moreData")
       div.wallet-content__button
-        button.btn--outlined(@click="moreData += 10") {{$t('other.more')}}
+        button.btn--outlined(@click="moreData += 10") more
 </template>
 
 <script>
@@ -82,7 +60,7 @@ export default {
       if (window.ethereum) {
         return window.ethereum.selectedAddress;
       } else {
-        return '';
+        return false;
       }
     },
     totalAmount() {
@@ -98,43 +76,19 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-.wallet-field
-  display: flex
-  align-items: center
-  margin-bottom: 20px
-  &__label
-    width: 16%
-    margin-right: 15px
-    font-size: 14px
-    line-height: 100%
-    color: #8C8C8C
-  &__body
-    width: 384px
-  &__action
-    width: 71px
-    font-size: 12px
-    margin-left: 10px
-
-
-
 .wallet-content
+  max-width: 840px
   width: 100%
-  &__fee
-    font-weight: 300
-    font-size: 12px
-    line-height: 100%
-    color: #8C8C8C
-    margin-bottom: 12px
-
-  &__btn-wrap
-    padding-right: 85px
+  margin: 0 216px
 
   &--hero
-    width: 574px
+    width: 600px
 
   &__totals
-    padding-left: 107px
     margin: 25px 0
+
+  &__table
+    margin-bottom: 60px
 
   &__button
     margin-top: 20px

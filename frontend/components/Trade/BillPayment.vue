@@ -91,8 +91,7 @@
       },
       check: {},
       showCountdown: false,
-      countdown: null,
-      goneToNextStep: false
+      countdown: null
     }),
     methods: {
       stopCountdown() {
@@ -112,17 +111,6 @@
           this.busyChecking = true
           this.check = await this.$store.dispatch('invoices/fetchSingle', this.created_transaction)
           this.status = this.check.status
-
-          if(this.check.btc_txs.length > 0) {
-            if(this.check.btc_txs[0].confirmations > 0 ) {
-              this.$parent.multi_props["invoice"] = this.check._id
-              this.goneToNextStep = true
-              this.stopCountdown();
-              this.$parent.$emit('nextStep')
-              return;
-            }
-          }
-
           this.updated_invoice_data = JSON.parse(JSON.stringify(this.check));
           await setTimeout(() => {
             this.busyChecking = false;
@@ -138,10 +126,11 @@
         this.$parent.$emit('step_failed')
       })
 
-      // Preload 'Hot' BTC address
+      // Preload BTC address
       await this.$store.dispatch('getBtcAddress')
 
       if(this.multi_props['no_create']) {
+        /*console.log('multi-props', this.multi_props);*/
         this.created_transaction = this.multi_props['invoice'];
       } else {
 
@@ -174,12 +163,10 @@
 
       this.showCountdown = true;
 
-      if(!this.goneToNextStep) {
-        this.countdown = setInterval(async () => {
-          await this.checkSingle();
-          console.log('Checking every 10 seconds!')
-        }, 10000)
-      }
+      this.countdown = setInterval(async () => {
+        await this.checkSingle();
+        console.log('interval work!')
+      }, 10000)
     },
 
     beforeDestroy() {

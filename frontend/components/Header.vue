@@ -50,8 +50,7 @@ export default {
       if (_.isEmpty(this.$store.getters["contract/SIMBA"])) {
         await this.$store.dispatch("contract/fetchContract");
       }
-      const isUnlocked = await window.ethereum._metamask.isUnlocked();
-      if (window.ethereum && isUnlocked) {
+      if (window.ethereum.selectedAddress) {
         this.$contract()
           .SIMBA.methods.balanceOf(window.ethereum.selectedAddress)
           .call()

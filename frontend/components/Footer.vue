@@ -2,13 +2,13 @@
   footer.the-footer
     div.the-footer__wrapper
       div.the-footer__icons-list
-        a(:href="$i18n.t(`socials.${soc.id}`)" v-for="soc in socials" target="_blank" rel="noopener noreferrer").the-footer__soc-link
+        a(:href="soc.url" v-for="soc in socials").the-footer__soc-link
           InlineSvg(:src="require(`~/assets/images/socials/${soc.icon}`)").the-footer__icon
       div.the-footer__copyright © 2019–2020 SIMBA
       div.mt-1.is-flex.align-items-center
-        a(href="https://simba.storage/terms-of-use.pdf" target="_blank" rel="noopener noreferrer").the-footer__link {{ $t('footer.tos') }}
-        //--a(href="https://simba.storage/privacy-policy.pdf" target="_blank" rel="noopener noreferrer").the-footer__link {{ $t('footer.privacy') }}
-        //--a(href="https://simba.storage/cookies-policy.pdf" target="_blank" rel="noopener noreferrer").the-footer__link {{ $t('footer.cookies') }}
+        a(href="https://simba.storage/terms-and-conditions" target="_blank" rel="noopener").the-footer__link {{ $t('footer.tos') }}
+        a(href="#").the-footer__link {{ $t('footer.privacy') }}
+        a(href="#").the-footer__link {{ $t('footer.cookies') }}
         LangSwitcher
 </template>
 
@@ -20,23 +20,20 @@
   export default {
     name: 'Footer',
     components: { InlineSvg, LangSwitcher },
-
     data: () => ({
       socials: [
-        { id: 'facebook', icon: 'facebook.svg' },
-        { id: 'bitcoin', icon: 'bitcoin.svg' },
-        { id: 'instagram', icon: 'instagram.svg' },
-        { id: 'medium', icon: 'medium.svg' },
-        { id: 'zen', icon: 'zen.svg' },
-        { id: 'reddit', icon: 'reddit.svg' },
-        { id: 'twitter', icon: 'twitter.svg' },
-        { id: 'vk', icon: 'vk.svg' },
-        { id: 'telegram', icon: 'telegram.svg' },
-        { id: 'discord', icon: 'discord.svg' },
-        { id: 'telegram_chat', icon: 'telegram.svg' },
-        { id: 'streemit', icon: 'streemit.svg' },
-        { id: 'github', icon: 'github.svg' },
-        { id: 'linkedin', icon: 'linkedin.svg' },
+        { url: '#', icon: 'facebook.svg' },
+        { url: '#', icon: 'bitcoin.svg' },
+        { url: '#', icon: 'instagram.svg' },
+        { url: '#', icon: 'medium.svg' },
+        { url: '#', icon: 'zen.svg' },
+        { url: '#', icon: 'reddit.svg' },
+        { url: '#', icon: 'twitter.svg' },
+        { url: '#', icon: 'vk.svg' },
+        { url: '#', icon: 'telegram.svg' },
+        { url: '#', icon: 'discord.svg' },
+        { url: '#', icon: 'streemit.svg' },
+        { url: '#', icon: 'github.svg' },
       ]
     })
   }
@@ -63,7 +60,7 @@
       align-items: center
       justify-content: center
       text-align: center
-      margin-right: 33px
+      margin-right: 40px
     &__icons-list
       display: flex
       align-items: center

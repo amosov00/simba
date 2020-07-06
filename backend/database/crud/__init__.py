@@ -5,4 +5,3 @@ from .btc_transaction import BTCTransactionCRUD
 from .eth_transaction import EthereumTransactionCRUD
 from .invoice import InvoiceCRUD
 from .blockcypher_webhooks import BlockCypherWebhookCRUD
-from .referral import ReferralCRUD

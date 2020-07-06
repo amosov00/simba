@@ -18,7 +18,7 @@ export const actions = {
   async createTransaction({}, data) {
 
     return await this.$axios.post('/invoices/', { invoice_type: data }).then(res =>{
-      //Toast.open({message: 'Transaction created!', type: 'is-primary'});
+      Toast.open({message: 'Transaction created!', type: 'is-primary'});
       return res.data;
     }).catch(_ => {
       Toast.open({message: 'Error creating invoice!', type: 'is-danger'});
@@ -35,7 +35,7 @@ export const actions = {
     }
 
     return await this.$axios.put(`/invoices/${data.id}/`, data_to_send).then(res => {
-      //Toast.open({message: 'Transaction updated!', type: 'is-primary'});
+      Toast.open({message: 'Transaction updated!', type: 'is-primary'});
       return res.data;
     }).catch(_ => {
       Toast.open({message: 'Error updating invoice!', type: 'is-danger'});
