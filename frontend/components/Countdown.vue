@@ -1,6 +1,6 @@
 <template lang="pug">
   div.countdown__digits(:class="{'countdown__digits--red': done}")
-    VueCountdown(:time="countdownTime" @end="onEnd" :interval="100" tag="div")
+    VueCountdown(:time="countdownTime" @end="onEnd" :interval="1000" tag="div")
       template(slot-scope="props")
         | {{ props.hours }}:{{ twoDigits(props.minutes) }}:{{ twoDigits(props.seconds) }}
 </template>

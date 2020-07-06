@@ -12,6 +12,8 @@
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
             span {{ btc_address }}
+            CopyToClipboard(:value_to_copy="btc_address").ml-2
+            TradeQRCode(:qrcode_value="btc_address" :amount="parseFloat(tradeData.btc)").ml-1
         div.is-flex.align-items-center.mt-2
           img(src="@/assets/images/logo_sm.png").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
@@ -57,10 +59,16 @@
 <script>
   import Countdown from "~/components/Countdown";
   import formatCurrency from '~/mixins/formatCurrency'
+
+  import CopyToClipboard from "~/components/CopyToClipboard";
+  import TradeQRCode from "~/components/TradeQRCode";
+
+  import AddressQRCode from "~/components/AddressQRCode";
+
   export default {
     name: 'trade-bill-payment',
 
-    components: {Countdown},
+    components: {Countdown, CopyToClipboard, TradeQRCode, AddressQRCode},
     mixins: [formatCurrency],
 
     computed: {
