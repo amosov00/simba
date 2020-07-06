@@ -36,13 +36,14 @@ class EventsContractWrapper(EthereumBaseContractWrapper):
     def _fetch_event_blocks_with_filter(self, event_filter: LogFilter, event: str = None) -> bool:
         try:
             for event in event_filter.get_all_entries():
-                block = dict(contract=self.contract_meta.title, **self.serialize(event))
-                self.blocks.append(EthereumTransaction(**block))
+                block = self.serialize(event)
+                self.blocks.append(
+                    EthereumTransaction(**block, contract=self.contract_meta.title, fetched_at=datetime.now())
+                )
         except ConnectionClosedError as e:
             # TODO deal with exception code = 1011 (unexpected error), reason = Internal server disconnect error
             capture_exception(e)
-            logging.info(e, f"Contract:{self.contract_meta.title}", f"Event:{event}", sep="\n")
-            pass
+            logging.error(e, f"Contract:{self.contract_meta.title}", f"Event:{event}", sep="\n")
 
         return True
 
