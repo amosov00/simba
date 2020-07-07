@@ -1,4 +1,4 @@
-from hexbytes import HexBytes
+import asyncio
 
 from .base import CryptoValidation, CryptoCurrencyRate
 from core.integrations.ethereum import FunctionsContractWrapper, EventsContractWrapper
@@ -39,6 +39,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
         return round(result_sst)
 
     async def send_sst_to_referrals(self, user: User, simba_tokens: int):
+        await asyncio.sleep(15.0)
         sst_tokens = self.simba_to_sst(simba_tokens)
         referral = await ReferralCRUD.find_by_user_id(user.id)
         for i in range(1, 6):
@@ -47,6 +48,8 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
             current_user = await UserCRUD.find_by_id(ObjectId(referral[f"ref{i}"]))
             wallet: str = current_user["user_eth_addresses"][0] if current_user.get("user_eth_addresses") else None
             if wallet is not None:
+                # Wait between eth transations
+                await asyncio.sleep(15.0)
                 self.api_wrapper.freeze_and_transfer(
                     wallet,
                     self._calculate_referrals_accurals(i, sst_tokens),

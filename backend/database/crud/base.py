@@ -1,6 +1,8 @@
 from abc import ABC
+from http import HTTPStatus
 
 from bson import ObjectId
+from fastapi import HTTPException
 
 from database import mongo_db
 
@@ -12,12 +14,16 @@ class BaseMongoCRUD(ABC):
     collection = NotImplemented
 
     @classmethod
-    async def find_by_id(cls, _id: ObjectId, **kwargs):
-        return await cls.db[cls.collection].find_one({"_id": _id}, **kwargs)
+    async def find_by_id(cls, _id: str, raise_404: bool = False, **kwargs):
+        obj = await cls.db[cls.collection].find_one({"_id": ObjectId(_id)}, **kwargs)
+        if obj or not raise_404:
+            return obj
+        else:
+            raise HTTPException(HTTPStatus.NOT_FOUND, "object is not found")
 
     @classmethod
     async def find_one(cls, query: dict):
-        return await cls.db[cls.collection].find_one(filter=query,)
+        return await cls.db[cls.collection].find_one(filter=query, )
 
     @classmethod
     async def find_many(cls, query: dict, options: dict = None):
@@ -29,7 +35,7 @@ class BaseMongoCRUD(ABC):
 
     @classmethod
     async def insert_many(cls, payload: list, options: dict = None):
-        return await cls.db[cls.collection].insert_many(payload, options,)
+        return await cls.db[cls.collection].insert_many(payload, options, )
 
     @classmethod
     async def update_one(cls, query: dict, payload: dict, with_set_option: bool = True, **kwargs):
@@ -39,7 +45,7 @@ class BaseMongoCRUD(ABC):
     @classmethod
     async def update_many(cls, query: dict, payload: dict, with_set_option: bool = True, **kwargs):
         payload = {"$set": payload} if with_set_option else payload
-        return [i async for i in cls.db[cls.collection].update_many(query, payload, **kwargs,)]
+        return [i async for i in cls.db[cls.collection].update_many(query, payload, **kwargs, )]
 
     @classmethod
     async def update_or_insert(cls, query: dict, payload: dict, with_set_option: bool = True, **kwargs):

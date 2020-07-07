@@ -92,4 +92,17 @@ export default {
   margin-right: 10px
   &:last-child
     margin-right: 0
+.balance
+  display: flex
+  align-items: center
+  justify-content: flex-end
+  font-size: 18px
+  &__img
+    margin-right: 10px
+    cursor: pointer
+  &__amount
+.pa-0
+  padding-left: 0
+  padding-top: 0
+  padding-bottom: 0
 </style>

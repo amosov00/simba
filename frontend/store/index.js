@@ -99,16 +99,6 @@ export const actions = {
       .catch(_ => false);
   },
 
-  async getBtcAddress({ commit }) {
-    return await this.$axios
-      .get("/account/btc-address/")
-      .then(resp => {
-        commit("setBtcAddress", resp.data.address);
-        return true;
-      })
-      .catch(_ => false);
-  },
-
   async signUp({ commit }, data) {
     if (!data) return false;
     return await this.$axios
@@ -179,10 +169,10 @@ export const actions = {
       })
       .then(() => {
         commit("setTwoFactor", true);
-        Toast.open({ message: "2FA successfuly enabled!", type: "is-success" });
+        Toast.open({ message: this.$i18n.t('messages.two_factor_enable_success'), type: "is-primary" });
       })
       .catch(() => {
-        Toast.open({ message: "Something went wrong!", type: "is-danger" });
+        Toast.open({ message: this.$i18n.t('messages.two_factor_enable_failed'), type: "is-danger" });
       });
   },
   async delete2fa({ commit }, pin_code) {
@@ -195,12 +185,12 @@ export const actions = {
       .then(() => {
         commit("setTwoFactor", false);
         Toast.open({
-          message: "2FA successfuly disabled!",
-          type: "is-success"
+          message: this.$i18n.t('messages.two_factor_disable_success'),
+          type: "is-primary"
         });
       })
       .catch(() => {
-        Toast.open({ message: "Something went wrong!", type: "is-danger" });
+        Toast.open({ message: this.$i18n.t('messages.two_factor_disable_failed'), type: "is-danger" });
       });
   }
 };

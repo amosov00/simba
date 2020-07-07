@@ -5,7 +5,7 @@ from pydantic import Field, validator
 from passlib.context import CryptContext
 from passlib import pwd
 
-from schemas.base import BaseModel, ObjectIdPydantic, validate_eth_address, validate_btc_address
+from schemas.base import BaseModel, ObjectIdPydantic, SuccessResponse, validate_eth_address, validate_btc_address
 
 __all__ = [
     "pwd_context",
@@ -19,7 +19,6 @@ __all__ = [
     "UserChangePassword",
     "UserVerifyEmail",
     "UserVerifyEmailResponse",
-    "UserCreationSafeResponse",
     "UserRecover",
     "UserRecoverLink",
     "User2faConfirm",
@@ -27,7 +26,12 @@ __all__ = [
     "User2faDelete",
     "UserReferralInfo",
     "User2faURL",
+    "UserEthereumSignedAddress",
+    "SuccessResponse",
     "USER_MODEL_INCLUDE_FIELDS",
+    "UserBitcoinAddress",
+    "UserBitcoinAddressDelete",
+
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -65,9 +69,28 @@ def validate_password(v: Optional[str], values: dict) -> str:
     return pwd_context.hash(v)
 
 
-class UserSignedAddresses(BaseModel):
-    address: Optional[str] = Field(default=None)
-    signature: Optional[str] = Field(default=None)
+class UserEthereumSignedAddress(BaseModel):
+    address: str = Field(default=None)
+    signature: str = Field(default=None)
+
+    _validate_address = validator("address", allow_reuse=True)(
+        validate_eth_address
+    )
+
+
+class UserBitcoinAddress(BaseModel):
+    address: str = Field(default=None)
+    created_at: Optional[datetime] = Field(default=None)
+    pin_code: Optional[str] = Field(default=None)
+
+    _validate_address = validator("address", allow_reuse=True)(
+        validate_btc_address
+    )
+
+
+class UserBitcoinAddressDelete(BaseModel):
+    address: str = Field(default=None)
+    pin_code: Optional[str] = Field(default=None)
 
 
 class User(BaseModel):
@@ -84,9 +107,8 @@ class User(BaseModel):
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
 
-    signed_addresses: List[UserSignedAddresses] = Field(default=[])
-    user_btc_addresses: List[str] = Field(default=[])
-    user_eth_addresses: List[str] = Field(default=[])
+    user_btc_addresses: List[UserBitcoinAddress] = Field(default=[])
+    user_eth_addresses: List[UserEthereumSignedAddress] = Field(default=[])
 
     btc_address: str = Field(default=None, description="Linked BTC address to user for transactions")
 
@@ -170,27 +192,12 @@ class UserCreationSafe(BaseModel):
     _validate_passwords = validator("password", allow_reuse=True)(validate_password)
 
 
-class UserCreationSafeResponse(BaseModel):
-    success: bool = Field(..., description="Success or not")
-
-
 class UserUpdateSafe(BaseModel):
     email: Optional[str] = Field(default=None)
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
 
-    signed_addresses: Optional[List[Optional[UserSignedAddresses]]] = Field(default=[])
-    user_btc_addresses: Optional[List[str]] = Field(default=None)
-    user_eth_addresses: Optional[List[str]] = Field(default=None)
-
     _validate_email = validator("email", allow_reuse=True)(validate_email)
-
-    _validate_user_btc_addresses = validator("user_btc_addresses", allow_reuse=True, each_item=True)(
-        validate_btc_address
-    )
-    _validate_user_eth_addresses = validator("user_eth_addresses", allow_reuse=True, each_item=True)(
-        validate_eth_address
-    )
 
 
 class UserCreationNotSafe(BaseModel):
@@ -218,7 +225,7 @@ class UserCreationNotSafe(BaseModel):
 
 
 class UserUpdateNotSafe(UserCreationNotSafe):
-    email: Optional[str] = Field(default="")
+    pass
 
 
 class User2faURL(BaseModel):
