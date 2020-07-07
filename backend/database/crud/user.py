@@ -63,10 +63,11 @@ class UserCRUD(BaseMongoCRUD):
         if not user.get("email_is_active"):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Activate your account")
 
-        if user.get("two_factor") is True and not await cls.check_2fa(user["_id"], pin_code):
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect 2FA pin code")
-
         if pwd_context.verify(password, user["password"]):
+
+            if user.get("two_factor") is True and not await cls.check_2fa(user["_id"], pin_code):
+                raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect 2FA pin code")
+
             token = encode_jwt_token({"id": str(user["_id"])})
             return {"token": token}
         else:
