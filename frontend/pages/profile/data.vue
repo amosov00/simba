@@ -11,7 +11,7 @@
       div.column.is-9.has-text-weight-bold.is-size-6 {{ userData.telegram_id }}
     div.is-flex.align-items-center.columns
       div.column.is-3.has-text-grey {{$t('profile.identity')}}
-      div.column.is-9.has-text-weight-bold.is-size-6 {{ userData.email_is_active ? $i18n.t('profile.email_verified') : "Unverified" }}
+      div.column.is-9.has-text-weight-bold.is-size-6 {{ userData.is_active ? $i18n.t('profile.email_verified') : $i18n.t('profile.email_unverified') }}
     div
       button(@click="modalShow = true").btn {{ $t('profile.edit_my_profile')}}
     b-modal(:active.sync="modalShow" has-modal-card @close="modalShow = false")
@@ -37,8 +37,10 @@ export default {
   methods: {
   },
   created() {
+
+    console.log(this.userData)
+
     this.$on('closeProfileUpdate', () => {
-      console.log('closing modal')
       this.modalShow = false
     })
   },

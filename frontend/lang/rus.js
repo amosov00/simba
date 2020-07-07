@@ -1,5 +1,25 @@
 export default context => {
   const locale = {
+    auth: {
+      password: 'пароль',
+      pin_code: 'пин код',
+      sign_in: 'Войти',
+      forgot_pw: 'Забыли пароль?',
+      submit: 'Отправить',
+      registration: 'Регистрация',
+      first_name: 'Имя',
+      last_name: 'Фамилия',
+      partner_id: 'Партнерский код',
+      repeat_password: 'Повторите пароль',
+      i_accept: 'Я принимаю',
+      terms_of_agreement: 'условия соглашения',
+      sign_up: 'Зарегистрироваться',
+      sign_up_success: 'Вы зарегистрировались! Пожалуйста проверьте ваш email чтобы активировать аккаунт!',
+      sign_up_error_referral: 'Для регистрации в системе необходим Партнерский код. Если у вас нет кода, пожалуйста, запросите в',
+      to_support: 'службе поддержки',
+      recover_success: 'Успешно! Проверьте ваш email для дальнейших инструкций.',
+      recover_error: 'Ошибка: убедитесь что email введет верно'
+    },
     footer: {
       tos: "Условия использования",
       privacy: "Политики конфиденциальности",
@@ -73,13 +93,18 @@ export default context => {
       edit_my_profile: "Изменить мои данные",
       identity: "Верификация",
       email_verified: "Email подтвержден",
+      email_unverified: "Email не подтверджен",
       email_verification: "Подтверждение email",
       verify_address: "Подтверждение адреса",
       id_verification: "Подтверждение паспорта",
       source_of_funds_verification: "Подтверждение источника средств",
       scan_qr_code: 'Отсканируйте этот QR код',
       after_scan_hit_enable: 'После сканирования QR кода, введите пин-код ниже и нажмите "Включить"',
-      pin_code: 'Пин-код'
+      pin_code: 'Пин-код',
+      btc_address_list: 'Список BTC адресов',
+      eth_address_list: 'Список ETH адресов',
+      for_withdraw_btc: 'для вывода Bitcoin при погашении SIMBA',
+      for_issue_simba: 'для получения SIMBA',
     },
     messages: {
       two_factor_enable_failed: 'Не удалось включить двухфакторную аутентификацию!',
@@ -97,8 +122,8 @@ export default context => {
         "4. Когда ваши друзья будут приглашать своих, вы будете получать дополнительный бонус. Так за 5 уровней вы получите: 5%, 1%, 1%, 0.5% и 0.5%.<br><br>" +
         "Предложение ограничено количеством предоставленных SST токенов.",
       invited: "Приглашенные пользователи",
-      your_ref_link: "Ваша реферальная ссылка",
-      your_ref_code: "Ваш реферальный код",
+      your_ref_link: "Ваша партнерская ссылка",
+      your_ref_code: "Ваш партнерский код",
       refs_empty: "У вас еще нет приглашенных пользователей"
     },
     password: {
@@ -138,7 +163,10 @@ export default context => {
       reg_date: "Дата регистрации",
       change: "Изменить",
       enable: "Включить",
-      disable: "Отключить"
+      disable: "Отключить",
+      first_name: 'Имя',
+      last_name: 'Фамилия',
+      save: 'Сохранить'
     },
     about: {
       company_goal: "Цель компании",

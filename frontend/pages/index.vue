@@ -1,19 +1,19 @@
 <template lang="pug">
   div
     div.is-flex.content-tabs
-      n-link(to="/" exact-active-class="link--active").link.link--underlined.content-tabs-item Sign in
-      n-link(to="/register" exact-active-class="link--active").link.link--underlined.content-tabs-item Registration
+      n-link(to="/" exact-active-class="link--active").link.link--underlined.content-tabs-item {{$t('auth.sign_in')}}
+      n-link(to="/register" exact-active-class="link--active").link.link--underlined.content-tabs-item {{$t('auth.registration')}}
     div.main-content
       div.column.is-4.p-0
         b-field
           b-input(size="is-small" placeholder="e-mail" v-model="email")
         b-field
-          b-input(size="is-small" type="password" placeholder="password" v-model="password" v-on:keypress.enter.native="login")
+          b-input(size="is-small" type="password" :placeholder="$i18n.t('auth.password')" v-model="password" v-on:keypress.enter.native="login")
         b-field
-          b-input(size="is-small" type="number" placeholder="pin code" v-model="pin_code")
-        b-button(:loading="loading" @click="login").btn.w-100 Sign in
+          b-input(size="is-small" type="text" :placeholder="$i18n.t('auth.pin_code')" v-model="pin_code")
+        b-button(:loading="loading" @click="login").btn.w-100 {{ $t('auth.sign_in') }}
         div.mt-2
-          n-link(to="/forgot" exact-active-class="link--active").link.link--underlined Forgot password?
+          n-link(to="/forgot" exact-active-class="link--active").link.link--underlined {{ $t('auth.forgot_pw') }}
 
 </template>
 

@@ -1,5 +1,5 @@
 import _, { stubArray } from "lodash";
-import { ToastProgrammatic as Toast } from "buefy";
+import { ToastProgrammatic as Toast, DialogProgrammatic as Dialog } from "buefy";
 
 export const state = () => ({
   user: null,
@@ -100,18 +100,26 @@ export const actions = {
       .then(resp => {
         Toast.open({
           message:
-            "Successfully registered! Please check your email to activate your account.",
+            this.$i18n.t('auth.sign_up_success'),
           type: "is-success",
-          duration: "6000"
+          duration: 6000
         });
         return true;
       })
       .catch(resp => {
-        Toast.open({
-          message: resp.response.data[0].message,
-          type: "is-danger",
-          duration: "6000"
-        });
+
+        if(resp.response.data[0].message === 'Referral link invalid') {
+          Dialog.alert({
+            message: `${this.$i18n.t('auth.sign_up_error_referral')} <a href='mailto:support@simba.storage'>${this.$i18n.t('auth.to_support')}</a>`,
+            type: "is-primary",
+          })
+        } else {
+          Toast.open({
+            message: resp.response.data[0].message,
+            type: "is-danger",
+            duration: 6000
+          })
+        }
         return false;
       });
   },

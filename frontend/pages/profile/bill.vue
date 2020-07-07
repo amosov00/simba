@@ -5,9 +5,9 @@
         img(:src="require('~/assets/images/bitcoin.svg')" width="36")
       div
         div.is-flex.align-items-center
-          div.is-size-5.has-text-weight-bold BTC Address list
+          div.is-size-5.has-text-weight-bold {{ $t('profile.btc_address_list') }}
           a(href="#" @click="addNewWalletModal('btc')").link.ml-2 {{$t('wallet.add_wallet')}}
-        div.is-italic.has-text-grey-light for withdrawal Bitcoin when redeem SIMBA
+        div.is-italic.has-text-grey-light {{ $t('profile.for_withdraw_btc') }}
     div.mt-3
       div(v-for="(addr, i) in user.user_btc_addresses").mb-2.addr
         div {{ addr }}
@@ -17,9 +17,9 @@
         img(:src="require('~/assets/images/eth.svg')" width="36")
       div
         div.is-flex.align-items-center
-          div.is-size-5.has-text-weight-bold ETH Address list
+          div.is-size-5.has-text-weight-bold {{ $t('profile.eth_address_list') }}
           a(href="#" @click="addNewWalletModal('eth')").link.ml-2 {{$t('wallet.add_wallet')}}
-        div.is-italic.has-text-grey-light for issue SIMBA
+        div.is-italic.has-text-grey-light {{ $t('profile.for_issue_simba') }}
     div.mt-3
       div(v-for="(addr, i) in user.user_eth_addresses").mb-2.addr
         div {{ addr }}

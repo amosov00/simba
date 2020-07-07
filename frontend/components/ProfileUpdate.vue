@@ -2,12 +2,12 @@
   div.card
     ValidationObserver(v-slot="{ handleSubmit, invalid }" tag="div")
       form(@submit.prevent="handleSubmit(saveProfile)" style="width: 320px").card-content
-        b-field(label="First name")
-          ValidationProvider(mode="aggressive" rules="required|alpha_spaces|min:1" v-slot="{ errors }" name="First name")
+        b-field(:label="$i18n.t('other.first_name')")
+          ValidationProvider(mode="aggressive" rules="required|alpha_spaces|min:1" v-slot="{ errors }" :name="$i18n.t('other.first_name')")
             b-input(v-model="userData.first_name")
             span.validaton-error {{ errors[0] }}
-        b-field(label="Last name")
-          ValidationProvider(mode="aggressive" rules="required|alpha_spaces|min:1" v-slot="{ errors }" name="Last name")
+        b-field(:label="$i18n.t('other.last_name')")
+          ValidationProvider(mode="aggressive" rules="required|alpha_spaces|min:1" v-slot="{ errors }" :name="$i18n.t('other.last_name')")
             b-input(v-model="userData.last_name")
             span.validaton-error {{ errors[0] }}
         b-field(label="Email")
@@ -15,7 +15,7 @@
             b-input(v-model="userData.email")
             span.validaton-error {{ errors[0] }}
         div.is-flex.space-between
-          b-button.mt-4.btn(:loading="isLoading" native-type="submit" :disabled="!changesFound || invalid") Save
+          b-button.mt-2.btn(:loading="isLoading" native-type="submit" :disabled="!changesFound || invalid") {{ $t('other.save') }}
 </template>
 
 <script>
