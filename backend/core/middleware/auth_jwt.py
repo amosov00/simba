@@ -29,9 +29,7 @@ async def auth_with_jwt(header: str) -> Union[dict, None]:
 
 class JWTAuthBackend(AuthenticationBackend):
     async def authenticate(self, request):
-        user = await auth_with_jwt(
-            request.headers.get("authorization") or request.headers.get("Authorization")
-        )
+        user = await auth_with_jwt(request.headers.get("authorization") or request.headers.get("Authorization"))
 
         if user:
             user = User(**user)

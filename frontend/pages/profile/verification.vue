@@ -3,7 +3,7 @@
     div.steps.is-flex.align-items-center
       div(v-for="(step, i) in steps.list" :key="i" :class="{ 'steps-item--failed': failedStep(i), 'steps-item--active': activeStep(i)}").steps-item.steps-item--profile
         | {{ i+1 }}
-        div.steps-item__text {{ step }}
+        div.steps-item__text {{ $t(step) }}
 </template>
 
 <script>
@@ -15,8 +15,9 @@
     },
     data: () => ({
       steps: {
-        current: 'Email verification',
-        list: ['Email verification', 'Verify address', 'ID verification', 'Source of funds verification']
+        current: 'profile.email_verification',
+        list: ['profile.email_verification', 'profile.verify_address',
+          'profile.id_verification', 'profile.source_of_funds_verification']
       }
     }),
     methods: {

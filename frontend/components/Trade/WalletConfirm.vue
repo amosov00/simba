@@ -57,11 +57,6 @@
           props: { type: 'btc' }
         });
       },
-
-      async testSell() {
-        await this.$store.dispatch('contract/fetchContract');
-        this.$store.dispatch('contract/redeemSimbaToken', {});
-      },
       next(){
 
         if(this.multi_props.op === 'sell') {

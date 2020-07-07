@@ -9,7 +9,7 @@
         span.mr-2.ml-2
           | =
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
-          input(v-model="btc" type="text" @input="convertBTCtoSimba($event)").smb-input
+          input(v-model="btc" type="text" @input="convertBTCtoSimba($event)" maxlength="10").smb-input
       b-button.btn(@click="confirm") {{$t('exchange.create')}}
     div.is-flex.has-text-centered(:class="{ 'flex-row-reverse': isBuy, 'justify-content-end': isBuy}")
       div.smb-input-wrapper.mt-2 SIMBA
@@ -64,8 +64,6 @@
       },
 
       convert() {
-        console.log('convert()')
-
         if(this.isConverting) {
           return
         }
@@ -89,7 +87,7 @@
           this.simba = 0
         } else {
           this.btc = test;
-          this.simba = (this.btc*100000000)
+          this.simba = (this.btc*100000000).toFixed(0)
         }
 
         this.isConverting = false

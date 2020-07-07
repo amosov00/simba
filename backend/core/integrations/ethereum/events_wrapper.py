@@ -27,7 +27,7 @@ class ContractEventsWrapper(EthereumBaseWrapper):
         return self.contract.events[contract_title]
 
     def _create_filter(
-            self, contract_title: str, from_block: Union[str, int] = None, to_block: Union[str, int] = None,
+        self, contract_title: str, from_block: Union[str, int] = None, to_block: Union[str, int] = None,
     ) -> LogFilter:
         return self._get_contract_event_by_title(contract_title).createFilter(
             address=self.contract_address, fromBlock=from_block, toBlock=to_block
@@ -73,10 +73,9 @@ class ContractEventsWrapper(EthereumBaseWrapper):
     async def save_blocks(self):
         tasks = [
             EthereumTransactionCRUD.update_or_create(
-                transaction_hash=block.transactionHash,
-                log_index=block.logIndex,
-                payload=block.dict()
-            ) for block in self.blocks
+                transaction_hash=block.transactionHash, log_index=block.logIndex, payload=block.dict()
+            )
+            for block in self.blocks
         ]
         await asyncio.gather(*tasks)
         return True

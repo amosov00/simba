@@ -1,12 +1,12 @@
 <template lang="pug">
   div
-    div.main-content
+    div.main-content.is-flex.flex-column
       div
         n-link(to="/exchange/buysell?op=buy").btn.mr-2 {{ $t('exchange.buy') }}
         //--n-link(to="/exchange/buysell?op=sell").btn.mr-2 {{ $t('exchange.sell') }}
         button(disabled).btn.mr-2 {{ $t('exchange.sell') }}
       h3.title.is-5.mt-4 {{ $t('exchange.last_bills') }}
-      div.bills-table
+      div.bills-table.flex-1(:class="{'is-flex': billsToShow.length === 0}")
         div(v-if="billsToShow.length === 0").no-bills {{ $t('exchange.empty_bills') }}
         n-link(:to="'/exchange/buysell?id=' + item._id" v-for="(item, i) in billsToShow" :key="i").is-flex.bills-table__container
           div {{ item._id }}
@@ -42,6 +42,9 @@
     mounted() {
       //this.showMore()
       this.billsToShow = this.billsList.slice(0, this.amounToView)
+      if(!this.billsToShow.length) {
+        this.showBtn = false
+      }
     },
 
     methods: {
@@ -104,9 +107,12 @@
 
 <style lang="sass" scoped>
   .no-bills
+    display: flex
+    align-items: center
+    justify-content: center
     text-align: center
-    padding: 60px
     color: #bcbcbc
+    width: 100%
 
   .bills-table
     border: 1px solid #EBEBEC

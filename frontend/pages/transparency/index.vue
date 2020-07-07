@@ -1,16 +1,16 @@
 <template lang="pug">
   div.transparency
     div.main-content
-      h1.title.is-size-4 Transparency
-        section.transparency__section
+      h1.title.is-size-4 {{$t('header_menu.transparency')}}
+        //- section.transparency__section
           img(src="../../assets/images/chart.png")
-      h1.title.is-size-4 Current Balances
+      h3.title.is-size-5 {{ $t('transparency.curr_balances')}}
         section.transparency__section
           img(src="../../assets/images/logo-lg.png")
           List.mt-3
             li.list__item
               span.list__item--name Total Assets:
-              span.list__item--value.blue {{simbaFormat(totalAssets)}} SIMBA
+              a(href="https://etherscan.io/token/0x7806a1b2b6056cda57d3e889a9513615733e2b66" target="_blank" rel="noopener").list__item--value.blue {{simbaFormat(totalAssets)}} SIMBA
             li.list__item
               span.list__item--name Total USD equivalent:
               span.list__item--value {{simbaFormat(totalEquivalent)}} USDT
@@ -28,10 +28,10 @@
               span.list__item--value {{simbaFormat(circulation)}} SIMBA
             li.list__item
               span.list__item--name SIMBA holders:
-              span.list__item--value.blue {{holders}}
+              a(href="https://etherscan.io/token/0x7806a1b2b6056cda57d3e889a9513615733e2b66" target="_blank" rel="noopener").list__item--value.blue {{holders}}
             li.list__item
               span.list__item--name Ethereum Contract:
-              a.list__item--value.blue(href="https://rinkeby.etherscan.io/address/0x60e1bf648580aafbff6c1bc122bb1ae6be7c1352" rel="nofollow noopener" target="_blank") SIMBA Stablecoin (SIMBA) 0x7806a1b2b6056cda57d3e889a9513615733e2b66
+              a(href="https://etherscan.io/address/0x7806a1b2b6056cda57d3e889a9513615733e2b66" target="_blank" rel="noopener").list__item--value.blue SIMBA Stablecoin (SIMBA) 0x7806a1b2b6056cda57d3e889a9513615733e2b66
           img(src="../../assets/images/bitcoin-lg.svg")
           List.mt-3
             li.list__item

@@ -1,22 +1,16 @@
 from urllib.parse import urljoin
-from typing import Literal, Optional
-from datetime import datetime
-import logging
+from typing import Literal
 
 from passlib import pwd
-from sentry_sdk import capture_message
 
 from schemas import (
     InvoiceInDB,
     BlockCypherWebhookCreate,
-    BTCTransaction,
-    BTCTransactionInDB,
     BlockCypherWebhookEvents,
-    InvoiceStatus,
+    BlockCypherWebhookInDB,
 )
-from database.crud import BlockCypherWebhookCRUD, InvoiceCRUD, BTCTransactionCRUD
+from database.crud import BlockCypherWebhookCRUD
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
-from core.mechanics.crypto import SimbaWrapper
 from config import HOST_URL, BTC_MINIMAL_CONFIRMATIONS
 
 __all__ = ["BlockCypherWebhookHandler"]
@@ -31,11 +25,11 @@ class BlockCypherWebhookHandler:
         return urljoin(HOST_URL, f"/api/meta/{path}/")
 
     async def create_webhook(
-            self,
-            invoice: InvoiceInDB,
-            event: Literal[BlockCypherWebhookEvents.ALL],  # noqa
-            wallet_address: str = None,
-            transaction_hash: str = None,
+        self,
+        invoice: InvoiceInDB,
+        event: Literal[BlockCypherWebhookEvents.ALL],  # noqa
+        wallet_address: str = None,
+        transaction_hash: str = None,
     ):
         secret_path = pwd.genword(length=10)
 
@@ -56,59 +50,12 @@ class BlockCypherWebhookHandler:
         await BlockCypherWebhookCRUD.update_or_insert({"id": webhook.blockcypher_id}, payload=webhook.dict())
         return True
 
-    def validate_transaction(self) -> dict:
-        pass
+    async def delete_webhook(self, invoice: InvoiceInDB) -> None:
+        webhook_obj = await BlockCypherWebhookCRUD.find_one({"invoice_id": invoice.id})
 
-    async def parse(self, payload: dict):
-        # TODO depicated -> logic goes to  InvoiceMechanics
-        transaction = BTCTransaction(**payload)
-        invoice = None
-        incoming_btc: int = 0
+        if webhook_obj:
+            webhook_obj = BlockCypherWebhookInDB(**webhook_obj)
+            await self.api_wrapper.delete_webhook(webhook_obj.blockcypher_id)
+            await BlockCypherWebhookCRUD.delete_one({"_id": webhook_obj.id})
 
-        for output in transaction.outputs:
-            invoice = await InvoiceCRUD.find_one({
-                "target_btc_address": output.addresses[0],
-                "status": {"$in": [InvoiceStatus.WAITING, InvoiceStatus.COMPLETED]}
-            })
-            if invoice:
-                incoming_btc = output.value
-                break
-
-        if not invoice:
-            capture_message(f"Invoice not founded; tx hash: {transaction.hash}")
-            return True
-        else:
-            invoice = InvoiceInDB(**invoice)
-
-        transaction.invoice_id = invoice.id
-
-        if transaction_in_db := await BTCTransactionCRUD.find_one({
-            "hash": transaction.hash,
-        }):
-            transaction_in_db = BTCTransactionInDB(**transaction_in_db)
-
-        # TODO remove before prod
-        logging.info(f"Got transaction {transaction.hash};\nconfirmations {transaction.confirmations}")
-
-        if transaction.block_height < 0 or transaction.confirmations == 0:
-            return True
-
-        if transaction.confirmations < BTC_MINIMAL_CONFIRMATIONS:
-            await BTCTransactionCRUD.update_or_insert({"hash": transaction.hash}, transaction.dict())
-
-        # # TODO transaction_in_db may not exists
-        # elif transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS:
-        #     await BTCTransactionCRUD.update_one({"hash": transaction.hash}, transaction.dict())
-
-        elif transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS:
-            await SimbaWrapper().validate_and_issue_tokens(
-                invoice, incoming_btc=incoming_btc, comment=transaction.hash
-            )
-            transaction.simba_tokens_issued = True
-            await BTCTransactionCRUD.update_one({"hash": transaction.hash}, transaction.dict())
-            invoice.status = InvoiceStatus.COMPLETED
-            invoice.btc_amount_proceeded += incoming_btc
-            invoice.finised_at = datetime.now()
-            await InvoiceCRUD.update_one({"_id": invoice.id}, invoice.dict(exclude={"id"}))
-
-        return True
+        return None
