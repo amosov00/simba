@@ -39,6 +39,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
         return round(result_sst)
 
     async def send_sst_to_referrals(self, user: User, simba_tokens: int):
+        await asyncio.sleep(15.0)
         sst_tokens = self.simba_to_sst(simba_tokens)
         referral = await ReferralCRUD.find_by_user_id(user.id)
         for i in range(1, 6):
