@@ -76,11 +76,21 @@ export default context => {
       email_verification: "Email verification",
       verify_address: "Verify address",
       id_verification: "ID verification",
-      source_of_funds_verification: "Source of funds verification"
+      source_of_funds_verification: "Source of funds verification",
+      scan_qr_code: 'Scan this QR code',
+      after_scan_hit_enable: 'After code scanning type pin code below and hit enable button.',
+      pin_code: 'Pin code'
+    },
+    messages: {
+      two_factor_enable_failed: 'Failed to enable two-factor authentication!',
+      two_factor_enable_success: 'Two-factor authentication successfuly enabled!',
+      two_factor_disable_failed: 'Failed to disable two-factor authentication!',
+      two_factor_disable_success: 'Two-factor authentication successfuly disabled!',
     },
     partner: {
       main:
-        "Get tokens for each deposit of users invited via your link. " +
+        "Get tokens for each deposit of users invited via your " +
+        "<a href='#' id='text-ref-link' class='link' rel='noreferrer noopener' target='_blank'>link</a>. " +
         "How it works?<br><br>" +
         "1. You copy the link and send it to your friend.<br>" +
         "2. After sign up with your link, it will be tied to your account.<br>" +
@@ -94,7 +104,9 @@ export default context => {
     password: {
       current: "Current password",
       new: "New password",
-      confirm: "Password confirmation"
+      confirm: "Password confirmation",
+      change_success: "Your password successfully changed!",
+      change_error: "Failed to change password!"
     },
     transparency: {
       curr_balances: "Current balances"

@@ -42,9 +42,6 @@ export default {
       this.modalShow = false
     })
   },
-  async asyncData({ store }) {
-    await store.dispatch("getBtcAddress");
-  }
 };
 </script>
 

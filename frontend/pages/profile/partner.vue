@@ -10,7 +10,7 @@
         div.mr-2.has-text-weight-medium
           a(:href="ref_link").link {{ ref_link }}
         CopyToClipboard(:value_to_copy="ref_link")
-    div.mt-4.mb-2(v-html="$t('partner.main')").is-size-6
+    div.mt-4.mb-2(v-html="$t('partner.main')").main-content__text
     div.has-text-weight-bold.is-size-5.mt-4 {{$t('partner.invited')}}
     b-table(:data="referrals" focusable striped).mt-3
       template(slot="empty")
@@ -21,7 +21,6 @@
         b-table-column(field="name" :label="$i18n.t('other.name')") {{ props.row.first_name }} {{ props.row.last_name }}
         b-table-column(field="referral_level" :label="$i18n.t('other.level')") {{ props.row.referral_level }}
     div.has-text-weight-bold.is-size-5.mt-4 {{$t('wallet.txs_history')}}
-    //--WalletTable(:moreData="history_more_data").mt-3
     b-table(:data="[]" focusable striped).mt-3
       template(slot="empty")
         div.content.has-text-grey.has-text-centered {{$t('wallet.txs_history_empty')}}
@@ -58,6 +57,12 @@
     methods: {
       formatDate(date_str) {
         return moment(String(date_str)).format(("DD/MM/YYYY, h:mm:ss"))
+      },
+
+      setTextRefLink() {
+        if(this.ref_link) {
+          document.getElementById('text-ref-link').setAttribute('href', this.ref_link)
+        }
       }
     },
 
@@ -68,6 +73,14 @@
         let url_data = new URL(this.ref_link)
         this.ref_code = url_data.searchParams.get("referral_id")
       }
+    },
+
+    mounted() {
+      this.setTextRefLink();
+    },
+
+    updated() {
+      this.setTextRefLink();
     },
 
     async asyncData({store}) {

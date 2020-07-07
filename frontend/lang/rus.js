@@ -67,7 +67,7 @@ export default context => {
         partner_program: "Партнер. программа",
         security: "Безопасность",
         change_password: "Изменить пароль",
-        two_factor: "Двухфакт. авторизация",
+        two_factor: "Двухфакт. аутентификация",
         logout: "Выход"
       },
       edit_my_profile: "Изменить мои данные",
@@ -76,11 +76,21 @@ export default context => {
       email_verification: "Подтверждение email",
       verify_address: "Подтверждение адреса",
       id_verification: "Подтверждение паспорта",
-      source_of_funds_verification: "Подтверждение источника средств"
+      source_of_funds_verification: "Подтверждение источника средств",
+      scan_qr_code: 'Отсканируйте этот QR код',
+      after_scan_hit_enable: 'После сканирования QR кода, введите пин-код ниже и нажмите "Включить"',
+      pin_code: 'Пин-код'
+    },
+    messages: {
+      two_factor_enable_failed: 'Не удалось включить двухфакторную аутентификацию!',
+      two_factor_enable_success: 'Двухфакторная аутентификая включена!',
+      two_factor_disable_failed: 'Не удалось отключить двухфакторную аутентификацию!',
+      two_factor_disable_success: 'Двухфакторная аутентификая отключена!',
     },
     partner: {
       main:
-        "Получайте токены за каждый депозит пользователей приглашенных по вашей ссылке. Как это работает?<br><br>" +
+        "Получайте токены за каждый депозит пользователей приглашенных по вашей " +
+        "<a href='#' id='text-ref-link' class='link' rel='noreferrer noopener' target='_blank'>ссылке</a>. Как это работает?<br><br>" +
         "1. Вы копируете ссылку и отправляете вашему другу.<br>" +
         "2. Регистрируясь по вашей ссылке он будет привязан к вашему аккаунту.<br>" +
         "3. При каждом пополнении вы получите токены SST, которые сможете продать на бирже по актуальному курсу.<br>" +
@@ -94,7 +104,9 @@ export default context => {
     password: {
       current: "Текущий пароль",
       new: "Новый пароль",
-      confirm: "Подтверждение пароля"
+      confirm: "Подтверждение пароля",
+      change_success: "Пароль успешно изменен!",
+      change_error: "Не удалось изменить пароль!"
     },
     transparency: {
       curr_balances: "Текущие балансы"
