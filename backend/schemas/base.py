@@ -81,3 +81,7 @@ class BaseModel(PydanticBaseModel):
             time: lambda o: o.isoformat(),
             Decimal128: lambda o: int(o.to_decimal()),
         }
+
+
+class SuccessResponse(BaseModel):
+    success: bool = Field(..., description="Success or not")
