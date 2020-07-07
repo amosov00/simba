@@ -9,47 +9,61 @@
 </template>
 
 <script>
+export default {
+  name: "AddNewWallet",
+  props: {
+    type: String
+  },
+  data: () => ({
+    wallet: ""
+  }),
+  computed: {
+    user() {
+      return this.$store.getters.user;
+    }
+  },
+  methods: {
+    async add() {
+      let type_prop = "user_btc_addresses";
 
-  export default {
-    name: 'AddNewWallet',
-    props: {
-      type: String
-    },
-    data: () => ({
-      wallet: ""
-    }),
-    methods: {
-      async add(){
-
-        let type_prop = 'user_btc_addresses';
-
-        if(this.type === 'eth') {
-          type_prop = 'user_eth_addresses';
-        }
-
-        let addr_list = JSON.parse(JSON.stringify(this.$store.getters.user[type_prop]));
-
-        if(addr_list.indexOf(this.wallet) !== -1) {
-          this.$buefy.toast.open({ message: "You already have this wallet in the list!", type: 'is-danger' })
-          return
-        }
-
-        addr_list.push(this.wallet)
-
-        let data_to_send = {[type_prop]: addr_list};
-
-        if(await this.$store.dispatch('changeAddresses', data_to_send)) {
-          this.$buefy.toast.open({ message: "Address successfully added!", type: 'is-primary' })
-          this.$emit('close');
-        } else {
-          this.$buefy.toast.open({ message: "Something went wrong, your wallet address might be invalid!", type: 'is-danger' })
-        }
-
-        await this.$store.dispatch('getUser')
+      if (this.type === "eth") {
+        type_prop = "user_eth_addresses";
       }
+
+      let addr_list = JSON.parse(
+        JSON.stringify(this.$store.getters.user[type_prop])
+      );
+
+      if (addr_list.indexOf(this.wallet) !== -1) {
+        this.$buefy.toast.open({
+          message: "You already have this wallet in the list!",
+          type: "is-danger"
+        });
+        return;
+      }
+
+      addr_list.push(this.wallet);
+
+      let data_to_send = { [type_prop]: addr_list };
+
+      if (await this.$store.dispatch("changeAddresses", data_to_send)) {
+        this.$buefy.toast.open({
+          message: "Address successfully added!",
+          type: "is-primary"
+        });
+        this.$emit("close");
+      } else {
+        this.$buefy.toast.open({
+          message:
+            "Something went wrong, your wallet address might be invalid!",
+          type: "is-danger"
+        });
+      }
+
+      await this.$store.dispatch("getUser");
     }
   }
+};
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>

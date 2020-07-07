@@ -42,6 +42,8 @@ export default {
 
       if(!resp) {
         this.$buefy.toast.open({message: 'Check your email/password and make sure you activated your account!', type: 'is-danger', duration: 3500})
+      } else if (resp.response.data[0].message === 'Incorrect 2FA pin code') {
+        console.log('show modal')
       }
 
       this.password = "";
