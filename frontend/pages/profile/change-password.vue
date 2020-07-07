@@ -3,15 +3,15 @@
     form(@submit.prevent="handleSubmit(onSubmit)" style="max-width: 356px")
       div
         b-field
-          ValidationProvider(rules="required" v-slot="{ errors }" name="Current password")
+          ValidationProvider(rules="required" v-slot="{ errors }" :name="$i18n.t('password.current')")
             b-input(type="password" v-model="form.old_password" :placeholder="$i18n.t('password.current')")
             span.validaton-error {{ errors[0] }}
         b-field
-          ValidationProvider(rules="required|min:8|confirmed:confirmation" v-slot="{ errors }" name="New password")
+          ValidationProvider(rules="required|min:8|confirmed:confirmation" v-slot="{ errors }" :name="$i18n.t('password.new')")
             b-input(type="password" v-model="form.password" :placeholder="$i18n.t('password.new')")
             span.validaton-error {{ errors[0] }}
         b-field
-          ValidationProvider(rules="required" v-slot="{ errors }" vid="confirmation" name="Password confirmation")
+          ValidationProvider(rules="required" v-slot="{ errors }" vid="confirmation" :name="$i18n.t('password.confirm')")
             b-input(type="password" v-model="form.repeat_password" :placeholder="$i18n.t('password.confirm')")
             span.validaton-error {{ errors[0] }}
         div.has-text-right
@@ -40,9 +40,9 @@
         const resp = await this.$store.dispatch('changePassword', this.form);
 
         if(resp) {
-          this.$buefy.toast.open({message: 'Succesfully changed!', type: 'is-primary'});
+          this.$buefy.toast.open({message: this.$i18n.t('password.change_success'), type: 'is-primary'});
         } else {
-          this.$buefy.toast.open({message: 'Error changing password!', type: 'is-danger'});
+          this.$buefy.toast.open({message: this.$i18n.t('password.change_error'), type: 'is-danger'});
         }
         this.isLoading = false;
       }

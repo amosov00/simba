@@ -20,7 +20,7 @@
   import Header from "~/components/Header";
 
   export default {
-    middleware: ['fetchUser'],
+    middleware: ['fetchUser', 'authRequired'],
     components: { Header, Footer },
     data: () => ({
       showModalNew: false,

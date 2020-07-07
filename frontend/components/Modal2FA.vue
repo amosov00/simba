@@ -1,9 +1,9 @@
 <template>
   <div class="card two-fa-window">
     <div class="card-content">
-      <div class="title is-4">Enable 2FA</div>
+      <div class="title is-4">{{$t('other.enable')}} 2FA</div>
       <div class="mt-2">
-        <p class="subtitle">1. Scan this QR code.</p>
+        <p class="subtitle">1. {{$t('profile.scan_qr_code')}}</p>
         <qrcode-vue
           class="mt-2"
           :value="value"
@@ -13,14 +13,14 @@
       </div>
       <div class="mt-2">
         <p class="subtitle">
-          2. After code scanning type pin code below and hit enable button.
+          2. {{$t('profile.after_scan_hit_enable')}}.
         </p>
         <b-field class="mt-2">
-          <b-input type="number" v-model="confirm2faData.pin_code" placeholder="Pin code"></b-input>
+          <b-input type="number" v-model="confirm2faData.pin_code" :placeholder="$t('profile.pin_code')"></b-input>
         </b-field>
       </div>
       <div>
-        <b-button @click="enable2fa" class="btn w-100 mt-4">Enable</b-button>
+        <b-button @click="enable2fa" class="btn w-100 mt-4">{{$t('other.enable')}}</b-button>
       </div>
     </div>
   </div>
@@ -32,7 +32,7 @@ export default {
   data() {
     return {
       value: "",
-      size: 300,
+      size: 230,
       confirm2faData: {
         token: '',
         pin_code: null,

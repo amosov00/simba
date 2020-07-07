@@ -128,5 +128,7 @@ export default {
     cursor: pointer
   &__amount
 .pa-0
-  padding: 0
+  padding-left: 0
+  padding-top: 0
+  padding-bottom: 0
 </style>
