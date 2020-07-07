@@ -9,49 +9,65 @@
           b-input(size="is-small" placeholder="e-mail" v-model="email")
         b-field
           b-input(size="is-small" type="password" placeholder="password" v-model="password" v-on:keypress.enter.native="login")
-        b-field
-          b-input(size="is-small" type="number" placeholder="pin code" v-model="pin_code")
         b-button(:loading="loading" @click="login").btn.w-100 Sign in
         div.mt-2
           n-link(to="/forgot" exact-active-class="link--active").link.link--underlined Forgot password?
-
 </template>
 
 <script>
+import Login2FA from "~/components/Login2FA";
 export default {
   name: "index",
   layout: "main",
-  middleware ({ store, redirect }) {
-    if(store.state.user) {
-      redirect('/profile/data/')
-      return
+  components: { Login2FA },
+  middleware({ store, redirect }) {
+    if (store.state.user) {
+      redirect("/profile/data/");
+      return;
     }
   },
   data() {
     return {
       email: "",
       password: "",
-      pin_code: null,
-      loading: false
+      loading: false,
+      modal2FA: true
     };
   },
   methods: {
     async login() {
       this.loading = true;
-      let resp = await this.$authLogin(this.email, this.password, this.pin_code);
+      this.$store.commit("setLoginDataBuffer", {
+        email: this.email,
+        password: this.password
+      });
+      let resp = await this.$authLogin(
+        this.email,
+        this.password
+      );
 
-      if(!resp) {
-        this.$buefy.toast.open({message: 'Check your email/password and make sure you activated your account!', type: 'is-danger', duration: 3500})
+      if (!resp) {
+        this.$buefy.toast.open({
+          message:
+            "Check your email/password and make sure you activated your account!",
+          type: "is-danger",
+          duration: 3500
+        });
+      } else if (resp.response.data[0].message === "Incorrect 2FA pin code") {
+        this.$buefy.modal.open({
+          parent: this,
+          component: Login2FA,
+          hasModalCard: true,
+          customClass: "custom-class custom-class-2",
+          trapFocus: true
+        });
       }
 
       this.password = "";
       this.loading = false;
     }
-  },
-  async mounted() {
   }
 };
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>

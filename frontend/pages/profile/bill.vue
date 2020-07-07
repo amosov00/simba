@@ -27,26 +27,26 @@
 </template>
 
 <script>
-  import AddNewWallet from "~/components/AddNewWallet";
+import AddNewWallet from "~/components/AddNewWallet";
 
-  export default {
-    name: "profile-bill",
-    layout: "profile",
+export default {
+  name: "profile-bill",
+  layout: "profile",
 
-    components: {AddNewWallet},
+  components: { AddNewWallet },
 
-    data: () => ({
-      eth_wallet_add_modal: false
-    }),
+  data: () => ({
+    eth_wallet_add_modal: false
+  }),
 
-    computed: {
-      user() {
-        return this.$store.getters.user;
-      }
-    },
+  computed: {
+    user() {
+      return this.$store.getters.user;
+    }
+  },
 
-    methods: {
-      addNewWalletModal(type) {
+  methods: {
+    addNewWalletModal(type) {
         this.$buefy.modal.open({
           parent: this,
           component: AddNewWallet,
@@ -54,55 +54,66 @@
           trapFocus: true,
           props: { type }
         });
-      },
+    },
 
-      removeAddress(index, type) {
-        this.$buefy.dialog.confirm({
-          title: this.$i18n.t('other.delete'),
-          message: "<span class='is-size-6' style='line-height: 150%'>" + this.$i18n.t('wallet.delete_sure') + ": <strong>" + this.user[type][index] + "</strong><span>",
-          confirmText: this.$i18n.t('other.delete'),
-          cancelText: this.$i18n.t('other.cancel'),
-          type: 'is-danger',
-          onConfirm: async () => {
-            let addr_list = JSON.parse(JSON.stringify(this.user[type]));
-            addr_list.splice(index, 1)
+    removeAddress(index, type) {
+      this.$buefy.dialog.confirm({
+        title: this.$i18n.t("other.delete"),
+        message:
+          "<span class='is-size-6' style='line-height: 150%'>" +
+          this.$i18n.t("wallet.delete_sure") +
+          ": <strong>" +
+          this.user[type][index] +
+          "</strong><span>",
+        confirmText: this.$i18n.t("other.delete"),
+        cancelText: this.$i18n.t("other.cancel"),
+        type: "is-danger",
+        onConfirm: async () => {
+          let addr_list = JSON.parse(JSON.stringify(this.user[type]));
+          addr_list.splice(index, 1);
 
-            let data_to_send = {[type]: addr_list};
+          let data_to_send = { [type]: addr_list };
 
-            if(await this.$store.dispatch('changeAddresses', data_to_send)) {
-              this.$buefy.toast.open({ message: "Address successfully deleted!", type: 'is-primary' })
-            } else {
-              this.$buefy.toast.open({ message: "Error deleting address!", type: 'is-danger' })
-            }
-
-            await this.$store.dispatch('getUser')
+          if (await this.$store.dispatch("changeAddresses", data_to_send)) {
+            this.$buefy.toast.open({
+              message: "Address successfully deleted!",
+              type: "is-primary"
+            });
+          } else {
+            this.$buefy.toast.open({
+              message: "Error deleting address!",
+              type: "is-danger"
+            });
           }
-        })
-      }
+
+          await this.$store.dispatch("getUser");
+        }
+      });
     }
-  };
+  }
+};
 </script>
 
 <style lang="sass" scoped>
-  .addr
-    display: flex
-    align-items: center
-    height: 21px
+.addr
+  display: flex
+  align-items: center
+  height: 21px
+  &:hover
+    color: #0060FF
+    cursor: default
+    .addr__delete
+      display: inline-block
+  &__delete
+    display: none
+    margin-left: 20px
+    padding: 2px 20px
+    background-color: transparent
+    border-radius: 100px
+    transition: background-color 300ms
     &:hover
-      color: #0060FF
-      cursor: default
-      .addr__delete
-        display: inline-block
-    &__delete
-      display: none
-      margin-left: 20px
-      padding: 2px 20px
-      background-color: transparent
-      border-radius: 100px
-      transition: background-color 300ms
-      &:hover
-        cursor: pointer
-        background-color: #ffe8ef
-      &:active
-        opacity: 0.8
+      cursor: pointer
+      background-color: #ffe8ef
+    &:active
+      opacity: 0.8
 </style>
