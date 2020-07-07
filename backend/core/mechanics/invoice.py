@@ -102,8 +102,10 @@ class InvoiceMechanics(CryptoValidation):
         transaction.simba_tokens_issued = True
         await BTCTransactionCRUD.update_or_insert({"hash": transaction.hash}, transaction.dict())
         self.invoice.status = InvoiceStatus.COMPLETED
-        self.invoice.btc_amount_proceeded += incoming_btc
         self.invoice.finised_at = datetime.now()
+        self.invoice.btc_amount_proceeded += incoming_btc
+        # Incoming BTC - fee (50000)
+        self.invoice.simba_amount_proceeded += incoming_btc - 50000
         self.invoice.eth_tx_hashes = list({*self.invoice.eth_tx_hashes, eth_tx_hash})
         self.invoice.btc_tx_hashes = list({*self.invoice.btc_tx_hashes, transaction.hash})
 

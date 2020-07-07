@@ -32,7 +32,7 @@
       this.received_payment_amount = res.btc_amount_proceeded
 
       if(res.btc_txs.length > 0) {
-        this.tx_hash = res.eth_txs[0]?.hash || ''
+        this.tx_hash = res.eth_tx_hashes[0] || ''
       }
     },
 
@@ -45,7 +45,7 @@
 
           this.$store.commit('exchange/setTradeData', { prop: 'simba_issued', value: res.btc_amount_proceeded})
           this.$store.commit('exchange/setTradeData', { prop: 'target_eth', value: res.target_eth_address})
-          this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: res.eth_txs[0]?.hash || ''})
+          this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: res.eth_tx_hashes[0] || ''})
 
           clearInterval(this.interval)
           this.$parent.$emit('nextStep')
