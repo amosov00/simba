@@ -2,11 +2,9 @@ import asyncio
 from http import HTTPStatus
 
 from hexbytes import HexBytes
-from bson import Decimal128
 from web3 import Web3
-from web3.contract import prepare_transaction, build_transaction_for_function
-from web3.datastructures import AttributeDict
 from fastapi import HTTPException
+from sentry_sdk import capture_message
 
 from .base_wrapper import EthereumBaseContractWrapper
 from schemas import EthereumContract
@@ -38,13 +36,14 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
     def issue_coins(self, customer_address: str, amount: int, comment: str) -> HexBytes:
         """Simba contract"""
         if amount < SIMBA_MIN_BASE_AMOUNT:
+            capture_message(f"trying to issue < 50k simba,\nETH ADDR: {customer_address}, BTC HASH {comment}")
             raise HTTPException(HTTPStatus.BAD_REQUEST, "minimal simba amount to issue - 50,000")
 
         customer_address = Web3.toChecksumAddress(customer_address)
         nonce = self._get_nonce()
-        self._approve(amount, nonce)
+        self._approve(amount, nonce + 1)
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
-            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce + 1,}
+            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce + 2}
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)

@@ -45,10 +45,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
             if not referral[f"ref{i}"]:
                 continue
             current_user = await UserCRUD.find_by_id(ObjectId(referral[f"ref{i}"]))
-            wallet: str = current_user["user_eth_addresses"][0] if (
-                "user_eth_addresses" in current_user
-                and len(current_user["user_eth_addresses"]) > 0
-            ) else None
+            wallet: str = current_user["user_eth_addresses"][0] if current_user.get("user_eth_addresses") else None
             if wallet is not None:
                 self.api_wrapper.freeze_and_transfer(
                     wallet,
