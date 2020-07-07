@@ -79,7 +79,8 @@ async def account_recover(data: UserRecoverLink = Body(...)):
 @router.get("/referral_link/", response_model=UserReferralURLResponse)
 async def account_get_referral_link(user: User = Depends(get_user)):
     params = {"referral_id": user.id}
-    url = urljoin(HOST_URL, "register") + "?" + urlencode(params)
+    url = urljoin(HOST_URL, "register") + "?" + \
+          (urlencode(params) if user.user_eth_addresses != [] else "referral_id=*************")
     return {"URL": url}
 
 
@@ -135,7 +136,6 @@ async def account_add_eth_address_delete(address: str = Path(...), user: User = 
 
 @router.post("/btc-address/")
 async def account_add_btc_address(user: User = Depends(get_user), data: UserBitcoinAddress = Body(...)):
-
     if user.two_factor and not await UserCRUD.check_2fa(user_id=user.id, pin_code=data.pin_code):
         raise HTTPException(
             HTTPStatus.BAD_REQUEST, "Incorrect pin-code"
@@ -161,7 +161,6 @@ async def account_add_btc_address(user: User = Depends(get_user), data: UserBitc
 
 @router.delete("/btc-address/")
 async def account_add_btc_address_delete(data: UserBitcoinAddressDelete = Body(...), user: User = Depends(get_user)):
-
     if user.two_factor and not await UserCRUD.check_2fa(user_id=user.id, pin_code=data.pin_code):
         raise HTTPException(
             HTTPStatus.BAD_REQUEST, "Incorrect pin-code"
