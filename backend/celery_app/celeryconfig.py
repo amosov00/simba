@@ -1,5 +1,3 @@
-from urllib.parse import urljoin
-
 from celery import Celery
 from celery.schedules import crontab
 
@@ -14,7 +12,7 @@ __all__ = ["app"]
 
 celery_decorator_taskcls.patch_celery()
 
-CELERY_MONGO_DATABASE_URL = urljoin(MONGO_DATABASE_URL, CELERY_DATABASE_NAME)
+CELERY_MONGO_DATABASE_URL = f"{MONGO_DATABASE_URL}{CELERY_DATABASE_NAME}"
 
 app = Celery(main="celery_main", broker=CELERY_BROKER_URL, backend=CELERY_MONGO_DATABASE_URL,)
 
