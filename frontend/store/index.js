@@ -9,13 +9,15 @@ export const state = () => ({
     eth_address: "",
     simba: 0,
     btc: 0
-  }
+  },
+  loginDataBuffer: {}
 });
 
 export const getters = {
   user: s => s.user,
   contract: s => s.contract,
-  tradeData: s => s.tradeData
+  tradeData: s => s.tradeData,
+  loginDataBuffer: s => s.loginDataBuffer
 };
 
 export const mutations = {
@@ -27,14 +29,18 @@ export const mutations = {
   },
   setTwoFactor: (state, payload) => (state.user.two_factor = payload),
   setSignedAddresses: (state, payload) =>
-    state.user.signed_addresses.push(payload)
+    state.user.signed_addresses.push(payload),
+  setLoginDataBuffer: (state, payload) => {
+    state.loginDataBuffer = payload
+  }
 };
 
 export const actions = {
   async fetchReferrals() {
-    return await this.$axios.get('/account/referrals/')
-      .then((res) => res.data["referrals"])
-      .catch(() => false)
+    return await this.$axios
+      .get("/account/referrals/")
+      .then(res => res.data["referrals"])
+      .catch(() => false);
   },
 
   async changeAddresses({}, data) {
