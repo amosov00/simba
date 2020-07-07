@@ -87,17 +87,6 @@ async def account_confirm_2fa(user: User = Depends(get_user), payload: User2faCo
     return await UserCRUD.confirm_2fa(user, payload)
 
 
-# TODO deprecated, delete after 07/09/20
-# @router.get("/btc-address/")
-# async def account_btc_address(user: User = Depends(get_user)):
-#     if not user.btc_address:
-#         address = await BitcoinWrapper().create_wallet_address(user)
-#     else:
-#         address = user.btc_address
-#
-#     return {"address": address}
-
-
 @router.delete("/2fa/")
 async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDelete = Body(...)):
     return await UserCRUD.delete_2fa(user, payload)
@@ -110,3 +99,8 @@ async def account_referrals_info(user: User = Depends(get_user)):
     transactions = []
 
     return {"referrals": referrals, "transactions": transactions}
+
+
+@router.post("/eth-address/", response_model=UserReferralsResponse)
+async def account_referrals_info(user: User = Depends(get_user)):
+    return True
