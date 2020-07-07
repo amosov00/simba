@@ -120,11 +120,12 @@ export default context => {
         "1. You copy the link and send it to your friend.<br>" +
         "2. After sign up with your link, it will be tied to your account.<br>" +
         "3. With each recharge, you will receive SST tokens that you can sell" +
-        "on the exchange at the current rate. The offer is limited by amount of provided SST tokens.",
+        "on the exchange at the current rate.<br><br>The offer is limited by amount of provided SST tokens.",
       invited: "Invited",
       your_ref_link: "Your partner link",
       your_ref_code: "Your partner code",
-      refs_empty: "You don't have invited users yet"
+      refs_empty: "You don't have invited users yet",
+      how_to_get_code: {p1: "To get your partner code, ", p2: "add", p3: "your reward wallet"}
     },
     password: {
       current: "Current password",
