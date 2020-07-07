@@ -47,10 +47,9 @@
     margin-left: auto
     position: absolute
     right: -20px
-    min-width: 140px
     &__wrapper
       position: relative
-      text-align: right
+      text-align: left
       height: 36px
       margin-bottom: 6px
     &__logout
@@ -80,6 +79,7 @@
       bottom: 2px
       position: relative
     &__header
+      text-align: left
       padding: 13px 20px 13px 20px
     &__name
       color: #0060FF
@@ -89,6 +89,7 @@
     &__name-wrapper
       display: flex
       align-items: center
+      justify-content: space-between
       border-bottom: 1px dashed #0060FF
     &__footer
       display: none

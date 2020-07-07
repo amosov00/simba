@@ -19,7 +19,7 @@ async def finish_overdue_invoices(self, *args, **kwargs):
     """Крон для завершения счетов, которые неактивны > 2 часов и у которых нет транзакций"""
     invoices = await InvoiceCRUD.aggregate(
         [
-            {"$match": {"status": InvoiceStatus.WAITING}},
+            {"$match": {"status": {"$in": (InvoiceStatus.CREATED, InvoiceStatus.WAITING)}}},
             {
                 "$lookup": {
                     "from": BTCTransactionCRUD.collection,

@@ -7,14 +7,14 @@ from datetime import datetime
 from web3.contract import ContractEvent, LogFilter
 from sentry_sdk import capture_exception
 
-from .base_wrapper import EthereumBaseWrapper
+from .base_wrapper import EthereumBaseContractWrapper, EthereumBaseCommonWrapper
 from schemas import EthereumTransaction
 from database.crud import EthereumTransactionCRUD
 
-__all__ = ["ContractEventsWrapper"]
+__all__ = ["EventsContractWrapper"]
 
 
-class ContractEventsWrapper(EthereumBaseWrapper):
+class EventsContractWrapper(EthereumBaseContractWrapper):
     def _get_contract_events_titles(self) -> list:
         events = []
         for key, val in self.contract.events.__dict__.items():
@@ -27,7 +27,7 @@ class ContractEventsWrapper(EthereumBaseWrapper):
         return self.contract.events[contract_title]
 
     def _create_filter(
-        self, contract_title: str, from_block: Union[str, int] = None, to_block: Union[str, int] = None,
+            self, contract_title: str, from_block: Union[str, int] = None, to_block: Union[str, int] = None,
     ) -> LogFilter:
         return self._get_contract_event_by_title(contract_title).createFilter(
             address=self.contract_address, fromBlock=from_block, toBlock=to_block
@@ -36,13 +36,14 @@ class ContractEventsWrapper(EthereumBaseWrapper):
     def _fetch_event_blocks_with_filter(self, event_filter: LogFilter, event: str = None) -> bool:
         try:
             for event in event_filter.get_all_entries():
-                block = dict(contract=self.contract_meta.title, **self.serialize(event))
-                self.blocks.append(EthereumTransaction(**block))
+                block = self.serialize(event)
+                self.blocks.append(
+                    EthereumTransaction(**block, contract=self.contract_meta.title, fetched_at=datetime.now())
+                )
         except ConnectionClosedError as e:
             # TODO deal with exception code = 1011 (unexpected error), reason = Internal server disconnect error
             capture_exception(e)
-            logging.info(e, f"Contract:{self.contract_meta.title}", f"Event:{event}", sep="\n")
-            pass
+            logging.error(e, f"Contract:{self.contract_meta.title}", f"Event:{event}", sep="\n")
 
         return True
 

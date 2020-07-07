@@ -8,7 +8,7 @@
         div.operation.mr-4 {{ $t(`exchange.${operation.toLowerCase()}`) }}
         span(v-for="(step, i) in tradeData.steps.list" :key="i" :class="{ 'steps-item--failed': failedStep(i), 'steps-item--active': activeStep(i)}").steps-item {{ i+1 }}
       div.trade-content
-        component(:is="tradeData.steps.current" :multi_props="multi_props")
+        component(:is="tradeData.steps.current")
 </template>
 
 <script>
@@ -55,12 +55,18 @@
           return false
         })
       } else {
-        console.log('metamask not found')
 
-        Toast.open({message: 'Metamask is not installed!', type:'is-warning', duration: 4000})
+        Toast.open({message: 'Metamask is not installed!', type:'is-danger', duration: 4000})
 
         redirect('/exchange/')
       }
+    },
+
+    beforeRouteUpdate (to, from, next) {
+      if(to.query.hasOwnProperty('id')) {
+        this.tradeData.steps.current = 'BillPayment'
+      }
+      next()
     },
 
     async beforeMount() {
@@ -78,46 +84,50 @@
         if(this.$nuxt.$route.query['op'] === 'buy') {
           this.operation = 'Buy';
           this.$store.commit('exchange/setTradeData', {prop: 'operation', value: 1})
-          this.multi_props["op"] = 'buy'
         } else {
           this.operation = 'Sell'
           this.$store.commit('exchange/setTradeData', {prop: 'operation', value: 2})
-
           this.tradeData.steps.list.splice(3, 0, 'BtcSentStatus')
-
-          this.multi_props["op"] = 'sell'
         }
       }
 
+      // Handle url with invoice id
       if(this.$nuxt.$route.query['id']) {
         let single_res = await this.$store.dispatch('invoices/fetchSingle', this.$nuxt.$route.query['id']);
 
-        this.multi_props["no_create"] = true;
-        this.multi_props["invoice"] = single_res._id;
+        this.$store.commit('exchange/setTradeData', {
+          prop: 'no_create',  value: 'true'
+        })
+
+        this.$store.commit('exchange/setTradeData', {
+          prop: 'invoice_id', value: this.$nuxt.$route.query['id']
+        })
 
         if(single_res) {
 
           if(single_res.invoice_type === 1) {
             this.operation = 'Buy';
-            this.multi_props["op"] = 'buy'
           } else {
             this.operation = 'Sell'
-            this.multi_props["op"] = 'sell'
             this.tradeData.steps.list.splice(3, 0, 'BtcSentStatus')
           }
 
-          if(single_res.status === 'waiting') {
+          if(single_res.status === 'waiting' || single_res.status === 'created') {
             this.tradeData.steps.current = 'BillPayment'
           }
           else if(single_res.status === 'completed') {
             //this.tradeData.steps.current = 'BillPayment'
             this.tradeData.steps.current = 'Final'
-            this.multi_props["buy_info"] = {
+            this.$store.commit('exchange/setTradeData', {prop: 'btc_amount_proceeded', value: single_res.btc_amount_proceeded})
+            this.$store.commit('exchange/setTradeData', {prop: 'target_eth', value: single_res.target_eth_address})
+            this.$store.commit('exchange/setTradeData', {prop: 'tx_hash', value: single_res.eth_tx_hashes[0] || ''})
+            this.$store.commit('exchange/setTradeData', {prop: 'simba_issued', value: single_res.btc_amount_proceeded})
+/*            this.multi_props["buy_info"] = {
               btc_amount_proceeded: single_res.btc_amount_proceeded,
               target_eth: single_res.target_eth_address,
               tx_hash: single_res.btc_txs[0].hash,
               simba_issued: single_res.btc_amount_proceeded
-            }
+            }*/
           }
         } else {
           this.$buefy.toast.open({message:'Error: invoice not found', type: 'is-danger'})

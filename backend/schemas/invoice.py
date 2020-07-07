@@ -63,8 +63,8 @@ class Invoice(BaseModel):
     target_btc_address: Optional[str] = Field(default=None, description="Address which will be scanned")
 
     # Connected transactions
-    eth_tx_ids: List[ObjectIdPydantic] = Field(default=[])
-    btc_tx_ids: List[ObjectIdPydantic] = Field(default=[])
+    eth_tx_hashes: List[str] = Field(default=[])
+    btc_tx_hashes: List[str] = Field(default=[])
 
     # Datetimes
     created_at: datetime = Field(default_factory=datetime.utcnow, description="UTC")
@@ -85,8 +85,10 @@ class InvoiceExtended(InvoiceInDB):
 
 class InvoiceCreate(BaseModel):
     invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")
-    # TODO make strict
     target_eth_address: Optional[str] = Field(default=None, description="Address which will be scanned")
+    btc_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send", gt=0)
+    simba_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send",
+                                                      gt=0)
 
 
 class InvoiceUpdate(BaseModel):

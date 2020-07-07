@@ -1,8 +1,8 @@
 FROM node:13.8-buster
 
 ENV DEBUG=true
-ENV ENV=development
-ENV NODE_ENV=development
+ENV ENV=develop
+ENV NODE_ENV=develop
 ENV NUXT_HOST=0.0.0.0
 ENV NUXT_PORT=3015
 ENV API_URL=https://simba-dev.elastoo.com/api

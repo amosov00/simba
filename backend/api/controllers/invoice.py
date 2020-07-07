@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Res
 from bson import ObjectId
 
 from api.dependencies import get_user
-from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
+from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD, UserCRUD
 from schemas import (
     Invoice,
     InvoiceCreate,
@@ -78,7 +78,11 @@ async def invoice_fetch_one(invoice_id: str, user: User = Depends(get_user)):
 
 @router.put("/{invoice_id}/")
 async def invoice_update(invoice_id: str, user: User = Depends(get_user), payload: InvoiceUpdate = Body(...)):
-    return await InvoiceCRUD.update_invoice(invoice_id, user, payload, statuses=(InvoiceStatus.CREATED,),)
+    if await InvoiceCRUD.need_to_update(invoice_id, user, payload) is True:
+        await UserCRUD.update_one(query={"_id": ObjectId(user.id)},
+                                  payload={"user_eth_addresses": [payload.target_eth_address]})
+
+    return await InvoiceCRUD.update_invoice(invoice_id, user, payload, filtering_statuses=(InvoiceStatus.CREATED,), )
 
 
 @router.post("/{invoice_id}/transaction/")
@@ -86,7 +90,7 @@ async def invoice_add_transaction(
     invoice_id: str, user: User = Depends(get_user), payload: InvoiceTransactionManual = Body(...)
 ):
     invoice = await InvoiceCRUD.find_invoice_safely(
-        invoice_id, user.id, statuses=(InvoiceStatus.WAITING, InvoiceStatus.COMPLETED),
+        invoice_id, user.id, filtering_statuses=(InvoiceStatus.WAITING, InvoiceStatus.COMPLETED),
     )
 
     invoice = InvoiceInDB(**invoice)

@@ -2,13 +2,11 @@ import asyncio
 from http import HTTPStatus
 
 from hexbytes import HexBytes
-from bson import Decimal128
 from web3 import Web3
-from web3.contract import prepare_transaction, build_transaction_for_function
-from web3.datastructures import AttributeDict
 from fastapi import HTTPException
+from sentry_sdk import capture_message
 
-from .base_wrapper import EthereumBaseWrapper
+from .base_wrapper import EthereumBaseContractWrapper
 from schemas import EthereumContract
 
 GAS = 250000
@@ -19,7 +17,7 @@ GAS_PRICE = Web3.toWei("24", "gwei")
 SIMBA_MIN_BASE_AMOUNT = 50000
 
 
-class ContractFunctionsWrapper(EthereumBaseWrapper):
+class FunctionsContractWrapper(EthereumBaseContractWrapper):
     def __init__(self, contract: EthereumContract, admin_address: str, admin_private_key: str):
         super().__init__(contract)
         self.admin_address = Web3.toChecksumAddress(admin_address)
@@ -38,13 +36,14 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
     def issue_coins(self, customer_address: str, amount: int, comment: str) -> HexBytes:
         """Simba contract"""
         if amount < SIMBA_MIN_BASE_AMOUNT:
+            capture_message(f"trying to issue < 50k simba,\nETH ADDR: {customer_address}, BTC HASH {comment}")
             raise HTTPException(HTTPStatus.BAD_REQUEST, "minimal simba amount to issue - 50,000")
 
         customer_address = Web3.toChecksumAddress(customer_address)
         nonce = self._get_nonce()
         self._approve(amount, nonce)
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
-            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce + 1,}
+            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce + 1}
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
@@ -56,8 +55,9 @@ class ContractFunctionsWrapper(EthereumBaseWrapper):
     def freeze_and_transfer(self, customer_address: str, amount: int, period: int):
         """SST contract"""
         customer_address = Web3.toChecksumAddress(customer_address)
+        nonce = self._get_nonce()
         tx = self.contract.functions.freezeAndTransfer(customer_address, amount, period).buildTransaction(
-            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": self._get_nonce(),}
+            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce}
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
