@@ -41,9 +41,10 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
 
         customer_address = Web3.toChecksumAddress(customer_address)
         nonce = self._get_nonce()
-        self._approve(amount, nonce)
+        # TODO delete self._approve after success testing (after 8/07/2020)
+        # self._approve(amount, nonce)
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
-            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce + 1}
+            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce}
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
