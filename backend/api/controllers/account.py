@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Body, Path
 from urllib.parse import urlencode, urljoin
 from http import HTTPStatus
+from datetime import datetime, timedelta
 
 from core.mechanics.crypto import BitcoinWrapper
 from core.mechanics.referrals import ReferralMechanics
@@ -26,6 +27,8 @@ from schemas import (
     UserEthereumSignedAddress,
     UserUpdateNotSafe,
     USER_MODEL_INCLUDE_FIELDS,
+    UserBitcoinAddress,
+    UserBitcoinAddressDelete
 )
 
 __all__ = ["router"]
@@ -105,7 +108,7 @@ async def account_referrals_info(user: User = Depends(get_user)):
 
 
 @router.post("/eth-address/")
-async def account_eth_address_add(data: UserEthereumSignedAddress, user: User = Depends(get_user)):
+async def account_eth_address_add(data: UserEthereumSignedAddress = Body(...), user: User = Depends(get_user)):
     filtered_addresses = list(filter(lambda o: o.address == data.address, user.user_eth_addresses))
 
     if filtered_addresses:
@@ -123,7 +126,7 @@ async def account_add_eth_address_delete(address: str = Path(...), user: User = 
     filtered_addresses = list(filter(lambda o: o.address != address, user.user_eth_addresses))
 
     if len(filtered_addresses) == len(user.user_eth_addresses):
-        raise HTTPException(HTTPStatus.BAD_REQUEST, "address not exists")
+        raise HTTPException(HTTPStatus.BAD_REQUEST, "Address does not exist")
 
     await UserCRUD.update_one({"_id": user.id}, {"user_eth_addresses": [i.dict() for i in filtered_addresses]})
 
@@ -131,5 +134,44 @@ async def account_add_eth_address_delete(address: str = Path(...), user: User = 
 
 
 @router.post("/btc-address/")
-async def account_referrals_info(user: User = Depends(get_user)):
+async def account_add_btc_address(user: User = Depends(get_user), data: UserBitcoinAddress = Body(...)):
+
+    if user.two_factor and not await UserCRUD.check_2fa(user_id=user.id, pin_code=data.pin_code):
+        raise HTTPException(
+            HTTPStatus.BAD_REQUEST, "Incorrect pin-code"
+        )
+
+    data.created_at = datetime.now()
+    filtered_addresses = list(filter(lambda o: o.address == data.address, user.user_btc_addresses))
+
+    if filtered_addresses:
+        raise HTTPException(
+            HTTPStatus.BAD_REQUEST, "Address already exists"
+        )
+
+    user.user_btc_addresses.append(data)
+
+    await UserCRUD.update_one(
+        {"_id": user.id},
+        {"user_btc_addresses": [i.dict(exclude={"pin_code"}) for i in user.user_btc_addresses]}
+    )
+
+    return True
+
+
+@router.delete("/btc-address/")
+async def account_add_btc_address_delete(data: UserBitcoinAddressDelete = Body(...), user: User = Depends(get_user)):
+
+    if user.two_factor and not await UserCRUD.check_2fa(user_id=user.id, pin_code=data.pin_code):
+        raise HTTPException(
+            HTTPStatus.BAD_REQUEST, "Incorrect pin-code"
+        )
+
+    filtered_addresses = list(filter(lambda o: o.address != data.address, user.user_btc_addresses))
+
+    if len(filtered_addresses) == len(user.user_btc_addresses):
+        raise HTTPException(HTTPStatus.BAD_REQUEST, "Address does not exist")
+
+    await UserCRUD.update_one({"_id": user.id}, {"user_btc_addresses": [i.dict() for i in filtered_addresses]})
+
     return True
