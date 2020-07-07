@@ -15,51 +15,30 @@
         nuxt-link(:to="menuItem.to" v-for="(menuItem, i) in menu" :key="i" active-class="link--active").menu-item.link {{ $t(menuItem.title) }}
         a(href="https://simba.storage/transparency" target="_blank" rel="noopener noreferrer").menu-item.link {{$t('header_menu.transparency')}}
       div.column.is-4.has-text-right.pa-0
-        div.balance
-          img.balance__img(src="../assets/images/bitcoin-min.svg" @click="setBtc")
-          img.balance__img(src="../assets/images/tether.svg" @click="setTether")
-          span.balance__amount(v-if="showBtc") {{simbaFormat(btcBalance)}} BTC
-          span.balance__amount(v-else-if="showTether") {{simbaFormat(tetherBalance)}} USDT
+        HeaderBalance(:simbaBalance="simbaBalance")
 </template>
 
 <script>
 import ProfileDropdown from "~/components/ProfileDropdown";
+import HeaderBalance from "~/components/HeaderBalance";
 import _ from "lodash";
 import formatCurrency from "../mixins/formatCurrency";
 export default {
   name: "Header",
   mixins: [formatCurrency],
   components: {
-    ProfileDropdown
+    ProfileDropdown,
+    HeaderBalance
   },
   computed: {
     user() {
       return this.$store.getters.user;
-    },
-    tetherBalance() {
-      return ((this.simbaBalance / 100000000) * this.btcPrice).toFixed(2);
-    },
-    btcBalance() {
-      return (this.simbaBalance / 100000000).toFixed(2);
     }
   },
   data: () => ({
     menu: [],
-    simbaBalance: 0,
-    btcPrice: 0,
-    showBtc: true,
-    showTether: false
+    simbaBalance: 0
   }),
-  methods: {
-    setBtc() {
-      this.showBtc = true
-      this.showTether = false
-    },
-    setTether() {
-      this.showBtc = false
-      this.showTether = true
-    }
-  },
   async created() {
     this.menu = [
       { title: "header_menu.exchange", to: "/exchange/" },
@@ -83,11 +62,6 @@ export default {
           });
       }
     }
-    await this.$axios
-      .get("https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD")
-      .then(res => {
-        this.btcPrice = res.data.USD;
-      });
   }
 };
 </script>

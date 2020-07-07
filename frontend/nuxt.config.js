@@ -10,10 +10,10 @@ export default {
       {hid: 'description', name: 'description', content: ''}
     ],
     link: [
-      {rel: "icon", type: "image/x-icon", href: "/favicon.ico"},
+      {rel: "icon", type: "image/x-icon", href: "/favicon.ico?v=2"},
       {rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Roboto&display=swap"},
       {href: "https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap", rel: "stylesheet"},
-      {href: "/logo-lg.png", rel: "shortcut icon"}
+      {href: "/logo-lg.png?v=2", rel: "shortcut icon"}
     ]
   },
 
