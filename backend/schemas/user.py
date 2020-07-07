@@ -29,6 +29,9 @@ __all__ = [
     "UserEthereumSignedAddress",
     "SuccessResponse",
     "USER_MODEL_INCLUDE_FIELDS",
+    "UserBitcoinAddress",
+    "UserBitcoinAddressDelete",
+
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -75,6 +78,21 @@ class UserEthereumSignedAddress(BaseModel):
     )
 
 
+class UserBitcoinAddress(BaseModel):
+    address: str = Field(default=None)
+    created_at: Optional[datetime] = Field(default=None)
+    pin_code: Optional[str] = Field(default=None)
+
+    _validate_address = validator("address", allow_reuse=True)(
+        validate_btc_address
+    )
+
+
+class UserBitcoinAddressDelete(BaseModel):
+    address: str = Field(default=None)
+    pin_code: Optional[str] = Field(default=None)
+
+
 class User(BaseModel):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
 
@@ -89,7 +107,7 @@ class User(BaseModel):
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
 
-    user_btc_addresses: List[str] = Field(default=[])
+    user_btc_addresses: List[UserBitcoinAddress] = Field(default=[])
     user_eth_addresses: List[UserEthereumSignedAddress] = Field(default=[])
 
     btc_address: str = Field(default=None, description="Linked BTC address to user for transactions")
