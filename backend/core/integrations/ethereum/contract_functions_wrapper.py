@@ -41,9 +41,9 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
 
         customer_address = Web3.toChecksumAddress(customer_address)
         nonce = self._get_nonce()
-        self._approve(amount, nonce + 1)
+        self._approve(amount, nonce)
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
-            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce + 2}
+            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce + 1}
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
@@ -57,7 +57,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         customer_address = Web3.toChecksumAddress(customer_address)
         nonce = self._get_nonce()
         tx = self.contract.functions.freezeAndTransfer(customer_address, amount, period).buildTransaction(
-            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce + 1}
+            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce}
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)

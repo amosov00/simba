@@ -1,10 +1,10 @@
 import asyncio
 
+from celery_app.celeryconfig import app
 from database.crud import InvoiceCRUD, EthereumTransactionCRUD
-from schemas import InvoiceInDB, InvoiceStatus, SimbaContractEvents, EthereumTransactionInDB
+from schemas import SimbaContractEvents, EthereumTransactionInDB
 from core.integrations.ethereum import EventsContractWrapper
 from core.mechanics import InvoiceMechanics
-from celery_app.celeryconfig import app
 from config import SIMBA_CONTRACT
 
 __all__ = ["fetch_simba_contract_cronjob"]

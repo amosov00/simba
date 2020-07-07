@@ -48,9 +48,22 @@ async def debug_get(user: User = Depends(get_user)):
     return await ReferralCRUD.find_by_user_id(user.id)
 
 
-@router.get("/eth/")
+@router.get("/simba/")
 async def debug_get():
-    breakpoint()
+    result = await SimbaWrapper().issue_tokens(
+        "0xBeb3EC5BCE587420c00eC547cA2DD5626f497B73", 100000, "manual"
+    )
+    print(f"SIMBA {result}")
+    return None
+
+
+@router.get("/sst/")
+async def debug_get():
+    await asyncio.sleep(15.0)
+    result = SSTWrapper().api_wrapper.freeze_and_transfer(
+        "0xBeb3EC5BCE587420c00eC547cA2DD5626f497B73", 15, 250000
+    )
+    print(f"SST {result.hex()}")
     return None
 
 
