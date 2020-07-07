@@ -3,7 +3,7 @@
     div.has-text-success.is-size-5.has-text-weight-bold {{$t('exchange.success')}}
     div.mt-4
       div.is-size-5
-        span.has-text-weight-bold {{ numberWithCommas(tradeData.simba_issued-50000) }} SIMBA
+        span.has-text-weight-bold {{ numberWithCommas(tradeData.simba_issued) }} SIMBA
         =' '
         span.has-text-grey-light {{$t('exchange.issued')}}
       div.is-size-6

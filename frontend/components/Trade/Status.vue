@@ -6,7 +6,7 @@
       =' '
       a(:href="'https://etherscan.io/tx/' + tx_hash" target="_blank").link {{ tx_hash }}
     div.mt-2
-      div Confirmation 1/{{min_confirms}}
+      div Confirmation {{currentConfirms}}/{{min_confirms}}
     b-loading(:active.sync="confirms_loading" :is-full-page="false")
 </template>
 
@@ -18,7 +18,8 @@
       confirms_loading: false,
       tx_hash: '',
       received_payment_amount: 0,
-      min_confirms: 1
+      min_confirms: 3,
+      currentConfirms: 0
     }),
 
     computed: {
@@ -32,6 +33,7 @@
       this.received_payment_amount = res.btc_amount_proceeded
 
       if(res.btc_txs.length > 0) {
+        this.currentConfirms = res.btc_txs[0].confirmations
         this.tx_hash = res.eth_tx_hashes[0] || ''
       }
     },
@@ -41,7 +43,9 @@
         this.loadingSpinner()
         let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id)
 
-        if(res.status === 'completed' || res.btc_txs[0].confirmations >= this.min_confirms) {
+        this.currentConfirms = res.btc_txs[0].confirmations
+
+        if(res.status === 'completed' && res.btc_txs[0].confirmations >= this.min_confirms) {
 
           this.$store.commit('exchange/setTradeData', { prop: 'simba_issued', value: res.btc_amount_proceeded})
           this.$store.commit('exchange/setTradeData', { prop: 'target_eth', value: res.target_eth_address})
