@@ -8,11 +8,10 @@
       b-field(label="2FA Code" v-if="user.two_factor && type === 'btc'")
         b-input(type="number" v-model="pin_code")
       button(@click="add" v-if="user.two_factor || type === 'btc'" :disabled="!wallet && pin_code.toString().length != 6").btn.w-100 Add
-      button(@click="add" v-else-if="type === 'eth'" :disabled="!wallet").btn.w-100 Add
+      button(@click.once="add" v-else-if="type === 'eth'" :disabled="!wallet").btn.w-100 Add
 </template>
 
 <script>
-// 0x70762f14E24f9b6608C45F5B66ACeB5A66A17b24
 export default {
   name: "AddNewWallet",
   props: {

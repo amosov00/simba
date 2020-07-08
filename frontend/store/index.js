@@ -53,22 +53,26 @@ export const actions = {
       .catch(() => false);
   },
 
-  async addAddress({}, data) {
-    return await this.$axios
-      .post(`/account/${data.type}-address/`, data)
-      .then(() => {
-        Toast.open({
-          message: "Address successfully added!",
-          type: "is-primary"
+  async addAddress({ dispatch }, data) {
+    if (data.type === "eth") {
+      dispatch("metamask/createSignature", data);
+    } else {
+      return await this.$axios
+        .post(`/account/btc-address/`, data)
+        .then(() => {
+          Toast.open({
+            message: "Address successfully added!",
+            type: "is-primary"
+          });
+        })
+        .catch(resp => {
+          Toast.open({
+            message: resp.response.data[0].message,
+            type: "is-danger",
+            duration: 6000
+          });
         });
-      })
-      .catch(resp => {
-        Toast.open({
-          message: resp.response.data[0].message,
-          type: "is-danger",
-          duration: 6000
-        });
-      });
+    }
   },
 
   async removeAddress({ dispatch }, data) {
