@@ -31,6 +31,7 @@ __all__ = [
     "USER_MODEL_INCLUDE_FIELDS",
     "UserBitcoinAddress",
     "UserBitcoinAddressDelete",
+    "UserBitcoinAddressInput"
 
 ]
 
@@ -81,11 +82,14 @@ class UserEthereumSignedAddress(BaseModel):
 class UserBitcoinAddress(BaseModel):
     address: str = Field(default=None)
     created_at: Optional[datetime] = Field(default=None)
-    pin_code: Optional[str] = Field(default=None)
 
     _validate_address = validator("address", allow_reuse=True)(
         validate_btc_address
     )
+
+
+class UserBitcoinAddressInput(UserBitcoinAddress):
+    pin_code: Optional[str] = Field(default=None)
 
 
 class UserBitcoinAddressDelete(BaseModel):
