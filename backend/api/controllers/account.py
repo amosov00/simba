@@ -28,7 +28,8 @@ from schemas import (
     UserUpdateNotSafe,
     USER_MODEL_INCLUDE_FIELDS,
     UserBitcoinAddress,
-    UserBitcoinAddressDelete
+    UserBitcoinAddressDelete,
+    UserBitcoinAddressInput
 )
 
 __all__ = ["router"]
@@ -135,7 +136,7 @@ async def account_add_eth_address_delete(address: str = Path(...), user: User = 
 
 
 @router.post("/btc-address/")
-async def account_add_btc_address(user: User = Depends(get_user), data: UserBitcoinAddress = Body(...)):
+async def account_add_btc_address(user: User = Depends(get_user), data: UserBitcoinAddressInput = Body(...)):
     if user.two_factor and not await UserCRUD.check_2fa(user_id=user.id, pin_code=data.pin_code):
         raise HTTPException(
             HTTPStatus.BAD_REQUEST, "Incorrect pin-code"
