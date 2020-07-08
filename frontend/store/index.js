@@ -1,5 +1,8 @@
 import _, { stubArray } from "lodash";
-import { ToastProgrammatic as Toast, DialogProgrammatic as Dialog } from "buefy";
+import {
+  ToastProgrammatic as Toast,
+  DialogProgrammatic as Dialog
+} from "buefy";
 
 export const state = () => ({
   user: null,
@@ -31,7 +34,7 @@ export const mutations = {
   setSignedAddresses: (state, payload) =>
     state.user.signed_addresses.push(payload),
   setLoginDataBuffer: (state, payload) => {
-    state.loginDataBuffer = payload
+    state.loginDataBuffer = payload;
   }
 };
 
@@ -48,6 +51,67 @@ export const actions = {
       .put("/account/user/", data)
       .then(() => true)
       .catch(() => false);
+  },
+
+  async addAddress({}, data) {
+    return await this.$axios
+      .post(`/account/${data.type}-address/`, data)
+      .then(() => {
+        Toast.open({
+          message: "Address successfully added!",
+          type: "is-primary"
+        });
+      })
+      .catch(resp => {
+        Toast.open({
+          message: resp.response.data[0].message,
+          type: "is-danger",
+          duration: 6000
+        });
+      });
+  },
+
+  async removeAddress({ dispatch }, data) {
+    if (data.type === "btc") {
+      return await this.$axios
+        .delete(`/account/btc-address/`, {
+          data: {
+            address: data.address,
+            pin_code: data.pin_code
+          }
+        })
+        .then(() => {
+          Toast.open({
+            message: "Address successfully deleted!",
+            type: "is-primary"
+          });
+          dispatch("getUser");
+        })
+        .catch(resp => {
+          Toast.open({
+            message: resp.response.data[0].message,
+            type: "is-danger",
+            duration: 6000
+          });
+        });
+    } else {
+      return await this.$axios
+        .delete(`/account/eth-address/${data.address}`)
+        .then(() => {
+          Toast.open({
+            message: "Address successfully deleted!",
+            type: "is-primary"
+          });
+          dispatch("getUser");
+        })
+        .catch(resp => {
+          Toast.open({
+            message: resp.response.data[0].message,
+            type: "is-danger",
+            duration: 6000
+          });
+        });
+    }
   },
 
   async fetchContracts({ commit }) {
@@ -105,26 +169,28 @@ export const actions = {
       .post("/account/signup/", data)
       .then(resp => {
         Toast.open({
-          message:
-            this.$i18n.t('auth.sign_up_success'),
+          message: this.$i18n.t("auth.sign_up_success"),
           type: "is-success",
           duration: 6000
         });
         return true;
       })
       .catch(resp => {
-
-        if(resp.response.data[0].message === 'Referral link invalid') {
+        if (resp.response.data[0].message === "Referral link invalid") {
           Dialog.alert({
-            message: `${this.$i18n.t('auth.sign_up_error_referral')} <a href='mailto:support@simba.storage'>${this.$i18n.t('auth.to_support')}</a>`,
-            type: "is-primary",
-          })
+            message: `${this.$i18n.t(
+              "auth.sign_up_error_referral"
+            )} <a href='mailto:support@simba.storage'>${this.$i18n.t(
+              "auth.to_support"
+            )}</a>`,
+            type: "is-primary"
+          });
         } else {
           Toast.open({
             message: resp.response.data[0].message,
             type: "is-danger",
             duration: 6000
-          })
+          });
         }
         return false;
       });
@@ -177,10 +243,16 @@ export const actions = {
       })
       .then(() => {
         commit("setTwoFactor", true);
-        Toast.open({ message: this.$i18n.t('messages.two_factor_enable_success'), type: "is-primary" });
+        Toast.open({
+          message: this.$i18n.t("messages.two_factor_enable_success"),
+          type: "is-primary"
+        });
       })
       .catch(() => {
-        Toast.open({ message: this.$i18n.t('messages.two_factor_enable_failed'), type: "is-danger" });
+        Toast.open({
+          message: this.$i18n.t("messages.two_factor_enable_failed"),
+          type: "is-danger"
+        });
       });
   },
   async delete2fa({ commit }, pin_code) {
@@ -193,12 +265,15 @@ export const actions = {
       .then(() => {
         commit("setTwoFactor", false);
         Toast.open({
-          message: this.$i18n.t('messages.two_factor_disable_success'),
+          message: this.$i18n.t("messages.two_factor_disable_success"),
           type: "is-primary"
         });
       })
       .catch(() => {
-        Toast.open({ message: this.$i18n.t('messages.two_factor_disable_failed'), type: "is-danger" });
+        Toast.open({
+          message: this.$i18n.t("messages.two_factor_disable_failed"),
+          type: "is-danger"
+        });
       });
   }
 };
