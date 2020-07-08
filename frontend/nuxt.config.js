@@ -1,5 +1,3 @@
-
-
 export default {
   mode: 'spa',
   head: {
