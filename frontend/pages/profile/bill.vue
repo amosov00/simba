@@ -57,7 +57,7 @@ export default {
     },
 
     removeAddress(data) {
-      if (data.type === "btc") {
+      if (data.type === "btc" && this.user.two_factor) {
         this.$buefy.dialog.prompt({
           message: `Confirm deleting`,
           inputAttrs: {
