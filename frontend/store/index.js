@@ -1,5 +1,8 @@
 import _, { stubArray } from "lodash";
-import { ToastProgrammatic as Toast } from "buefy";
+import {
+  ToastProgrammatic as Toast,
+  DialogProgrammatic as Dialog
+} from "buefy";
 
 export const state = () => ({
   user: null,
@@ -9,13 +12,15 @@ export const state = () => ({
     eth_address: "",
     simba: 0,
     btc: 0
-  }
+  },
+  loginDataBuffer: {}
 });
 
 export const getters = {
   user: s => s.user,
   contract: s => s.contract,
-  tradeData: s => s.tradeData
+  tradeData: s => s.tradeData,
+  loginDataBuffer: s => s.loginDataBuffer
 };
 
 export const mutations = {
@@ -27,14 +32,18 @@ export const mutations = {
   },
   setTwoFactor: (state, payload) => (state.user.two_factor = payload),
   setSignedAddresses: (state, payload) =>
-    state.user.signed_addresses.push(payload)
+    state.user.signed_addresses.push(payload),
+  setLoginDataBuffer: (state, payload) => {
+    state.loginDataBuffer = payload;
+  }
 };
 
 export const actions = {
   async fetchReferrals() {
-    return await this.$axios.get('/account/referrals/')
-      .then((res) => res.data["referrals"])
-      .catch(() => false)
+    return await this.$axios
+      .get("/account/referrals/")
+      .then(res => res.data["referrals"])
+      .catch(() => false);
   },
 
   async changeAddresses({}, data) {
@@ -42,6 +51,71 @@ export const actions = {
       .put("/account/user/", data)
       .then(() => true)
       .catch(() => false);
+  },
+
+  async addAddress({ dispatch }, data) {
+    if (data.type === "eth") {
+      dispatch("metamask/createSignature", data);
+    } else {
+      return await this.$axios
+        .post(`/account/btc-address/`, data)
+        .then(() => {
+          Toast.open({
+            message: "Address successfully added!",
+            type: "is-primary"
+          });
+        })
+        .catch(resp => {
+          Toast.open({
+            message: resp.response.data[0].message,
+            type: "is-danger",
+            duration: 6000
+          });
+        });
+    }
+  },
+
+  async removeAddress({ dispatch }, data) {
+    if (data.type === "btc") {
+      return await this.$axios
+        .delete(`/account/btc-address/`, {
+          data: {
+            address: data.address,
+            pin_code: data.pin_code
+          }
+        })
+        .then(() => {
+          Toast.open({
+            message: "Address successfully deleted!",
+            type: "is-primary"
+          });
+          dispatch("getUser");
+        })
+        .catch(resp => {
+          Toast.open({
+            message: resp.response.data[0].message,
+            type: "is-danger",
+            duration: 6000
+          });
+        });
+    } else {
+      return await this.$axios
+        .delete(`/account/eth-address/${data.address}`)
+        .then(() => {
+          Toast.open({
+            message: "Address successfully deleted!",
+            type: "is-primary"
+          });
+          dispatch("getUser");
+        })
+        .catch(resp => {
+          Toast.open({
+            message: resp.response.data[0].message,
+            type: "is-danger",
+            duration: 6000
+          });
+        });
+    }
   },
 
   async fetchContracts({ commit }) {
@@ -93,35 +167,35 @@ export const actions = {
       .catch(_ => false);
   },
 
-  async getBtcAddress({ commit }) {
-    return await this.$axios
-      .get("/account/btc-address/")
-      .then(resp => {
-        commit("setBtcAddress", resp.data.address);
-        return true;
-      })
-      .catch(_ => false);
-  },
-
   async signUp({ commit }, data) {
     if (!data) return false;
     return await this.$axios
       .post("/account/signup/", data)
       .then(resp => {
         Toast.open({
-          message:
-            "Successfully registered! Please check your email to activate your account.",
+          message: this.$i18n.t("auth.sign_up_success"),
           type: "is-success",
-          duration: "6000"
+          duration: 6000
         });
         return true;
       })
       .catch(resp => {
-        Toast.open({
-          message: resp.response.data[0].message,
-          type: "is-danger",
-          duration: "6000"
-        });
+        if (resp.response.data[0].message === "Referral link invalid") {
+          Dialog.alert({
+            message: `${this.$i18n.t(
+              "auth.sign_up_error_referral"
+            )} <a href='mailto:support@simba.storage'>${this.$i18n.t(
+              "auth.to_support"
+            )}</a>`,
+            type: "is-primary"
+          });
+        } else {
+          Toast.open({
+            message: resp.response.data[0].message,
+            type: "is-danger",
+            duration: 6000
+          });
+        }
         return false;
       });
   },
@@ -173,10 +247,16 @@ export const actions = {
       })
       .then(() => {
         commit("setTwoFactor", true);
-        Toast.open({ message: "2FA successfuly enabled!", type: "is-success" });
+        Toast.open({
+          message: this.$i18n.t("messages.two_factor_enable_success"),
+          type: "is-primary"
+        });
       })
       .catch(() => {
-        Toast.open({ message: "Something went wrong!", type: "is-danger" });
+        Toast.open({
+          message: this.$i18n.t("messages.two_factor_enable_failed"),
+          type: "is-danger"
+        });
       });
   },
   async delete2fa({ commit }, pin_code) {
@@ -189,12 +269,15 @@ export const actions = {
       .then(() => {
         commit("setTwoFactor", false);
         Toast.open({
-          message: "2FA successfuly disabled!",
-          type: "is-success"
+          message: this.$i18n.t("messages.two_factor_disable_success"),
+          type: "is-primary"
         });
       })
       .catch(() => {
-        Toast.open({ message: "Something went wrong!", type: "is-danger" });
+        Toast.open({
+          message: this.$i18n.t("messages.two_factor_disable_failed"),
+          type: "is-danger"
+        });
       });
   }
 };

@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _, { reject } from "lodash";
 import web3 from "~/plugins/web3";
 const ethUtil = require("ethereumjs-util");
 const sigUtil = require("eth-sig-util");
@@ -81,6 +81,63 @@ export const actions = {
             });
         } else {
           Toast.open({ message: "Signing failed!", type: "is-danger" });
+        }
+      }
+    );
+  },
+  async createSignature({}, data) {
+    const msgParams = [
+      {
+        type: "string",
+        name: "Message",
+        value: "Please provide a signature for your wallet"
+      },
+      {
+        type: "address",
+        name: "Address",
+        value: data.address
+      }
+    ];
+
+    const from = data.address;
+    const params = [msgParams, from];
+    const method = "eth_signTypedData";
+
+    web3.currentProvider.sendAsync(
+      {
+        method,
+        params,
+        from
+      },
+      (err, result) => {
+        const recovered = sigUtil.recoverTypedSignatureLegacy({
+          data: msgParams,
+          sig: result.result
+        });
+
+        if (
+          ethUtil.toChecksumAddress(recovered) ===
+          ethUtil.toChecksumAddress(from)
+        ) {
+          this.$axios
+            .post(`/account/eth-address/`, {
+              address: data.address,
+              signature: result.result
+            })
+            .then(() => {
+              Toast.open({
+                message: "Address successfully added!",
+                type: "is-primary"
+              });
+              dispatch("getUser");
+            })
+            .catch(resp => {
+              Toast.open({
+                message: resp.response.data[0].message,
+                type: "is-danger",
+                duration: 6000
+              });
+            });
         }
       }
     );

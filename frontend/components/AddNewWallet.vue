@@ -3,53 +3,41 @@
     header.modal-card-head
       p(class="modal-card-title") Add new {{ type.toUpperCase() }} wallet
     section.modal-card-body
-      b-field
+      b-field(label="Wallet")
         b-input(v-model="wallet")
-      button(@click="add" :disabled="!wallet").btn.w-100 Add
+      b-field(label="2FA Code" v-if="user.two_factor && type === 'btc'")
+        b-input(type="number" v-model="pin_code")
+      button(@click="add" v-if="user.two_factor || type === 'btc'" :disabled="!wallet && pin_code.toString().length != 6").btn.w-100 Add
+      button(@click.once="add" v-else-if="type === 'eth'" :disabled="!wallet").btn.w-100 Add
 </template>
 
 <script>
-
-  export default {
-    name: 'AddNewWallet',
-    props: {
-      type: String
-    },
-    data: () => ({
-      wallet: ""
-    }),
-    methods: {
-      async add(){
-
-        let type_prop = 'user_btc_addresses';
-
-        if(this.type === 'eth') {
-          type_prop = 'user_eth_addresses';
-        }
-
-        let addr_list = JSON.parse(JSON.stringify(this.$store.getters.user[type_prop]));
-
-        if(addr_list.indexOf(this.wallet) !== -1) {
-          this.$buefy.toast.open({ message: "You already have this wallet in the list!", type: 'is-danger' })
-          return
-        }
-
-        addr_list.push(this.wallet)
-
-        let data_to_send = {[type_prop]: addr_list};
-
-        if(await this.$store.dispatch('changeAddresses', data_to_send)) {
-          this.$buefy.toast.open({ message: "Address successfully added!", type: 'is-primary' })
-          this.$emit('close');
-        } else {
-          this.$buefy.toast.open({ message: "Something went wrong, your wallet address might be invalid!", type: 'is-danger' })
-        }
-
-        await this.$store.dispatch('getUser')
-      }
+export default {
+  name: "AddNewWallet",
+  props: {
+    type: String
+  },
+  data: () => ({
+    wallet: "",
+    pin_code: ""
+  }),
+  computed: {
+    user() {
+      return this.$store.getters.user;
+    }
+  },
+  methods: {
+    async add() {
+      await this.$store.dispatch("addAddress", {
+        type: this.type,
+        address: this.wallet,
+        created_at: Date.now(),
+        pin_code: this.pin_code
+      });
+      await this.$store.dispatch("getUser");
     }
   }
+};
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>

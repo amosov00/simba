@@ -29,6 +29,8 @@
     },
 
     async created() {
+      this.min_confirms = process.env.NODE_ENV === 'production' ? 3 : 1
+
       let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id);
       this.received_payment_amount = res.btc_amount_proceeded
 
@@ -45,7 +47,7 @@
 
         this.currentConfirms = res.btc_txs[0].confirmations
 
-        if(res.status === 'completed' && res.btc_txs[0].confirmations >= this.min_confirms) {
+        if(res.status === 'completed') {
 
           this.$store.commit('exchange/setTradeData', { prop: 'simba_issued', value: res.btc_amount_proceeded})
           this.$store.commit('exchange/setTradeData', { prop: 'target_eth', value: res.target_eth_address})

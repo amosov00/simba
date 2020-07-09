@@ -72,4 +72,8 @@ export const actions = {
   async fetchSingle({commit}, id) {
     return await this.$axios.get(`/invoices/${id}/`).then(res => res.data).catch(_ => false)
   },
+
+  async getConfirm() {
+    const {data} = this.$axios.get('')
+  }
 };

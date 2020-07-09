@@ -1,5 +1,25 @@
 export default context => {
   const locale = {
+    auth: {
+      password: 'password',
+      pin_code: 'pin code',
+      sign_in: 'Sign in',
+      forgot_pw: 'Forgot password?',
+      submit: 'Submit',
+      registration: 'Registration',
+      first_name: 'first name',
+      last_name: 'last name',
+      partner_id: 'partner id',
+      repeat_password: 'repeat password',
+      i_accept: 'I accept',
+      terms_of_agreement: 'terms of agreement',
+      sign_up: 'Sign up',
+      sign_up_success: 'Successfully registered! Please check your email to activate your account.',
+      sign_up_error_referral: 'Partner ID is required. If this is your first time on the site and you don\'t have any code, please contact',
+      to_support: 'support',
+      recover_success: 'Success! Please check your email for further instructions.',
+      recover_error: 'Error: make sure email is entered correctly'
+    },
     footer: {
       tos: "Terms of Use",
       privacy: "Privacy Policy",
@@ -73,28 +93,46 @@ export default context => {
       edit_my_profile: "Edit my profile",
       identity: "Identify verification",
       email_verified: "Email verified",
+      email_unverified: "Email Unverified",
       email_verification: "Email verification",
       verify_address: "Verify address",
       id_verification: "ID verification",
-      source_of_funds_verification: "Source of funds verification"
+      source_of_funds_verification: "Source of funds verification",
+      scan_qr_code: 'Scan this QR code',
+      after_scan_hit_enable: 'After code scanning type pin code below and hit enable button.',
+      pin_code: 'Pin code',
+      btc_address_list: 'BTC Address list',
+      eth_address_list: 'ETH Address list',
+      for_withdraw_btc: 'for withdrawal Bitcoin when redeem SIMBA',
+      for_issue_simba: 'for issue SIMBA',
+    },
+    messages: {
+      two_factor_enable_failed: 'Failed to enable two-factor authentication!',
+      two_factor_enable_success: 'Two-factor authentication successfuly enabled!',
+      two_factor_disable_failed: 'Failed to disable two-factor authentication!',
+      two_factor_disable_success: 'Two-factor authentication successfuly disabled!',
     },
     partner: {
       main:
-        "Get tokens for each deposit of users invited via your link. " +
+        "Get tokens for each deposit of users invited via your " +
+        "<a href='#' id='text-ref-link' class='link' rel='noreferrer noopener' target='_blank'>link</a>. " +
         "How it works?<br><br>" +
         "1. You copy the link and send it to your friend.<br>" +
         "2. After sign up with your link, it will be tied to your account.<br>" +
         "3. With each recharge, you will receive SST tokens that you can sell" +
-        "on the exchange at the current rate. The offer is limited by amount of provided SST tokens.",
+        "on the exchange at the current rate.<br><br>The offer is limited by amount of provided SST tokens.",
       invited: "Invited",
-      your_ref_link: "Your referral link",
-      your_ref_code: "Your referral code",
-      refs_empty: "You don't have invited users yet"
+      your_ref_link: "Your partner link",
+      your_ref_code: "Your partner code",
+      refs_empty: "You don't have invited users yet",
+      how_to_get_code: {p1: "To get your partner code, ", p2: "add", p3: "your reward wallet"}
     },
     password: {
       current: "Current password",
       new: "New password",
-      confirm: "Password confirmation"
+      confirm: "Password confirmation",
+      change_success: "Your password successfully changed!",
+      change_error: "Failed to change password!"
     },
     transparency: {
       curr_balances: "Current balances"
@@ -126,7 +164,10 @@ export default context => {
       reg_date: "Registration date",
       change: "Change",
       enable: "Enable",
-      disable: "Disable"
+      disable: "Disable",
+      first_name: 'First name',
+      last_name: 'Last name',
+      save: 'Save'
     },
     about: {
       company_goal: "Company goal",

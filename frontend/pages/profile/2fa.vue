@@ -31,10 +31,11 @@
       },
       disableConfirmation() {
         this.$buefy.dialog.prompt({
-          message: `To confirm your action enter 2fa pin code`,
+          confirmText: this.$i18n.t('other.disable'),
+          cancelText: this.$i18n.t('other.cancel'),
           inputAttrs: {
-            type: "number",
-            placeholder: "Type your pin code",
+            type: "text",
+            placeholder: this.$i18n.t('profile.pin_code'),
             value: "",
             maxlength: 6,
             min: 0

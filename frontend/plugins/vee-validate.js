@@ -1,18 +1,12 @@
 import Vue from 'vue';
-import { extend, localize } from 'vee-validate';
+import { extend } from 'vee-validate';
 import { required, email, min, confirmed, max, regex, alpha_num, alpha, alpha_spaces } from 'vee-validate/dist/rules';
-import en from 'vee-validate/dist/locale/en.json';
 import { setInteractionMode, ValidationObserver, ValidationProvider, } from 'vee-validate';
 
 Vue.component('ValidationObserver', ValidationObserver)
 Vue.component('ValidationProvider', ValidationProvider)
 
 setInteractionMode('eager');
-
-// Install English and Arabic locales.
-localize({
-  en
-});
 
 
 extend('email', email);

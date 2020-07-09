@@ -2,29 +2,34 @@
   div
     div.is-size-5.has-text-weight-bold {{ $t('partner.your_ref_code')}}:
     div.is-flex.mt-3
-      div.mr-2.has-text-weight-medium {{ ref_code }}
-      CopyToClipboard(:value_to_copy="ref_code")
+      div.has-text-weight-medium(v-if="can_invite") {{ ref_code }}
+      div(v-else)
+        | {{$t('partner.how_to_get_code.p1')}}
+        n-link(to="/profile/bill").link {{$t('partner.how_to_get_code.p2')}}
+        = ' '
+        | {{$t('partner.how_to_get_code.p3')}}
+      CopyToClipboard(:value_to_copy="ref_code").ml-2
     div.mt-4
       div.is-size-5.has-text-weight-bold {{ $t('partner.your_ref_link')}}:
       div.is-flex.mt-2
         div.mr-2.has-text-weight-medium
           a(:href="ref_link").link {{ ref_link }}
         CopyToClipboard(:value_to_copy="ref_link")
-    div.mt-4.mb-2(v-html="$t('partner.main')").is-size-6
-    div.has-text-weight-bold.is-size-5.mt-4 {{$t('partner.invited')}}
-    b-table(:data="referrals" focusable striped).mt-3
-      template(slot="empty")
-        div.content.has-text-grey.has-text-centered {{$t('partner.refs_empty')}}
-      template(slot-scope="props")
-        b-table-column(field="created_at" :label="$i18n.t('other.reg_date')") {{ formatDate(props.row.created_at) }}
-        b-table-column(field="ref_email" label="Email") {{ props.row.email }}
-        b-table-column(field="name" :label="$i18n.t('other.name')") {{ props.row.first_name }} {{ props.row.last_name }}
-        b-table-column(field="referral_level" :label="$i18n.t('other.level')") {{ props.row.referral_level }}
-    div.has-text-weight-bold.is-size-5.mt-4 {{$t('wallet.txs_history')}}
-    //--WalletTable(:moreData="history_more_data").mt-3
-    b-table(:data="[]" focusable striped).mt-3
-      template(slot="empty")
-        div.content.has-text-grey.has-text-centered {{$t('wallet.txs_history_empty')}}
+    div.mt-4.mb-2(v-html="$t('partner.main')").main-content__text
+    div(v-if="can_invite")
+      div.has-text-weight-bold.is-size-5.mt-4 {{$t('partner.invited')}}
+      b-table(:data="referrals" focusable striped).mt-3
+        template(slot="empty")
+          div.content.has-text-grey.has-text-centered {{$t('partner.refs_empty')}}
+        template(slot-scope="props")
+          b-table-column(field="created_at" :label="$i18n.t('other.reg_date')") {{ formatDate(props.row.created_at) }}
+          b-table-column(field="ref_email" label="Email") {{ props.row.email }}
+          b-table-column(field="name" :label="$i18n.t('other.name')") {{ props.row.first_name }} {{ props.row.last_name }}
+          b-table-column(field="referral_level" :label="$i18n.t('other.level')") {{ props.row.referral_level }}
+      div.has-text-weight-bold.is-size-5.mt-4 {{$t('wallet.txs_history')}}
+      b-table(:data="[]" focusable striped).mt-3
+        template(slot="empty")
+          div.content.has-text-grey.has-text-centered {{$t('wallet.txs_history_empty')}}
     //--div.text-center
       button.btn--outlined(@click="history_more_data += 10") {{$t('other.more')}}
 </template>
@@ -58,6 +63,12 @@
     methods: {
       formatDate(date_str) {
         return moment(String(date_str)).format(("DD/MM/YYYY, h:mm:ss"))
+      },
+
+      setTextRefLink() {
+        if(this.ref_link) {
+          document.getElementById('text-ref-link').setAttribute('href', this.ref_link)
+        }
       }
     },
 
@@ -70,11 +81,26 @@
       }
     },
 
+    mounted() {
+      this.setTextRefLink();
+    },
+
+    updated() {
+      this.setTextRefLink();
+    },
+
     async asyncData({store}) {
+
       let ref_link = await store.dispatch('fetchRefLink');
       let referrals = await store.dispatch('fetchReferrals');
 
-      let result = {}
+      let result = {
+        can_invite: false
+      }
+
+      if(store.getters.user.user_eth_addresses.length) {
+        result['can_invite'] = true
+      }
 
       if(ref_link) {
         result['ref_link'] = ref_link.URL

@@ -16,7 +16,8 @@ export default ({ app, redirect, route }, inject) => {
 			redirect('/exchange/');
 			return true;
 		}).catch(resp => {
-		  return false;
+			console.log(resp.response.data[0].message)
+		  return resp;
     })
 	});
 	inject('authLogout', () => {

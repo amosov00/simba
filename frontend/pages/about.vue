@@ -1,18 +1,18 @@
 <template lang="pug">
-  div
-    div.main-content
-      div
-        h1.title.is-size-4 {{$t('about.company_goal')}}
-        p.subtitle(v-html="$t('about.goal')")
-      div.mt-4
-        h1.title.is-size-4 {{$t('about.date_of_establishment')}}
-        p.subtitle {{$t('about.establishment')}}
-      div.mt-4
-        h1.title.is-size-4 {{$t('about.сompany_locations')}}
-        p.subtitle {{$t('about.locations')}}
-      div.mt-4
-        h1.title.is-size-4 {{$t('about.our_mission')}}
-        p.subtitle {{$t('about.mission')}}
+  div.main-content
+    h1.is-size-4.has-text-weight-bold {{$t('header_menu.about')}}
+    div.mt-4
+      h3.is-size-5.has-text-weight-bold {{$t('about.company_goal')}}
+      p.mt-1.main-content__text(v-html="$t('about.goal')")
+    div.mt-4
+      h3.is-size-5.has-text-weight-bold {{$t('about.date_of_establishment')}}
+      p.mt-1.main-content__text {{$t('about.establishment')}}
+    div.mt-4
+      h3.is-size-5.has-text-weight-bold {{$t('about.сompany_locations')}}
+      p.mt-1.main-content__text {{$t('about.locations')}}
+    div.mt-4
+      h3.is-size-5.has-text-weight-bold {{$t('about.our_mission')}}
+      p.mt-1.main-content__text {{$t('about.mission')}}
 </template>
 
 <script>

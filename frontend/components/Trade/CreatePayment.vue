@@ -5,28 +5,38 @@
       div.is-flex.align-items-center(:class="{ 'flex-row-reverse': isBuy}")
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
           //--money(v-model.lazy="simba" v-bind="money" change.native="convert").smb-input
-          input(v-model="simba" type="text" @input="convert").smb-input
+          input(v-model="simba" type="text" @input="convert" :disabled="btn_loading").smb-input
         span.mr-2.ml-2
           | =
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
-          input(v-model="btc" type="text" @input="convertBTCtoSimba($event)" maxlength="10").smb-input
-      b-button.btn(@click="confirm" :loading="btn_loading") {{$t('exchange.create')}}
-    div.is-flex.has-text-centered(:class="{ 'flex-row-reverse': isBuy, 'justify-content-end': isBuy}")
-      div.smb-input-wrapper.mt-2 SIMBA
-      span.mr-4
-      div.smb-input-wrapper.mt-2 BTC
+          input(v-model="btc" type="text" @input="convertBTCtoSimba($event)" maxlength="10" :disabled="btn_loading").smb-input
+      b-button.btn(@click="confirm" :loading="btn_loading" :disabled="!accepted_terms") {{$t('exchange.create')}}
+    div.is-flex.space-between
+      div.is-flex.has-text-centered(:class="{ 'flex-row-reverse': isBuy, 'justify-content-end': isBuy}")
+        div.smb-input-wrapper.mt-2 SIMBA
+        span.mr-4
+        div.smb-input-wrapper.mt-2 BTC
+      div
+        ValidationProvider(:rules="{ required: { allowFalse: false } }" v-slot="{ errors }" :name="$i18n.t('auth.terms_of_agreement')" tag="div").mt-2
+          b-checkbox(v-model="accepted_terms" :disabled="btn_loading").checkbox-fix
+            span {{$t('auth.i_accept')}}
+            =' '
+            a(href="https://simba.storage/terms-of-use.pdf" target="_blank" rel="noreferrer noopener").link {{$i18n.t('auth.terms_of_agreement')}}
+          span.validaton-error {{ errors[0] }}
     div(v-if="error").error.has-text-danger.mt-4 {{ $t('exchange.amount_err') }} 200,000 SIMBA
 </template>
 
 <script>
-  import {Money} from 'v-money'
+  import { ValidationProvider } from "vee-validate";
+  //import {Money} from 'v-money'
 
   export default {
     name: 'trade-create-payment',
 
-    components: {Money},
+    components: {ValidationProvider},
 
     data: () => ({
+      accepted_terms: false,
       isConverting: false,
       error: false,
       btc: 0.00200000,
@@ -126,5 +136,7 @@
   }
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
+  .checkbox-fix:not(.button)
+    margin-right: 0
 </style>
