@@ -24,6 +24,23 @@ input[type="text"], input[type="password"], input[type="number"]
   border-radius: 0!important
   &::placeholder
     opacity: 0.6
+  &:disabled
+    background-color: #efefef
+
+.input--material
+  input[type="text"], input[type="password"], input[type="number"]
+    box-shadow: none
+    border: 0
+    border-bottom: 1px solid #DFDFDF
+    border-radius: 0!important
+    &:focus
+      &::placeholder
+        transition: color 150ms
+        color: rgba(0,0,0,0)
+      outline: none
+      border-bottom: 1px solid #0060FF
+    &::placeholder
+      opacity: 0.6
 
 .link
   color: #0060FF
