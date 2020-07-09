@@ -32,15 +32,10 @@ async def create_invoice(
 ):
     invoice = Invoice(user_id=user.id, status=InvoiceStatus.CREATED, invoice_type=data.invoice_type)
 
-    # if invoice.invoice_type == InvoiceType.SELL:
-    #     invoice.target_eth_address = data.target_eth_address
-    # else:
-    #     pass
-
     created_invoice = await InvoiceCRUD.create_invoice(invoice)
 
     if invoice.invoice_type == InvoiceType.BUY:
-        background_tasks.add_task(BitcoinWrapper().create_wallet_address, created_invoice)
+        created_invoice["target_btc_address"] = await BitcoinWrapper().create_wallet_address(created_invoice, user)
 
     return created_invoice
 
@@ -151,7 +146,6 @@ async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
         wallet_address=invoice.target_btc_address,
     )
     return invoice
-
 
 # TODO update_invoice was change, need to refactor it
 # @router.post("/{invoice_id}/cancel/")
