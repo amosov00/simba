@@ -94,7 +94,7 @@ class EventsContractWrapper(EthereumBaseContractWrapper):
             self.last_block = self.contract.web3.eth.blockNumber
 
         self.fetch_blocks_from_block(from_block + 1) if from_block else self.fetch_all_blocks()
-        logging.info(f"{self.contract_meta.title}: {len(self.blocks)} new blocks")
+        logging.info(f"{self.contract_meta.title}: {len(self.blocks)} new transactions")
         return self.blocks
 
     async def fetch_blocks_and_save(self, from_block: Optional[int] = None) -> List[EthereumTransaction]:

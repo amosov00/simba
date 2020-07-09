@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Literal
 from datetime import datetime
 
 from pydantic import Field, validator
@@ -135,6 +135,18 @@ class User(BaseModel):
     @property
     def display_name(self):
         return self.email
+
+    def has_address(self, crypto: Literal["eth", "btc"], address: str) -> bool:
+        if crypto == "eth":
+            return bool(list(filter(
+                lambda o: o.address.lower() == address.lower(), self.user_eth_addresses
+            )))
+        elif crypto == "btc":
+            return bool(list(filter(
+                lambda o: o.address.lower() == address.lower(), self.user_btc_addresses
+            )))
+        else:
+            return True
 
 
 class UserRecover(BaseModel):
