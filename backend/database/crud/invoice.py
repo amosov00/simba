@@ -66,8 +66,7 @@ class InvoiceCRUD(BaseMongoCRUD):
     @classmethod
     async def create_invoice(cls, data: Invoice) -> dict:
         inserted_id = (await super().insert_one(data.dict())).inserted_id
-        created_invoice = await cls.find_one(query={"_id": inserted_id})
-        return created_invoice
+        return await cls.find_one(query={"_id": inserted_id})
 
     @classmethod
     async def update_invoice(cls, invoice_id: str, user: User, payload: InvoiceUpdate, filtering_statuses: tuple = None):

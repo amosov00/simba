@@ -6,10 +6,11 @@ from sentry_sdk import capture_message
 from fastapi import HTTPException
 
 from core.integrations.blockcypher import BlockCypherAPIWrapper
+from core.integrations.pycoin_wrapper import PycoinWrapper
 from database.crud import UserCRUD, BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
 from schemas import User, InvoiceInDB, InvoiceStatus, BTCTransaction
 from .base import CryptoValidation, ParseCryptoTransaction
-from config import BTC_HOT_WALLET_ADDRESS, BTC_HOT_WALLET_WIF
+from config import BTC_HOT_WALLET_ADDRESS, BTC_HOT_WALLET_WIF, BTC_COLD_WALLET_XPUB
 
 
 class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
@@ -27,7 +28,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         return True
 
     async def proceed_payables(
-        self, destination_payables: Tuple[str, int], address_from: str, fee: Optional[int] = None
+            self, destination_payables: Tuple[str, int], address_from: str, fee: Optional[int] = None
     ) -> List[Tuple[str, int]]:
         """
         Струкрура payable (address, satoshi)
@@ -42,7 +43,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         return [destination_payables, difference_payables]
 
     async def create_and_sign_transaction(
-        self, destination_payables: Tuple[str, int], fee: Optional[int] = None,
+            self, destination_payables: Tuple[str, int], fee: Optional[int] = None,
     ):
         """
         Payables передавать в форме [(<address_hash>, <btc_amount>), ], btc_amount - in satoshi
@@ -65,7 +66,8 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         )
         return await self.api_wrapper.push_raw_tx(tx)
 
-    async def create_wallet_address(self, invoice: dict):
+    async def _create_wallet_address(self, invoice: dict):
+        """ Depretaced """
         resp = await self.api_wrapper.create_wallet_address(1)
 
         if "errors" in resp:
@@ -82,6 +84,12 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         await InvoiceCRUD.update_one({"_id": invoice["_id"]}, {"target_btc_address": address_full_info.address})
 
         return address_full_info.address
+
+    async def create_wallet_address(self, invoice: dict, user: User):
+        invoice = InvoiceInDB(**invoice)
+        created_address = await PycoinWrapper(BTC_COLD_WALLET_XPUB, user=user, invoice=invoice).generate_new_address()
+        await InvoiceCRUD.update_one({"_id": invoice.id}, {"target_btc_address": created_address})
+        return created_address
 
     async def fetch_transaction(self, invoice: InvoiceInDB, transaction_hash: str) -> BTCTransaction:
         return await self.api_wrapper.fetch_transaction_info(transaction_hash)

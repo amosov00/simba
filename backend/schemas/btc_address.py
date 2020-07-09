@@ -32,7 +32,7 @@ class BTCAddress(BaseModel):
     total_sent: int = Field(...)
     transactions_refs: List[BTCAddressTransactions] = Field(default=[])
     transactions_number: int = Field(default=0, alias="n_tx")
-    url: HttpUrl = Field(default=None, alias="tx_url")
+    created_at: datetime = Field(default=None)
 
 
 class BTCAddressInDB(BTCAddress):
