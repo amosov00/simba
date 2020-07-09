@@ -4,15 +4,15 @@
       div
         b-field
           ValidationProvider(rules="required" v-slot="{ errors }" :name="$i18n.t('password.current')")
-            b-input(type="password" v-model="form.old_password" :placeholder="$i18n.t('password.current')")
+            b-input(type="password" v-model="form.old_password" :placeholder="$i18n.t('password.current')" autocomplete="off").input--material
             span.validaton-error {{ errors[0] }}
         b-field
           ValidationProvider(rules="required|min:8|confirmed:confirmation" v-slot="{ errors }" :name="$i18n.t('password.new')")
-            b-input(type="password" v-model="form.password" :placeholder="$i18n.t('password.new')")
+            b-input(type="password" v-model="form.password" :placeholder="$i18n.t('password.new')" autocomplete="off").input--material
             span.validaton-error {{ errors[0] }}
         b-field
           ValidationProvider(rules="required" v-slot="{ errors }" vid="confirmation" :name="$i18n.t('password.confirm')")
-            b-input(type="password" v-model="form.repeat_password" :placeholder="$i18n.t('password.confirm')")
+            b-input(type="password" v-model="form.repeat_password" :placeholder="$i18n.t('password.confirm')" autocomplete="off").input--material
             span.validaton-error {{ errors[0] }}
         div.has-text-right
           b-button(type="is-primary" native-type="submit" :loading="isLoading" style="width: 50%") {{$t('other.change')}}
