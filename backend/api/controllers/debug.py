@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper, BlockCypherAPIWrapper
 from core.integrations.ethereum import EventsContractWrapper
 from core.mechanics.crypto import SimbaWrapper, SSTWrapper
-from celery_app.tasks import delete_unused_webhooks, finish_overdue_invoices, fetch_simba_contract_cronjob
+from celery_app.tasks import delete_unused_webhooks, finish_overdue_invoices, fetch_and_proceed_simba_contract_cronjob
 from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD, ReferralCRUD
 from schemas import BlockCypherWebhookInDB, User, ReferralInDB, InvoiceInDB
 from api.dependencies import get_user
@@ -19,7 +19,7 @@ router = APIRouter()
 
 @router.get("/cron/")
 async def debug_get():
-    await fetch_simba_contract_cronjob()
+    await fetch_and_proceed_simba_contract_cronjob()
     return True
 
 
