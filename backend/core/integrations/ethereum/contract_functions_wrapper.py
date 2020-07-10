@@ -5,9 +5,11 @@ from hexbytes import HexBytes
 from web3 import Web3
 from fastapi import HTTPException
 from sentry_sdk import capture_message
+import requests
 
 from .base_wrapper import EthereumBaseContractWrapper
 from schemas import EthereumContract
+from config import GAS_STATION_ENDPOINT
 
 GAS = 250000
 GAS_PRICE = Web3.toWei("24", "gwei")
@@ -43,8 +45,14 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         nonce = self._get_nonce()
         # TODO delete self._approve after success testing (after 8/07/2020)
         # self._approve(amount, nonce)
+        gas_gasstation = requests.get(GAS_STATION_ENDPOINT).json()["fast"]
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
-            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce}
+            {
+                "gas": gas_gasstation if gas_gasstation else GAS,
+                "gasPrice": GAS_PRICE,
+                "from": self.admin_address,
+                "nonce": nonce + 1
+            }
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
