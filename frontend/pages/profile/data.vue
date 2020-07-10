@@ -31,7 +31,7 @@ export default {
   }),
   computed: {
     userData() {
-      return this.$store.getters.user
+      return this.$store.getters.user || {}
     }
   },
   methods: {

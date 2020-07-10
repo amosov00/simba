@@ -58,7 +58,6 @@
       &:hover
         color: red
     &__link
-      transition: 100ms all
       color: #0060FF
       padding: 4px 20px
       margin-bottom: 2px

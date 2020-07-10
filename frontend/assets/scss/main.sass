@@ -45,6 +45,12 @@ input[type="text"], input[type="password"], input[type="number"]
     &::placeholder
       opacity: 0.6
 
+.b-checkbox.checkbox input[type=checkbox]:focus:checked+.check
+  box-shadow: none!important
+
+.b-checkbox.checkbox input[type=checkbox]:focus + .check
+  box-shadow: none!important
+
 .link
   color: #0060FF
   &--active
