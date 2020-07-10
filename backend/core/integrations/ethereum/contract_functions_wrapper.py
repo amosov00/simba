@@ -37,7 +37,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
-    def issue_coins(self, customer_address: str, amount: int, comment: str) -> HexBytes:
+    async def issue_coins(self, customer_address: str, amount: int, comment: str) -> HexBytes:
         """Simba contract"""
         if amount < SIMBA_MIN_BASE_AMOUNT:
             capture_message(f"trying to issue < 50k simba,\nETH ADDR: {customer_address}, BTC HASH {comment}")
