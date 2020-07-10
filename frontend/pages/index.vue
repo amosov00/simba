@@ -47,21 +47,25 @@ export default {
         this.password
       );
 
-      if (!resp) {
-        this.$buefy.toast.open({
-          message:
-            "Check your email/password and make sure you activated your account!",
-          type: "is-danger",
-          duration: 3500
-        });
-      } else if (resp.response.data[0].message === "Incorrect 2FA pin code") {
-        this.$buefy.modal.open({
-          parent: this,
-          component: Login2FA,
-          hasModalCard: true,
-          customClass: "custom-class custom-class-2",
-          trapFocus: true
-        });
+      if(resp.response.status >= 400) {
+        let resp_msg = resp.response.data[0].message
+
+        if (resp_msg === "Incorrect 2FA pin code") {
+          this.$buefy.modal.open({
+            parent: this,
+            component: Login2FA,
+            hasModalCard: true,
+            customClass: "custom-class custom-class-2",
+            trapFocus: true
+          });
+        } else {
+          this.$buefy.toast.open({
+            message:
+              this.$i18n.t('auth.login_failed'),
+            type: "is-danger",
+            duration: 3500
+          });
+        }
       }
 
       this.password = "";
