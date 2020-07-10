@@ -1,13 +1,17 @@
 <template lang="pug">
-  div.position-relative
-    h3.text-large.has-text-weight-bold Status
-    div.mt-3.is-size-6 Received payment {{ parseFloat(convert(received_payment_amount)) }} BTC
-    div.mt-2 Transaction hash:
-      =' '
-      a(:href="'https://etherscan.io/tx/' + tx_hash" target="_blank").link {{ tx_hash }}
-    div.mt-2
-      div Confirmation {{currentConfirms}}/{{min_confirms}}
-    b-loading(:active.sync="confirms_loading" :is-full-page="false")
+  div
+    div.position-relative
+      h3.text-large.has-text-weight-bold {{$t('exchange.status')}}
+      div.mt-3.is-size-6 {{$t('exchange.received_payment')}} {{ parseFloat(convert(received_payment_amount)) }} BTC
+      div.mt-2 {{$t('exchange.transaction_hash')}}:
+        =' '
+        a(:href="'https://etherscan.io/tx/' + tx_hash" target="_blank").link {{ tx_hash }}
+      div.mt-2
+        div {{$t('exchange.confirms')}} {{currentConfirms}}/{{min_confirms}}
+      b-loading(:active.sync="confirms_loading" :is-full-page="false")
+    div.mt-4
+      div {{$t('exchange.verify_auto')}}
+      div.mt-1 {{$t('exchange.payment_confirmation_buy')}}
 </template>
 
 <script>

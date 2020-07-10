@@ -11,7 +11,7 @@
         ProfileDropdown(:name="`${user.first_name} ${user.last_name}`")
         div.has-text-weight-bold.text-large {{simbaFormat(simbaBalance)}} SIMBA
     div.header-menu.columns.is-flex(v-if="user")
-      div.column.is-8
+      div.column.is-8.pa-0
         nuxt-link(:to="menuItem.to" v-for="(menuItem, i) in menu" :key="i" active-class="link--active").menu-item.link {{ $t(menuItem.title) }}
         a(href="https://simba.storage/transparency" target="_blank" rel="noopener noreferrer").menu-item.link {{$t('header_menu.transparency')}}
       div.column.is-4.has-text-right.pa-0
@@ -66,7 +66,7 @@ export default {
 };
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .header
   padding-top: 40px
   padding-bottom: 14px
@@ -102,7 +102,6 @@ export default {
     cursor: pointer
   &__amount
 .pa-0
-  padding-left: 0
   padding-top: 0
   padding-bottom: 0
 </style>
