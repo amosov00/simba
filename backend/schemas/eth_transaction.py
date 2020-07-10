@@ -17,8 +17,9 @@ __all__ = [
 class SimbaContractEvents:
     OnIssued = "OnIssued"
     OnRedeemed = "OnRedeemed"
+    Transfer = "Transfer"
 
-    ALL = (OnIssued, OnRedeemed)
+    ALL = (OnIssued, OnRedeemed, Transfer)
 
 
 class SSTContractEvents:
