@@ -62,13 +62,16 @@ class InvoiceMechanics(CryptoValidation):
 
     def _validate_for_buy(self):
         if self.user:
-            if not self.validate_simba_amount(self.invoice.simba_amount):
-                pass
-        # TODO fields:
+            if not self.user.has_address("eth", self.invoice.target_eth_address):
+                self.errors.append("user has no target_eth_address")
         return True
 
     def _validate_for_sell(self):
-        # TODO fill
+        if self.user:
+            if not self.user.has_address("eth", self.invoice.target_eth_address):
+                self.errors.append("user has no target_eth_address")
+            if not self.user.has_address("btc", self.invoice.target_btc_address):
+                self.errors.append("user has no target_btc_address")
         return True
 
     def validate(self) -> bool:
