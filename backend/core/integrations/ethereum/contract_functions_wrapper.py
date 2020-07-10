@@ -45,11 +45,17 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         nonce = self._get_nonce()
         # TODO delete self._approve after success testing (after 8/07/2020)
         # self._approve(amount, nonce)
-        gas_gasstation = requests.get(GAS_STATION_ENDPOINT).json()["fast"] * 1000
+
+        try:
+            gas_station_req = requests.get(GAS_STATION_ENDPOINT).json()
+        except Exception:
+            gas_station_req = None
+        gas_station_gwei = str(int(gas_station_req.get("fast")) // 10) if gas_station_req and gas_station_req.get("fast") else "24"
+        gas_price = Web3.toWei(gas_station_gwei, "gwei")
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
             {
-                "gas": gas_gasstation if gas_gasstation else GAS,
-                "gasPrice": GAS_PRICE,
+                "gas": GAS,
+                "gasPrice": gas_price if gas_price else GAS_PRICE,
                 "from": self.admin_address,
                 "nonce": nonce
             }
