@@ -14,22 +14,14 @@
           div.wallet-field__label {{ $t('wallet.recipient') }}
           div.wallet-field__body
             b-field
-              b-input(size="is-small" v-model="transferData.address")
+              b-input(size="is-small" v-model="transferData.address").input--material
           div.wallet-field__action
             //--a(href="#").link save address
         div.wallet-field
           div.wallet-field__label {{ $t('other.amount') }}
           div.wallet-field__body
             b-field
-              b-input(size="is-small" type="number" min="0" step="10000" v-model="transferData.amount")
-        //--div
-          b-field(label="Your wallet (selected MetaMask address)")
-            b-input(size="is-small" v-model="selectedAddress" disabled)
-          button.btn--inline(@click="metamaskModal" v-if="selectedAddress") add new
-          b-field(label="Recipient")
-            b-input(size="is-small" v-model="transferData.address")
-          b-field(label="Amount")
-            b-input(size="is-small" type="number" min="0" step="10000" v-model="transferData.amount")
+              b-input(size="is-small" type="number" min="0" step="10000" v-model="transferData.amount").input--material
         div.wallet-content__totals
           div.wallet-content__fee {{ $t('other.fee') }}: 5,000 SIMBA
           div.is-size-6.has-text-weight-bold {{ $t('other.total') }}: {{totalAmount}} SIMBA
@@ -40,9 +32,7 @@
     hr.mt-4
     div
       h1.title.is-size-4 {{ $t('wallet.txs_history') }}
-      WalletTable(:moreData="moreData")
-      div.wallet-content__button
-        button.btn--outlined(@click="moreData += 10") {{$t('other.more')}}
+      WalletTable
 </template>
 
 <script>
@@ -59,7 +49,6 @@ export default {
         address: "",
         amount: 0
       },
-      moreData: 10
     };
   },
   methods: {
@@ -103,6 +92,7 @@ export default {
   align-items: center
   margin-bottom: 20px
   &__label
+    text-align: right
     width: 16%
     margin-right: 15px
     font-size: 14px
@@ -135,8 +125,4 @@ export default {
   &__totals
     padding-left: 107px
     margin: 25px 0
-
-  &__button
-    margin-top: 20px
-    text-align: center
 </style>

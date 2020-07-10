@@ -5,12 +5,16 @@ from hexbytes import HexBytes
 from web3 import Web3
 from fastapi import HTTPException
 from sentry_sdk import capture_message
+import requests
 
 from .base_wrapper import EthereumBaseContractWrapper
+from core.utils import get_gas_price
 from schemas import EthereumContract
+from config import GAS_STATION_ENDPOINT, DEFAULT_GAS_PRICE
 
 GAS = 250000
-GAS_PRICE = Web3.toWei("24", "gwei")
+GAS_PRICE = Web3.toWei(DEFAULT_GAS_PRICE, "gwei")
+
 
 # Is necessary because of initial fee in 50k.
 # If transaction is made with amount less than 50k, error will be raised
@@ -33,7 +37,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
-    def issue_coins(self, customer_address: str, amount: int, comment: str) -> HexBytes:
+    async def issue_coins(self, customer_address: str, amount: int, comment: str) -> HexBytes:
         """Simba contract"""
         if amount < SIMBA_MIN_BASE_AMOUNT:
             capture_message(f"trying to issue < 50k simba,\nETH ADDR: {customer_address}, BTC HASH {comment}")
@@ -43,8 +47,15 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         nonce = self._get_nonce()
         # TODO delete self._approve after success testing (after 8/07/2020)
         # self._approve(amount, nonce)
+
+        gas_price = Web3.toWei(await get_gas_price(), "gwei")
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
-            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce}
+            {
+                "gas": GAS,
+                "gasPrice": gas_price if gas_price else GAS_PRICE,
+                "from": self.admin_address,
+                "nonce": nonce
+            }
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)

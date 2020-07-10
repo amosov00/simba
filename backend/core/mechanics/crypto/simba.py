@@ -16,6 +16,6 @@ class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
         simba_to_issue = incoming_btc
         self.validate_currency_rate(incoming_btc, simba_to_issue)
 
-        tx_hash = self.api_wrapper.issue_coins(customer_address, simba_to_issue, comment)
+        tx_hash = await self.api_wrapper.issue_coins(customer_address, simba_to_issue, comment)
 
         return tx_hash.hex()

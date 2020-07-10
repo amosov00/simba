@@ -9,7 +9,7 @@
           a(href="#" @click="addNewWalletModal('btc')").link.ml-2 {{$t('wallet.add_wallet')}}
         div.is-italic.has-text-grey-light {{ $t('profile.for_withdraw_btc') }}
     div.mt-3
-      div(v-for="(address, i) in user.user_btc_addresses").mb-2.addr
+      div(v-for="(address, i) in user.user_btc_addresses" :key="i").mb-2.addr
         div {{ address.address }}
         div(@click="removeAddress({address:address.address, type: 'btc'})").has-text-danger.addr__delete {{$t('wallet.delete_wallet')}}
     div.is-flex.align-items-center.mt-4
@@ -21,7 +21,7 @@
           a(href="#" @click="addNewWalletModal('eth')").link.ml-2 {{$t('wallet.add_wallet')}}
         div.is-italic.has-text-grey-light {{ $t('profile.for_issue_simba') }}
     div.mt-3
-      div(v-for="(address, i) in user.user_eth_addresses").mb-2.addr
+      div(v-for="(address, i) in user.user_eth_addresses" :key="i").mb-2.addr
         div {{ address.address }}
         div(@click="removeAddress({address:address.address, type: 'eth'})").has-text-danger.addr__delete {{$t('wallet.delete_wallet')}}
 </template>
@@ -59,19 +59,32 @@ export default {
     removeAddress(data) {
       if (data.type === "btc" && this.user.two_factor) {
         this.$buefy.dialog.prompt({
-          message: `Confirm deleting`,
+          type:'is-danger',
           inputAttrs: {
-            type: "number",
-            placeholder: "Type your 2FA code",
+            placeholder: this.$i18n.t('wallet.pin_code'),
             value: "",
-            maxlength: 6
+            maxlength: 6,
           },
+          cancelText: this.$i18n.t('other.cancel'),
+          confirmText: this.$i18n.t('other.delete'),
           trapFocus: true,
-          onConfirm: value =>
-            this.$store.dispatch("removeAddress", { ...data, pin_code: value })
+          onConfirm: async (value) => {
+            await this.$store.dispatch("removeAddress", {...data, pin_code: value});
+            this.$parent.$emit('close')
+          }
         });
       } else {
-        this.$store.dispatch("removeAddress", data);
+        this.$buefy.dialog.confirm({
+          title: this.$i18n.t('other.delete'),
+          message: `${this.$i18n.t('wallet.delete_sure')}?`,
+          cancelText: this.$i18n.t('other.cancel'),
+          confirmText: this.$i18n.t('other.delete'),
+          type: 'is-danger',
+          onConfirm: async () => {
+            await this.$store.dispatch("removeAddress", data);
+            this.$parent.$emit('close')
+          }
+        })
       }
     }
   }

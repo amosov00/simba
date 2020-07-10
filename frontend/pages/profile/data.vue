@@ -31,14 +31,12 @@ export default {
   }),
   computed: {
     userData() {
-      return this.$store.getters.user
+      return this.$store.getters.user || {}
     }
   },
   methods: {
   },
   created() {
-
-    console.log(this.userData)
 
     this.$on('closeProfileUpdate', () => {
       this.modalShow = false

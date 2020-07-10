@@ -1,8 +1,11 @@
 export default context => {
   const locale = {
     auth: {
+      activation: 'Активация',
+      activation_success: 'Вы успешно подтвердили email!',
+      activation_failed: 'Ошибка: неверный email/код или email уже подтвержден',
       password: 'пароль',
-      pin_code: 'пин код',
+      pin_code: 'Пин-код',
       sign_in: 'Войти',
       forgot_pw: 'Забыли пароль?',
       submit: 'Отправить',
@@ -18,7 +21,9 @@ export default context => {
       sign_up_error_referral: 'Для регистрации в системе необходим Партнерский код. Если у вас нет кода, пожалуйста, запросите в',
       to_support: 'службе поддержки',
       recover_success: 'Успешно! Проверьте ваш email для дальнейших инструкций.',
-      recover_error: 'Ошибка: убедитесь что email введет верно'
+      recover_error: 'Ошибка: убедитесь что email введет верно',
+      login_failed: 'Проверьте введенные email/пароль, возможно ваш email не подтвержден',
+      login_failed_pin: 'Проверьте введенные email/пароль и пинкод',
     },
     footer: {
       tos: "Условия использования",
@@ -47,13 +52,31 @@ export default context => {
       bill_payment: "Оплата сделки",
       send: "Отправьте",
       receive: "Получите",
-      verify_auto: "Платежи подтверждаются автоматически.",
+      verify_auto: "Мы проверяем платеж автоматически.",
       verify_asap:
         "Как только оплата будет произведена, вы перейдете на следущий шаг сделки.",
       success: "Успех!",
       issued: "отправлено",
       wallet: "Кошелек",
-      buy_more: "Купить еще"
+      buy_more: "Купить еще",
+      status: 'Статус',
+      received_payment: 'Получен платеж',
+      transaction_hash: 'Хеш транзакции',
+      confirms: 'Подтверждений',
+      payment_confirmation_buy: 'Как только сеть получит 3 подтверждения, токены SIMBA будут отправлены на ваш ETH адрес.',
+      statuses: {
+        completed: 'Оплачено',
+        created: 'Создан',
+        waiting: 'В ожидании',
+        cancelled: 'Отменен',
+        expired: 'Просрочен'
+      },
+      error_creating_invoice: 'Произошла ошибка при создании инвойса',
+      error_updating_invoice: 'Произошла ошибка при обновления инвойса',
+      error_confirming_invoice: 'Произошла ошибка при подтверждении инвойса',
+      bill_expired: 'Сделка просрочена',
+      time_is_out: 'Время вышло',
+      time_is_limited: 'Время на каждую сделку ограничено 2 часами.'
     },
     dropdown: {
       bill_details: "Реквизиты",
@@ -145,9 +168,20 @@ export default context => {
       txs_history: "История транзакций",
       delete_wallet: "удалить",
       delete_sure: "Вы уверены что хотите удалить этот адрес",
-      txs_history_empty: "История транзакций пуста"
+      txs_history_empty: "История транзакций пуста",
+      transaction_failed: 'Ошибка: транзацкия не удалась',
+      transaction_success: 'Транзакция проведена успешно!',
+      pin_code: 'Пин-код',
+      add_new_wallet: { p1: 'Добавить новый', p2:'кошелек'},
+      address_deleted: 'Адрес успешно удален!',
+      address_added: 'Адрес успешно добавлен!',
+      address_failed_with_pin: 'Ошибка при добавлении адреса, убедитесь что адрес и пин-код введены верно!',
+      address_failed_to_add: 'Ошибка: убедитесь что адрес введен корректно, возможно данный адрес уже существует',
+      failed_to_get_signature: 'Не удалось получить подпись!',
     },
     other: {
+      try_again: 'Попробовать еще раз',
+      add: 'Добавить',
       date: "Дата",
       fee: "Комиссия",
       total: "Итого",
@@ -167,7 +201,8 @@ export default context => {
       disable: "Отключить",
       first_name: 'Имя',
       last_name: 'Фамилия',
-      save: 'Сохранить'
+      save: 'Сохранить',
+      copied_to_clipboard: 'Скопировано в буфер обмена',
     },
     about: {
       company_goal: "Цель компании",

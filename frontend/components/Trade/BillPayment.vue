@@ -41,10 +41,10 @@
               img(:src="require('@/assets/images/arrow-right.svg')")
             span {{ btc_address }}
     div.mt-4(v-if="expired")
-      div.has-text-weight-bold.is-size-5 Bill expired
+      div.has-text-weight-bold.is-size-5 {{$t('exchange.bill_expired')}}
       div.mt-3.is-flex.align-items-center
-        div.column.is-4.p-0.is-size-6 Time is out
-        n-link(to="/exchange/").btn Try again
+        div.column.is-4.p-0.is-size-6 {{$t('exchange.time_is_out')}}
+        n-link(to="/exchange/").btn {{$t('other.try_again')}}
     div.is-flex.align-items-center.countdown-block
       Countdown(:date="updated_invoice_data.created_at" v-if="showCountdown").mr-4
       div.countdown-refresh.mr-4(:class="{ 'rotate-anim': busyChecking }" @click="checkSingle")
@@ -52,7 +52,7 @@
       div(v-if="!expired")
         div {{$t('exchange.verify_auto')}}
         div {{$t('exchange.verify_asap')}}
-      div(v-if="expired") Time for each bill is limited with 2 hours.
+      div(v-if="expired") {{$t('exchange.time_is_limited')}}
 
 </template>
 
@@ -105,35 +105,33 @@
       },
 
       async checkSingle() {
-        if(!this.busyChecking) {
-          this.busyChecking = true
+        this.busyChecking = true
 
-          this.check = await this.$store.dispatch('invoices/fetchSingle', this.created_invoice_id)
+        this.check = await this.$store.dispatch('invoices/fetchSingle', this.created_invoice_id)
 
-          if(this.check.btc_txs.length > 0) {
-            this.goneToNextStep = true
-            this.stopCountdown();
-            this.$parent.$emit('nextStep')
-            return;
-/*            if(this.check.btc_txs[0].confirmations > 0 ) {
-              this.goneToNextStep = true
-              this.stopCountdown();
-              this.$parent.$emit('nextStep')
-              return;
-            }*/
-          }
-
-          this.updated_invoice_data = JSON.parse(JSON.stringify(this.check));
-
-          // Confirm if invoice is not confirmed
-          if(this.updated_invoice_data.target_btc_address && this.updated_invoice_data.status === 'created') {
-            await this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
-          }
-
-          await setTimeout(() => {
-            this.busyChecking = false;
-          }, 1000)
+        if(this.check.btc_txs.length > 0) {
+          this.goneToNextStep = true
+          this.stopCountdown();
+          this.$parent.$emit('nextStep')
+          return;
+          /*            if(this.check.btc_txs[0].confirmations > 0 ) {
+                        this.goneToNextStep = true
+                        this.stopCountdown();
+                        this.$parent.$emit('nextStep')
+                        return;
+                      }*/
         }
+
+        this.updated_invoice_data = JSON.parse(JSON.stringify(this.check));
+
+        // Confirm if invoice is not confirmed
+        if(this.updated_invoice_data.target_btc_address && this.updated_invoice_data.status === 'created') {
+          await this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
+        }
+
+        await setTimeout(() => {
+          this.busyChecking = false;
+        }, 1000)
       }
     },
 
@@ -158,7 +156,6 @@
       if(!this.goneToNextStep) {
         this.countdown = setInterval(async () => {
           await this.checkSingle();
-          console.log('Checking every 10 seconds!')
         }, 10000)
       }
     },

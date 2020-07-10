@@ -16,25 +16,18 @@
         a(href="#" @click="addNewWalletModal") add new
       button.btn(@click="next") {{ $t('exchange.confirm')}}
     div.mt-2.has-text-danger {{ errors[0] }}
-    b-modal
-      AddNewWallet
 </template>
 
 <script>
-  import AddNewWallet from "~/components/AddNewWallet";
-
   export default {
     name: 'trade-wallet-confirm',
-
-    components: {AddNewWallet},
-
     data: () => ({
       selectedOptions: '',
       errors: []
     }),
 
     computed: {
-      isBuy(){
+      isBuy() {
         return this.$store.getters['exchange/tradeData']['operation'] === 1;
       },
       user() {
@@ -47,26 +40,61 @@
     },
 
     methods: {
-      addNewWalletModal() {
-        this.$buefy.modal.open({
-          parent: this,
-          component: AddNewWallet,
-          hasModalCard: true,
-          trapFocus: true,
-          props: { type: 'btc' }
-        });
+      saveAddress(data) {
+        this.$store.dispatch("addAddress", data).then(_ => {
+          this.$parent.$emit('nextStep')
+        }).catch(_ => {
+          this.$buefy.toast.open({message: this.$i18n.t('wallet.failed_to_get_signature'), type: 'is-danger'})
+        })
       },
-      next(){
-/*        if(this.multi_props.op === 'sell') {
-          if(this.selectedOptions.length <= 0) {
-            this.errors.push('Please choose Bitcoin wallet')
-            return
+
+      next() {
+        /*        if(this.multi_props.op === 'sell') {
+                  if(this.selectedOptions.length <= 0) {
+                    this.errors.push('Please choose Bitcoin wallet')
+                    return
+                  }
+
+                  this.$store.commit('exchange/setTradeData', { prop: 'btc_target_wallet', value: this.selectedOptions })
+                }*/
+
+        if (this.isBuy) {
+
+          if(this.user.user_eth_addresses.length > 0) {
+            if(this.user.user_eth_addresses.find(el => el.address === this.eth_address) !== undefined) {
+              this.$parent.$emit('nextStep')
+              return
+            }
           }
 
-          this.$store.commit('exchange/setTradeData', { prop: 'btc_target_wallet', value: this.selectedOptions })
-        }*/
+          let data = {
+            type: 'eth',
+            address: this.eth_address,
+            created_at: Date.now(),
+          }
 
-        this.$parent.$emit('nextStep')
+          this.saveAddress(data)
+
+          /*if (this.user.two_factor) {
+            this.$buefy.dialog.prompt({
+              inputAttrs: {
+                placeholder: this.$i18n.t('wallet.pin_code'),
+                maxlength: 6
+              },
+              cancelText: this.$i18n.t('other.cancel'),
+              confirmText: 'OK',
+              trapFocus: true,
+              onConfirm: (value) => {
+                data['pin_code'] = value
+                this.saveAddress(data)
+              }
+            })
+          } else {
+            this.saveAddress(data)
+          }*/
+        }
+
+        //this.$parent.$emit('nextStep')
       }
     }
   }

@@ -20,6 +20,7 @@
   import Header from "~/components/Header";
 
   export default {
+    name: 'profile-layout',
     middleware: ['fetchUser', 'authRequired'],
     components: { Header, Footer },
     data: () => ({

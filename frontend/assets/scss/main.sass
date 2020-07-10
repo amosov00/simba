@@ -22,6 +22,9 @@ body
 input[type="text"], input[type="password"], input[type="number"]
   border: 1px solid #DFDFDF
   border-radius: 0!important
+  &:focus
+    outline: none
+    border: 1px solid #0060FF
   &::placeholder
     opacity: 0.6
   &:disabled
@@ -41,6 +44,12 @@ input[type="text"], input[type="password"], input[type="number"]
       border-bottom: 1px solid #0060FF
     &::placeholder
       opacity: 0.6
+
+.b-checkbox.checkbox input[type=checkbox]:focus:checked+.check
+  box-shadow: none!important
+
+.b-checkbox.checkbox input[type=checkbox]:focus + .check
+  box-shadow: none!important
 
 .link
   color: #0060FF
