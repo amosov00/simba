@@ -10,10 +10,11 @@ import requests
 from .base_wrapper import EthereumBaseContractWrapper
 from core.utils import get_gas_price
 from schemas import EthereumContract
-from config import GAS_STATION_ENDPOINT
+from config import GAS_STATION_ENDPOINT, DEFAULT_GAS_PRICE
 
 GAS = 250000
-GAS_PRICE = Web3.toWei("24", "gwei")
+GAS_PRICE = Web3.toWei(DEFAULT_GAS_PRICE, "gwei")
+
 
 # Is necessary because of initial fee in 50k.
 # If transaction is made with amount less than 50k, error will be raised
@@ -47,7 +48,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         # TODO delete self._approve after success testing (after 8/07/2020)
         # self._approve(amount, nonce)
 
-        gas_price = Web3.toWei(get_gas_price(), "gwei")
+        gas_price = Web3.toWei(await get_gas_price(), "gwei")
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
             {
                 "gas": GAS,
