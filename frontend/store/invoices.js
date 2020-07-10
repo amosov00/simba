@@ -21,7 +21,7 @@ export const actions = {
       //Toast.open({message: 'Transaction created!', type: 'is-primary'});
       return res.data;
     }).catch(_ => {
-      Toast.open({message: 'Error creating invoice!', type: 'is-danger'});
+      Toast.open({message: this.$i18n.t('exchange.error_creating_invoice'), type: 'is-danger'});
       return false
     })
   },
@@ -38,7 +38,7 @@ export const actions = {
       //Toast.open({message: 'Transaction updated!', type: 'is-primary'});
       return res.data;
     }).catch(_ => {
-      Toast.open({message: 'Error updating invoice!', type: 'is-danger'});
+      Toast.open({message: this.$i18n.t('exchange.error_updating_invoice'), type: 'is-danger'});
       return false
     })
   },
@@ -57,7 +57,7 @@ export const actions = {
   async confirmTransaction({}, id) {
     return await this.$axios.post(`/invoices/${id}/confirm/`).then(res => res.data)
       .catch(_ => {
-        Toast.open({message: 'Error confirming invoice!', type: 'is-danger'});
+        Toast.open({message: this.$i18n.t('exchange.error_confirming_invoice'), type: 'is-danger'});
         return false
       })
   },

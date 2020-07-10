@@ -12,7 +12,7 @@
   import Modal2FA from "~/components/Modal2FA";
 
   export default {
-    name: 'profile-2fa',
+    name: 'profile-twofactor',
     layout: "profile",
     components: { Modal2FA },
     data: () => ({

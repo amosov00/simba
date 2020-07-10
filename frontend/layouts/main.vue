@@ -10,6 +10,7 @@
   import Footer from "~/components/Footer";
 
   export default {
+    name: 'main-layout',
     middleware: ['fetchUser'],
     components: { Header, Footer },
 

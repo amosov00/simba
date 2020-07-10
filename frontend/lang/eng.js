@@ -61,7 +61,20 @@ export default context => {
       received_payment: 'Received payment',
       transaction_hash: 'Transaction hash',
       confirms: 'Confirmations',
-      payment_confirmation_buy: 'As soon as network get 3 confirmations, SIMBA tokens will be issued to your ETH address.'
+      payment_confirmation_buy: 'As soon as network get 3 confirmations, SIMBA tokens will be issued to your ETH address.',
+      statuses: {
+        completed: 'Paid',
+        created: 'Created',
+        waiting: 'Waiting',
+        cancelled: 'Cancelled',
+        expired: 'Expired'
+      },
+      error_creating_invoice: 'Error creating invoice',
+      error_updating_invoice: 'Error updating invoice',
+      error_confirming_invoice: 'Error confirming invoice',
+      bill_expired: 'Bill expired',
+      time_is_out: 'Time is out',
+      time_is_limited: 'Time for each bill is limited with 2 hours.'
     },
     dropdown: {
       bill_details: "Bill details",
@@ -165,6 +178,7 @@ export default context => {
       failed_to_get_signature: 'Failed to get signature!'
     },
     other: {
+      try_again: 'Try again',
       add: 'Add',
       date: "Date",
       fee: "Fee",
@@ -185,7 +199,8 @@ export default context => {
       disable: "Disable",
       first_name: 'First name',
       last_name: 'Last name',
-      save: 'Save'
+      save: 'Save',
+      copied_to_clipboard: 'Copied to clipboard'
     },
     about: {
       company_goal: "Company goal",

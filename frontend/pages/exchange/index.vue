@@ -13,7 +13,8 @@
           div {{ item.simba_amount }}
           div {{ (new Date(item.created_at)).toLocaleString() }}
           div {{ getType(item.invoice_type) }}
-          div {{ getStatus(item) }}
+          div(v-if="!getStatus(item).includes(':')") {{ $t(`exchange.statuses.${getStatus(item)}`) }}
+          div(v-else) {{ getStatus(item) }}
       div.has-text-centered
         button.mt-3.btn--outlined(@click="showMore" v-if="showBtn") {{ $t('exchange.more_bills') }}
 </template>
@@ -34,7 +35,7 @@
       }
     },
     data: () => ({
-      amounToView: 4,
+      amounToView: 6,
       billsToShow: [],
       showBtn: true
     }),
@@ -43,6 +44,10 @@
       //this.showMore()
       this.billsToShow = this.billsList.slice(0, this.amounToView)
       if(!this.billsToShow.length) {
+        this.showBtn = false
+      }
+
+      if(this.billsList.length <= this.amounToView) {
         this.showBtn = false
       }
     },
@@ -59,7 +64,7 @@
           let diff = plus2hours - current;
 
           if(diff < 0) {
-            return 'Expired'
+            return 'expired'
           }
 
           let remain = moment.duration(diff);

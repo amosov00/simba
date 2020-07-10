@@ -44,6 +44,11 @@
       }
     },
 
+    beforeDestroy() {
+      clearInterval(this.interval)
+      this.interval = null
+    },
+
     mounted() {
       this.interval = setInterval(async () => {
         this.loadingSpinner()
