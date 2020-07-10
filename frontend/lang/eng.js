@@ -1,6 +1,9 @@
 export default context => {
   const locale = {
     auth: {
+      activation: 'Activation',
+      activation_success: 'You successfully verified your email!',
+      activation_failed: 'Error: invalid email/code or email is already verified',
       password: 'password',
       pin_code: 'pin code',
       sign_in: 'Sign in',
@@ -53,7 +56,12 @@ export default context => {
       success: "Success!",
       issued: "issued",
       wallet: "Wallet",
-      buy_more: "Buy more"
+      buy_more: "Buy more",
+      status: 'Status',
+      received_payment: 'Received payment',
+      transaction_hash: 'Transaction hash',
+      confirms: 'Confirmations',
+      payment_confirmation_buy: 'As soon as network get 3 confirmations, SIMBA tokens will be issued to your ETH address.'
     },
     dropdown: {
       bill_details: "Bill details",
@@ -145,9 +153,19 @@ export default context => {
       txs_history: "History of transactions",
       delete_wallet: "delete",
       delete_sure: "Are you sure you want to delete this address",
-      txs_history_empty: "Your transaction history is empty."
+      txs_history_empty: "Your transaction history is empty.",
+      transaction_failed: 'Transaction failed',
+      transaction_success: 'Transaction completed successfully',
+      pin_code: 'Pin-code',
+      add_new_wallet: { p1: 'Add new', p2:'wallet'},
+      address_deleted: 'Address successfully deleted!',
+      address_added: 'Address successfully deleted!',
+      address_failed_with_pin: 'Failed to add address, make sure you entered correct address and pin-code!',
+      address_failed_to_add: 'Error: make sure your provided address is correct, maybe this address already exists',
+      failed_to_get_signature: 'Failed to get signature!'
     },
     other: {
+      add: 'Add',
       date: "Date",
       fee: "Fee",
       total: "Total",

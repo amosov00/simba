@@ -42,9 +42,9 @@ export const actions = {
       },
       (err, result) => {
         if (result.result) {
-          Toast.open({message: 'Transaction sent!', type: 'is-success'})
+          Toast.open({message: this.$i18n.t('wallet.transaction_success'), type: 'is-primary'})
         } else {
-          Toast.open({message: 'Transaction failed!', type: 'is-danger'})
+          Toast.open({message: this.$i18n.t('wallet.transaction_failed'), type: 'is-danger'})
         }
       }
     );

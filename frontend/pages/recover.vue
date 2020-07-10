@@ -1,15 +1,14 @@
 <template lang="pug">
   div
     div.is-flex.content-tabs
-      n-link(to="/" exact-active-class="link--active").link.link--underlined.content-tabs-item Sign in
-      n-link(to="/activate" active-class="link--active").link.link--underlined.content-tabs-item Activation
+      n-link(to="/recover" active-class="link--active").link.link--underlined.content-tabs-item {{$t('auth.forgot_pw')}}
     div.main-content
-      div.column.is-5.p-0
-        b-field(label="Password")
-          b-input(type="password" v-model="password")
-        b-field(label="Repeat password")
-          b-input(type="password" v-model="repeat_password")
-        button.btn.w-100(@click="changePassword") Change password
+      div.column.is-4.p-0
+        b-field(:label="$i18n.t('password.new')")
+          b-input(size="is-small" type="password" v-model="password")
+        b-field(:label="$i18n.t('password.confirm')")
+          b-input(size="is-small" type="password" v-model="repeat_password")
+        button.btn.w-100(@click="changePassword") {{$t('auth.submit')}}
 
 </template>
 
@@ -31,13 +30,11 @@
         let data = { password: this.password, repeat_password: this.repeat_password, recover_code: this.query.recover_code}
 
         if(await this.$store.dispatch('finishRecover', data)) {
-          this.$buefy.toast.open({message: 'Success!', type: 'is-primary'});
-          this.$nuxt.$router.replace({ path: '/'});
+          this.$buefy.toast.open({message: this.$i18n.t('password.change_success'), type: 'is-primary'});
+          this.$nuxt.context.redirect('/')
         } else {
-          this.$buefy.toast.open({message: 'Error', type: 'is-danger'});
+          this.$buefy.toast.open({message: this.$i18n.t('password.change_error'), type: 'is-danger'});
         }
-
-        this.email = ''
 
         this.loading = false;
       }

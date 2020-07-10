@@ -1,6 +1,9 @@
 export default context => {
   const locale = {
     auth: {
+      activation: 'Активация',
+      activation_success: 'Вы успешно подтвердили email!',
+      activation_failed: 'Ошибка: неверный email/код или email уже подтвержден',
       password: 'пароль',
       pin_code: 'пин код',
       sign_in: 'Войти',
@@ -47,13 +50,18 @@ export default context => {
       bill_payment: "Оплата сделки",
       send: "Отправьте",
       receive: "Получите",
-      verify_auto: "Платежи подтверждаются автоматически.",
+      verify_auto: "Мы проверяем платеж автоматически.",
       verify_asap:
         "Как только оплата будет произведена, вы перейдете на следущий шаг сделки.",
       success: "Успех!",
       issued: "отправлено",
       wallet: "Кошелек",
-      buy_more: "Купить еще"
+      buy_more: "Купить еще",
+      status: 'Статус',
+      received_payment: 'Получен платеж',
+      transaction_hash: 'Хеш транзакции',
+      confirms: 'Подтверждений',
+      payment_confirmation_buy: 'Как только сеть получит 3 подтверждения, токены SIMBA будут отправлены на ваш ETH адрес.'
     },
     dropdown: {
       bill_details: "Реквизиты",
@@ -145,9 +153,19 @@ export default context => {
       txs_history: "История транзакций",
       delete_wallet: "удалить",
       delete_sure: "Вы уверены что хотите удалить этот адрес",
-      txs_history_empty: "История транзакций пуста"
+      txs_history_empty: "История транзакций пуста",
+      transaction_failed: 'Ошибка: транзацкия не удалась',
+      transaction_success: 'Транзакция проведена успешно!',
+      pin_code: 'Пин-код',
+      add_new_wallet: { p1: 'Добавить новый', p2:'кошелек'},
+      address_deleted: 'Адрес успешно удален!',
+      address_added: 'Адрес успешно добавлен!',
+      address_failed_with_pin: 'Ошибка при добавлении адреса, убедитесь что адрес и пин-код введены верно!',
+      address_failed_to_add: 'Ошибка: убедитесь что адрес введен корректно, возможно данный адрес уже существует',
+      failed_to_get_signature: 'Не удалось получить подпись!',
     },
     other: {
+      add: 'Добавить',
       date: "Дата",
       fee: "Комиссия",
       total: "Итого",

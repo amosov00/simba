@@ -1,8 +1,5 @@
 <template lang="pug">
   div
-    //--div.is-flex
-      div.column.is-12
-        b-loading(:is-full-page="false" :active="true" :can-cancel="true")
     b-table(:data="cuttedData" hoverable :loading="loading" striped :class="{'loading-height': loading}").table-fixed.position-relative
       template(slot="empty")
         div.content.has-text-grey.has-text-centered(v-if="!loading") {{$t('wallet.txs_history_empty')}}
@@ -20,6 +17,8 @@
         div(v-if="cuttedData.length > 0").is-flex.space-between.has-text-weight-bold.mt-3
           div {{ $t('other.total')}}
           div {{ total }}
+    div.mt-3.text-center
+      button.btn--outlined(@click="moreData += 10" v-if="showMoreBtn" ) {{$t('other.more')}}
 </template>
 
 <script>
@@ -28,28 +27,29 @@ import formatCurrency from "~/mixins/formatCurrency";
 export default {
   name: 'WalletTable',
   mixins: [formatDate, formatCurrency],
-  props: {
-    moreData: {
-      type: Number,
-      default: 0
-    }
-  },
   data() {
     return {
       loading: false,
       tableData: [],
       cuttedData: [],
-      total: ''
+      total: '',
+      moreData: 5,
+      showMoreBtn: true
     };
   },
   watch: {
     moreData: function() {
+      if(this.tableData.length <= this.moreData) {
+        this.showMoreBtn = false
+      }
+
       this.cuttedData = this.tableData.slice(0, this.moreData)
     }
   },
   async created() {
 
     if(window.ethereum === undefined) {
+      this.showMoreBtn = false
       return
     }
 
@@ -79,6 +79,7 @@ export default {
         this.cuttedData = this.tableData.slice(0, this.moreData)
         this.loading = false;
       }).catch(() => {
+        this.showMoreBtn = false
         this.cuttedData = []
         this.loading = false;
       })

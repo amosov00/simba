@@ -48,7 +48,7 @@ export default {
 };
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .balance
   display: flex
   align-items: center

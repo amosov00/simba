@@ -55,19 +55,26 @@ export const actions = {
 
   async addAddress({ dispatch }, data) {
     if (data.type === "eth") {
-      dispatch("metamask/createSignature", data);
+      return dispatch("metamask/createSignature", data);
     } else {
       return await this.$axios
         .post(`/account/btc-address/`, data)
         .then(() => {
+          dispatch("getUser");
           Toast.open({
-            message: "Address successfully added!",
+            message: this.$i18n.t('wallet.address_added'),
             type: "is-primary"
           });
         })
-        .catch(resp => {
+        .catch(_ => {
+          let error_msg = this.$i18n.t('wallet.address_failed_to_add')
+
+          if(this.getters.user.two_factor) {
+            error_msg = this.$i18n.t('wallet.address_failed_with_pin')
+          }
+
           Toast.open({
-            message: resp.response.data[0].message,
+            message: error_msg,
             type: "is-danger",
             duration: 6000
           });
@@ -85,11 +92,11 @@ export const actions = {
           }
         })
         .then(() => {
+          dispatch("getUser");
           Toast.open({
-            message: "Address successfully deleted!",
+            message: this.$i18n.t('wallet.address_deleted'),
             type: "is-primary"
           });
-          dispatch("getUser");
         })
         .catch(resp => {
           Toast.open({
@@ -102,11 +109,11 @@ export const actions = {
       return await this.$axios
         .delete(`/account/eth-address/${data.address}`)
         .then(() => {
+          dispatch("getUser");
           Toast.open({
-            message: "Address successfully deleted!",
+            message: this.$i18n.t('wallet.address_deleted'),
             type: "is-primary"
           });
-          dispatch("getUser");
         })
         .catch(resp => {
           Toast.open({
@@ -134,7 +141,7 @@ export const actions = {
     return await this.$axios
       .post("/account/verify/", data)
       .then(resp => {
-        return true;
+        return resp.data;
       })
       .catch(_ => {
         return false;
@@ -174,7 +181,7 @@ export const actions = {
       .then(resp => {
         Toast.open({
           message: this.$i18n.t("auth.sign_up_success"),
-          type: "is-success",
+          type: "is-primary",
           duration: 6000
         });
         return true;

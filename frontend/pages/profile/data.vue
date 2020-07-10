@@ -38,8 +38,6 @@ export default {
   },
   created() {
 
-    console.log(this.userData)
-
     this.$on('closeProfileUpdate', () => {
       this.modalShow = false
     })

@@ -1,15 +1,9 @@
 <template lang="pug">
   div
     div.is-flex.content-tabs
-      n-link(to="/" exact-active-class="link--active").link.link--underlined.content-tabs-item Sign in
-      n-link(to="/activate" active-class="link--active").link.link--underlined.content-tabs-item Activation
+      n-link(to="/activate" active-class="link--active").link.link--underlined.content-tabs-item {{$t('auth.activation')}}
     div.main-content
-      div.column.is-5.p-0
-        b-field(label="Email")
-          b-input(v-model="query.email")
-        b-field(label="Verification code")
-          b-input(v-model="query.verification_code")
-        button.btn.w-100(@click="activate") Activate
+      b-message(type="is-danger" v-if="success === false") {{ error_message }}
 
 </template>
 
@@ -22,19 +16,33 @@
         verification_code: '',
         email: ''
       },
+      error_message: ''
     }),
     methods: {
-      async activate(){
-        if(!await this.$store.dispatch('activateAccount', this.query)) {
-          this.$buefy.toast.open({message: 'Error: invalid email/code or account is already activated', type: 'is-danger'})
-        } else {
-          this.$buefy.toast.open({message: 'You successfully verifed your account!', type: 'is-success'})
-          this.$nuxt.$router.replace({ path: '/'});
-        }
+    },
+    async mounted() {
+      if(this.success) {
+        this.$axios.setToken(this.res.token, 'Bearer');
+        this.$cookies.set('token', this.res.token, {
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7,
+        });
+        await this.$authFetchUser()
+        this.$nuxt.context.redirect('/profile/data/')
+        this.$buefy.toast.open({message: this.$i18n.t('auth.activation_success'), type: 'is-primary'})
+      } else {
+        this.error_message = this.$i18n.t('auth.activation_failed')
       }
     },
-    asyncData({ query }) {
-      return { query }
+    async asyncData({ query, store }) {
+
+      let res = await store.dispatch('activateAccount', query);
+
+      if(res) {
+        return { success: true, res }
+      } else {
+        return { success: false }
+      }
     }
   };
 </script>

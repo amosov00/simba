@@ -18,11 +18,11 @@
     div.mt-4.mb-2(v-html="$t('partner.main')").main-content__text
     div(v-if="can_invite")
       div.has-text-weight-bold.is-size-5.mt-4 {{$t('partner.invited')}}
-      b-table(:data="referrals" focusable striped).mt-3
+      b-table(:data="referrals" focusable striped default-sort="created_at" default-sort-direction="desc" per-page="5" :paginated="Boolean(referrals.length)" pagination-simple).mt-3
         template(slot="empty")
           div.content.has-text-grey.has-text-centered {{$t('partner.refs_empty')}}
         template(slot-scope="props")
-          b-table-column(field="created_at" :label="$i18n.t('other.reg_date')") {{ formatDate(props.row.created_at) }}
+          b-table-column(field="created_at" :label="$i18n.t('other.reg_date')" sortable) {{ formatDate(props.row.created_at) }}
           b-table-column(field="ref_email" label="Email") {{ props.row.email }}
           b-table-column(field="name" :label="$i18n.t('other.name')") {{ props.row.first_name }} {{ props.row.last_name }}
           b-table-column(field="referral_level" :label="$i18n.t('other.level')") {{ props.row.referral_level }}
@@ -48,17 +48,19 @@
     components: { CopyToClipboard, WalletTable },
     middleware: ["contract", "metamask"],
     computed: {
+      codeUnavailable() {
+        if(this.ref_code.includes('*')) {
+          return true
+        }
+        else {
+          return false
+        }
+      }
     },
     data: () => ({
       ref_code: '',
       history_more_data: 5,
-      table1: {
-        data: [
-          { date: '01/06/2020, 09:49:15', email: 'example@test.test', name: 'Константин Константинопольский', level: 1},
-          { date: '01/06/2020, 09:49:15', email: 'example@test.test', name: 'Константин Константинопольский', level: 2},
-          { date: '01/06/2020, 09:49:15', email: 'example@test.test', name: 'Константин Константинопольский', level: 3},
-        ],
-      },
+      referrals: []
     }),
     methods: {
       formatDate(date_str) {
