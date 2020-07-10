@@ -51,7 +51,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
                 "gas": gas_gasstation if gas_gasstation else GAS,
                 "gasPrice": GAS_PRICE,
                 "from": self.admin_address,
-                "nonce": nonce + 1
+                "nonce": nonce
             }
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
