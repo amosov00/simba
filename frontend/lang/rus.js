@@ -61,7 +61,20 @@ export default context => {
       received_payment: 'Получен платеж',
       transaction_hash: 'Хеш транзакции',
       confirms: 'Подтверждений',
-      payment_confirmation_buy: 'Как только сеть получит 3 подтверждения, токены SIMBA будут отправлены на ваш ETH адрес.'
+      payment_confirmation_buy: 'Как только сеть получит 3 подтверждения, токены SIMBA будут отправлены на ваш ETH адрес.',
+      statuses: {
+        completed: 'Оплачено',
+        created: 'Создан',
+        waiting: 'В ожидании',
+        cancelled: 'Отменен',
+        expired: 'Просрочен'
+      },
+      error_creating_invoice: 'Произошла ошибка при создании инвойса',
+      error_updating_invoice: 'Произошла ошибка при обновления инвойса',
+      error_confirming_invoice: 'Произошла ошибка при подтверждении инвойса',
+      bill_expired: 'Сделка просрочена',
+      time_is_out: 'Время вышло',
+      time_is_limited: 'Время на каждую сделку ограничено 2 часами.'
     },
     dropdown: {
       bill_details: "Реквизиты",
@@ -165,6 +178,7 @@ export default context => {
       failed_to_get_signature: 'Не удалось получить подпись!',
     },
     other: {
+      try_again: 'Попробовать еще раз',
       add: 'Добавить',
       date: "Дата",
       fee: "Комиссия",
@@ -185,7 +199,8 @@ export default context => {
       disable: "Отключить",
       first_name: 'Имя',
       last_name: 'Фамилия',
-      save: 'Сохранить'
+      save: 'Сохранить',
+      copied_to_clipboard: 'Скопировано в буфер обмена',
     },
     about: {
       company_goal: "Цель компании",

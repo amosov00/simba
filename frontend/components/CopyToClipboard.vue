@@ -18,7 +18,7 @@
     methods: {
       copy() {
         this.$refs.reflink.select();
-        this.$buefy.toast.open({ message: 'Copied to clipboard', type: 'is-primary' });
+        this.$buefy.toast.open({ message: this.$i18n.t('other.copied_to_clipboard'), type: 'is-primary' });
         document.execCommand('copy');
       }
     }
