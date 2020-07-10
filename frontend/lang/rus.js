@@ -5,7 +5,7 @@ export default context => {
       activation_success: 'Вы успешно подтвердили email!',
       activation_failed: 'Ошибка: неверный email/код или email уже подтвержден',
       password: 'пароль',
-      pin_code: 'пин код',
+      pin_code: 'Пин-код',
       sign_in: 'Войти',
       forgot_pw: 'Забыли пароль?',
       submit: 'Отправить',
@@ -21,7 +21,9 @@ export default context => {
       sign_up_error_referral: 'Для регистрации в системе необходим Партнерский код. Если у вас нет кода, пожалуйста, запросите в',
       to_support: 'службе поддержки',
       recover_success: 'Успешно! Проверьте ваш email для дальнейших инструкций.',
-      recover_error: 'Ошибка: убедитесь что email введет верно'
+      recover_error: 'Ошибка: убедитесь что email введет верно',
+      login_failed: 'Проверьте введенные email/пароль, возможно ваш email не подтвержден',
+      login_failed_pin: 'Проверьте введенные email/пароль и пинкод',
     },
     footer: {
       tos: "Условия использования",
