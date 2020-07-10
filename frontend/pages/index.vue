@@ -47,26 +47,29 @@ export default {
         this.password
       );
 
-      if(resp.response.status >= 400) {
-        let resp_msg = resp.response.data[0].message
+      if(resp !== true) {
+        if(resp.response.status >= 400) {
+          let resp_msg = resp.response.data[0].message
 
-        if (resp_msg === "Incorrect 2FA pin code") {
-          this.$buefy.modal.open({
-            parent: this,
-            component: Login2FA,
-            hasModalCard: true,
-            customClass: "custom-class custom-class-2",
-            trapFocus: true
-          });
-        } else {
-          this.$buefy.toast.open({
-            message:
-              this.$i18n.t('auth.login_failed'),
-            type: "is-danger",
-            duration: 3500
-          });
+          if (resp_msg === "Incorrect 2FA pin code") {
+            this.$buefy.modal.open({
+              parent: this,
+              component: Login2FA,
+              hasModalCard: true,
+              customClass: "custom-class custom-class-2",
+              trapFocus: true
+            });
+          } else {
+            this.$buefy.toast.open({
+              message:
+                this.$i18n.t('auth.login_failed'),
+              type: "is-danger",
+              duration: 3500
+            });
+          }
         }
       }
+
 
       this.password = "";
       this.loading = false;

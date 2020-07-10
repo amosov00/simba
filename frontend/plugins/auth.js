@@ -23,7 +23,7 @@ export default ({ app, redirect, route }, inject) => {
 		app.store.commit('deleteUser');
 		app.$axios.setToken(null);
 		app.$cookies.remove('token');
-		redirect('/')
+		window.location.href = '/'
 	});
 	inject('authFetchUser', async () => {
 		let {data, status} = await app.$axios.get('/account/user/');
