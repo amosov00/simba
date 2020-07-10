@@ -45,7 +45,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         nonce = self._get_nonce()
         # TODO delete self._approve after success testing (after 8/07/2020)
         # self._approve(amount, nonce)
-        gas_gasstation = requests.get(GAS_STATION_ENDPOINT).json()["fast"]
+        gas_gasstation = requests.get(GAS_STATION_ENDPOINT).json()["fast"] * 1000
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
             {
                 "gas": gas_gasstation if gas_gasstation else GAS,
