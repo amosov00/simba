@@ -50,7 +50,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
             gas_station_req = requests.get(GAS_STATION_ENDPOINT).json()
         except Exception:
             gas_station_req = None
-        gas_station_gwei = str(int(gas_station_req.get("fast")) // 10) if gas_station_req and gas_station_req.get("fast") else "24"
+        gas_station_gwei = str(int(gas_station_req.get("fast")) // 10) if gas_station_req and gas_station_req.get("fast") else "35"
         gas_price = Web3.toWei(gas_station_gwei, "gwei")
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
             {
