@@ -8,6 +8,7 @@ from sentry_sdk import capture_message
 import requests
 
 from .base_wrapper import EthereumBaseContractWrapper
+from core.utils import get_gas_price
 from schemas import EthereumContract
 from config import GAS_STATION_ENDPOINT
 
@@ -46,12 +47,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         # TODO delete self._approve after success testing (after 8/07/2020)
         # self._approve(amount, nonce)
 
-        try:
-            gas_station_req = requests.get(GAS_STATION_ENDPOINT).json()
-        except Exception:
-            gas_station_req = None
-        gas_station_gwei = str(int(gas_station_req.get("fast")) // 10) if gas_station_req and gas_station_req.get("fast") else "35"
-        gas_price = Web3.toWei(gas_station_gwei, "gwei")
+        gas_price = Web3.toWei(get_gas_price(), "gwei")
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
             {
                 "gas": GAS,
