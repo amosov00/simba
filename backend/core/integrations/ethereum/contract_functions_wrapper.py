@@ -47,7 +47,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         # TODO delete self._approve after success testing (after 8/07/2020)
         # self._approve(amount, nonce)
 
-        gas_price = Web3.toWei(get_gas_price(), "gwei")
+        gas_price = Web3.toWei(await get_gas_price(), "gwei")
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
             {
                 "gas": GAS,
