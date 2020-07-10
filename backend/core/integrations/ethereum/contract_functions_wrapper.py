@@ -10,10 +10,11 @@ import requests
 from .base_wrapper import EthereumBaseContractWrapper
 from core.utils import get_gas_price
 from schemas import EthereumContract
-from config import GAS_STATION_ENDPOINT
+from config import GAS_STATION_ENDPOINT, DEFAULT_GAS_PRICE
 
 GAS = 250000
-GAS_PRICE = Web3.toWei("24", "gwei")
+GAS_PRICE = Web3.toWei(DEFAULT_GAS_PRICE, "gwei")
+
 
 # Is necessary because of initial fee in 50k.
 # If transaction is made with amount less than 50k, error will be raised
