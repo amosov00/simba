@@ -46,17 +46,15 @@ class PycoinWrapper:
 
         return self.format_path(*path_indexes)
 
-    async def _save_address(self, address: str, public_key: str, path: str):
+    async def _save_address(self, address: str, path: str):
         new_address = BTCAddress(
             user_id=self.user.id if self.user else None,
             invoice_id=self.invoice.id if self.invoice else None,
             address=address,
-            public_key=public_key,
             path=path,
             balance=0,
             total_sent=0,
             total_received=0,
-            transactions_refs=[],
             n_tx=0,
             created_at=datetime.now()
         )
@@ -68,6 +66,6 @@ class PycoinWrapper:
         path_with_m = "m/" + path_without_m
         key = self._generate_subkey(path_without_m)
         await self._save_address(
-            key.address(), "", path_with_m
+            key.address(), path_with_m
         )
         return key.address()

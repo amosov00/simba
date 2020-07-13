@@ -50,5 +50,10 @@ app.conf.beat_schedule = {
         "task": "fetch_and_proceed_sst_contract",
         "schedule": crontab(minute="0", hour="1", day_of_month="*/1"),
         "args": (),
+    },
+    "update_empty_btc_addresses_info": {
+        "task": "update_empty_btc_addresses_info",
+        "schedule": crontab(minute="0", hour="2", day_of_month="*/1"),
+        "args": (),
     }
 }

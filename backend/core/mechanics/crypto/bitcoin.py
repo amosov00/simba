@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from core.integrations.blockcypher import BlockCypherAPIWrapper
 from core.integrations.pycoin_wrapper import PycoinWrapper
 from database.crud import UserCRUD, BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
-from schemas import User, InvoiceInDB, InvoiceStatus, BTCTransaction, BTCAddress
+from schemas import User, InvoiceInDB, InvoiceStatus, BTCTransaction, BTCAddress, ObjectIdPydantic
 from .base import CryptoValidation, ParseCryptoTransaction
 from config import BTC_HOT_WALLET_ADDRESS, BTC_HOT_WALLET_WIF, BTC_COLD_WALLET_XPUB
 
@@ -32,8 +32,18 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
 
         return True
 
-    async def fetch_address_and_save(self, address: str, *, save: bool = True) -> Optional[BTCAddress]:
+    async def fetch_address_and_save(
+            self,
+            address: str,
+            *,
+            invoice_id: ObjectIdPydantic = None,
+            user_id: ObjectIdPydantic = None,
+            save: bool = True
+    ) -> Optional[BTCAddress]:
         address_info = await self.api_wrapper.fetch_address_info(address)
+        if address_info:
+            address_info.user_id = user_id
+            address_info.invoice_id = invoice_id
 
         if address_info and save:
             await BTCAddressCRUD.update_or_create(address_info.address, address_info.dict())
@@ -104,7 +114,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
     async def create_wallet_address(self, invoice: dict, user: User):
         invoice = InvoiceInDB(**invoice)
         created_address = await PycoinWrapper(BTC_COLD_WALLET_XPUB, user=user, invoice=invoice).generate_new_address()
-        await self.fetch_address_and_save(created_address)
+        await self.fetch_address_and_save(created_address, invoice_id=invoice.id, user_id=user.id)
         await InvoiceCRUD.update_one({"_id": invoice.id}, {"target_btc_address": created_address})
         return created_address
 
