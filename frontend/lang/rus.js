@@ -62,6 +62,8 @@ export default context => {
       sell_more: "Продать еще",
       status: 'Статус',
       sent_payment: 'Платеж отправлен',
+      choose_btc_wallet: {p1: 'Выберите BTC кошелек', p2: 'для вывода'},
+      choose_btc_wallet_error: 'Пожалуйста выберите BTC кошелек',
       received_payment: 'Получен платеж',
       transaction_hash: 'Хеш транзакции',
       confirms: 'Подтверждений',

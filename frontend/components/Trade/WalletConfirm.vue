@@ -2,9 +2,9 @@
   div
     h3(v-if="isBuy").text-large.has-text-weight-bold {{ $t('exchange.confirm_wallet')}}
     div(v-else).is-size-6
-      span.has-text-weight-bold Choose BTC wallet
+      span.has-text-weight-bold {{$t('exchange.choose_btc_wallet.p1')}}
       = ' '
-      span to get coins after redeem
+      span {{$t('exchange.choose_btc_wallet.p2')}}
     div.is-flex.mt-2.align-items-center.space-between
       div(v-if="isBuy").is-flex.align-items-center
         img(src="~assets/images/eth.svg").mr-2
@@ -13,18 +13,22 @@
       div(v-else).is-flex.align-items-center.flex-1.mr-4
         b-select(placeholder="" expanded v-model="selectedOptions").flex-1.mr-3
           option(v-for="op in user.user_btc_addresses") {{ op.address }}
-        a(href="#") add new
+        a(href="#" @click="addNewWalletModal") {{$t('wallet.add_wallet')}}
       button.btn(@click="next") {{ $t('exchange.confirm')}}
     div.mt-2.has-text-danger {{ errors[0] }}
 </template>
 
 <script>
+  import AddNewWallet from "~/components/AddNewWallet";
+
   export default {
     name: 'trade-wallet-confirm',
     data: () => ({
       selectedOptions: '',
       errors: []
     }),
+
+    components: { AddNewWallet },
 
     computed: {
       isBuy() {
@@ -40,6 +44,16 @@
     },
 
     methods: {
+      addNewWalletModal() {
+        this.$buefy.modal.open({
+          parent: this,
+          component: AddNewWallet,
+          hasModalCard: true,
+          trapFocus: true,
+          props: { type: 'btc' }
+        });
+      },
+
       saveAddress(data) {
         this.$store.dispatch("addAddress", data).then(_ => {
           this.$parent.$emit('nextStep')
@@ -49,14 +63,6 @@
       },
 
       next() {
-        /*        if(this.multi_props.op === 'sell') {
-                  if(this.selectedOptions.length <= 0) {
-                    this.errors.push('Please choose Bitcoin wallet')
-                    return
-                  }
-
-                  this.$store.commit('exchange/setTradeData', { prop: 'btc_target_wallet', value: this.selectedOptions })
-                }*/
 
         if (this.isBuy) {
 
@@ -74,37 +80,16 @@
           }
 
           this.saveAddress(data)
-
-          /*if (this.user.two_factor) {
-            this.$buefy.dialog.prompt({
-              inputAttrs: {
-                placeholder: this.$i18n.t('wallet.pin_code'),
-                maxlength: 6
-              },
-              cancelText: this.$i18n.t('other.cancel'),
-              confirmText: 'OK',
-              trapFocus: true,
-              onConfirm: (value) => {
-                data['pin_code'] = value
-                this.saveAddress(data)
-              }
-            })
-          } else {
-            this.saveAddress(data)
-          }*/
         } else {
-          console.log('sell: wallet confirm')
 
           if(this.selectedOptions.length <= 0) {
-            this.errors.push('Please choose Bitcoin wallet')
+            this.errors.push(this.$i18n.t('exchange.choose_btc_wallet_error'))
             return
           }
 
           this.$store.commit('exchange/setTradeData', { prop: 'btc_redeem_wallet', value: this.selectedOptions })
           this.$parent.$emit('nextStep')
         }
-
-        //this.$parent.$emit('nextStep')
       }
     }
   }
