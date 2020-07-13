@@ -81,7 +81,9 @@ export default context => {
       error_confirming_invoice: 'Error confirming invoice',
       bill_expired: 'Bill expired',
       time_is_out: 'Time is out',
-      time_is_limited: 'Time for each bill is limited with 2 hours.'
+      time_is_limited: 'Time for each bill is limited with 2 hours.',
+      simba_redemption: 'Simba redemption',
+      send_simba_now: 'Send SIMBA now'
     },
     dropdown: {
       bill_details: "Bill details",
