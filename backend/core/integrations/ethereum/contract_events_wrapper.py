@@ -84,7 +84,7 @@ class EventsContractWrapper(EthereumBaseContractWrapper):
     async def fetch_blocks(self, from_block: Optional[int] = None) -> List[EthereumTransaction]:
         logging.info(f"Starting fetching contract {self.contract_meta.title} at {datetime.now()}")
         if not from_block:
-            last_block = await EthereumTransactionCRUD.find_last_block()
+            last_block = await EthereumTransactionCRUD.find_last_block(self.contract_meta.title)
             from_block = last_block.get("blockNumber") if last_block else None
 
         if not self.contract_events:

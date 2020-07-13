@@ -11,7 +11,7 @@ __all__ = ["send_btc_to_proceeding_invoices"]
 
 
 @app.task(
-    name="finish_overdue_invoices", bind=True, soft_time_limit=42, time_limit=300,
+    name="send_btc_to_proceeding_invoices", bind=True, soft_time_limit=42, time_limit=300,
 )
 async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
     btc_wrapper = BitcoinWrapper()

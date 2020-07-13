@@ -196,6 +196,9 @@ class InvoiceMechanics(CryptoValidation):
         self._raise_exception_if_exists()
 
         transaction.invoice_id = self.invoice.id
+        transaction.bitcoins_sended = True
+        transaction.user_id = self.user.id if self.user else None
+
         self.invoice.status = InvoiceStatus.PROCESSING
         self.invoice.simba_amount_proceeded = incoming_eth
         self.invoice.add_hash("eth", transaction.transactionHash)

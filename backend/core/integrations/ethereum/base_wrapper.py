@@ -54,8 +54,8 @@ class EthereumBaseContractWrapper(EthereumBaseWrapper):
         _abi = []
         _bin = None
         # Temp fix cause of Infura maintenance
-        # self.w3 = Web3(self.init_web3_provider("ws", contract.provider_ws_link))
-        self.w3 = Web3(self.init_web3_provider("http", contract.provider_http_link))
+        self.w3 = Web3(self.init_web3_provider("ws", contract.provider_ws_link))
+        # self.w3 = Web3(self.init_web3_provider("http", contract.provider_http_link))
         self.contract_meta = contract
         self.contract_address = Web3.toChecksumAddress(contract.address)
 
