@@ -5,20 +5,16 @@ from hexbytes import HexBytes
 from web3 import Web3
 from fastapi import HTTPException
 from sentry_sdk import capture_message
-import requests
 
 from .base_wrapper import EthereumBaseContractWrapper
-from core.utils import get_gas_price
+from core.utils import gas_price_from_ethgasstation
 from schemas import EthereumContract
-from config import GAS_STATION_ENDPOINT, DEFAULT_GAS_PRICE
 
 GAS = 250000
-GAS_PRICE = Web3.toWei(DEFAULT_GAS_PRICE, "gwei")
-
 
 # Is necessary because of initial fee in 50k.
 # If transaction is made with amount less than 50k, error will be raised
-SIMBA_MIN_BASE_AMOUNT = 50000
+SIMBA_BUY_SELL_FEE = 50000
 
 
 class FunctionsContractWrapper(EthereumBaseContractWrapper):
@@ -26,50 +22,67 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         super().__init__(contract)
         self.admin_address = Web3.toChecksumAddress(admin_address)
         self.admin_privkey = admin_private_key
+        self.simba_fee = SIMBA_BUY_SELL_FEE
 
     def _get_nonce(self):
         return self.w3.eth.getTransactionCount(self.admin_address)
 
-    def _approve(self, amount: int, nonce: int) -> HexBytes:
-        tx = self.contract.functions.approve(self.admin_address, amount).buildTransaction(
-            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce,}
-        )
-        signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
-        return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+    @staticmethod
+    async def get_gas_price():
+        actual_gas_price_gwei = await gas_price_from_ethgasstation()
+        return Web3.toWei(actual_gas_price_gwei, "gwei")
+
+    def check_min_amount(self, amount: int, *, func_name: str = None, comment: str = None) -> bool:
+        if amount < self.simba_fee:
+            capture_message(
+                f"trying to {func_name or 'call some contranc func'} < 50k simba, BTC HASH {comment or '?'}"
+            )
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "minimal simba amount to issue - 50,000")
+
+        return True
 
     async def issue_coins(self, customer_address: str, amount: int, comment: str) -> HexBytes:
         """Simba contract"""
-        if amount < SIMBA_MIN_BASE_AMOUNT:
-            capture_message(f"trying to issue < 50k simba,\nETH ADDR: {customer_address}, BTC HASH {comment}")
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "minimal simba amount to issue - 50,000")
+        self.check_min_amount(amount, func_name="issue", comment=comment)
 
         customer_address = Web3.toChecksumAddress(customer_address)
-        nonce = self._get_nonce()
-        # TODO delete self._approve after success testing (after 8/07/2020)
-        # self._approve(amount, nonce)
 
-        gas_price = Web3.toWei(await get_gas_price(), "gwei")
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
             {
                 "gas": GAS,
-                "gasPrice": gas_price if gas_price else GAS_PRICE,
+                "gasPrice": await self.get_gas_price(),
                 "from": self.admin_address,
-                "nonce": nonce
+                "nonce": self._get_nonce()
             }
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
-    def redeem_coins(self):
+    async def redeem_coins(self, amount: int, comment: str):
         """Simba contract"""
-        pass
+        self.check_min_amount(amount, func_name="redeem", comment=comment)
 
-    def freeze_and_transfer(self, customer_address: str, amount: int, period: int):
+        tx = self.contract.functions.redeem(amount, comment).buildTransaction(
+            {
+                "gas": GAS,
+                "gasPrice": await self.get_gas_price(),
+                "from": self.admin_address,
+                "nonce": self._get_nonce()
+            }
+        )
+        signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
+        return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+
+    async def freeze_and_transfer(self, customer_address: str, amount: int, period: int):
         """SST contract"""
         customer_address = Web3.toChecksumAddress(customer_address)
-        nonce = self._get_nonce()
         tx = self.contract.functions.freezeAndTransfer(customer_address, amount, period).buildTransaction(
-            {"gas": GAS, "gasPrice": GAS_PRICE, "from": self.admin_address, "nonce": nonce}
+            {
+                "gas": GAS,
+                "gasPrice": await self.get_gas_price(),
+                "from": self.admin_address,
+                "nonce": self._get_nonce()
+            }
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)

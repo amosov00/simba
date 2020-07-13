@@ -6,10 +6,9 @@ from datetime import datetime
 from fastapi import HTTPException
 from sentry_sdk import capture_message
 
-from .crypto import SimbaWrapper
-from .crypto.base import CryptoValidation
 from database.crud import BTCTransactionCRUD, InvoiceCRUD, EthereumTransactionCRUD
-from core.mechanics.crypto.sst import SSTWrapper
+from core.mechanics.crypto import SSTWrapper, SimbaWrapper, BitcoinWrapper
+from core.mechanics.crypto.base import CryptoValidation
 from database.crud import UserCRUD
 from schemas import (
     User,
@@ -74,6 +73,16 @@ class InvoiceMechanics(CryptoValidation):
                 self.errors.append("user has no target_btc_address")
         return True
 
+    def _validate_for_sending_btc(self):
+        if not self.invoice.status == InvoiceStatus.PROCESSING:
+            self.errors.append("invalid invoice status")
+        if self.invoice.simba_amount_proceeded < self.SIMBA_BUY_SELL_FEE:
+            self.errors.append("too low simba tokens value")
+
+        self._raise_exception_if_exists()
+
+        return True
+
     def validate(self) -> bool:
         self._validate_common()
 
@@ -102,7 +111,7 @@ class InvoiceMechanics(CryptoValidation):
         return incoming_btc
 
     @classmethod
-    def get_incoming_eth(cls, transaction: Union[EthereumTransaction, EthereumTransactionInDB]) -> int:
+    def get_incoming_simba(cls, transaction: Union[EthereumTransaction, EthereumTransactionInDB]) -> int:
         value = 0
 
         if transaction.event == SimbaContractEvents.Transfer:
@@ -115,7 +124,7 @@ class InvoiceMechanics(CryptoValidation):
     ):
         self._raise_exception_if_exists()
         eth_tx_hash = await SimbaWrapper().issue_tokens(
-            self.invoice.target_eth_address, incoming_btc=incoming_btc, comment=transaction.hash
+            self.invoice.target_eth_address, incoming_btc=incoming_btc, btc_tx_hash=transaction.hash
         )
         transaction.simba_tokens_issued = True
         await BTCTransactionCRUD.update_or_insert({"hash": transaction.hash}, transaction.dict())
@@ -124,8 +133,8 @@ class InvoiceMechanics(CryptoValidation):
         self.invoice.btc_amount_proceeded += incoming_btc
         # Incoming BTC - fee (50000)
         self.invoice.simba_amount_proceeded += incoming_btc - 50000
-        self.invoice.eth_tx_hashes = list({*self.invoice.eth_tx_hashes, eth_tx_hash})
-        self.invoice.btc_tx_hashes = list({*self.invoice.btc_tx_hashes, transaction.hash})
+        self.invoice.add_hash("eth", eth_tx_hash)
+        self.invoice.add_hash("btc", transaction.hash)
 
         await self.update_invoice()
         user = await UserCRUD.find_by_id(self.invoice.user_id)
@@ -176,12 +185,9 @@ class InvoiceMechanics(CryptoValidation):
 
         return True
 
-    async def send_bitcoins(self, transaction: Union[EthereumTransaction, EthereumTransactionInDB]):
-        pass
-
     async def proceed_new_eth_transaction(self, transaction: Union[EthereumTransaction, EthereumTransactionInDB]):
         logging.info(f"TX:{transaction}\nINV:{self.invoice.id}")
-        incoming_eth = self.get_incoming_eth(transaction)
+        incoming_eth = self.get_incoming_simba(transaction)
 
         if not incoming_eth:
             capture_message("failed to parse incoming eth from transaction", level="error")
@@ -190,7 +196,12 @@ class InvoiceMechanics(CryptoValidation):
         self._raise_exception_if_exists()
 
         transaction.invoice_id = self.invoice.id
+        transaction.bitcoins_sended = True
+        transaction.user_id = self.user.id if self.user else None
+
         self.invoice.status = InvoiceStatus.PROCESSING
+        self.invoice.simba_amount_proceeded = incoming_eth
+        self.invoice.add_hash("eth", transaction.transactionHash)
 
         await EthereumTransactionCRUD.update_one({"_id": transaction.id}, transaction.dict(exclude={"id"}))
         await self.update_invoice()
@@ -206,3 +217,30 @@ class InvoiceMechanics(CryptoValidation):
 
     async def update_invoice(self):
         return await InvoiceCRUD.update_one({"_id": self.invoice.id}, self.invoice.dict(exclude={"id"}))
+
+    async def send_bitcoins(self):
+        self._validate_for_sending_btc()
+
+        btc_outcoming = self.invoice.simba_amount_proceeded
+
+        btc_tx = await BitcoinWrapper().create_and_sign_transaction(
+            address=self.invoice.target_btc_address, amount=btc_outcoming
+        )
+        if not btc_tx:
+            capture_message(f"failed to get btc tx info from invoice {self.invoice.id}", level="error")
+            return False
+
+        eth_tx_hash = await SimbaWrapper().redeem_tokens(
+            btc_outcoming, btc_tx.hash
+        )
+        btc_tx.simba_tokens_issued = True
+        btc_tx.invoice_id = self.invoice.id
+
+        self.invoice.btc_amount_proceeded = btc_outcoming
+        self.invoice.status = InvoiceStatus.COMPLETED
+        self.invoice.add_hash("eth", eth_tx_hash)
+        self.invoice.add_hash("btc", btc_tx.hash)
+
+        await BTCTransactionCRUD.insert_one(btc_tx.dict())
+        await self.update_invoice()
+        return True

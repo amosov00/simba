@@ -5,8 +5,11 @@ from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request
 
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper, BlockCypherAPIWrapper
 from core.integrations.ethereum import EventsContractWrapper
-from core.mechanics.crypto import SimbaWrapper, SSTWrapper
-from celery_app.tasks import delete_unused_webhooks, finish_overdue_invoices, fetch_and_proceed_simba_contract_cronjob
+from core.mechanics.crypto import SimbaWrapper, SSTWrapper, BitcoinWrapper
+from celery_app.tasks import (
+    delete_unused_webhooks, send_btc_to_proceeding_invoices, fetch_and_proceed_simba_contract_cronjob,
+    fetch_and_proceed_sst_contract_cronjob
+)
 from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD, ReferralCRUD
 from schemas import BlockCypherWebhookInDB, User, ReferralInDB, InvoiceInDB
 from api.dependencies import get_user
@@ -19,7 +22,7 @@ router = APIRouter()
 
 @router.get("/cron/")
 async def debug_get():
-    await fetch_and_proceed_simba_contract_cronjob()
+    await send_btc_to_proceeding_invoices()
     return True
 
 
@@ -51,8 +54,8 @@ async def debug_get(user: User = Depends(get_user)):
 
 @router.get("/simba/")
 async def debug_get():
-    result = await SimbaWrapper().issue_tokens(
-        "0xBeb3EC5BCE587420c00eC547cA2DD5626f497B73", 100000, "manual"
+    result = await SimbaWrapper().redeem_tokens(
+        100000, "e3a671d13607f8512806851e78d92341c33b1efd16093a707d39e95a04cee3a1"
     )
     print(f"SIMBA {result}")
     return None
@@ -65,6 +68,12 @@ async def debug_get():
         "0xBeb3EC5BCE587420c00eC547cA2DD5626f497B73", 15, 250000
     )
     print(f"SST {result.hex()}")
+    return None
+
+
+@router.get("/btc/")
+async def debug_get():
+    res = await BitcoinWrapper().create_and_sign_transaction("mgcEs8CPgX1uJjjyLRbv4vLVuabevKe9LE", 72544)
     return None
 
 

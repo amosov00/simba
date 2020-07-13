@@ -8,13 +8,13 @@ from fastapi import HTTPException
 from core.integrations.blockcypher import BlockCypherAPIWrapper
 from core.integrations.pycoin_wrapper import PycoinWrapper
 from database.crud import UserCRUD, BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
-from schemas import User, InvoiceInDB, InvoiceStatus, BTCTransaction
+from schemas import User, InvoiceInDB, InvoiceStatus, BTCTransaction, BTCAddress
 from .base import CryptoValidation, ParseCryptoTransaction
 from config import BTC_HOT_WALLET_ADDRESS, BTC_HOT_WALLET_WIF, BTC_COLD_WALLET_XPUB
 
 
 class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
-    FEE = 15000
+    FEE = 10000
     BTC_HOT_WALLET_WIF = BTC_HOT_WALLET_WIF
     BTC_HOT_WALLET_ADDRESS = BTC_HOT_WALLET_ADDRESS
 
@@ -25,10 +25,23 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
     @staticmethod
     def _validate_payables(payables: List[Tuple[str, int]]) -> bool:
         # TODO дописать валидацию
+        for payable in payables:
+            if payable[1] == 0:
+                capture_message("Invalid payable amount")
+                raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, "Invalid payable")
+
         return True
 
-    async def proceed_payables(
-            self, destination_payables: Tuple[str, int], address_from: str, fee: Optional[int] = None
+    async def fetch_address_and_save(self, address: str, *, save: bool = True) -> Optional[BTCAddress]:
+        address_info = await self.api_wrapper.fetch_address_info(address)
+
+        if address_info and save:
+            await BTCAddressCRUD.update_or_create(address_info.address, address_info.dict())
+
+        return address_info
+
+    def proceed_payables(
+            self, destination_address: str, amount: int, address_from: str, fee: Optional[int] = None
     ) -> List[Tuple[str, int]]:
         """
         Струкрура payable (address, satoshi)
@@ -37,14 +50,15 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         address from - адрес отправляющего кошелька
         :return:
         """
-        btc_difference = self.service_wallet_balance - destination_payables[1] - fee
-        difference_payables = (address_from, btc_difference)
+        btc_difference = self.service_wallet_balance - amount - fee
+        destination_payable = (destination_address, amount)
+        difference_payable = (address_from, btc_difference)
 
-        return [destination_payables, difference_payables]
+        return [destination_payable, difference_payable]
 
     async def create_and_sign_transaction(
-            self, destination_payables: Tuple[str, int], fee: Optional[int] = None,
-    ):
+            self, address: str, amount: int, fee: Optional[int] = None,
+    ) -> BTCTransaction:
         """
         Payables передавать в форме [(<address_hash>, <btc_amount>), ], btc_amount - in satoshi
         destination_payables - Payable клиентского кошелька
@@ -53,7 +67,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         fee = fee or self.FEE
         self.service_wallet_balance = await self.api_wrapper.current_balance(self.BTC_HOT_WALLET_ADDRESS)
         spendables = await self.api_wrapper.get_spendables(self.BTC_HOT_WALLET_ADDRESS)
-        payables = await self.proceed_payables(destination_payables, self.BTC_HOT_WALLET_ADDRESS, fee)
+        payables = self.proceed_payables(address, amount, self.BTC_HOT_WALLET_ADDRESS, fee)
 
         self._validate_payables(payables)
 
@@ -64,10 +78,12 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
             wifs=[self.BTC_HOT_WALLET_WIF, ],
             fee=fee,
         )
-        return await self.api_wrapper.push_raw_tx(tx)
+        result = await self.api_wrapper.push_raw_tx(tx)
+        result = result.get("tx")
+        return BTCTransaction(**result) if result else None
 
     async def _create_wallet_address(self, invoice: dict):
-        """ Depretaced """
+        """ TODO Deprecated, delete after 15/07/20 """
         resp = await self.api_wrapper.create_wallet_address(1)
 
         if "errors" in resp:
@@ -88,6 +104,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
     async def create_wallet_address(self, invoice: dict, user: User):
         invoice = InvoiceInDB(**invoice)
         created_address = await PycoinWrapper(BTC_COLD_WALLET_XPUB, user=user, invoice=invoice).generate_new_address()
+        await self.fetch_address_and_save(created_address)
         await InvoiceCRUD.update_one({"_id": invoice.id}, {"target_btc_address": created_address})
         return created_address
 

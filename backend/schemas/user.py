@@ -80,7 +80,7 @@ class UserEthereumSignedAddress(BaseModel):
 
 
 class UserBitcoinAddress(BaseModel):
-    address: str = Field(default=None)
+    address: str = Field(...)
     created_at: Optional[datetime] = Field(default=None)
 
     _validate_address = validator("address", allow_reuse=True)(

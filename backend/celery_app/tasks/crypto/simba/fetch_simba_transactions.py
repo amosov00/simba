@@ -15,7 +15,7 @@ async def fetch_and_proceed_simba_contract_cronjob(self, *args, **kwargs):
     await EventsContractWrapper(SIMBA_CONTRACT).fetch_blocks_and_save()
 
     transactions = await EthereumTransactionCRUD.find(
-        {"event": {"$in": SimbaContractEvents.ALL}, "invoice_id": None}
+        {"contract": SIMBA_CONTRACT.title, "event": {"$in": SimbaContractEvents.ALL}, "invoice_id": None}
     )
     for transaction in transactions:
         transaction = EthereumTransactionInDB(**transaction)

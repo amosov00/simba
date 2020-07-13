@@ -23,11 +23,14 @@ class SimbaContractEvents:
 
 
 class SSTContractEvents:
-    pass
+    OnFreezed = "OnFreezed"
+    Transfer = "Transfer"
+    ALL = (OnFreezed, Transfer)
 
 
 class EthereumTransaction(BaseModel):
     invoice_id: ObjectIdPydantic = None
+    user_id: ObjectIdPydantic = None
     bitcoins_sended: bool = False
     address: str = None
     args: dict = None
