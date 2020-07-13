@@ -73,6 +73,12 @@ class Invoice(BaseModel):
     # Validate transaction before processing
     validation_md5_hash: str = Field(default="")
 
+    def add_hash(self, crypto: Literal["eth", "btc"], hash_: str) -> None:
+        if crypto == "eth":
+            self.eth_tx_hashes = list({*self.eth_tx_hashes, hash_})
+        elif crypto == "btc":
+            self.btc_tx_hashes = list({*self.btc_tx_hashes, hash_})
+
 
 class InvoiceInDB(Invoice):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")

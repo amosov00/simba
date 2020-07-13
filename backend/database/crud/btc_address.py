@@ -20,5 +20,5 @@ class BTCAddressCRUD(BaseMongoCRUD):
         )
 
     @classmethod
-    async def update_or_create(cls, _id: Union[ObjectId, ObjectIdPydantic], data: dict):
-        return await cls.update_one({"_id": _id}, data, upsert=True)
+    async def update_or_create(cls, address: str, data: dict):
+        return await cls.update_one({"address": address}, data, upsert=True)

@@ -13,12 +13,13 @@ __all__ = [
 
 
 class BTCAddressTransactions(BaseModel):
-    transactions_hash: int = Field(default=0, alias="tx_hash")
+    transactions_hash: str = Field(default=0, alias="tx_hash", title="tx_hash")
     block_height: int = Field(...)
     value: int = Field(...)
     ref_balance: int = Field(...)
     confirmations: int = Field(...)
     confirmed: datetime = Field(...)
+    double_spend: bool = Field(...)
 
 
 class BTCAddress(BaseModel):
@@ -27,11 +28,13 @@ class BTCAddress(BaseModel):
     address: str = Field(...)
     public_key: str = Field(default=None)
     path: str = Field(default=None)
-    balance: int = Field(...)
-    total_received: int = Field(...)
-    total_sent: int = Field(...)
-    transactions_refs: List[BTCAddressTransactions] = Field(default=[])
-    transactions_number: int = Field(default=0, alias="n_tx")
+    balance: int = Field(default=0)
+    unconfirmed_balance: int = Field(default=0)
+    total_received: int = Field(default=0)
+    total_sent: int = Field(default=0)
+    transactions_number: int = Field(default=0, alias="n_tx", title="n_tx")
+    unconfirmed_transactions_number: int = Field(default=0, alias="unconfirmed_n_tx")
+    transactions_refs: List[BTCAddressTransactions] = Field(default=[], alias="txrefs", title="txrefs")
     created_at: datetime = Field(default=None)
 
 
