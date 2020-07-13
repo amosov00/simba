@@ -15,7 +15,7 @@
           a(:href="'https://etherscan.io/tx/' + tradeData.tx_hash" target="_blank").link {{ tradeData.tx_hash }}
     div.mt-4(v-else)
       div.is-size-5
-        span.has-text-weight-bold {{ simbaFormat(tradeData.simba_issued) }} BTC
+        span.has-text-weight-bold {{ convert(tradeData.simba_issued) }} BTC
       div.is-size-6
         div.mt-2 {{$t('exchange.wallet')}}:
           =' '
@@ -32,13 +32,11 @@
 </template>
 
 <script>
-  import formatCurrency from '~/mixins/formatCurrency'
 
   export default {
     name: 'trade-final',
     data: () => ({
     }),
-    mixins: [formatCurrency],
     computed: {
       tradeData() {
         return this.$store.getters['exchange/tradeData'];
@@ -51,6 +49,16 @@
       numberWithCommas(x) {
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       },
+      convert(simba) {
+
+        let test = (simba/100000000).toFixed(4);
+
+        if(isNaN(test)) {
+          return 0
+        }
+
+        return test
+      }
     }
   }
 </script>

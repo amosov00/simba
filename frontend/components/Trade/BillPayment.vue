@@ -42,6 +42,8 @@
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
             span {{ btc_address }}
+        div.mt-3
+          button.btn(@click="payWithMetamask") Pay with MetaMask
     div.mt-4(v-if="expired")
       div.has-text-weight-bold.is-size-5 {{$t('exchange.bill_expired')}}
       div.mt-3.is-flex.align-items-center
@@ -100,6 +102,15 @@
       confirmInterval: null,
     }),
     methods: {
+      payWithMetamask() {
+        let transferData = {
+          address: this.tradeData.admin_eth_address,
+          amount: this.tradeData.simba
+        }
+
+        let transfer = this.$store.dispatch("contract/transferSimbaToken", transferData);
+      },
+
       stopCountdown() {
         if(this.countdown !== null) {
           clearInterval(this.countdown)

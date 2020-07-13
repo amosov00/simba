@@ -63,6 +63,8 @@ export default context => {
       status: 'Status',
       received_payment: 'Received payment',
       sent_payment: 'Payment sent',
+      choose_btc_wallet: {p1: 'Choose BTC wallet', p2: 'to get coins after redeem'},
+      choose_btc_wallet_error: 'Please choose a BTC wallet',
       transaction_hash: 'Transaction hash',
       confirms: 'Confirmations',
       payment_confirmation_buy: 'As soon as network get 3 confirmations, SIMBA tokens will be issued to your ETH address.',
