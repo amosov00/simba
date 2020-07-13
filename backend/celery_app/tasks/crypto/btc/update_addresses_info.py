@@ -10,6 +10,7 @@ __all__ = ["update_empty_btc_addresses_info"]
     name="update_empty_btc_addresses_info", bind=True, soft_time_limit=42, time_limit=300,
 )
 async def update_empty_btc_addresses_info(self, *args, **kwargs):
+    """Обновление данных кошельков BTC для статистики в transparency"""
     btc_addresses = await BTCAddressCRUD.find_many({
         "transactions_number": 0, "fetch_address": {"$ne": False}
     })

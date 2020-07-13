@@ -5,13 +5,14 @@ from core.integrations.ethereum import EventsContractWrapper
 from core.mechanics import InvoiceMechanics
 from config import SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS
 
-__all__ = ["fetch_and_proceed_simba_contract_cronjob"]
+__all__ = ["fetch_and_proceed_simba_contract"]
 
 
 @app.task(
     name="fetch_and_proceed_simba_contract", bind=True, soft_time_limit=42, time_limit=300,
 )
-async def fetch_and_proceed_simba_contract_cronjob(self, *args, **kwargs):
+async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
+    """Синхронизация с Simba контрактом"""
     await EventsContractWrapper(SIMBA_CONTRACT).fetch_blocks_and_save()
 
     transactions = await EthereumTransactionCRUD.find(

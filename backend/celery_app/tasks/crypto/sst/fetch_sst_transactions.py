@@ -5,13 +5,14 @@ from core.integrations.ethereum import EventsContractWrapper
 from core.mechanics import InvoiceMechanics
 from config import SST_CONTRACT, SST_ADMIN_ADDRESS
 
-__all__ = ["fetch_and_proceed_sst_contract_cronjob"]
+__all__ = ["fetch_and_proceed_sst_contract"]
 
 
 @app.task(
     name="fetch_and_proceed_sst_contract", bind=True, soft_time_limit=42, time_limit=300,
 )
-async def fetch_and_proceed_sst_contract_cronjob(self, *args, **kwargs):
+async def fetch_and_proceed_sst_contract(self, *args, **kwargs):
+    """Синхронизация с SST контрактом"""
     await EventsContractWrapper(SST_CONTRACT).fetch_blocks_and_save()
 
     transactions = await EthereumTransactionCRUD.find(

@@ -97,7 +97,6 @@ class EventsContractWrapper(EthereumBaseContractWrapper):
         return True
 
     async def fetch_blocks(self, from_block: Optional[int] = None) -> List[EthereumTransaction]:
-        logging.info(f"Starting fetching contract {self.contract_meta.title} at {datetime.now()}")
         if not from_block:
             last_block = await EthereumTransactionCRUD.find_last_block(self.contract_meta.title)
             from_block = last_block.get("blockNumber") if last_block else None
@@ -109,7 +108,6 @@ class EventsContractWrapper(EthereumBaseContractWrapper):
             self.last_block = self.contract.web3.eth.blockNumber
 
         self.fetch_blocks_from_block(from_block + 1) if from_block else self.fetch_all_blocks()
-        logging.info(f"{self.contract_meta.title}: {len(self.blocks)} new transactions")
         return self.blocks
 
     async def fetch_blocks_and_save(self, from_block: Optional[int] = None) -> List[EthereumTransaction]:

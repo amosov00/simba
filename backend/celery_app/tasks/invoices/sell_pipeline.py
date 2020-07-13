@@ -14,6 +14,7 @@ __all__ = ["send_btc_to_proceeding_invoices"]
     name="send_btc_to_proceeding_invoices", bind=True, soft_time_limit=42, time_limit=300,
 )
 async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
+    """Крон для завершение пайплайна продажи (отсылка BTC + redeem)"""
     btc_wrapper = BitcoinWrapper()
     hot_wallet_info = await btc_wrapper.fetch_address_and_save(BTC_HOT_WALLET_ADDRESS)
     proceeding_invoices = await InvoiceCRUD.find_many({"status": InvoiceStatus.PROCESSING})

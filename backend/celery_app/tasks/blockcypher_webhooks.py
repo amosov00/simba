@@ -29,9 +29,10 @@ async def delete_unused_webhooks(self, *args, **kwargs):
 
         invoice = InvoiceInDB(**invoice)
 
-        if any(
-                [invoice.status != InvoiceStatus.WAITING, invoice.created_at + timedelta(hours=4) < datetime.now(), ]
-        ):
+        if any([
+            invoice.status != InvoiceStatus.WAITING,
+            invoice.created_at + timedelta(hours=4) < datetime.now()
+        ]):
             await BlockCypherWebhookAPIWrapper().delete_webhook(webhook_in_db["id"])
             await BlockCypherWebhookCRUD.delete_one({"_id": webhook_in_db["_id"]})
             counter += 1

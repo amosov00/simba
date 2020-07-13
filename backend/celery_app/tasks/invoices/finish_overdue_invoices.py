@@ -38,27 +38,19 @@ async def finish_overdue_invoices(self, *args, **kwargs):
             },
         ]
     )
-    tasks = []
     counter = 0
 
     for invoice in invoices:
         invoice = InvoiceExtended(**invoice)
-        if all(
-            [
-                invoice.created_at + INVOICE_TIMEOUT < datetime.now(),
-                not bool(invoice.eth_txs),
-                not bool(invoice.btc_txs),
-            ]
-        ):
-            # Change status
-            tasks.append(InvoiceCRUD.update_one({"_id": invoice.id}, {"status": InvoiceStatus.CANCELLED}))
-            # Delete webhook
-            tasks.append(BlockCypherWebhookHandler().delete_webhook(invoice))
+        if all([
+            invoice.created_at + INVOICE_TIMEOUT < datetime.now(),
+            not bool(invoice.eth_txs),
+            not bool(invoice.btc_txs),
+        ]):
+            await InvoiceCRUD.update_one({"_id": invoice.id}, {"status": InvoiceStatus.CANCELLED})
+            # Delete connected webhook
+            await BlockCypherWebhookHandler().delete_webhook(invoice)
             counter += 1
 
-    if tasks:
-        await asyncio.gather(*tasks)
-
     logging.info(f"Closed {counter} invoices")
-
     return True

@@ -7,8 +7,8 @@ from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper, BlockCyp
 from core.integrations.ethereum import EventsContractWrapper
 from core.mechanics.crypto import SimbaWrapper, SSTWrapper, BitcoinWrapper
 from celery_app.tasks import (
-    delete_unused_webhooks, send_btc_to_proceeding_invoices, fetch_and_proceed_simba_contract_cronjob,
-    fetch_and_proceed_sst_contract_cronjob, update_empty_btc_addresses_info
+    delete_unused_webhooks, send_btc_to_proceeding_invoices, fetch_and_proceed_simba_contract,
+    fetch_and_proceed_sst_contract, update_empty_btc_addresses_info
 )
 from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD, ReferralCRUD
 from schemas import BlockCypherWebhookInDB, User, ReferralInDB, InvoiceInDB
@@ -22,7 +22,7 @@ router = APIRouter()
 
 @router.get("/cron/")
 async def debug_get():
-    await fetch_and_proceed_sst_contract_cronjob()
+    await fetch_and_proceed_sst_contract()
     return True
 
 
