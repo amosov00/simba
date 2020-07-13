@@ -1,4 +1,6 @@
 from typing import Literal, Optional
+from datetime import datetime
+
 from pycoin.coins.Tx import Tx
 
 from schemas import BTCAddress, BTCTransaction
@@ -15,7 +17,7 @@ class BlockCypherAPIWrapper(BlockCypherBaseAPIWrapper):
         res = await self.request(endpoint)
         if not res:
             pass
-        return BTCAddress(**res) if res else None
+        return BTCAddress(**res, created_at=datetime.now()) if res else None
 
     async def fetch_transaction_info(self, transaction_hash: str) -> Optional[BTCTransaction]:
         endpoint = f"/txs/{transaction_hash}/"

@@ -26,7 +26,6 @@ class BTCAddress(BaseModel):
     user_id: ObjectIdPydantic = Field(default=None)
     invoice_id: ObjectIdPydantic = Field(default=None)
     address: str = Field(...)
-    public_key: str = Field(default=None)
     path: str = Field(default=None)
     balance: int = Field(default=0)
     unconfirmed_balance: int = Field(default=0)
@@ -36,6 +35,9 @@ class BTCAddress(BaseModel):
     unconfirmed_transactions_number: int = Field(default=0, alias="unconfirmed_n_tx")
     transactions_refs: List[BTCAddressTransactions] = Field(default=[], alias="txrefs", title="txrefs")
     created_at: datetime = Field(default=None)
+    fetch_address: bool = Field(
+        default=True, description="Try to fetch new address data. Set to false if invoice is cancelled"
+    )
 
 
 class BTCAddressInDB(BTCAddress):
