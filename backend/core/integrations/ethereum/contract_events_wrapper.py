@@ -34,6 +34,8 @@ class EventsContractWrapper(EthereumBaseContractWrapper):
         )
 
     def _fetch_event_blocks_with_filter(self, event_filter: LogFilter, event: str = None) -> bool:
+        """
+        # TODO deal with Infura API bug: getEventFilters
         try:
             for event in event_filter.get_all_entries():
                 block = self.serialize(event)
@@ -44,6 +46,19 @@ class EventsContractWrapper(EthereumBaseContractWrapper):
             # TODO deal with exception code = 1011 (unexpected error), reason = Internal server disconnect error
             capture_exception(e)
             logging.error(e, f"Contract:{self.contract_meta.title}", f"Event:{event}", sep="\n")
+        """
+        log_entries = event_filter._filter_valid_entries(  # noqa
+            event_filter.web3.eth.getLogs(event_filter.filter_params)
+        )
+        try:
+            for event in event_filter._format_log_entries(log_entries):  # noqa
+                block = self.serialize(event)
+                self.blocks.append(
+                    EthereumTransaction(**block, contract=self.contract_meta.title, fetched_at=datetime.now())
+                )
+        except ConnectionClosedError as e:
+            capture_exception(e)
+            pass
 
         return True
 
