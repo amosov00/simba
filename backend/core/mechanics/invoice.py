@@ -226,6 +226,10 @@ class InvoiceMechanics(CryptoValidation):
         btc_tx = await BitcoinWrapper().create_and_sign_transaction(
             address=self.invoice.target_btc_address, amount=btc_outcoming
         )
+        if not btc_tx:
+            capture_message(f"failed to get btc tx info from invoice {self.invoice.id}", level="error")
+            return False
+
         eth_tx_hash = await SimbaWrapper().redeem_tokens(
             btc_outcoming, btc_tx.hash
         )

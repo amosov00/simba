@@ -22,7 +22,7 @@ router = APIRouter()
 
 @router.get("/cron/")
 async def debug_get():
-    await fetch_and_proceed_sst_contract_cronjob()
+    await send_btc_to_proceeding_invoices()
     return True
 
 

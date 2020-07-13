@@ -78,10 +78,9 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
             wifs=[self.BTC_HOT_WALLET_WIF, ],
             fee=fee,
         )
-
         result = await self.api_wrapper.push_raw_tx(tx)
-
-        return BTCTransaction(**result)
+        result = result.get("tx")
+        return BTCTransaction(**result) if result else None
 
     async def _create_wallet_address(self, invoice: dict):
         """ TODO Deprecated, delete after 15/07/20 """
