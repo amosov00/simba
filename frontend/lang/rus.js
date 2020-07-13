@@ -81,7 +81,9 @@ export default context => {
       error_confirming_invoice: 'Произошла ошибка при подтверждении инвойса',
       bill_expired: 'Сделка просрочена',
       time_is_out: 'Время вышло',
-      time_is_limited: 'Время на каждую сделку ограничено 2 часами.'
+      time_is_limited: 'Время на каждую сделку ограничено 2 часами.',
+      simba_redemption: 'Вывод Simba',
+      send_simba_now: 'Отправить SIMBA сейчас'
     },
     dropdown: {
       bill_details: "Реквизиты",

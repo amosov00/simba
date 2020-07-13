@@ -23,7 +23,7 @@
         div.mt-2 {{$t('exchange.transaction_hash')}}:
           =' '
           a(:href="'https://live.blockcypher.com/btc-testnet/tx/' + tradeData.tx_hash" target="_blank").link {{ tradeData.tx_hash }}
-        div.mt-2 Simba redemption:
+        div.mt-2 {{$t('exchange.simba_redemption')}}:
           =' '
           a(:href="'https://etherscan.io/tx/' + tradeData.tx_hash_redeem" target="_blank").link {{ tradeData.tx_hash_redeem }}
     div.mt-4
