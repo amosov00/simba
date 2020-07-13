@@ -3,8 +3,7 @@
     div.main-content.is-flex.flex-column
       div
         n-link(to="/exchange/buysell?op=buy").btn.mr-2 {{ $t('exchange.buy') }}
-        //--n-link(to="/exchange/buysell?op=sell").btn.mr-2 {{ $t('exchange.sell') }}
-        button(disabled).btn.mr-2 {{ $t('exchange.sell') }}
+        n-link(to="/exchange/buysell?op=sell").btn.mr-2 {{ $t('exchange.sell') }}
       h3.title.is-5.mt-4 {{ $t('exchange.last_bills') }}
       div.bills-table.flex-1(:class="{'is-flex': billsToShow.length === 0}")
         div(v-if="billsToShow.length === 0").no-bills {{ $t('exchange.empty_bills') }}

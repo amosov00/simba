@@ -4,14 +4,16 @@ export const state = () => ({
   invoice_id: '',
   operation: 1,
   eth_address: '',
-  btc_target_wallet: '',
+  btc_redeem_wallet: '',
+  admin_eth_address: '',
   simba: 0,
   btc: 0,
   no_create: false,
   btc_amount_proceeded: 0,
   target_eth: '',
   tx_hash: '',
-  simba_issued: 0
+  tx_hash_redeem: '',
+  simba_issued: 0,
 });
 
 export const getters = {
@@ -25,4 +27,12 @@ export const mutations = {
 };
 
 export const actions = {
+  fetchAdminEthAddress({commit}) {
+    return this.$axios.get('/meta/eth/admin-address/')
+      .then(res => {
+        console.log(res.data.address)
+
+        commit('setTradeData', {prop: 'admin_eth_address', value: res.data.address})
+      })
+  }
 };

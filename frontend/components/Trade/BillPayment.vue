@@ -30,7 +30,9 @@
             span.has-text-weight-bold.ml-1 {{ tradeData.simba }} SIMBA
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
-            span {{ updated_invoice_data.target_eth_address }}
+            span {{ tradeData.admin_eth_address }}
+            CopyToClipboard(:value_to_copy="tradeData.admin_eth_address").ml-2
+            TradeQRCode(:qrcode_value="tradeData.admin_eth_address" :amount="parseFloat(tradeData.simba)").ml-1
         div.is-flex.align-items-center.mt-2
           img(src="@/assets/images/bitcoin.svg").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
@@ -109,17 +111,22 @@
 
         this.check = await this.$store.dispatch('invoices/fetchSingle', this.created_invoice_id)
 
-        if(this.check.btc_txs.length > 0) {
-          this.goneToNextStep = true
-          this.stopCountdown();
-          this.$parent.$emit('nextStep')
-          return;
-          /*            if(this.check.btc_txs[0].confirmations > 0 ) {
-                        this.goneToNextStep = true
-                        this.stopCountdown();
-                        this.$parent.$emit('nextStep')
-                        return;
-                      }*/
+        if(this.isBuy) { // Buy
+          if(this.check.btc_txs.length > 0) {
+            this.goneToNextStep = true
+            this.stopCountdown();
+            this.$parent.$emit('nextStep')
+            return;
+          }
+        } else { // Sell
+          if(this.check.eth_txs.length > 0) {
+            if(this.check.eth_txs[0].bitcoins_sended) {
+              this.goneToNextStep = true
+              this.stopCountdown();
+              this.$parent.$emit('nextStep')
+              return;
+            }
+          }
         }
 
         this.updated_invoice_data = JSON.parse(JSON.stringify(this.check));
@@ -142,9 +149,7 @@
         this.$parent.$emit('step_failed')
       })
 
-      /*if(this.multi_props['no_create']) {
-        this.created_transaction = this.multi_props['invoice'];
-      }*/
+      await this.$store.dispatch('exchange/fetchAdminEthAddress')
 
       await this.checkSingle()
 
