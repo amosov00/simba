@@ -147,7 +147,6 @@ class InvoiceMechanics(CryptoValidation):
             self.errors.append("transaction is not confirmed yet")
 
         transaction.invoice_id = self.invoice.id
-        transaction.user_id = self.user.id if self.user else self.invoice.user_id
 
         incoming_btc = self.get_incoming_btc_from_outputs(transaction.outputs, self.invoice.target_btc_address)
 
@@ -197,7 +196,6 @@ class InvoiceMechanics(CryptoValidation):
 
         transaction.invoice_id = self.invoice.id
         transaction.bitcoins_sended = True
-        transaction.user_id = self.user.id if self.user else None
 
         self.invoice.status = InvoiceStatus.PROCESSING
         self.invoice.simba_amount_proceeded = incoming_eth
