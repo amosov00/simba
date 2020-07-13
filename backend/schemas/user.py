@@ -141,6 +141,9 @@ class User(BaseModel):
         return self.email
 
     def has_address(self, crypto: Literal["eth", "btc"], address: str) -> bool:
+        if not address:
+            return False
+
         if crypto == "eth":
             return bool(list(filter(
                 lambda o: o.address.lower() == address.lower(), self.user_eth_addresses
