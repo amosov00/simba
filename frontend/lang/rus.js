@@ -39,8 +39,8 @@ export default context => {
       contacts: "Контакты"
     },
     exchange: {
-      buy: "Купить",
-      sell: "Продать",
+      buy: "Покупка",
+      sell: "Продажа",
       last_bills: "Последние сделки",
       empty_bills: "Список сделок пуст",
       more_bills: "Больше",
@@ -59,11 +59,14 @@ export default context => {
       issued: "отправлено",
       wallet: "Кошелек",
       buy_more: "Купить еще",
+      sell_more: "Продать еще",
       status: 'Статус',
+      sent_payment: 'Платеж отправлен',
       received_payment: 'Получен платеж',
       transaction_hash: 'Хеш транзакции',
       confirms: 'Подтверждений',
       payment_confirmation_buy: 'Как только сеть получит 3 подтверждения, токены SIMBA будут отправлены на ваш ETH адрес.',
+      payment_confirmation_sell: 'Как только сеть получит 3 подтверждения, BTC будут отправлены на ваш адрес.',
       statuses: {
         completed: 'Оплачено',
         created: 'Создан',

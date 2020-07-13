@@ -12,8 +12,8 @@
         //-- img(src="~assets/images/bitcoin.svg").mr-2
       div(v-else).is-flex.align-items-center.flex-1.mr-4
         b-select(placeholder="" expanded v-model="selectedOptions").flex-1.mr-3
-          option(v-for="op in user.user_btc_addresses") {{ op }}
-        a(href="#" @click="addNewWalletModal") add new
+          option(v-for="op in user.user_btc_addresses") {{ op.address }}
+        a(href="#") add new
       button.btn(@click="next") {{ $t('exchange.confirm')}}
     div.mt-2.has-text-danger {{ errors[0] }}
 </template>
@@ -92,6 +92,16 @@
           } else {
             this.saveAddress(data)
           }*/
+        } else {
+          console.log('sell: wallet confirm')
+
+          if(this.selectedOptions.length <= 0) {
+            this.errors.push('Please choose Bitcoin wallet')
+            return
+          }
+
+          this.$store.commit('exchange/setTradeData', { prop: 'btc_redeem_wallet', value: this.selectedOptions })
+          this.$parent.$emit('nextStep')
         }
 
         //this.$parent.$emit('nextStep')
