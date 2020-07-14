@@ -131,7 +131,7 @@
               this.$store.commit('exchange/setTradeData', {prop: 'simba_issued', value: single_res.btc_amount_proceeded})
               this.$store.commit('exchange/setTradeData', { prop: 'btc_redeem_wallet', value: single_res.target_btc_address})
               this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: single_res.btc_txs[0].hash })
-              this.$store.commit('exchange/setTradeData', { prop: 'tx_hash_redeem', value: single_res.eth_txs[0].transactionHash })
+              this.$store.commit('exchange/setTradeData', { prop: 'tx_hash_redeem', value: single_res.eth_txs[0]?.transactionHash || single_res.eth_tx_hashes[0] })
             }
 
             this.tradeData.steps.current = 'Final'

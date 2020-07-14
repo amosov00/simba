@@ -77,7 +77,7 @@ export default context => {
         expired: 'Просрочен'
       },
       error_creating_invoice: 'Произошла ошибка при создании инвойса',
-      error_updating_invoice: 'Произошла ошибка при обновления инвойса',
+      error_updating_invoice: 'Произошла ошибка при обновлении инвойса',
       error_confirming_invoice: 'Произошла ошибка при подтверждении инвойса',
       bill_expired: 'Сделка просрочена',
       time_is_out: 'Время вышло',
