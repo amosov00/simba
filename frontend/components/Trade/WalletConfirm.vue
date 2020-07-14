@@ -1,20 +1,31 @@
 <template lang="pug">
   div
     h3(v-if="isBuy").text-large.has-text-weight-bold {{ $t('exchange.confirm_wallet')}}
-    div(v-else).is-size-6
-      span.has-text-weight-bold {{$t('exchange.choose_btc_wallet.p1')}}
-      = ' '
-      span {{$t('exchange.choose_btc_wallet.p2')}}
     div.is-flex.mt-2.align-items-center.space-between
       div(v-if="isBuy").is-flex.align-items-center
         img(src="~assets/images/eth.svg").mr-2
         div.text-large {{ eth_address }}
         //-- img(src="~assets/images/bitcoin.svg").mr-2
-      div(v-else).is-flex.align-items-center.flex-1.mr-4
-        b-select(placeholder="" expanded v-model="selectedOptions").flex-1.mr-3
-          option(v-for="op in user.user_btc_addresses") {{ op.address }}
-        a(href="#" @click="addNewWalletModal") {{$t('wallet.add_wallet')}}
-      button.btn(@click="next") {{ $t('exchange.confirm')}}
+      div(v-else)
+        //-- div.is-size-6.mb-1
+          span.has-text-weight-bold Choose ETH wallet
+          = ' '
+          span to sell SIMBA
+        //-- div.is-flex.align-items-center.mr-4
+          b-select(expanded v-model="selectedOptions_eth").mr-3.wallet-select
+            option(v-for="op in user.user_eth_addresses") {{ op.address }}
+          a(href="#" @click="addNewWalletModal") {{$t('wallet.add_wallet')}}
+        div.is-size-6.mt-4.mb-1
+          span.has-text-weight-bold {{$t('exchange.choose_btc_wallet.p1')}}
+          = ' '
+          span {{$t('exchange.choose_btc_wallet.p2')}}
+        div.is-flex.align-items-center.mr-4
+          b-select(expanded v-model="selectedOptions").mr-3.wallet-select
+            option(v-for="op in user.user_btc_addresses") {{ op.address }}
+          a(href="#" @click="addNewWalletModal") {{$t('wallet.add_wallet')}}
+        div.mt-4
+          button.btn(@click="next") {{ $t('exchange.confirm')}}
+      button.btn(@click="next" v-if="isBuy") {{ $t('exchange.confirm')}}
     div.mt-2.has-text-danger {{ errors[0] }}
 </template>
 
@@ -25,6 +36,7 @@
     name: 'trade-wallet-confirm',
     data: () => ({
       selectedOptions: '',
+      selectedOptions_eth: '',
       errors: []
     }),
 
@@ -87,6 +99,11 @@
             return
           }
 
+          if(this.selectedOptions.length <= 0) {
+            this.errors.push('Please choose ETH wallet!')
+            return
+          }
+
           this.$store.commit('exchange/setTradeData', { prop: 'btc_redeem_wallet', value: this.selectedOptions })
           this.$parent.$emit('nextStep')
         }
@@ -96,4 +113,15 @@
 </script>
 
 <style lang="sass">
+  .wallet-select
+    width: 500px
+    .select
+      select
+        border: 1px solid rgba(0,0,0,0)
+        border-bottom: 1px solid #E5E5E5
+        &:focus
+          border: 1px solid #0060FF
+          box-shadow: none
+        &:hover
+          border-bottom: 1px solid #0060FF
 </style>
