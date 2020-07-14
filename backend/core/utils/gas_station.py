@@ -1,11 +1,13 @@
 import httpx
-from config import GAS_STATION_ENDPOINT, DEFAULT_GAS_PRICE
+from config import GASSTATION_API_TOKEN, DEFAULT_GAS_PRICE
+
+GASSTATION_URL = "https://ethgasstation.info/api/ethgasAPI.json?api-key="
 
 
 async def gas_price_from_ethgasstation() -> str:
     async with httpx.AsyncClient() as client:
         try:
-            gas_station_req = (await client.get(GAS_STATION_ENDPOINT)).json()
+            gas_station_req = (await client.get(GASSTATION_URL + GASSTATION_API_TOKEN)).json()
         except Exception:
             gas_station_req = None
 
