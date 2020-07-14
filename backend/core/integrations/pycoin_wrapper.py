@@ -2,7 +2,7 @@ from datetime import datetime
 
 from database.crud import BTCAddressCRUD
 from schemas import BTCAddressInDB, BTCAddress, User, InvoiceInDB, BTCXPUB
-from config import IS_PRODUCTION, BTC_COLD_WALLETS, BTC_COLD_XPUB_UAE
+from config import IS_PRODUCTION, BTC_COLD_WALLETS, BTC_COLD_XPUB_SWISS
 
 if IS_PRODUCTION:
     from pycoin.symbols.btc import network
@@ -28,7 +28,7 @@ class PycoinWrapper:
 
     @staticmethod
     def _get_cold_wallet() -> BTCXPUB:
-        return BTC_COLD_XPUB_UAE
+        return BTC_COLD_XPUB_SWISS
 
     @staticmethod
     async def _get_last_path_index():
