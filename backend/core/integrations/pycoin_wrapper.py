@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from database.crud import BTCAddressCRUD
-from schemas import BTCAddressInDB, BTCAddress, User, InvoiceInDB
-from config import IS_PRODUCTION
+from schemas import BTCAddressInDB, BTCAddress, User, InvoiceInDB, BTCXPUB
+from config import IS_PRODUCTION, BTC_COLD_WALLETS, BTC_COLD_XPUB_UAE
 
 if IS_PRODUCTION:
     from pycoin.symbols.btc import network
@@ -13,8 +13,11 @@ __all__ = ["PycoinWrapper"]
 
 
 class PycoinWrapper:
-    def __init__(self, xpub: str, *, user: User, invoice: InvoiceInDB):
-        self.key = network.parse.bip32(xpub)
+    def __init__(self, *, user: User, invoice: InvoiceInDB):
+        self.cold_wallet = self._get_cold_wallet()
+        assert self.cold_wallet.xpub is not None
+
+        self.key = network.parse.bip32(self.cold_wallet.xpub)
         self.user = user or None
         self.invoice = invoice or None
 
@@ -23,13 +26,17 @@ class PycoinWrapper:
         path = "/".join([str(i) for i in indexes])
         return path if not include_m else f"m/{path}"
 
-    def _generate_subkey(self, path: str):
-        return self.key.subkey_for_path(path)
+    @staticmethod
+    def _get_cold_wallet() -> BTCXPUB:
+        return BTC_COLD_XPUB_UAE
 
     @staticmethod
     async def _get_last_path_index():
         last_address = await BTCAddressCRUD.find_latest()
         return last_address.get("path") if last_address else None
+
+    def _generate_subkey(self, path: str):
+        return self.key.subkey_for_path(path)
 
     async def _generate_new_path(self):
         last_path = await self._get_last_path_index()
@@ -56,7 +63,8 @@ class PycoinWrapper:
             total_sent=0,
             total_received=0,
             n_tx=0,
-            created_at=datetime.now()
+            created_at=datetime.now(),
+            cold_wallet_title=self.cold_wallet.title
         )
         await BTCAddressCRUD.insert_one(new_address.dict())
         return True

@@ -10,7 +10,7 @@ from core.integrations.pycoin_wrapper import PycoinWrapper
 from database.crud import UserCRUD, BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
 from schemas import User, InvoiceInDB, InvoiceStatus, BTCTransaction, BTCAddress, ObjectIdPydantic
 from .base import CryptoValidation, ParseCryptoTransaction
-from config import BTC_HOT_WALLET_ADDRESS, BTC_HOT_WALLET_WIF, BTC_COLD_WALLET_XPUB
+from config import BTC_HOT_WALLET_ADDRESS, BTC_HOT_WALLET_WIF
 
 
 class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
@@ -113,7 +113,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
 
     async def create_wallet_address(self, invoice: dict, user: User):
         invoice = InvoiceInDB(**invoice)
-        created_address = await PycoinWrapper(BTC_COLD_WALLET_XPUB, user=user, invoice=invoice).generate_new_address()
+        created_address = await PycoinWrapper(user=user, invoice=invoice).generate_new_address()
         await self.fetch_address_and_save(created_address, invoice_id=invoice.id, user_id=user.id)
         await InvoiceCRUD.update_one({"_id": invoice.id}, {"target_btc_address": created_address})
         return created_address
