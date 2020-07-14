@@ -9,6 +9,7 @@ __all__ = [
     "BTCAddress",
     "BTCAddressInDB",
     "BTCAddressTransactions",
+    "BTCXPUB"
 ]
 
 
@@ -38,7 +39,13 @@ class BTCAddress(BaseModel):
     fetch_address: bool = Field(
         default=True, description="Try to fetch new address data. Set to false if invoice is cancelled"
     )
+    cold_wallet_title: str = Field(default=None)
 
 
 class BTCAddressInDB(BTCAddress):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
+
+
+class BTCXPUB(BaseModel):
+    title: str = None
+    xpub: str = None
