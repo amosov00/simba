@@ -34,6 +34,7 @@ class EthereumTransaction(BaseModel):
     bitcoins_sended: bool = False
     address: str = None
     args: dict = None
+    confirmations: int = None
     blockHash: Union[str] = None
     blockNumber: int = None
     logIndex: int = None

@@ -53,6 +53,7 @@ class EventsContractWrapper(EthereumBaseContractWrapper):
         try:
             for event in event_filter._format_log_entries(log_entries):  # noqa
                 block = self.serialize(event)
+                block["confirmations"] = self.last_block - block["blockNumber"]
                 self.blocks.append(
                     EthereumTransaction(**block, contract=self.contract_meta.title, fetched_at=datetime.now())
                 )
@@ -91,7 +92,7 @@ class EventsContractWrapper(EthereumBaseContractWrapper):
             EthereumTransactionCRUD.update_or_create(
                 transaction_hash=block.transactionHash, log_index=block.logIndex, payload=block.dict()
             )
-            for block in self.blocks
+            for block in list(filter(lambda o: o.confirmations >= self.min_confirmations, self.blocks))
         ]
         await asyncio.gather(*tasks)
         return True

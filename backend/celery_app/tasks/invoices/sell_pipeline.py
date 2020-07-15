@@ -27,7 +27,7 @@ async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
         user = await UserCRUD.find_by_id(invoice.id)
 
         if invoice.simba_amount_proceeded > hot_wallet_info.balance:
-            logging.info(f"Not enough btc on hot wallet to pay Invoice {invoice.id}")
+            logging.warning(f"Not enough btc on hot wallet to pay Invoice {invoice.id}")
             break
 
         await InvoiceMechanics(invoice, user).send_bitcoins()
