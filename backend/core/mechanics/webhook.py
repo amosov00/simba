@@ -29,9 +29,10 @@ class BlockCypherWebhookHandler:
 
     @staticmethod
     async def _check_if_webhook_exists(wallet_address: str, transaction_hash: str):
-        return bool(await BlockCypherWebhookCRUD.find_one(
-            {"$or": [{"address": wallet_address}, {"hash": transaction_hash}]}
-        ))
+        or_query = []
+        or_query.append({"address": wallet_address}) if wallet_address else None
+        or_query.append({"hash": transaction_hash}) if transaction_hash else None
+        return bool(await BlockCypherWebhookCRUD.find_one({"$or": or_query}))
 
     async def create_webhook(
             self,
