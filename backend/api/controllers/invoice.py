@@ -116,10 +116,10 @@ async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
     InvoiceMechanics(invoice, user).validate()
 
     invoice.status = InvoiceStatus.WAITING
-    await InvoiceCRUD.update_invoice_not_safe(invoice.id, user.id, {"status": InvoiceStatus.WAITING})
     await BlockCypherWebhookHandler().create_webhook(
         invoice=invoice,
         event=BlockCypherWebhookEvents.TX_CONFIMATION,
         wallet_address=invoice.target_btc_address,
     )
+    await InvoiceCRUD.update_invoice_not_safe(invoice.id, user.id, {"status": InvoiceStatus.WAITING})
     return invoice
