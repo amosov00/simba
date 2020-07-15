@@ -53,7 +53,7 @@
 
     methods: {
       getStatus(item) {
-        if(item.status === 'waiting') {
+        if(item.status === 'waiting' || item.status === 'processing' || item.status === 'created') {
           let current = +Date.now();
           let dt = +moment.utc(item.created_at).toDate();
 

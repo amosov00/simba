@@ -115,6 +115,14 @@
         }
       },
 
+      checkMinimum() {
+        if(this.btc < 0.002 || this.simba < 200000) {
+          this.error = true
+        } else {
+          this.error = false
+        }
+      },
+
       convert() {
         if(this.isConverting) {
           return
@@ -127,6 +135,8 @@
         } else {
           this.btc = test;
         }
+
+        this.checkMinimum()
       },
 
       convertBTCtoSimba(e) {
@@ -143,6 +153,7 @@
         }
 
         this.isConverting = false
+        this.checkMinimum()
       }
     }
   }

@@ -26,7 +26,7 @@
           div.wallet-content__fee {{ $t('other.fee') }}: 5,000 SIMBA
           div.is-size-6.has-text-weight-bold {{ $t('other.total') }}: {{totalAmount}} SIMBA
             =' '
-            span.subtitle.is-size-6.has-text-grey (0 USDT / {{totalBTC}} BTC)
+            span.subtitle.is-size-6.has-text-grey ({{totalUSDT}} USDT / {{totalBTC}} BTC)
         div.wallet-content__btn-wrap
           button(@click="transferFunds").btn.w-100 {{ $t('other.send') }} SIMBA
     hr.mt-4
@@ -66,6 +66,15 @@ export default {
       });
     }
   },
+
+  async asyncData({$axios}) {
+    let btc_to_usdt = await $axios
+      .get("https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USDT")
+      .then(res => res.data.USDT);
+
+    return { btc_to_usdt }
+  },
+
   computed: {
     selectedAddress() {
       if (window.ethereum) {
@@ -78,6 +87,9 @@ export default {
       return this.transferData.amount > 0
         ? this.transferData.amount * 1 + 5000
         : 0;
+    },
+    totalUSDT() {
+      return (this.totalBTC * this.btc_to_usdt).toFixed(2)
     },
     totalBTC() {
       return (this.transferData.amount * 1) / 100000000;

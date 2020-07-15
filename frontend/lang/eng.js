@@ -74,7 +74,8 @@ export default context => {
         created: 'Created',
         waiting: 'Waiting',
         cancelled: 'Cancelled',
-        expired: 'Expired'
+        expired: 'Expired',
+        processing: 'Processing'
       },
       error_creating_invoice: 'Error creating invoice',
       error_updating_invoice: 'Error updating invoice',

@@ -7,22 +7,22 @@
         div.text-large {{ eth_address }}
         //-- img(src="~assets/images/bitcoin.svg").mr-2
       div(v-else)
-        //-- div.is-size-6.mb-1
+        div.is-size-6.mb-1
           span.has-text-weight-bold Choose ETH wallet
           = ' '
-          span to sell SIMBA
-        //-- div.is-flex.align-items-center.mr-4
+          span.has-text-grey-light to sell SIMBA
+        div.is-flex.align-items-center.mr-4
           b-select(expanded v-model="selectedOptions_eth").mr-3.wallet-select
             option(v-for="op in user.user_eth_addresses") {{ op.address }}
-          a(href="#" @click="addNewWalletModal") {{$t('wallet.add_wallet')}}
+          a(href="#" @click="addNewWalletModal('eth')") {{$t('wallet.add_wallet')}}
         div.is-size-6.mt-4.mb-1
           span.has-text-weight-bold {{$t('exchange.choose_btc_wallet.p1')}}
           = ' '
-          span {{$t('exchange.choose_btc_wallet.p2')}}
+          span.has-text-grey-light {{$t('exchange.choose_btc_wallet.p2')}}
         div.is-flex.align-items-center.mr-4
           b-select(expanded v-model="selectedOptions").mr-3.wallet-select
             option(v-for="op in user.user_btc_addresses") {{ op.address }}
-          a(href="#" @click="addNewWalletModal") {{$t('wallet.add_wallet')}}
+          a(href="#" @click="addNewWalletModal('btc')") {{$t('wallet.add_wallet')}}
         div.mt-4
           button.btn(@click="next") {{ $t('exchange.confirm')}}
       button.btn(@click="next" v-if="isBuy") {{ $t('exchange.confirm')}}
@@ -56,13 +56,12 @@
     },
 
     methods: {
-      addNewWalletModal() {
+      addNewWalletModal(type) {
         this.$buefy.modal.open({
           parent: this,
           component: AddNewWallet,
-          hasModalCard: true,
           trapFocus: true,
-          props: { type: 'btc' }
+          props: { type }
         });
       },
 
@@ -94,13 +93,15 @@
           this.saveAddress(data)
         } else {
 
-          if(this.selectedOptions.length <= 0) {
-            this.errors.push(this.$i18n.t('exchange.choose_btc_wallet_error'))
+          this.errors = []
+
+          if(this.selectedOptions_eth.length < 1) {
+            this.errors.push('Please choose ETH wallet!')
             return
           }
 
-          if(this.selectedOptions.length <= 0) {
-            this.errors.push('Please choose ETH wallet!')
+          if(this.selectedOptions.length < 1) {
+            this.errors.push(this.$i18n.t('exchange.choose_btc_wallet_error'))
             return
           }
 

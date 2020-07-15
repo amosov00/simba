@@ -74,7 +74,8 @@ export default context => {
         created: 'Создан',
         waiting: 'В ожидании',
         cancelled: 'Отменен',
-        expired: 'Просрочен'
+        expired: 'Просрочен',
+        processing: 'В обработке'
       },
       error_creating_invoice: 'Произошла ошибка при создании инвойса',
       error_updating_invoice: 'Произошла ошибка при обновлении инвойса',

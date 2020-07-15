@@ -50,7 +50,6 @@ export default {
       this.$buefy.modal.open({
         parent: this,
         component: AddNewWallet,
-        hasModalCard: true,
         trapFocus: true,
         props: { type }
       });
