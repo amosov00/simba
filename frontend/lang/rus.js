@@ -63,12 +63,13 @@ export default context => {
       status: 'Статус',
       sent_payment: 'Платеж отправлен',
       choose_btc_wallet: {p1: 'Выберите BTC кошелек', p2: 'для вывода'},
+      choose_eth_wallet: {p1: 'Выберите ETH кошелек', p2: 'для продажи SIMBA'},
       choose_btc_wallet_error: 'Пожалуйста выберите BTC кошелек',
       received_payment: 'Получен платеж',
       transaction_hash: 'Хеш транзакции',
       confirms: 'Подтверждений',
       payment_confirmation_buy: 'Как только сеть получит 3 подтверждения, токены SIMBA будут отправлены на ваш ETH адрес.',
-      payment_confirmation_sell: 'Как только сеть получит 3 подтверждения, BTC будут отправлены на ваш адрес.',
+      payment_confirmation_sell: 'Как только сеть получит {min_confirms} подтверждение(-я), BTC будут отправлены на ваш адрес.',
       statuses: {
         completed: 'Оплачено',
         created: 'Создан',
@@ -84,7 +85,9 @@ export default context => {
       time_is_out: 'Время вышло',
       time_is_limited: 'Время на каждую сделку ограничено 2 часами.',
       simba_redemption: 'Вывод Simba',
-      send_simba_now: 'Отправить SIMBA сейчас'
+      send_simba_now: 'Отправить SIMBA сейчас',
+      applied_fee: 'Комиссия',
+      fee_in_simba: '(взымается в SIMBA)'
     },
     dropdown: {
       bill_details: "Реквизиты",
@@ -186,8 +189,21 @@ export default context => {
       address_failed_with_pin: 'Ошибка при добавлении адреса, убедитесь что адрес и пин-код введены верно!',
       address_failed_to_add: 'Ошибка: убедитесь что адрес введен корректно, возможно данный адрес уже существует',
       failed_to_get_signature: 'Не удалось получить подпись!',
+      new_eth_wallet_instruct: {
+        text1: 'Для добавления нового адреса, нажмите кнопку "Добавить"',
+        text2: 'Если вы делаете это в первый раз, пожалуйста установите расширение {metamask}',
+        text3: 'Для мобильных устройств мы рекомендуем {metamask} или приложение {imtoken}'
+      },
+      eth_wallet_switch_info: 'чтобы изменить адрес измените его в вашем кошельке',
+      new_btc_wallet_instruct: {
+        text1: 'Добавляя BTC-адрес вашего кошелька, вы подтверждаете что ввели правильный адрес',
+        text2: 'За полную и безвозвратную потерю средств при выводе на эти адреса вы берете ответственность на себя.'
+      },
+      security_verification: 'Подтверждение',
+      confirm_verification: 'Для завершения, пройдите подтверждение вводом пин-кода'
     },
     other: {
+      confirm: 'Подтвердить',
       try_again: 'Попробовать еще раз',
       add: 'Добавить',
       date: "Дата",

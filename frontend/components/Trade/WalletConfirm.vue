@@ -8,9 +8,9 @@
         //-- img(src="~assets/images/bitcoin.svg").mr-2
       div(v-else)
         div.is-size-6.mb-1
-          span.has-text-weight-bold Choose ETH wallet
+          span.has-text-weight-bold {{$t('exchange.choose_eth_wallet.p1')}}
           = ' '
-          span.has-text-grey-light to sell SIMBA
+          span.has-text-grey-light {{$t('exchange.choose_eth_wallet.p2')}}
         div.is-flex.align-items-center.mr-4
           b-select(expanded v-model="selectedOptions_eth").mr-3.wallet-select
             option(v-for="op in user.user_eth_addresses") {{ op.address }}

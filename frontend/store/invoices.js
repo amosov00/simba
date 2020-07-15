@@ -29,7 +29,7 @@ export const actions = {
   async updateTransaction({}, data) {
     let data_to_send = {
       "target_eth_address": data.eth_address,
-      "btc_amount": data.simba_amount,
+      "btc_amount": data.btc_amount,
       "simba_amount": data.simba_amount,
     }
 

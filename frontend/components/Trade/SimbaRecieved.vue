@@ -11,11 +11,13 @@
       b-loading(:active.sync="confirms_loading" :is-full-page="false")
     div.mt-4
       div {{$t('exchange.verify_auto')}}
-      div.mt-1 {{$t('exchange.payment_confirmation_sell')}}
+      div.mt-1 {{ $t('exchange.payment_confirmation_sell', {min_confirms}) }}
 </template>
 
 <script>
   import formatCurrency from '~/mixins/formatCurrency'
+
+  import invoiceMixins from "~/mixins/invoiceMixins";
 
   export default {
     name: 'trade-btc-sent',
@@ -27,9 +29,13 @@
       min_confirms: 3,
       currentConfirms: 0
     }),
-    mixins: [formatCurrency],
+    mixins: [formatCurrency, invoiceMixins],
 
     computed: {
+      isProd() {
+        return process.env.NODE_ENV === 'production'
+      },
+
       tradeData() {
         return this.$store.getters['exchange/tradeData']
       },
@@ -40,9 +46,10 @@
 
       let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id);
       this.received_payment_amount = res.simba_amount_proceeded
+      this.currentConfirms = this.findEthTransactionByEvent(res, 'Transfer')?.confirmations
 
-      if(res.eth_tx_hashes.length > 0 && res.eth_txs.length > 0) {
-        this.tx_hash = res.eth_txs[0].transactionHash
+      if(res.eth_txs.length > 0) {
+        this.tx_hash = this.findEthTransactionByEvent(res, 'Transfer')?.transactionHash || ''
       }
     },
 
@@ -56,10 +63,12 @@
         this.loadingSpinner()
         let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id)
 
+        let desired_tx = this.findEthTransactionByEvent(res, 'Transfer')
+
+        this.currentConfirms = desired_tx?.confirmations
+
         if(res.btc_txs.length > 0) {
           if(res.btc_txs[0].simba_tokens_issued) {
-            this.currentConfirms = 1
-
             this.$store.commit('exchange/setTradeData', { prop: 'simba_issued', value: res.btc_amount_proceeded})
             this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: res.btc_txs[0].hash })
 

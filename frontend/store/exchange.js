@@ -30,8 +30,6 @@ export const actions = {
   fetchAdminEthAddress({commit}) {
     return this.$axios.get('/meta/eth/admin-address/')
       .then(res => {
-        console.log(res.data.address)
-
         commit('setTradeData', {prop: 'admin_eth_address', value: res.data.address})
       })
   }

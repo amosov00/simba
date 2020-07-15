@@ -19,7 +19,7 @@
       div {{$t('exchange.verify_auto')}}
       div
         div(v-if="isBuy").mt-1 {{$t('exchange.payment_confirmation_buy')}}
-        div(v-else).mt-1 {{$t('exchange.payment_confirmation_sell')}}
+        div(v-else).mt-1 {{$t('exchange.payment_confirmation_sell', {min_confirms})}}
 </template>
 
 <script>
@@ -51,7 +51,7 @@
 
       if(res.btc_txs.length > 0) {
         this.currentConfirms = res.btc_txs[0].confirmations
-        this.tx_hash = res.eth_tx_hashes[0] || ''
+        //this.tx_hash = res.btc_tx_hashes[0] || ''
       }
 
       if(this.isBuy) {
@@ -62,7 +62,7 @@
       } else {
         if(res.eth_txs.length > 0) {
           this.currentConfirms = res.btc_txs[0].confirmations
-          this.tx_hash = res.eth_txs[0].transactionHash || ''
+          this.tx_hash = res.btc_txs[0].hash || ''
         }
       }
     },
@@ -90,7 +90,7 @@
             this.$parent.$emit('nextStep')
           }
         } else {
-          this.currentConfirms = 1
+          this.currentConfirms = res.btc_txs[0].confirmations
           if(res.btc_tx_hashes.length > 0 && res.status === 'completed') {
             this.$store.commit('exchange/setTradeData', { prop: 'btc_redeem_wallet', value: res.target_btc_address})
             this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: res.btc_txs[0].hash })
