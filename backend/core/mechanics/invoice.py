@@ -80,6 +80,10 @@ class InvoiceMechanics(CryptoValidation):
             self.errors.append("invalid invoice status")
         if self.invoice.simba_amount_proceeded < self.SIMBA_BUY_SELL_FEE:
             self.errors.append("too low simba tokens value")
+        if self.invoice.simba_amount_proceeded == self.invoice.btc_amount_proceeded:
+            self.errors.append("btc are already sent")
+        if self.invoice.btc_tx_hashes:
+            self.errors.append("btc txs are already exist")
 
         self._raise_exception_if_exists()
 
