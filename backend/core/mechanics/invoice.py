@@ -25,6 +25,7 @@ from schemas import (
     SimbaContractEvents,
     BlockCypherWebhookEvents,
 )
+from config import SIMBA_BUY_SELL_FEE
 
 
 class InvoiceMechanics(CryptoValidation):
@@ -80,7 +81,7 @@ class InvoiceMechanics(CryptoValidation):
             self.errors.append("invalid invoice status")
         if self.invoice.simba_amount_proceeded < self.SIMBA_BUY_SELL_FEE:
             self.errors.append("too low simba tokens value")
-        if self.invoice.simba_amount_proceeded == self.invoice.btc_amount_proceeded:
+        if self.invoice.simba_amount_proceeded == self.invoice.btc_amount_proceeded + SIMBA_BUY_SELL_FEE:
             self.errors.append("btc are already sent")
         if self.invoice.btc_tx_hashes:
             self.errors.append("btc txs are already exist")
@@ -137,8 +138,8 @@ class InvoiceMechanics(CryptoValidation):
         self.invoice.status = InvoiceStatus.COMPLETED
         self.invoice.finised_at = datetime.now()
         self.invoice.btc_amount_proceeded += incoming_btc
-        # Incoming BTC - fee (50000)
-        self.invoice.simba_amount_proceeded += incoming_btc - 50000
+        # Subtract fee
+        self.invoice.simba_amount_proceeded += incoming_btc - SIMBA_BUY_SELL_FEE
         self.invoice.add_hash("eth", eth_tx_hash)
         self.invoice.add_hash("btc", transaction.hash)
 
@@ -287,20 +288,22 @@ class InvoiceMechanics(CryptoValidation):
     async def send_bitcoins(self):
         self._validate_for_sending_btc()
 
-        btc_outcoming = self.invoice.simba_amount_proceeded
+        btc_outcoming_without_fee = self.invoice.simba_amount_proceeded
+        btc_outcoming_with_fee = btc_outcoming_without_fee - SIMBA_BUY_SELL_FEE
 
         btc_tx = await BitcoinWrapper().create_and_sign_transaction(
-            address=self.invoice.target_btc_address, amount=btc_outcoming
+            address=self.invoice.target_btc_address, amount=btc_outcoming_with_fee
         )
         if not btc_tx:
             capture_message(f"failed to get btc tx info from invoice {self.invoice.id}", level="error")
             return False
 
-        eth_tx_hash = await SimbaWrapper().redeem_tokens(btc_outcoming, btc_tx.hash)
+        # send without fee cause of double charge
+        eth_tx_hash = await SimbaWrapper().redeem_tokens(btc_outcoming_without_fee, btc_tx.hash)
         btc_tx.simba_tokens_issued = True
         btc_tx.invoice_id = self.invoice.id
 
-        self.invoice.btc_amount_proceeded = btc_outcoming
+        self.invoice.btc_amount_proceeded = btc_outcoming_with_fee
         self.invoice.add_hash("eth", eth_tx_hash)
         self.invoice.add_hash("btc", btc_tx.hash)
 
