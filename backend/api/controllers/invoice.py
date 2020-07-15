@@ -14,12 +14,11 @@ from schemas import (
     InvoiceExtended,
     InvoiceStatus,
     InvoiceType,
-    InvoiceTransactionManual,
     INVOICE_MODEL_EXCLUDE_FIELDS,
     BlockCypherWebhookEvents,
 )
 from schemas.user import User
-from core.mechanics import BitcoinWrapper, SimbaWrapper, InvoiceMechanics, BlockCypherWebhookHandler
+from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler
 
 __all__ = ["router"]
 
@@ -28,7 +27,7 @@ router = APIRouter()
 
 @router.post("/", response_model=InvoiceInDB, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS)
 async def create_invoice(
-        background_tasks: BackgroundTasks, user: User = Depends(get_user), data: InvoiceCreate = Body(...),
+        user: User = Depends(get_user), data: InvoiceCreate = Body(...),
 ):
     invoice = Invoice(user_id=user.id, status=InvoiceStatus.CREATED, invoice_type=data.invoice_type)
 
@@ -99,39 +98,6 @@ async def invoice_update(invoice_id: str, user: User = Depends(get_user), payloa
 
     return await InvoiceCRUD.update_invoice(invoice_id, user, payload, filtering_statuses=(InvoiceStatus.CREATED,))
 
-# TODO deprecated, delete after 10/07/2020 if is unnecessary
-# @router.post("/{invoice_id}/transaction/")
-# async def invoice_add_transaction(
-#         invoice_id: str, user: User = Depends(get_user), payload: InvoiceTransactionManual = Body(...)
-# ):
-#     invoice = await InvoiceCRUD.find_invoice_safely(
-#         invoice_id, user.id, filtering_statuses=(InvoiceStatus.WAITING, InvoiceStatus.COMPLETED),
-#     )
-#
-#     invoice = InvoiceInDB(**invoice)
-#     response = {}
-#
-#     if invoice.invoice_type == InvoiceType.BUY and payload.btc_transaction_hash:
-#         btc_transaction = await BitcoinWrapper().fetch_transaction(invoice, payload.btc_transaction_hash)
-#         if not btc_transaction:
-#             raise HTTPException(HTTPStatus.NOT_FOUND, "transation is not found")
-#
-#         invoice_mechanics = InvoiceMechanics(invoice)
-#         invoice_mechanics.validate()
-#         await invoice_mechanics.proceed_new_transaction(btc_transaction)
-#
-#         response.update(
-#             {"success": True, }
-#         )
-#
-#     elif invoice.invoice_type == InvoiceType.SELL and payload.eth_transaction_hash:
-#         pass
-#
-#     else:
-#         raise HTTPException(HTTPStatus.BAD_REQUEST, "Payload doesn't match invoice type")
-#
-#     return response
-
 
 @router.post(
     "/{invoice_id}/confirm/", response_model=InvoiceInDB, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS
@@ -153,11 +119,3 @@ async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
         wallet_address=invoice.target_btc_address,
     )
     return invoice
-
-# TODO update_invoice was change, need to refactor it
-# @router.post("/{invoice_id}/cancel/")
-# async def invoice_cancel(invoice_id: str, user: User = Depends(get_user)):
-#     await InvoiceCRUD.update_invoice_not_safe(
-#         ObjectId(invoice_id), user.id, {"status": InvoiceStatus.CANCELLED}
-#     )
-#     return True

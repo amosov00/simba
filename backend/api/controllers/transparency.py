@@ -1,8 +1,8 @@
 from typing import List
 from fastapi import APIRouter
 
-from database.crud import BTCAddressCRUD
-from schemas import TransparencyTransaction
+from database.crud import BTCAddressCRUD, InvoiceCRUD
+from schemas import TransparencyTransaction, InvoiceStatus, InvoiceType
 from config import BTC_COLD_XPUB_SWISS, BTC_COLD_XPUB_UAE, BTC_COLD_XPUB_NEWZEL, BTC_COLD_XPUB_LIECH, \
     BTC_COLD_WALLETS, BTC_HOT_WALLET_ADDRESS
 
@@ -20,9 +20,15 @@ async def transparency_totals():
             "received": {"$sum": "$total_received"},
         }}
     ])
-    hot_wallet_meta = await BTCAddressCRUD.find_one({"address": BTC_HOT_WALLET_ADDRESS})
+    invoices_meta = await InvoiceCRUD.aggregate([
+        {"$match": {"status": InvoiceStatus.COMPLETED, "invoice_type": InvoiceType.SELL}},
+        {"$group": {
+            "_id": None,
+            "paid_out": {"$sum": "$btc_amount_proceeded"},
+        }}
+    ])
     total_recieved = sum([i["received"] for i in cold_wallets_meta if i["_id"]]) or 0
-    total_paid_out = hot_wallet_meta.get("total_sent") or 0
+    total_paid_out = invoices_meta[0].get("paid_out") or 0
     response.update({
         "total_assets": total_recieved - total_paid_out,
         "total_recieved": total_recieved,
