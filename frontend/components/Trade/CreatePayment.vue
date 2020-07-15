@@ -23,6 +23,9 @@
             =' '
             a(href="https://simba.storage/terms-of-use.pdf" target="_blank" rel="noreferrer noopener").link {{$i18n.t('auth.terms_of_agreement')}}
           span.validaton-error {{ errors[0] }}
+    div(v-if="!error")
+      div(v-if="isBuy").mt-4.has-text-grey-light {{$t('exchange.applied_fee')}} {{ fee }} BTC {{$t('exchange.fee_in_simba')}}
+      div(v-else).mt-4.has-text-grey-light {{$t('exchange.applied_fee')}} ≈ {{ (+fee * 100000000) }} SIMBA
     div(v-if="error").error.has-text-danger.mt-4 {{ $t('exchange.amount_err') }} 200,000 SIMBA
 </template>
 
@@ -39,8 +42,9 @@
       accepted_terms: false,
       isConverting: false,
       error: false,
-      btc: 0.00200000,
+      btc: 0.0025,
       simba: 200000,
+      fee: 0,
       btn_loading: false,
       money: {
         thousands: ' ',
@@ -50,6 +54,15 @@
       invoice_id: '',
       check_btc_address_interval: null
     }),
+
+    created() {
+      this.fee = 0.0005
+
+      if(!this.isBuy) {
+        this.btc = 0.0015
+        this.simba = 200000
+      }
+    },
 
     computed: {
       isBuy() {
@@ -68,7 +81,7 @@
 
       async confirm() {
 
-        if(this.btc < 0.002 || this.simba < 200000) {
+        if(this.simba < 200000) {
           this.error = true
           return
         }
@@ -89,7 +102,12 @@
             if(invoice.target_btc_address) {
               clearInterval(this.check_btc_address_interval)
               this.btn_loading = false
-              let data_for_update = { id: created_invoice._id, eth_address: this.tradeData.eth_address, simba_amount: this.tradeData.simba}
+              let data_for_update = {
+                id: created_invoice._id,
+                eth_address: this.tradeData.eth_address,
+                simba_amount: this.tradeData.simba,
+                btc_amount: this.tradeData.simba
+              }
 
               // Update invoice with amounts
               let updated_invoice_res = await this.$store.dispatch('invoices/updateTransaction', data_for_update)
@@ -102,7 +120,13 @@
             }
           }, 3000)
         } else {
-          let data_for_update = { id: created_invoice._id, btc_address: this.tradeData.btc_redeem_wallet, eth_address: this.tradeData.eth_address, simba_amount: this.tradeData.simba}
+          let data_for_update = {
+            id: created_invoice._id,
+            btc_address: this.tradeData.btc_redeem_wallet,
+            eth_address: this.tradeData.eth_address,
+            simba_amount: this.tradeData.simba,
+            btc_amount: this.tradeData.simba
+          }
           // Update invoice with amounts
           let updated_invoice_res = await this.$store.dispatch('invoices/updateTransaction', data_for_update)
           this.btn_loading = false
@@ -116,7 +140,7 @@
       },
 
       checkMinimum() {
-        if(this.btc < 0.002 || this.simba < 200000) {
+        if(this.simba < 200000) {
           this.error = true
         } else {
           this.error = false
@@ -128,12 +152,22 @@
           return
         }
 
-        let test = (this.simba/100000000).toFixed(8);
+        let res_in_btc = +((this.simba/100000000).toFixed(8));
 
-        if(isNaN(test)) {
+        if(isNaN(res_in_btc)) {
           this.btc = 0
         } else {
-          this.btc = test;
+          if(res_in_btc > 0.0005) {
+            if(this.isBuy) {
+              this.btc = +parseFloat((res_in_btc + 0.0005).toFixed(8))
+            } else {
+              this.btc = +parseFloat((res_in_btc - 0.0005).toFixed(8))
+            }
+            this.fee = 0.0005
+          } else {
+            this.btc = 0
+            this.fee = 0
+          }
         }
 
         this.checkMinimum()
@@ -149,7 +183,23 @@
           this.simba = 0
         } else {
           this.btc = test;
-          this.simba = (this.btc*100000000).toFixed(0)
+          let simba = (this.btc*100000000)
+          let simba_with_fee = 0
+
+          if(this.isBuy) {
+            simba_with_fee = (simba - 50000).toFixed(0)
+            this.fee = simba > 50000 ? 0.0005 : 0
+          } else {
+            if(this.btc > 0) {
+              simba_with_fee = (simba + 50000).toFixed(0)
+              this.fee = 0.0005
+            } else {
+              simba_with_fee = 0
+              this.fee = 0
+            }
+          }
+
+          this.simba = simba_with_fee < 1 ? 0 : simba_with_fee
         }
 
         this.isConverting = false

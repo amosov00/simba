@@ -64,11 +64,12 @@ export default context => {
       received_payment: 'Received payment',
       sent_payment: 'Payment sent',
       choose_btc_wallet: {p1: 'Choose BTC wallet', p2: 'to get coins after redeem'},
+      choose_eth_wallet: {p1: 'Choose ETH wallet', p2: 'to sell SIMBA'},
       choose_btc_wallet_error: 'Please choose a BTC wallet',
       transaction_hash: 'Transaction hash',
       confirms: 'Confirmations',
       payment_confirmation_buy: 'As soon as network get 3 confirmations, SIMBA tokens will be issued to your ETH address.',
-      payment_confirmation_sell: 'As soon as network get 3 confirmations, BTC will be sent to your address.',
+      payment_confirmation_sell: 'As soon as network get {min_confirms} confirmation(s), BTC will be sent to your address.',
       statuses: {
         completed: 'Paid',
         created: 'Created',
@@ -84,7 +85,9 @@ export default context => {
       time_is_out: 'Time is out',
       time_is_limited: 'Time for each bill is limited with 2 hours.',
       simba_redemption: 'Simba redemption',
-      send_simba_now: 'Send SIMBA now'
+      send_simba_now: 'Send SIMBA now',
+      applied_fee: 'Applied fee',
+      fee_in_simba: '(charged in SIMBA)'
     },
     dropdown: {
       bill_details: "Bill details",
@@ -186,8 +189,21 @@ export default context => {
       address_failed_with_pin: 'Failed to add address, make sure you entered correct address and pin-code!',
       address_failed_to_add: 'Error: make sure your provided address is correct, maybe this address already exists',
       failed_to_get_signature: 'Failed to get signature!',
+      new_eth_wallet_instruct: {
+        text1: 'To add a new address, press "Add" button',
+        text2: 'If this is your first time, please install {metamask} extension.',
+        text3: 'For mobile devices we recommend the {metamask} or {imtoken} application.',
+      },
+      eth_wallet_switch_info: 'to change the address you need to switch in the wallet',
+      new_btc_wallet_instruct: {
+        text1: 'By adding the BTC address of your wallet you confirm that you have entered the correct one.',
+        text2: 'For total and irrevocable loss of funds when withdrawing to these address you accept the responsibility.'
+      },
+      security_verification: 'Security verification',
+      confirm_verification: 'To confirm, please complete the verification by entering pin-code'
     },
     other: {
+      confirm: 'Confirm',
       try_again: 'Try again',
       add: 'Add',
       date: "Date",
