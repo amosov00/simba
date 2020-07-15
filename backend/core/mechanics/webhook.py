@@ -1,7 +1,10 @@
+from http import HTTPStatus
 from urllib.parse import urljoin
 from typing import Literal
 
 from passlib import pwd
+from fastapi import HTTPException
+from sentry_sdk import capture_message, push_scope
 
 from schemas import (
     InvoiceInDB,
@@ -24,13 +27,27 @@ class BlockCypherWebhookHandler:
     def _generate_webhook_url(path: str) -> str:
         return urljoin(HOST_URL, f"/api/meta/{path}/")
 
+    @staticmethod
+    async def _check_if_webhook_exists(wallet_address: str, transaction_hash: str):
+        return bool(await BlockCypherWebhookCRUD.find_one(
+            {"$or": [{"address": wallet_address}, {"hash": transaction_hash}]}
+        ))
+
     async def create_webhook(
-        self,
-        invoice: InvoiceInDB,
-        event: Literal[BlockCypherWebhookEvents.ALL],  # noqa
-        wallet_address: str = None,
-        transaction_hash: str = None,
+            self,
+            invoice: InvoiceInDB,
+            event: Literal[BlockCypherWebhookEvents.ALL],  # noqa
+            wallet_address: str = None,
+            transaction_hash: str = None,
     ):
+        if await self._check_if_webhook_exists(wallet_address, transaction_hash):
+            with push_scope() as scope:
+                scope.set_level("error")
+                scope.set_extra("invoice_id", str(invoice.id))
+                scope.set_extra("address_or_tx_hash", wallet_address or transaction_hash)
+                capture_message("webhook already exists")
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "webhook already exists")
+
         secret_path = pwd.genword(length=10)
 
         webhook = BlockCypherWebhookCreate(

@@ -116,7 +116,6 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
     async def create_wallet_address(self, invoice: dict, user: User):
         invoice = InvoiceInDB(**invoice)
         created_address = await PycoinWrapper(user=user, invoice=invoice).generate_new_address()
-        await self.fetch_address_and_save(created_address, invoice_id=invoice.id, user_id=user.id)
         await InvoiceCRUD.update_one({"_id": invoice.id}, {"target_btc_address": created_address})
         return created_address
 
