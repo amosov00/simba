@@ -105,8 +105,7 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
 
 @router.get("/referrals/", response_model=UserReferralsResponse)
 async def account_referrals_info(user: User = Depends(get_user)):
-    ref_obj = ReferralMechanics(user)
-    referrals = await ref_obj.fetch_referrals()
+    referrals = await ReferralMechanics(user).fetch_referrals()
     transactions = []
 
     return {"referrals": referrals, "transactions": transactions}

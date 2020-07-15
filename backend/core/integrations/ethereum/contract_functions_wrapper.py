@@ -21,7 +21,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         self.simba_fee = SIMBA_BUY_SELL_FEE
 
     def _get_nonce(self):
-        return self.w3.eth.getTransactionCount(self.admin_address, "pending")
+        return self.w3.eth.getTransactionCount(self.admin_address)
 
     @staticmethod
     async def get_gas_price():
