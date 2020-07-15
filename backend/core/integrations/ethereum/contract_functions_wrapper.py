@@ -1,16 +1,14 @@
-import asyncio
 from http import HTTPStatus
-import logging
 
-from hexbytes import HexBytes
-from web3 import Web3
 from fastapi import HTTPException
+from hexbytes import HexBytes
 from sentry_sdk import capture_message
+from web3 import Web3
 
-from .base_wrapper import EthereumBaseContractWrapper
+from config import SIMBA_BUY_SELL_FEE
 from core.utils import gas_price_from_ethgasstation
 from schemas import EthereumContract
-from config import SIMBA_BUY_SELL_FEE
+from .base_wrapper import EthereumBaseContractWrapper
 
 GAS = 250000
 
@@ -50,7 +48,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
                 "gas": GAS,
                 "gasPrice": await self.get_gas_price(),
                 "from": self.admin_address,
-                "nonce": self._get_nonce()
+                "nonce": self._get_nonce(),
             }
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
@@ -65,7 +63,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
                 "gas": GAS,
                 "gasPrice": await self.get_gas_price(),
                 "from": self.admin_address,
-                "nonce": self._get_nonce()
+                "nonce": self._get_nonce(),
             }
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
@@ -79,7 +77,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
                 "gas": GAS,
                 "gasPrice": await self.get_gas_price(),
                 "from": self.admin_address,
-                "nonce": self._get_nonce()
+                "nonce": self._get_nonce(),
             }
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)

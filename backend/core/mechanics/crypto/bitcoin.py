@@ -1,16 +1,16 @@
-from typing import Union, Optional, List, Tuple
 from http import HTTPStatus
+from typing import Optional, List, Tuple
 
+from fastapi import HTTPException
 from pycoin.coins.tx_utils import create_signed_tx
 from sentry_sdk import capture_message
-from fastapi import HTTPException
 
+from config import BTC_HOT_WALLET_ADDRESS, BTC_HOT_WALLET_WIF
 from core.integrations.blockcypher import BlockCypherAPIWrapper
 from core.integrations.pycoin_wrapper import PycoinWrapper
-from database.crud import UserCRUD, BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
+from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
 from schemas import User, InvoiceInDB, InvoiceStatus, BTCTransaction, BTCAddress, ObjectIdPydantic
 from .base import CryptoValidation, ParseCryptoTransaction
-from config import BTC_HOT_WALLET_ADDRESS, BTC_HOT_WALLET_WIF
 
 
 class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
@@ -33,12 +33,12 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         return True
 
     async def fetch_address_and_save(
-            self,
-            address: str,
-            *,
-            invoice_id: ObjectIdPydantic = None,
-            user_id: ObjectIdPydantic = None,
-            save: bool = True
+        self,
+        address: str,
+        *,
+        invoice_id: ObjectIdPydantic = None,
+        user_id: ObjectIdPydantic = None,
+        save: bool = True
     ) -> Optional[BTCAddress]:
         address_info = await self.api_wrapper.fetch_address_info(address)
         if address_info:
@@ -51,7 +51,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         return address_info
 
     def proceed_payables(
-            self, destination_address: str, amount: int, address_from: str, fee: Optional[int] = None
+        self, destination_address: str, amount: int, address_from: str, fee: Optional[int] = None
     ) -> List[Tuple[str, int]]:
         """
         Струкрура payable (address, satoshi)
@@ -67,7 +67,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         return [destination_payable, difference_payable]
 
     async def create_and_sign_transaction(
-            self, address: str, amount: int, fee: Optional[int] = None,
+        self, address: str, amount: int, fee: Optional[int] = None,
     ) -> BTCTransaction:
         """
         Payables передавать в форме [(<address_hash>, <btc_amount>), ], btc_amount - in satoshi
@@ -85,7 +85,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
             self.api_wrapper.network,
             spendables=spendables,
             payables=payables,
-            wifs=[self.BTC_HOT_WALLET_WIF, ],
+            wifs=[self.BTC_HOT_WALLET_WIF,],
             fee=fee,
         )
         result = await self.api_wrapper.push_raw_tx(tx)

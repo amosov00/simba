@@ -1,7 +1,7 @@
-from typing import List, Union
+from typing import List
 
 from database.crud import UserCRUD, ReferralCRUD
-from schemas import UserLogin, User, UserReferralInfo
+from schemas import User
 
 __all__ = ["ReferralMechanics"]
 

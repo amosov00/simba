@@ -1,10 +1,9 @@
-from datetime import datetime, timedelta
+import logging
 
 from celery_app.celeryconfig import app
-from database.crud import BlockCypherWebhookCRUD, InvoiceCRUD
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
+from database.crud import BlockCypherWebhookCRUD, InvoiceCRUD
 from schemas import InvoiceStatus, InvoiceInDB
-import logging
 
 __all__ = ["delete_unused_webhooks"]
 

@@ -1,10 +1,11 @@
 import logging
+
 import sentry_sdk
 
-from database.init import mongo_client
+from config import ENV, IS_PRODUCTION
 from database.crud import UserCRUD
+from database.init import mongo_client
 from schemas import UserCreationNotSafe
-from config import DEBUG, ENV, IS_PRODUCTION
 
 if IS_PRODUCTION:
     admin_user = {

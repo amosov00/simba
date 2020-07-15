@@ -6,7 +6,6 @@ from starlette.authentication import (
     AuthCredentials,
 )
 
-from database.crud import UserCRUD
 from schemas import User
 
 __all__ = [

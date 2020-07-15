@@ -14,7 +14,7 @@ celery_decorator_taskcls.patch_celery()
 
 CELERY_MONGO_DATABASE_URL = f"{MONGO_DATABASE_URL}{CELERY_DATABASE_NAME}"
 
-app = Celery(main="celery_main", broker=CELERY_BROKER_URL, backend=CELERY_MONGO_DATABASE_URL, )
+app = Celery(main="celery_main", broker=CELERY_BROKER_URL, backend=CELERY_MONGO_DATABASE_URL,)
 
 app.conf.update(
     task_serializer="json",
@@ -22,7 +22,7 @@ app.conf.update(
     result_serializer="json",
     timezone="Europe/Moscow",
     enable_utc=True,
-    imports=["celery_app.tasks", ],
+    imports=["celery_app.tasks",],
 )
 
 app.conf.beat_schedule = {
@@ -41,11 +41,7 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute="*/10"),
         "args": (),
     },
-    "delete_unused_webhooks": {
-        "task": "delete_unused_webhooks",
-        "schedule": crontab(hour="*/5"),
-        "args": (),
-    },
+    "delete_unused_webhooks": {"task": "delete_unused_webhooks", "schedule": crontab(hour="*/5"), "args": (),},
     "fetch_and_proceed_sst_contract": {
         "task": "fetch_and_proceed_sst_contract",
         "schedule": crontab(minute="0", hour="1", day_of_month="*/1"),
@@ -55,5 +51,5 @@ app.conf.beat_schedule = {
         "task": "update_empty_btc_addresses_info",
         "schedule": crontab(minute="0", hour="2", day_of_month="*/1"),
         "args": (),
-    }
+    },
 }

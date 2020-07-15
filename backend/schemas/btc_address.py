@@ -1,16 +1,11 @@
-from typing import Union, List, Optional
 from datetime import datetime
+from typing import List
 
-from pydantic import Field, HttpUrl
+from pydantic import Field
 
 from .base import BaseModel, ObjectIdPydantic
 
-__all__ = [
-    "BTCAddress",
-    "BTCAddressInDB",
-    "BTCAddressTransactions",
-    "BTCXPUB"
-]
+__all__ = ["BTCAddress", "BTCAddressInDB", "BTCAddressTransactions", "BTCXPUB"]
 
 
 class BTCAddressTransactions(BaseModel):

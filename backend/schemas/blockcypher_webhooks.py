@@ -1,5 +1,5 @@
-from typing import Literal, Optional
 from datetime import datetime
+from typing import Optional
 
 from pydantic import HttpUrl
 

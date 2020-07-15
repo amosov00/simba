@@ -1,9 +1,6 @@
-from hexbytes import HexBytes
-
-from .base import CryptoValidation, CryptoCurrencyRate
-from core.integrations.ethereum import FunctionsContractWrapper, EventsContractWrapper
-from schemas import InvoiceInDB, InvoiceStatus
 from config import SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
+from core.integrations.ethereum import FunctionsContractWrapper
+from .base import CryptoValidation, CryptoCurrencyRate
 
 
 class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):

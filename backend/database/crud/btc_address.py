@@ -1,9 +1,6 @@
-from typing import Union
-
 import pymongo
 
-from schemas.base import ObjectIdPydantic
-from .base import BaseMongoCRUD, ObjectId
+from .base import BaseMongoCRUD
 
 
 class BTCAddressCRUD(BaseMongoCRUD):

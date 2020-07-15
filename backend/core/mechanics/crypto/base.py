@@ -1,11 +1,10 @@
 from abc import ABC
 from http import HTTPStatus
-from typing import Union
 
 from fastapi import HTTPException
 
 from database.crud import BTCTransactionCRUD
-from schemas import InvoiceInDB, InvoiceType, InvoiceStatus, BTCTransaction
+from schemas import InvoiceInDB, InvoiceStatus, BTCTransaction
 
 __all__ = ["CryptoValidation", "ParseCryptoTransaction", "CryptoCurrencyRate"]
 
@@ -61,7 +60,7 @@ class CryptoValidation(ABC):
 
     @classmethod
     async def validate_btc_transaction_with_invoice(
-            cls, invoice: InvoiceInDB, transaction: BTCTransaction
+        cls, invoice: InvoiceInDB, transaction: BTCTransaction
     ) -> bool:
         """ TODO deprecated ? """
         errors = []

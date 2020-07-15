@@ -1,8 +1,8 @@
-from typing import Optional, Literal, List, Union
 from datetime import datetime
 from enum import IntEnum
+from typing import Optional, Literal, List, Union
 
-from pydantic import Field, validator, PositiveInt
+from pydantic import Field, validator
 
 from schemas.base import (
     BaseModel,
@@ -93,9 +93,12 @@ class InvoiceExtended(InvoiceInDB):
 
 class InvoiceCreate(BaseModel):
     invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")
-    btc_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send", gt=0)
-    simba_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send",
-                                                      gt=0)
+    btc_amount: Union[int, DecimalPydantic] = Field(
+        default=None, description="Planned amount to receive / send", gt=0
+    )
+    simba_amount: Union[int, DecimalPydantic] = Field(
+        default=None, description="Planned amount to receive / send", gt=0
+    )
 
 
 class InvoiceUpdate(BaseModel):
