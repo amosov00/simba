@@ -2,6 +2,7 @@ from typing import List
 
 import asyncio
 from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request
+from sentry_sdk import push_scope, capture_message
 
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper, BlockCypherAPIWrapper
 from core.integrations.ethereum import EventsContractWrapper
@@ -22,7 +23,7 @@ router = APIRouter()
 
 @router.get("/cron/")
 async def debug_get():
-    await fetch_and_proceed_sst_contract()
+    await delete_unused_webhooks()
     return True
 
 
@@ -79,7 +80,6 @@ async def debug_get():
 
 @router.get("/")
 async def debug_get():
-    await delete_unused_webhooks.delay()
     return True
 
 

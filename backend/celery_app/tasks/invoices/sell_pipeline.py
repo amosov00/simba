@@ -1,5 +1,6 @@
 import asyncio, logging
-from datetime import datetime, timedelta
+
+from sentry_sdk import capture_message, push_scope
 
 from celery_app.celeryconfig import app
 from database.crud import InvoiceCRUD, UserCRUD, EthereumTransactionCRUD
@@ -27,7 +28,13 @@ async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
         user = await UserCRUD.find_by_id(invoice.id)
 
         if invoice.simba_amount_proceeded > hot_wallet_info.balance:
-            logging.info(f"Not enough btc on hot wallet to pay Invoice {invoice.id}")
+            with push_scope() as scope:
+                scope.set_level("warning")
+                scope.set_extra("Hot wallet balance", hot_wallet_info.balance)
+                scope.set_extra("BTC to be sended", invoice.simba_amount_proceeded)
+                scope.set_extra("Pending invoices", len(proceeding_invoices))
+                capture_message("Hot wallet balance should be increased")
+
             break
 
         await InvoiceMechanics(invoice, user).send_bitcoins()

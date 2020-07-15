@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from sentry_sdk import capture_message
 
 from database.crud import BTCTransactionCRUD, InvoiceCRUD, EthereumTransactionCRUD
-from core.mechanics.crypto import SSTWrapper, SimbaWrapper, BitcoinWrapper
+from core.mechanics import SimbaWrapper, SSTWrapper, BitcoinWrapper, BlockCypherWebhookHandler
 from core.mechanics.crypto.base import CryptoValidation
 from database.crud import UserCRUD
 from schemas import (
@@ -20,7 +20,8 @@ from schemas import (
     BTCTransaction,
     BTCTransactionOutputs,
     BTCTransactionInDB,
-    SimbaContractEvents
+    SimbaContractEvents,
+    BlockCypherWebhookEvents
 )
 from config import BTC_MINIMAL_CONFIRMATIONS
 
@@ -142,45 +143,76 @@ class InvoiceMechanics(CryptoValidation):
         asyncio.create_task(SSTWrapper().send_sst_to_referrals(user, self.invoice.btc_amount))
         return True
 
+    async def _proceed_new_btc_tx_buy(
+            self,
+            new_transaction: BTCTransaction,
+            transaction_in_db: BTCTransactionInDB
+    ):
+        incoming_btc = self.get_incoming_btc_from_outputs(new_transaction.outputs, self.invoice.target_btc_address)
+
+        if not incoming_btc:
+            capture_message("Failed to parse btc amount from transaction", level="error")
+            self.errors.append("Failed to parse btc amount from transaction")
+            self._raise_exception_if_exists()
+
+        # TODO optimize and simplify algo
+        if transaction_in_db:
+            if new_transaction.confirmations < BTC_MINIMAL_CONFIRMATIONS:
+                await BTCTransactionCRUD.update_or_insert({"hash": new_transaction.hash}, new_transaction.dict())
+
+            elif (
+                    new_transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS and transaction_in_db.simba_tokens_issued
+            ):
+                self.errors.append("transaction already exists and simba tokens was issued")
+                self._raise_exception_if_exists()
+
+            elif (
+                    new_transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS
+                    and not transaction_in_db.simba_tokens_issued
+            ):
+                return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
+
+        else:
+            if new_transaction.confirmations < BTC_MINIMAL_CONFIRMATIONS:
+                await BTCTransactionCRUD.update_or_insert({"hash": new_transaction.hash}, new_transaction.dict())
+
+            elif new_transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS:
+                return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
+
+        return True
+
+    async def _proceed_new_btc_tx_sell(self, new_transaction: BTCTransaction):
+        if new_transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS \
+                and self.invoice.status == InvoiceStatus.PROCESSING:
+
+            self.invoice.status = InvoiceStatus.COMPLETED
+            self.invoice.finised_at = datetime.now()
+
+            await self.update_invoice()
+            await BTCTransactionCRUD.update_or_insert({"hash": new_transaction.hash}, new_transaction.dict())
+
+        else:
+            await BTCTransactionCRUD.update_or_insert({"hash": new_transaction.hash}, new_transaction.dict())
+
+        return True
+
     async def proceed_new_btc_transaction(self, transaction: BTCTransaction):
         if transaction.block_height < 0 or transaction.confirmations == 0:
-            self.errors.append("transaction is not confirmed yet")
+            logging.warning("Got unconfirmed transation from webhook")
+            return False
 
         transaction.invoice_id = self.invoice.id
 
-        incoming_btc = self.get_incoming_btc_from_outputs(transaction.outputs, self.invoice.target_btc_address)
-
-        if not incoming_btc:
-            self.errors.append("Failed to parse btc amount from transaction")
-
-        if transaction_in_db := await BTCTransactionCRUD.find_one({"hash": transaction.hash, }):
+        if transaction_in_db := await BTCTransactionCRUD.find_one({"hash": transaction.hash}):
             transaction_in_db = BTCTransactionInDB(**transaction_in_db)
 
         self._raise_exception_if_exists()
 
-        if transaction_in_db:
-            if transaction.confirmations < BTC_MINIMAL_CONFIRMATIONS:
-                await BTCTransactionCRUD.update_or_insert({"hash": transaction.hash}, transaction.dict())
+        if self.invoice.invoice_type == InvoiceType.BUY:
+            return await self._proceed_new_btc_tx_buy(transaction, incoming_btc, transaction_in_db)
 
-            elif (
-                    transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS and transaction_in_db.simba_tokens_issued
-            ):
-                self.errors.append("transaction already exists and simba tokens was issued")
-                self._raise_exception_if_exists()
-                await BTCTransactionCRUD.update_one({"hash": transaction.hash}, transaction.dict())
-
-            elif (
-                    transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS
-                    and not transaction_in_db.simba_tokens_issued
-            ):
-                return await self._issue_simba_tokens_and_save(transaction, incoming_btc)
-
-        else:
-            if transaction.confirmations < BTC_MINIMAL_CONFIRMATIONS:
-                await BTCTransactionCRUD.update_or_insert({"hash": transaction.hash}, transaction.dict())
-
-            elif transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS:
-                return await self._issue_simba_tokens_and_save(transaction, incoming_btc)
+        elif self.invoice.invoice_type == InvoiceType.SELL:
+            return await self._proceed_new_btc_tx_sell(transaction)
 
         return True
 
@@ -208,9 +240,9 @@ class InvoiceMechanics(CryptoValidation):
     async def proceed_new_transaction(
             self, transaction: Union[BTCTransaction, EthereumTransaction], **kwargs
     ) -> Union[bool, str]:
-        if isinstance(transaction, BTCTransaction) or isinstance(transaction, BTCTransactionInDB):
+        if isinstance(transaction, (BTCTransaction, BTCTransactionInDB)):
             return await self.proceed_new_btc_transaction(transaction)
-        elif isinstance(transaction, EthereumTransaction) or isinstance(transaction, EthereumTransactionInDB):
+        elif isinstance(transaction, (EthereumTransaction, EthereumTransactionInDB)):
             return await self.proceed_new_eth_transaction(transaction)
 
     async def update_invoice(self):
@@ -235,10 +267,15 @@ class InvoiceMechanics(CryptoValidation):
         btc_tx.invoice_id = self.invoice.id
 
         self.invoice.btc_amount_proceeded = btc_outcoming
-        self.invoice.status = InvoiceStatus.COMPLETED
         self.invoice.add_hash("eth", eth_tx_hash)
         self.invoice.add_hash("btc", btc_tx.hash)
 
         await BTCTransactionCRUD.insert_one(btc_tx.dict())
         await self.update_invoice()
+
+        asyncio.create_task(BlockCypherWebhookHandler().create_webhook(
+            invoice=self.invoice,
+            event=BlockCypherWebhookEvents.TX_CONFIMATION,
+            transaction_hash=btc_tx.hash
+        ))
         return True
