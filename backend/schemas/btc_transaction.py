@@ -1,7 +1,7 @@
-from typing import Union, List, Optional
 from datetime import datetime
+from typing import List
 
-from pydantic import Field, HttpUrl
+from pydantic import Field
 
 from .base import BaseModel, ObjectIdPydantic
 
@@ -27,7 +27,6 @@ class BTCTransactionOutputs(BaseModel):
 
 class BTCTransaction(BaseModel):
     invoice_id: ObjectIdPydantic = None
-    user_id: Optional[ObjectIdPydantic] = None
     simba_tokens_issued: bool = False
     addresses: List[str] = None
     block_hash: str = None

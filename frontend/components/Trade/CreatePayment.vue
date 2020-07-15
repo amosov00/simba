@@ -82,25 +82,45 @@
 
         this.$store.commit('exchange/setTradeData', {prop: 'invoice_id', value: created_invoice._id})
 
-        this.check_btc_address_interval = setInterval(async () => {
-          let invoice = await this.checkBitcoinAddress(created_invoice._id)
+        if(this.isBuy) {
+          this.check_btc_address_interval = setInterval(async () => {
+            let invoice = await this.checkBitcoinAddress(created_invoice._id)
 
-          if(invoice.target_btc_address) {
-            clearInterval(this.check_btc_address_interval)
-            this.btn_loading = false
-            let data_for_update = { id: created_invoice._id, eth_address: this.tradeData.eth_address, simba_amount: this.tradeData.simba}
+            if(invoice.target_btc_address) {
+              clearInterval(this.check_btc_address_interval)
+              this.btn_loading = false
+              let data_for_update = { id: created_invoice._id, eth_address: this.tradeData.eth_address, simba_amount: this.tradeData.simba}
 
-            // Update invoice with amounts
-            let updated_invoice_res = await this.$store.dispatch('invoices/updateTransaction', data_for_update)
+              // Update invoice with amounts
+              let updated_invoice_res = await this.$store.dispatch('invoices/updateTransaction', data_for_update)
 
-            // Add invoice id to url, go to next step
-            if(updated_invoice_res) {
-              this.$nuxt.$router.push({ path: '/exchange/buysell', query: {id: invoice._id }})
-              //this.$parent.$emit('nextStep')
+              // Add invoice id to url, go to next step
+              if(updated_invoice_res) {
+                this.$nuxt.$router.push({ path: '/exchange/buysell', query: {id: invoice._id }})
+                //this.$parent.$emit('nextStep')
+              }
             }
-          }
+          }, 3000)
+        } else {
+          let data_for_update = { id: created_invoice._id, btc_address: this.tradeData.btc_redeem_wallet, eth_address: this.tradeData.eth_address, simba_amount: this.tradeData.simba}
+          // Update invoice with amounts
+          let updated_invoice_res = await this.$store.dispatch('invoices/updateTransaction', data_for_update)
+          this.btn_loading = false
 
-        }, 3000)
+          // Add invoice id to url, go to next step
+          if(updated_invoice_res) {
+            this.$nuxt.$router.push({ path: '/exchange/buysell', query: {id: created_invoice._id }})
+            //this.$parent.$emit('nextStep')
+          }
+        }
+      },
+
+      checkMinimum() {
+        if(this.btc < 0.002 || this.simba < 200000) {
+          this.error = true
+        } else {
+          this.error = false
+        }
       },
 
       convert() {
@@ -115,6 +135,8 @@
         } else {
           this.btc = test;
         }
+
+        this.checkMinimum()
       },
 
       convertBTCtoSimba(e) {
@@ -131,6 +153,7 @@
         }
 
         this.isConverting = false
+        this.checkMinimum()
       }
     }
   }

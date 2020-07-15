@@ -1,11 +1,10 @@
-import asyncio
+import logging
 from datetime import datetime, timedelta
 
 from celery_app.celeryconfig import app
+from core.mechanics import BlockCypherWebhookHandler
 from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
 from schemas import InvoiceExtended, InvoiceStatus
-from core.mechanics import BlockCypherWebhookHandler
-import logging
 
 __all__ = ["finish_overdue_invoices"]
 
@@ -38,7 +37,6 @@ async def finish_overdue_invoices(self, *args, **kwargs):
             },
         ]
     )
-    tasks = []
     counter = 0
 
     for invoice in invoices:
@@ -50,15 +48,10 @@ async def finish_overdue_invoices(self, *args, **kwargs):
                 not bool(invoice.btc_txs),
             ]
         ):
-            # Change status
-            tasks.append(InvoiceCRUD.update_one({"_id": invoice.id}, {"status": InvoiceStatus.CANCELLED}))
-            # Delete webhook
-            tasks.append(BlockCypherWebhookHandler().delete_webhook(invoice))
+            await InvoiceCRUD.update_one({"_id": invoice.id}, {"status": InvoiceStatus.CANCELLED})
+            # Delete connected webhook
+            await BlockCypherWebhookHandler().delete_webhook(invoice)
             counter += 1
 
-    if tasks:
-        await asyncio.gather(*tasks)
-
     logging.info(f"Closed {counter} invoices")
-
     return True

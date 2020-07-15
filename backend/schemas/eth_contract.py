@@ -1,6 +1,4 @@
-from typing import Optional, Tuple, Union
-
-from pydantic import HttpUrl
+from typing import Optional
 
 from .base import BaseModel
 

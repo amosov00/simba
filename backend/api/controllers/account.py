@@ -1,13 +1,13 @@
-from fastapi import APIRouter, HTTPException, Depends, Body, Path
-from urllib.parse import urlencode, urljoin
+from datetime import datetime
 from http import HTTPStatus
-from datetime import datetime, timedelta
+from urllib.parse import urlencode, urljoin
 
-from core.mechanics.crypto import BitcoinWrapper
-from core.mechanics.referrals import ReferralMechanics
-from config import HOST_URL
+from fastapi import APIRouter, HTTPException, Depends, Body, Path
+
 from api.dependencies import get_user
-from database.crud import UserCRUD, ReferralCRUD
+from config import HOST_URL
+from core.mechanics.referrals import ReferralMechanics
+from database.crud import UserCRUD
 from schemas import (
     UserLogin,
     User,
@@ -25,11 +25,9 @@ from schemas import (
     User2faDelete,
     UserReferralsResponse,
     UserEthereumSignedAddress,
-    UserUpdateNotSafe,
     USER_MODEL_INCLUDE_FIELDS,
-    UserBitcoinAddress,
     UserBitcoinAddressDelete,
-    UserBitcoinAddressInput
+    UserBitcoinAddressInput,
 )
 
 __all__ = ["router"]
@@ -42,8 +40,10 @@ async def account_get_user(user: User = Depends(get_user)):
     return user
 
 
-@router.post("/login/", response_model=UserLoginResponse, )
-async def account_login(data: UserLogin = Body(...), ):
+@router.post(
+    "/login/", response_model=UserLoginResponse,
+)
+async def account_login(data: UserLogin = Body(...),):
     return await UserCRUD.authenticate(data.email, data.password, data.pin_code)
 
 
@@ -80,8 +80,11 @@ async def account_recover(data: UserRecoverLink = Body(...)):
 @router.get("/referral_link/", response_model=UserReferralURLResponse)
 async def account_get_referral_link(user: User = Depends(get_user)):
     params = {"referral_id": user.id}
-    url = urljoin(HOST_URL, "register") + "?" + \
-          (urlencode(params) if user.user_eth_addresses != [] else "referral_id=*************")
+    url = (
+        urljoin(HOST_URL, "register")
+        + "?"
+        + (urlencode(params) if user.user_eth_addresses != [] else "referral_id=*************")
+    )
     return {"URL": url}
 
 
@@ -102,8 +105,7 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
 
 @router.get("/referrals/", response_model=UserReferralsResponse)
 async def account_referrals_info(user: User = Depends(get_user)):
-    ref_obj = ReferralMechanics(user)
-    referrals = await ref_obj.fetch_referrals()
+    referrals = await ReferralMechanics(user).fetch_referrals()
     transactions = []
 
     return {"referrals": referrals, "transactions": transactions}
@@ -118,7 +120,9 @@ async def account_eth_address_add(data: UserEthereumSignedAddress = Body(...), u
 
     user.user_eth_addresses.append(data)
 
-    await UserCRUD.update_one({"_id": user.id}, {"user_eth_addresses": [i.dict() for i in user.user_eth_addresses]})
+    await UserCRUD.update_one(
+        {"_id": user.id}, {"user_eth_addresses": [i.dict() for i in user.user_eth_addresses]}
+    )
 
     return True
 
@@ -138,34 +142,30 @@ async def account_add_eth_address_delete(address: str = Path(...), user: User = 
 @router.post("/btc-address/")
 async def account_add_btc_address(user: User = Depends(get_user), data: UserBitcoinAddressInput = Body(...)):
     if user.two_factor and not await UserCRUD.check_2fa(user_id=user.id, pin_code=data.pin_code):
-        raise HTTPException(
-            HTTPStatus.BAD_REQUEST, "Incorrect pin-code"
-        )
+        raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin-code")
 
     data.created_at = datetime.now()
     filtered_addresses = list(filter(lambda o: o.address == data.address, user.user_btc_addresses))
 
     if filtered_addresses:
-        raise HTTPException(
-            HTTPStatus.BAD_REQUEST, "Address already exists"
-        )
+        raise HTTPException(HTTPStatus.BAD_REQUEST, "Address already exists")
 
     user.user_btc_addresses.append(data)
 
     await UserCRUD.update_one(
         {"_id": user.id},
-        {"user_btc_addresses": [i.dict(exclude={"pin_code"}) for i in user.user_btc_addresses]}
+        {"user_btc_addresses": [i.dict(exclude={"pin_code"}) for i in user.user_btc_addresses]},
     )
 
     return True
 
 
 @router.delete("/btc-address/")
-async def account_add_btc_address_delete(data: UserBitcoinAddressDelete = Body(...), user: User = Depends(get_user)):
+async def account_add_btc_address_delete(
+    data: UserBitcoinAddressDelete = Body(...), user: User = Depends(get_user)
+):
     if user.two_factor and not await UserCRUD.check_2fa(user_id=user.id, pin_code=data.pin_code):
-        raise HTTPException(
-            HTTPStatus.BAD_REQUEST, "Incorrect pin-code"
-        )
+        raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin-code")
 
     filtered_addresses = list(filter(lambda o: o.address != data.address, user.user_btc_addresses))
 

@@ -16,6 +16,7 @@
   import CreatePayment from "@/components/Trade/CreatePayment"
   import BillPayment from "@/components/Trade/BillPayment"
   import Status from "@/components/Trade/Status"
+  import SimbaRecieved from "~/components/Trade/SimbaRecieved"
   import Final from "@/components/Trade/Final"
 
   import { ToastProgrammatic as Toast } from 'buefy'
@@ -23,7 +24,7 @@
   export default {
     name: "exchange-buysell",
     layout: 'main',
-    components: { WalletConfirm, CreatePayment, BillPayment, Status, Final },
+    components: { WalletConfirm, CreatePayment, BillPayment, Status, Final, SimbaRecieved },
 
     methods: {
       activeStep(i) {
@@ -87,7 +88,7 @@
         } else {
           this.operation = 'Sell'
           this.$store.commit('exchange/setTradeData', {prop: 'operation', value: 2})
-          this.tradeData.steps.list.splice(3, 0, 'BtcSentStatus')
+          this.tradeData.steps.list.splice(3, 0, 'SimbaRecieved')
         }
       }
 
@@ -107,27 +108,33 @@
 
           if(single_res.invoice_type === 1) {
             this.operation = 'Buy';
+            this.$store.commit('exchange/setTradeData', {prop: 'operation', value: 1})
           } else {
             this.operation = 'Sell'
-            this.tradeData.steps.list.splice(3, 0, 'BtcSentStatus')
+            this.$store.commit('exchange/setTradeData', {prop: 'operation', value: 2})
+            this.tradeData.steps.list.splice(3, 0, 'SimbaRecieved')
           }
 
           if(single_res.status === 'waiting' || single_res.status === 'created') {
             this.tradeData.steps.current = 'BillPayment'
           }
+          else if(single_res.status === 'processing') {
+            this.tradeData.steps.current = 'SimbaRecieved'
+          }
           else if(single_res.status === 'completed') {
-            //this.tradeData.steps.current = 'BillPayment'
+            if(single_res.invoice_type === 1) {
+              this.$store.commit('exchange/setTradeData', {prop: 'btc_amount_proceeded', value: single_res.btc_amount_proceeded})
+              this.$store.commit('exchange/setTradeData', {prop: 'target_eth', value: single_res.target_eth_address})
+              this.$store.commit('exchange/setTradeData', {prop: 'tx_hash', value: single_res.eth_tx_hashes[0] || ''})
+              this.$store.commit('exchange/setTradeData', {prop: 'simba_issued', value: single_res.btc_amount_proceeded})
+            } else {
+              this.$store.commit('exchange/setTradeData', {prop: 'simba_issued', value: single_res.btc_amount_proceeded})
+              this.$store.commit('exchange/setTradeData', { prop: 'btc_redeem_wallet', value: single_res.target_btc_address})
+              this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: single_res.btc_txs[0].hash })
+              this.$store.commit('exchange/setTradeData', { prop: 'tx_hash_redeem', value: single_res.eth_txs[0]?.transactionHash || single_res.eth_tx_hashes[0] })
+            }
+
             this.tradeData.steps.current = 'Final'
-            this.$store.commit('exchange/setTradeData', {prop: 'btc_amount_proceeded', value: single_res.btc_amount_proceeded})
-            this.$store.commit('exchange/setTradeData', {prop: 'target_eth', value: single_res.target_eth_address})
-            this.$store.commit('exchange/setTradeData', {prop: 'tx_hash', value: single_res.eth_tx_hashes[0] || ''})
-            this.$store.commit('exchange/setTradeData', {prop: 'simba_issued', value: single_res.btc_amount_proceeded})
-/*            this.multi_props["buy_info"] = {
-              btc_amount_proceeded: single_res.btc_amount_proceeded,
-              target_eth: single_res.target_eth_address,
-              tx_hash: single_res.btc_txs[0].hash,
-              simba_issued: single_res.btc_amount_proceeded
-            }*/
           }
         } else {
           this.$buefy.toast.open({message:'Error: invoice not found', type: 'is-danger'})

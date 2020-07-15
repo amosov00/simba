@@ -1,9 +1,6 @@
-from hexbytes import HexBytes
-
-from .base import CryptoValidation, CryptoCurrencyRate
-from core.integrations.ethereum import FunctionsContractWrapper, EventsContractWrapper
-from schemas import InvoiceInDB, InvoiceStatus
 from config import SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
+from core.integrations.ethereum import FunctionsContractWrapper
+from .base import CryptoValidation, CryptoCurrencyRate
 
 
 class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
@@ -12,10 +9,18 @@ class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
             SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
         )
 
-    async def issue_tokens(self, customer_address: str, incoming_btc: int, comment: str) -> str:
+    async def issue_tokens(self, customer_address: str, incoming_btc: int, btc_tx_hash: str) -> str:
         simba_to_issue = incoming_btc
         self.validate_currency_rate(incoming_btc, simba_to_issue)
 
-        tx_hash = await self.api_wrapper.issue_coins(customer_address, simba_to_issue, comment)
+        tx_hash = await self.api_wrapper.issue_coins(customer_address, simba_to_issue, btc_tx_hash)
+
+        return tx_hash.hex()
+
+    async def redeem_tokens(self, outcoming_btc: int, btc_tx_hash: str):
+        simba_to_redeem = outcoming_btc
+        self.validate_currency_rate(outcoming_btc, simba_to_redeem)
+
+        tx_hash = await self.api_wrapper.redeem_coins(simba_to_redeem, btc_tx_hash)
 
         return tx_hash.hex()

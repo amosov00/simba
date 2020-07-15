@@ -59,24 +59,32 @@ export default context => {
       issued: "issued",
       wallet: "Wallet",
       buy_more: "Buy more",
+      sell_more: "Sell more",
       status: 'Status',
       received_payment: 'Received payment',
+      sent_payment: 'Payment sent',
+      choose_btc_wallet: {p1: 'Choose BTC wallet', p2: 'to get coins after redeem'},
+      choose_btc_wallet_error: 'Please choose a BTC wallet',
       transaction_hash: 'Transaction hash',
       confirms: 'Confirmations',
       payment_confirmation_buy: 'As soon as network get 3 confirmations, SIMBA tokens will be issued to your ETH address.',
+      payment_confirmation_sell: 'As soon as network get 3 confirmations, BTC will be sent to your address.',
       statuses: {
         completed: 'Paid',
         created: 'Created',
         waiting: 'Waiting',
         cancelled: 'Cancelled',
-        expired: 'Expired'
+        expired: 'Expired',
+        processing: 'Processing'
       },
       error_creating_invoice: 'Error creating invoice',
       error_updating_invoice: 'Error updating invoice',
       error_confirming_invoice: 'Error confirming invoice',
       bill_expired: 'Bill expired',
       time_is_out: 'Time is out',
-      time_is_limited: 'Time for each bill is limited with 2 hours.'
+      time_is_limited: 'Time for each bill is limited with 2 hours.',
+      simba_redemption: 'Simba redemption',
+      send_simba_now: 'Send SIMBA now'
     },
     dropdown: {
       bill_details: "Bill details",

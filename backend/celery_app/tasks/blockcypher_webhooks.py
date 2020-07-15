@@ -1,10 +1,9 @@
-from datetime import datetime, timedelta
+import logging
 
 from celery_app.celeryconfig import app
-from database.crud import BlockCypherWebhookCRUD, InvoiceCRUD
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
+from database.crud import BlockCypherWebhookCRUD, InvoiceCRUD
 from schemas import InvoiceStatus, InvoiceInDB
-import logging
 
 __all__ = ["delete_unused_webhooks"]
 
@@ -14,9 +13,10 @@ __all__ = ["delete_unused_webhooks"]
 )
 async def delete_unused_webhooks(self, *args, **kwargs):
     counter = 0
-    webhooks = await BlockCypherWebhookAPIWrapper().list_webhooks()
+    webhooks_blockcypher = await BlockCypherWebhookAPIWrapper().list_webhooks()
+    webhooks_local = await BlockCypherWebhookCRUD.find_many({})
 
-    for webhook in webhooks:
+    for webhook in webhooks_blockcypher:
         webhook_in_db = await BlockCypherWebhookCRUD.find_one({"id": webhook.get("id")})
 
         if not webhook_in_db:
@@ -26,15 +26,19 @@ async def delete_unused_webhooks(self, *args, **kwargs):
 
         if not invoice:
             continue
-        breakpoint()
+
         invoice = InvoiceInDB(**invoice)
 
-        if any(
-            [invoice.status != InvoiceStatus.WAITING, invoice.created_at + timedelta(hours=4) < datetime.now(),]
-        ):
+        if invoice.status in (InvoiceStatus.CREATED, InvoiceStatus.COMPLETED, InvoiceStatus.CANCELLED):
             await BlockCypherWebhookAPIWrapper().delete_webhook(webhook_in_db["id"])
             await BlockCypherWebhookCRUD.delete_one({"_id": webhook_in_db["_id"]})
             counter += 1
 
-    logging.info(f"Deleted webhooks count: {counter}")
+    for webhook in webhooks_local:
+        if not list(filter(lambda o: o["id"] == webhook["id"], webhooks_blockcypher)):
+            await BlockCypherWebhookCRUD.delete_one({"_id": webhook["_id"]})
+            counter += 1
+
+    if counter:
+        logging.info(f"Deleted webhooks count: {counter}")
     return True

@@ -1,9 +1,9 @@
-from typing import Optional, List, Union, Tuple, Dict, Literal, Iterable
 from datetime import datetime
+from typing import Union
 
-from pydantic import Field, validator
+from pydantic import Field
 
-from schemas.base import BaseModel, DecimalPydantic, ObjectIdPydantic
+from schemas.base import BaseModel, ObjectIdPydantic
 
 __all__ = [
     "EthereumTransaction",
@@ -17,19 +17,24 @@ __all__ = [
 class SimbaContractEvents:
     OnIssued = "OnIssued"
     OnRedeemed = "OnRedeemed"
+    Transfer = "Transfer"
 
-    ALL = (OnIssued, OnRedeemed)
+    ALL = (OnIssued, OnRedeemed, Transfer)
 
 
 class SSTContractEvents:
-    pass
+    OnFreezed = "OnFreezed"
+    Transfer = "Transfer"
+    ALL = (OnFreezed, Transfer)
 
 
 class EthereumTransaction(BaseModel):
     invoice_id: ObjectIdPydantic = None
+    user_id: ObjectIdPydantic = None
     bitcoins_sended: bool = False
     address: str = None
     args: dict = None
+    confirmations: int = None
     blockHash: Union[str] = None
     blockNumber: int = None
     logIndex: int = None

@@ -1,13 +1,10 @@
-from typing import Union, Optional, List
-from http import HTTPStatus
+from typing import Union, Optional
 
 from bson import ObjectId
 from sentry_sdk import capture_message
-from fastapi import HTTPException
 
-from schemas import ReferralInDB
 from database.crud.base import BaseMongoCRUD
-from core.utils import to_objectid
+from schemas import ReferralInDB
 
 __all__ = ["ReferralCRUD"]
 

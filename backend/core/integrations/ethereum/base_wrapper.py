@@ -1,24 +1,25 @@
-from abc import ABC, abstractmethod
+from abc import ABC
+from decimal import Decimal
+from sys import getsizeof
 from typing import Union, List, Literal
 
-from sys import getsizeof
-from decimal import Decimal
-
 import ujson
-from hexbytes import HexBytes
 from bson import Decimal128
+from hexbytes import HexBytes
 from web3 import Web3
 from web3.datastructures import AttributeDict
 
+from config import INFURA_WS_URL, IS_PRODUCTION
 from schemas import EthereumContract, EthereumTransaction
-from config import INFURA_WS_URL, INFURA_HTTP_URL
 
 __all__ = ["EthereumBaseCommonWrapper", "EthereumBaseContractWrapper"]
 
 
 class EthereumBaseWrapper(ABC):
     @classmethod
-    def init_web3_provider(cls, provider_type: Literal["http", "ws"], provider_url: str, websocket_timeout: int = 60):
+    def init_web3_provider(
+        cls, provider_type: Literal["http", "ws"], provider_url: str, websocket_timeout: int = 60
+    ):
         if provider_type == "http":
             return Web3.HTTPProvider(provider_url)
         elif provider_type == "ws":
@@ -53,7 +54,9 @@ class EthereumBaseContractWrapper(EthereumBaseWrapper):
     def __init__(self, contract: EthereumContract):
         _abi = []
         _bin = None
+        # Temp fix cause of Infura maintenance
         self.w3 = Web3(self.init_web3_provider("ws", contract.provider_ws_link))
+        # self.w3 = Web3(self.init_web3_provider("http", contract.provider_http_link))
         self.contract_meta = contract
         self.contract_address = Web3.toChecksumAddress(contract.address)
 
@@ -67,6 +70,7 @@ class EthereumBaseContractWrapper(EthereumBaseWrapper):
         self.blocks: List[EthereumTransaction] = []
         self.filters = []
         self.last_block = None
+        self.min_confirmations = 3 if IS_PRODUCTION else 1
 
     def fetch_transaction_by_hash(self, transaction_hash: Union[str, HexBytes]):
         return self.w3.eth.getBlock(transaction_hash, full_transactions=True)

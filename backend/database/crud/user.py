@@ -37,7 +37,7 @@ class UserCRUD(BaseMongoCRUD):
     collection: str = "users"
 
     @classmethod
-    async def find_by_id(cls, _id: Union[str, ObjectId]) -> Optional[dict]:
+    async def find_by_id(cls, _id: Union[str, ObjectId], **kwargs) -> Optional[dict]:
         return await super().find_one(query={"_id": to_objectid(_id)}) if _id else None
 
     @classmethod
@@ -249,8 +249,7 @@ class UserCRUD(BaseMongoCRUD):
 
     @classmethod
     async def delete_2fa(cls, user: User, payload: User2faDelete):
-        totp = pyotp.TOTP(user.secret_2fa)
-        current_pin_code = totp.now()
+        current_pin_code = pyotp.TOTP(user.secret_2fa).now()
         if current_pin_code != payload.pin_code:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin-code")
         await cls.update_one(query={"_id": user.id}, payload={"secret_2fa": None, "two_factor": False})

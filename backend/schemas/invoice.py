@@ -1,8 +1,8 @@
-from typing import Optional, Literal, List, Union
 from datetime import datetime
 from enum import IntEnum
+from typing import Optional, Literal, List, Union
 
-from pydantic import Field, validator, PositiveInt
+from pydantic import Field, validator
 
 from schemas.base import (
     BaseModel,
@@ -73,6 +73,14 @@ class Invoice(BaseModel):
     # Validate transaction before processing
     validation_md5_hash: str = Field(default="")
 
+    def add_hash(self, crypto: Literal["eth", "btc"], hash_: str) -> None:
+        if not hash_:
+            return None
+        if crypto == "eth":
+            self.eth_tx_hashes = list({*self.eth_tx_hashes, hash_})
+        elif crypto == "btc":
+            self.btc_tx_hashes = list({*self.btc_tx_hashes, hash_})
+
 
 class InvoiceInDB(Invoice):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
@@ -85,9 +93,12 @@ class InvoiceExtended(InvoiceInDB):
 
 class InvoiceCreate(BaseModel):
     invoice_type: InvoiceType = Field(..., description="1 for buy, 2 for sell")
-    btc_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send", gt=0)
-    simba_amount: Union[int, DecimalPydantic] = Field(default=None, description="Planned amount to receive / send",
-                                                      gt=0)
+    btc_amount: Union[int, DecimalPydantic] = Field(
+        default=None, description="Planned amount to receive / send", gt=0
+    )
+    simba_amount: Union[int, DecimalPydantic] = Field(
+        default=None, description="Planned amount to receive / send", gt=0
+    )
 
 
 class InvoiceUpdate(BaseModel):

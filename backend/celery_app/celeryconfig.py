@@ -31,5 +31,25 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute="*/1"),
         "args": (),
     },
+    "fetch_and_proceed_simba_contract": {
+        "task": "fetch_and_proceed_simba_contract",
+        "schedule": crontab(minute="*/1"),
+        "args": (),
+    },
+    "send_btc_to_proceeding_invoices": {
+        "task": "send_btc_to_proceeding_invoices",
+        "schedule": crontab(minute="*/10"),
+        "args": (),
+    },
     "delete_unused_webhooks": {"task": "delete_unused_webhooks", "schedule": crontab(hour="*/5"), "args": (),},
+    "fetch_and_proceed_sst_contract": {
+        "task": "fetch_and_proceed_sst_contract",
+        "schedule": crontab(minute="0", hour="1", day_of_month="*/1"),
+        "args": (),
+    },
+    "update_empty_btc_addresses_info": {
+        "task": "update_empty_btc_addresses_info",
+        "schedule": crontab(minute="0", hour="2", day_of_month="*/1"),
+        "args": (),
+    },
 }
