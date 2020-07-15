@@ -23,7 +23,7 @@ router = APIRouter()
 
 @router.get("/cron/")
 async def debug_get():
-    await delete_unused_webhooks()
+    await fetch_and_proceed_simba_contract()
     return True
 
 
