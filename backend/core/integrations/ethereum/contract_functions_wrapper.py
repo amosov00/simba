@@ -1,5 +1,6 @@
 import asyncio
 from http import HTTPStatus
+import logging
 
 from hexbytes import HexBytes
 from web3 import Web3
@@ -25,7 +26,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         self.simba_fee = SIMBA_BUY_SELL_FEE
 
     def _get_nonce(self):
-        return self.w3.eth.getTransactionCount(self.admin_address)
+        return self.w3.eth.getTransactionCount(self.admin_address, "pending")
 
     @staticmethod
     async def get_gas_price():
