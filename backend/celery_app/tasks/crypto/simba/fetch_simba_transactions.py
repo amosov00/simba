@@ -1,3 +1,7 @@
+from datetime import datetime
+
+from bson import Decimal128
+
 from celery_app.celeryconfig import app
 from database.crud import InvoiceCRUD, EthereumTransactionCRUD, UserCRUD
 from schemas import SimbaContractEvents, EthereumTransactionInDB, InvoiceStatus, InvoiceType
@@ -41,12 +45,27 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
             if invoice:
                 user = await UserCRUD.find_by_id(invoice["user_id"])
                 await InvoiceMechanics(invoice, user).proceed_new_transaction(transaction)
-            else:
-                continue
 
-        elif transaction.event in (SimbaContractEvents.OnRedeemed, SimbaContractEvents.OnIssued):
-            # Connect with finished invoices
-            # TODO Complete
-            pass
+        elif transaction.event in (SimbaContractEvents.OnIssued, SimbaContractEvents.OnRedeemed):
+            customer_address = transaction.args.get("customerAddress")
+            timestamp = transaction.args.get("timestamp")
+            if timestamp and isinstance(timestamp, Decimal128):
+                timestamp = int(timestamp.to_decimal())
+
+            tx_datetime = datetime.fromtimestamp(timestamp)
+            btc_tx_hash = transaction.args.get("comment")
+            invoice_type = InvoiceType.BUY if transaction.event == SimbaContractEvents.OnIssued else InvoiceType.SELL
+
+            invoice = await InvoiceCRUD.find_one({
+                "status": InvoiceStatus.COMPLETED,
+                "invoice_type": invoice_type,
+                "target_eth_address": {"$regex": customer_address, "$options": "i"},
+                "created_at": {"$lte": tx_datetime},
+                "btc_tx_hashes": btc_tx_hash,
+            })
+
+            if invoice:
+                import logging; logging.info(f"Invoice {invoice['_id']}")
+                await InvoiceMechanics(invoice).proceed_new_transaction(transaction)
 
     return True

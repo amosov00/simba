@@ -1,5 +1,5 @@
 import asyncio, logging
-from typing import Union, List, Tuple, Optional
+from typing import Union, List, Tuple, Optional, Type
 from http import HTTPStatus
 from datetime import datetime
 
@@ -115,7 +115,7 @@ class InvoiceMechanics(CryptoValidation):
     def get_incoming_simba(cls, transaction: Union[EthereumTransaction, EthereumTransactionInDB]) -> int:
         value = 0
 
-        if transaction.event == SimbaContractEvents.Transfer:
+        if transaction.event in SimbaContractEvents.ALL:
             value = transaction.args.get("value")
 
         return value
@@ -148,6 +148,7 @@ class InvoiceMechanics(CryptoValidation):
             new_transaction: BTCTransaction,
             transaction_in_db: BTCTransactionInDB
     ):
+        """Part of buy pipeline"""
         incoming_btc = self.get_incoming_btc_from_outputs(new_transaction.outputs, self.invoice.target_btc_address)
 
         if not incoming_btc:
@@ -182,6 +183,7 @@ class InvoiceMechanics(CryptoValidation):
         return True
 
     async def _proceed_new_btc_tx_sell(self, new_transaction: BTCTransaction):
+        """Part of sell pipeline"""
         if new_transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS \
                 and self.invoice.status == InvoiceStatus.PROCESSING:
 
@@ -209,25 +211,29 @@ class InvoiceMechanics(CryptoValidation):
         self._raise_exception_if_exists()
 
         if self.invoice.invoice_type == InvoiceType.BUY:
-            return await self._proceed_new_btc_tx_buy(transaction, incoming_btc, transaction_in_db)
+            return await self._proceed_new_btc_tx_buy(transaction, transaction_in_db)
 
         elif self.invoice.invoice_type == InvoiceType.SELL:
             return await self._proceed_new_btc_tx_sell(transaction)
 
         return True
 
-    async def proceed_new_eth_transaction(self, transaction: Union[EthereumTransaction, EthereumTransactionInDB]):
-        logging.info(f"TX:{transaction}\nINV:{self.invoice.id}")
+    async def _proceed_new_eth_tx_transfer(self, transaction: EthereumTransactionInDB):
+        """Part of sell pipeline"""
         incoming_eth = self.get_incoming_simba(transaction)
 
         if not incoming_eth:
             capture_message("failed to parse incoming eth from transaction", level="error")
             self.errors.append("failed to parse incoming eth from transaction")
 
+        if not self.invoice.status == InvoiceStatus.WAITING:
+            capture_message("invalid invoice status in sell invoice pipeline", level="error")
+            self.errors.append("invalid invoice status in sell invoice pipeline")
+
         self._raise_exception_if_exists()
 
         transaction.invoice_id = self.invoice.id
-        transaction.bitcoins_sended = True
+        transaction.bitcoins_sended = True  # TODO is it correct ?
 
         self.invoice.status = InvoiceStatus.PROCESSING
         self.invoice.simba_amount_proceeded = incoming_eth
@@ -235,6 +241,24 @@ class InvoiceMechanics(CryptoValidation):
 
         await EthereumTransactionCRUD.update_one({"_id": transaction.id}, transaction.dict(exclude={"id"}))
         await self.update_invoice()
+        return True
+
+    async def _proceed_new_eth_tx_issue_redeem(self, transaction: EthereumTransactionInDB):
+        """Part of buy and sell pipeline, just for adding extra info in invoice"""
+        transaction.invoice_id = self.invoice.id
+        self.invoice.add_hash("eth", transaction.transactionHash)
+
+        await EthereumTransactionCRUD.update_one({"_id": transaction.id}, transaction.dict(exclude={"id"}))
+        await self.update_invoice()
+        return True
+
+    async def proceed_new_eth_transaction(self, transaction: EthereumTransactionInDB):
+        if transaction.event == SimbaContractEvents.Transfer:
+            return await self._proceed_new_eth_tx_transfer(transaction)
+        elif transaction.event in (SimbaContractEvents.OnRedeemed, SimbaContractEvents.OnIssued):
+            return await self._proceed_new_eth_tx_issue_redeem(transaction)
+        else:
+            capture_message("Unindentified invoice type", level="warning")
         return True
 
     async def proceed_new_transaction(

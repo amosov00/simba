@@ -10,12 +10,9 @@ from sentry_sdk import capture_message
 from .base_wrapper import EthereumBaseContractWrapper
 from core.utils import gas_price_from_ethgasstation
 from schemas import EthereumContract
+from config import SIMBA_BUY_SELL_FEE
 
 GAS = 250000
-
-# Is necessary because of initial fee in 50k.
-# If transaction is made with amount less than 50k, error will be raised
-SIMBA_BUY_SELL_FEE = 50000
 
 
 class FunctionsContractWrapper(EthereumBaseContractWrapper):
@@ -36,9 +33,9 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
     def check_min_amount(self, amount: int, *, func_name: str = None, comment: str = None) -> bool:
         if amount < self.simba_fee:
             capture_message(
-                f"trying to {func_name or 'call some contranc func'} < 50k simba, BTC HASH {comment or '?'}"
+                f"trying to {func_name or 'call some contranc func'} < {self.simba_fee} simba, BTC HASH {comment or '?'}"
             )
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "minimal simba amount to issue - 50,000")
+            raise HTTPException(HTTPStatus.BAD_REQUEST, f"minimal simba amount to issue - {self.simba_fee}")
 
         return True
 

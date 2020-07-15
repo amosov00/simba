@@ -74,6 +74,8 @@ class Invoice(BaseModel):
     validation_md5_hash: str = Field(default="")
 
     def add_hash(self, crypto: Literal["eth", "btc"], hash_: str) -> None:
+        if not hash_:
+            return None
         if crypto == "eth":
             self.eth_tx_hashes = list({*self.eth_tx_hashes, hash_})
         elif crypto == "btc":
