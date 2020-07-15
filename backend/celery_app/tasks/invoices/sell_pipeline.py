@@ -1,12 +1,12 @@
-import asyncio, logging
+import asyncio
 
 from sentry_sdk import capture_message, push_scope
 
 from celery_app.celeryconfig import app
-from database.crud import InvoiceCRUD, UserCRUD, EthereumTransactionCRUD
-from schemas import InvoiceInDB, InvoiceStatus
-from core.mechanics import BitcoinWrapper, SimbaWrapper, InvoiceMechanics
 from config import BTC_HOT_WALLET_ADDRESS
+from core.mechanics import BitcoinWrapper, InvoiceMechanics
+from database.crud import InvoiceCRUD, UserCRUD
+from schemas import InvoiceInDB, InvoiceStatus
 
 __all__ = ["send_btc_to_proceeding_invoices"]
 

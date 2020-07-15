@@ -1,11 +1,9 @@
-from typing import Union
 from bson.errors import InvalidId
 from fastapi import responses
-from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError, HTTPException
 from pydantic import ValidationError
-from starlette.requests import Request
 from starlette import status
+from starlette.requests import Request
 
 __all__ = ["exception_handlers"]
 

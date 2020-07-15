@@ -37,7 +37,7 @@ class UserCRUD(BaseMongoCRUD):
     collection: str = "users"
 
     @classmethod
-    async def find_by_id(cls, _id: Union[str, ObjectId]) -> Optional[dict]:
+    async def find_by_id(cls, _id: Union[str, ObjectId], **kwargs) -> Optional[dict]:
         return await super().find_one(query={"_id": to_objectid(_id)}) if _id else None
 
     @classmethod

@@ -1,25 +1,19 @@
-import asyncio
-import logging
-from typing import Optional, Union, List
-from websockets import ConnectionClosedError
-from datetime import datetime
+from typing import Union
 
-from sentry_sdk import capture_exception
-
-from .base_wrapper import EthereumBaseContractWrapper, EthereumBaseCommonWrapper
-from schemas import EthereumTransaction
-from database.crud import EthereumTransactionCRUD
 from config import SIMBA_CONTRACT
+from .base_wrapper import EthereumBaseCommonWrapper
 
-__all__ = ['EthereumCommonWrapper']
+__all__ = ["EthereumCommonWrapper"]
 
 
 class EthereumCommonWrapper(EthereumBaseCommonWrapper):
     # TODO deprecated, delete after 10/07/2020
-    def _create_filter(self, address: str, from_block: Union[str, int] = None, to_block: Union[str, int] = None):
-        return self.w3.eth.filter({
-            "address": SIMBA_CONTRACT.address, "fromBlock": from_block, "toBlock": to_block, "from": address
-        })
+    def _create_filter(
+        self, address: str, from_block: Union[str, int] = None, to_block: Union[str, int] = None
+    ):
+        return self.w3.eth.filter(
+            {"address": SIMBA_CONTRACT.address, "fromBlock": from_block, "toBlock": to_block, "from": address}
+        )
 
     def _fetch_blocks(self, address, from_block: Union[str, int], to_block: Union[str, int]):
         for block in self._create_filter(address, from_block, to_block).get_all_entries():

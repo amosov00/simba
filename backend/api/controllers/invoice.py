@@ -1,11 +1,12 @@
-from typing import List
 from http import HTTPStatus
+from typing import List
 
-from fastapi import APIRouter, HTTPException, Query, Depends, Body, Request, Response, BackgroundTasks
 from bson import ObjectId
+from fastapi import APIRouter, HTTPException, Depends, Body, Response
 
 from api.dependencies import get_user
-from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD, UserCRUD
+from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler
+from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
 from schemas import (
     Invoice,
     InvoiceCreate,
@@ -18,7 +19,6 @@ from schemas import (
     BlockCypherWebhookEvents,
 )
 from schemas.user import User
-from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler
 
 __all__ = ["router"]
 
@@ -27,14 +27,16 @@ router = APIRouter()
 
 @router.post("/", response_model=InvoiceInDB, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS)
 async def create_invoice(
-        user: User = Depends(get_user), data: InvoiceCreate = Body(...),
+    user: User = Depends(get_user), data: InvoiceCreate = Body(...),
 ):
     invoice = Invoice(user_id=user.id, status=InvoiceStatus.CREATED, invoice_type=data.invoice_type)
 
     created_invoice = await InvoiceCRUD.create_invoice(invoice)
 
     if invoice.invoice_type == InvoiceType.BUY:
-        created_invoice["target_btc_address"] = await BitcoinWrapper().create_wallet_address(created_invoice, user)
+        created_invoice["target_btc_address"] = await BitcoinWrapper().create_wallet_address(
+            created_invoice, user
+        )
 
     return created_invoice
 
@@ -81,22 +83,24 @@ async def invoice_update(invoice_id: str, user: User = Depends(get_user), payloa
         if payload.target_eth_address and not user.has_address("eth", payload.target_eth_address):
             raise HTTPException(
                 HTTPStatus.BAD_REQUEST,
-                {"reason": "unconfirmed_eth_address", "message": "eth address must be confirmed"}
+                {"reason": "unconfirmed_eth_address", "message": "eth address must be confirmed"},
             )
 
     elif invoice.invoice_type == InvoiceType.SELL:
         if payload.target_eth_address and not user.has_address("eth", payload.target_eth_address):
             raise HTTPException(
                 HTTPStatus.BAD_REQUEST,
-                {"reason": "unconfirmed_eth_address", "message": "eth address must be confirmed"}
+                {"reason": "unconfirmed_eth_address", "message": "eth address must be confirmed"},
             )
         if payload.target_btc_address and not user.has_address("btc", payload.target_btc_address):
             raise HTTPException(
                 HTTPStatus.BAD_REQUEST,
-                {"reason": "unconfirmed_btc_address", "message": "btc address must be confirmed"}
+                {"reason": "unconfirmed_btc_address", "message": "btc address must be confirmed"},
             )
 
-    return await InvoiceCRUD.update_invoice(invoice_id, user, payload, filtering_statuses=(InvoiceStatus.CREATED,))
+    return await InvoiceCRUD.update_invoice(
+        invoice_id, user, payload, filtering_statuses=(InvoiceStatus.CREATED,)
+    )
 
 
 @router.post(

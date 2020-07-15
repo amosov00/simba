@@ -1,7 +1,6 @@
-from typing import AsyncGenerator
+import pymongo
 
 from .base import BaseMongoCRUD
-import pymongo
 
 
 class EthereumTransactionCRUD(BaseMongoCRUD):

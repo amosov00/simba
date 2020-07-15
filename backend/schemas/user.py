@@ -5,7 +5,13 @@ from pydantic import Field, validator
 from passlib.context import CryptContext
 from passlib import pwd
 
-from schemas.base import BaseModel, ObjectIdPydantic, SuccessResponse, validate_eth_address, validate_btc_address
+from schemas.base import (
+    BaseModel,
+    ObjectIdPydantic,
+    SuccessResponse,
+    validate_eth_address,
+    validate_btc_address,
+)
 
 __all__ = [
     "pwd_context",
@@ -31,8 +37,7 @@ __all__ = [
     "USER_MODEL_INCLUDE_FIELDS",
     "UserBitcoinAddress",
     "UserBitcoinAddressDelete",
-    "UserBitcoinAddressInput"
-
+    "UserBitcoinAddressInput",
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -74,18 +79,14 @@ class UserEthereumSignedAddress(BaseModel):
     address: str = Field(default=None)
     signature: str = Field(default=None)
 
-    _validate_address = validator("address", allow_reuse=True)(
-        validate_eth_address
-    )
+    _validate_address = validator("address", allow_reuse=True)(validate_eth_address)
 
 
 class UserBitcoinAddress(BaseModel):
     address: str = Field(...)
     created_at: Optional[datetime] = Field(default=None)
 
-    _validate_address = validator("address", allow_reuse=True)(
-        validate_btc_address
-    )
+    _validate_address = validator("address", allow_reuse=True)(validate_btc_address)
 
 
 class UserBitcoinAddressInput(UserBitcoinAddress):
@@ -145,13 +146,9 @@ class User(BaseModel):
             return False
 
         if crypto == "eth":
-            return bool(list(filter(
-                lambda o: o.address.lower() == address.lower(), self.user_eth_addresses
-            )))
+            return bool(list(filter(lambda o: o.address.lower() == address.lower(), self.user_eth_addresses)))
         elif crypto == "btc":
-            return bool(list(filter(
-                lambda o: o.address.lower() == address.lower(), self.user_btc_addresses
-            )))
+            return bool(list(filter(lambda o: o.address.lower() == address.lower(), self.user_btc_addresses)))
         else:
             return True
 

@@ -33,14 +33,18 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
             if not SIMBA_ADMIN_ADDRESS.lower() == receiver_hash.lower():
                 continue
 
-            invoice = await InvoiceCRUD.find_one(
-                {
-                    "status": InvoiceStatus.WAITING,
-                    "invoice_type": InvoiceType.SELL,
-                    "target_eth_address": {"$regex": sender_hash, "$options": "i"},
-                    "created_at": {"$lte": transaction.fetched_at}
-                }
-            ) if sender_hash else None
+            invoice = (
+                await InvoiceCRUD.find_one(
+                    {
+                        "status": InvoiceStatus.WAITING,
+                        "invoice_type": InvoiceType.SELL,
+                        "target_eth_address": {"$regex": sender_hash, "$options": "i"},
+                        "created_at": {"$lte": transaction.fetched_at},
+                    }
+                )
+                if sender_hash
+                else None
+            )
 
             if invoice:
                 user = await UserCRUD.find_by_id(invoice["user_id"])
@@ -54,18 +58,24 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
 
             tx_datetime = datetime.fromtimestamp(timestamp)
             btc_tx_hash = transaction.args.get("comment")
-            invoice_type = InvoiceType.BUY if transaction.event == SimbaContractEvents.OnIssued else InvoiceType.SELL
+            invoice_type = (
+                InvoiceType.BUY if transaction.event == SimbaContractEvents.OnIssued else InvoiceType.SELL
+            )
 
-            invoice = await InvoiceCRUD.find_one({
-                "status": InvoiceStatus.COMPLETED,
-                "invoice_type": invoice_type,
-                "target_eth_address": {"$regex": customer_address, "$options": "i"},
-                "created_at": {"$lte": tx_datetime},
-                "btc_tx_hashes": btc_tx_hash,
-            })
+            invoice = await InvoiceCRUD.find_one(
+                {
+                    "status": InvoiceStatus.COMPLETED,
+                    "invoice_type": invoice_type,
+                    "target_eth_address": {"$regex": customer_address, "$options": "i"},
+                    "created_at": {"$lte": tx_datetime},
+                    "btc_tx_hashes": btc_tx_hash,
+                }
+            )
 
             if invoice:
-                import logging; logging.info(f"Invoice {invoice['_id']}")
+                import logging
+
+                logging.info(f"Invoice {invoice['_id']}")
                 await InvoiceMechanics(invoice).proceed_new_transaction(transaction)
 
     return True

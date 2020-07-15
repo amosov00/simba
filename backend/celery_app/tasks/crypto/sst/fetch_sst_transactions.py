@@ -1,9 +1,8 @@
 from celery_app.celeryconfig import app
-from database.crud import InvoiceCRUD, EthereumTransactionCRUD, UserCRUD
-from schemas import SSTContractEvents, EthereumTransactionInDB, InvoiceStatus, InvoiceType
-from core.integrations.ethereum import EventsContractWrapper
-from core.mechanics import InvoiceMechanics
 from config import SST_CONTRACT, SST_ADMIN_ADDRESS
+from core.integrations.ethereum import EventsContractWrapper
+from database.crud import EthereumTransactionCRUD, UserCRUD
+from schemas import SSTContractEvents
 
 __all__ = ["fetch_and_proceed_sst_contract"]
 
@@ -27,13 +26,9 @@ async def fetch_and_proceed_sst_contract(self, *args, **kwargs):
     for transaction in transactions:
         address_to = transaction["args"].get("to")
 
-        user = await UserCRUD.find_one({
-            "user_eth_addresses.address": {"$regex": address_to, "$options": "i"}
-        })
+        user = await UserCRUD.find_one({"user_eth_addresses.address": {"$regex": address_to, "$options": "i"}})
 
         if user:
-            await EthereumTransactionCRUD.update_one(
-                {"_id": transaction["_id"]}, {"user_id": user["_id"]}
-            )
+            await EthereumTransactionCRUD.update_one({"_id": transaction["_id"]}, {"user_id": user["_id"]})
 
     return True

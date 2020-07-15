@@ -1,9 +1,9 @@
-from typing import Optional, List, Union, Tuple, Dict, Literal, Iterable
 from datetime import datetime
+from typing import Union
 
-from pydantic import Field, validator
+from pydantic import Field
 
-from schemas.base import BaseModel, DecimalPydantic, ObjectIdPydantic
+from schemas.base import BaseModel, ObjectIdPydantic
 
 __all__ = [
     "EthereumTransaction",

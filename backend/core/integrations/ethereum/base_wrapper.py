@@ -1,24 +1,25 @@
-from abc import ABC, abstractmethod
+from abc import ABC
+from decimal import Decimal
+from sys import getsizeof
 from typing import Union, List, Literal
 
-from sys import getsizeof
-from decimal import Decimal
-
 import ujson
-from hexbytes import HexBytes
 from bson import Decimal128
+from hexbytes import HexBytes
 from web3 import Web3
 from web3.datastructures import AttributeDict
 
-from schemas import EthereumContract, EthereumTransaction
 from config import INFURA_WS_URL, IS_PRODUCTION
+from schemas import EthereumContract, EthereumTransaction
 
 __all__ = ["EthereumBaseCommonWrapper", "EthereumBaseContractWrapper"]
 
 
 class EthereumBaseWrapper(ABC):
     @classmethod
-    def init_web3_provider(cls, provider_type: Literal["http", "ws"], provider_url: str, websocket_timeout: int = 60):
+    def init_web3_provider(
+        cls, provider_type: Literal["http", "ws"], provider_url: str, websocket_timeout: int = 60
+    ):
         if provider_type == "http":
             return Web3.HTTPProvider(provider_url)
         elif provider_type == "ws":

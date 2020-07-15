@@ -11,8 +11,10 @@ async def gas_price_from_ethgasstation() -> str:
         except Exception:
             gas_station_req = None
 
-    gas_station_gwei = str(int(gas_station_req.get("fast")) // 10) \
-        if gas_station_req and gas_station_req.get("fast") \
+    gas_station_gwei = (
+        str(int(gas_station_req.get("fast")) // 10)
+        if gas_station_req and gas_station_req.get("fast")
         else DEFAULT_GAS_PRICE
+    )
 
     return gas_station_gwei
