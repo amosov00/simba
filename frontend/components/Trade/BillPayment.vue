@@ -25,14 +25,15 @@
       div.mt-2(v-else)
         div.is-flex.align-items-center
           img(src="@/assets/images/logo_sm.png").mr-2
-          div.text-large.is-flex.align-items-center {{ $t('exchange.send')}}
+          div.text-large.is-flex.align-items-center.w-100 {{ $t('exchange.send')}}
             = ' '
             span.has-text-weight-bold.ml-1 {{ tradeData.simba }} SIMBA
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
-            span {{ tradeData.admin_eth_address }}
+            span {{ truncateEthAddress(tradeData.admin_eth_address) }}
             CopyToClipboard(:value_to_copy="tradeData.admin_eth_address").ml-2
             TradeQRCode(:qrcode_value="tradeData.admin_eth_address" :amount="parseFloat(tradeData.simba)").ml-1
+            button.btn(@click="payWithMetamask" style="margin-left: auto") {{ $t('other.send') }}
         div.is-flex.align-items-center.mt-2
           img(src="@/assets/images/bitcoin.svg").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
@@ -42,8 +43,7 @@
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
             span {{ btc_address }}
-        div.mt-3
-          button.btn(@click="payWithMetamask") {{ $t('exchange.send_simba_now') }}
+
     div.mt-4(v-if="expired")
       div.has-text-weight-bold.is-size-5 {{$t('exchange.bill_expired')}}
       div.mt-3.is-flex.align-items-center
@@ -102,6 +102,10 @@
       confirmInterval: null,
     }),
     methods: {
+      truncateEthAddress(address) {
+        return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
+      },
+
       payWithMetamask() {
         let transferData = {
           address: this.tradeData.admin_eth_address,
