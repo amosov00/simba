@@ -25,7 +25,7 @@ from schemas import (
     SimbaContractEvents,
     BlockCypherWebhookEvents,
 )
-from config import SIMBA_BUY_SELL_FEE
+from config import SIMBA_BUY_SELL_FEE, SIMBA_MINIMAL_BUY_AMOUNT
 
 
 class InvoiceMechanics(CryptoValidation):
@@ -54,7 +54,7 @@ class InvoiceMechanics(CryptoValidation):
         if not self.invoice.target_eth_address:
             self.errors.append("ethereum wallet address is required")
         if not self.validate_simba_amount(self.invoice.simba_amount):
-            self.errors.append(f"min simba token amount: {self.SIMBA_TOKENS_MINIMAL_AMOUNT}")
+            self.errors.append(f"min simba token amount: {SIMBA_MINIMAL_BUY_AMOUNT}")
         if not self.validate_currency_rate(self.invoice.btc_amount, self.invoice.simba_amount):
             self.errors.append("invalid rate")
         if self.invoice.invoice_type not in (InvoiceType.SELL, InvoiceType.BUY):
@@ -79,7 +79,7 @@ class InvoiceMechanics(CryptoValidation):
     def _validate_for_sending_btc(self):
         if not self.invoice.status == InvoiceStatus.PROCESSING:
             self.errors.append("invalid invoice status")
-        if self.invoice.simba_amount_proceeded < self.SIMBA_BUY_SELL_FEE:
+        if self.invoice.simba_amount_proceeded < SIMBA_MINIMAL_BUY_AMOUNT:
             self.errors.append("too low simba tokens value")
         if self.invoice.simba_amount_proceeded == self.invoice.btc_amount_proceeded + SIMBA_BUY_SELL_FEE:
             self.errors.append("btc are already sent")

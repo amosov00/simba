@@ -38,7 +38,7 @@ app.conf.beat_schedule = {
     },
     "send_btc_to_proceeding_invoices": {
         "task": "send_btc_to_proceeding_invoices",
-        "schedule": crontab(minute="*/10"),
+        "schedule": crontab(minute="*/1"),
         "args": (),
     },
     "delete_unused_webhooks": {

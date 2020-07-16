@@ -3,8 +3,8 @@ from http import HTTPStatus
 
 from fastapi import HTTPException
 
-from database.crud import BTCTransactionCRUD
 from schemas import InvoiceInDB, InvoiceStatus, BTCTransaction
+from config import SIMBA_BUY_SELL_FEE, SIMBA_MINIMAL_BUY_AMOUNT
 
 __all__ = ["CryptoValidation", "ParseCryptoTransaction", "CryptoCurrencyRate"]
 
@@ -53,53 +53,9 @@ class ParseCryptoTransaction:
 
 
 class CryptoValidation(ABC):
-    # Класс для валидации количества значений криптовалют
-    # TODO синхронизировать с InvoiceMechanics().validate(). Есть повторяющиеся элементы
-    SIMBA_TOKENS_MINIMAL_AMOUNT = 200000
-    SIMBA_BUY_SELL_FEE = 50000
-
-    @classmethod
-    async def validate_btc_transaction_with_invoice(
-        cls, invoice: InvoiceInDB, transaction: BTCTransaction
-    ) -> bool:
-        """ TODO deprecated ? """
-        errors = []
-
-        if invoice.status not in [InvoiceStatus.WAITING, InvoiceStatus.PROCESSING]:
-            errors.append("Invalid invoice address")
-
-        if not invoice.target_btc_address:
-            errors.append("Invoice has no btc address")
-
-        if await BTCTransactionCRUD.find_one({"hash": transaction.hash}):
-            errors.append("Transaction already exists")
-
-        if transaction.addresses:
-            if invoice.target_btc_address not in transaction.addresses:
-                errors.append("Target address is not found in transaction addresses")
-
-        if transaction.inputs:
-            target_address = list(
-                filter(lambda o: invoice.target_btc_address in o.addresses, transaction.inputs)
-            )
-
-            if not target_address:
-                errors.append("Target address is not found in transaction outputs")
-
-        else:
-            errors.append("Transaction has no outputs")
-
-        if errors:
-            raise HTTPException(HTTPStatus.BAD_REQUEST, errors)
-
-        return True
-
     @classmethod
     def validate_simba_amount(cls, simba: int) -> bool:
-        if simba and simba >= cls.SIMBA_TOKENS_MINIMAL_AMOUNT:
-            return True
-
-        return False
+        return True if simba and simba >= SIMBA_MINIMAL_BUY_AMOUNT else False
 
     @classmethod
     def validate_currency_rate(cls, btc: int, simba: int) -> bool:
@@ -107,7 +63,7 @@ class CryptoValidation(ABC):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc or simba amount")
         if btc <= 0 or simba <= 0:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc or simba amount")
-        if simba / btc != 1:
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc or simba ratio")
+        if simba + SIMBA_BUY_SELL_FEE != btc:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc and simba ratio")
 
         return True
