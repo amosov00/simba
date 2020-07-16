@@ -1,3 +1,4 @@
+import asyncio
 from http import HTTPStatus
 from urllib.parse import urljoin
 from typing import Literal
@@ -72,6 +73,8 @@ class BlockCypherWebhookHandler:
         webhook_obj = await BlockCypherWebhookCRUD.find_one({"invoice_id": invoice.id})
 
         if webhook_obj:
+            # Slow down cause of blockcypher limitations per sec
+            await asyncio.sleep(0.3)
             webhook_obj = BlockCypherWebhookInDB(**webhook_obj)
             await self.api_wrapper.delete_webhook(webhook_obj.blockcypher_id)
             await BlockCypherWebhookCRUD.delete_one({"_id": webhook_obj.id})

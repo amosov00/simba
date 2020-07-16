@@ -45,10 +45,10 @@ async def transparency_totals():
 async def transparency_transactions(
         tx_type: Literal["received", "paidout"] = Query(default="received", alias="type")
 ):
-    invoices = await InvoiceCRUD.find_many({
-        "status": InvoiceStatus.COMPLETED,
-        "invoice_type": InvoiceType.BUY if tx_type == "" else InvoiceType.SELL
-    }, {"target_btc_address": ""})
+    # invoices = await InvoiceCRUD.find_many({
+    #     "status": InvoiceStatus.COMPLETED,
+    #     "invoice_type": InvoiceType.BUY if tx_type == "" else InvoiceType.SELL
+    # }, {"target_btc_address": ""})
     transactions = await BTCAddressCRUD.aggregate(
         [
             {"$match": {
