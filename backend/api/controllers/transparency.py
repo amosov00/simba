@@ -3,8 +3,8 @@ from typing import List, Literal
 from fastapi import APIRouter, Query
 
 from config import BTC_COLD_WALLETS
-from database.crud import BTCAddressCRUD, InvoiceCRUD
-from schemas import TransparencyTransaction, InvoiceStatus, InvoiceType
+from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
+from schemas import TransparencyTransaction, InvoiceStatus, InvoiceType, Invoice
 
 __all__ = ["router"]
 
@@ -45,18 +45,18 @@ async def transparency_totals():
 async def transparency_transactions(
         tx_type: Literal["received", "paidout"] = Query(default="received", alias="type")
 ):
-    # invoices = await InvoiceCRUD.find_many({
-    #     "status": InvoiceStatus.COMPLETED,
-    #     "invoice_type": InvoiceType.BUY if tx_type == "" else InvoiceType.SELL
-    # }, {"target_btc_address": ""})
-    transactions = await BTCAddressCRUD.aggregate(
-        [
-            {"$match": {
-                "cold_wallet_title": {"$in": [i.title for i in BTC_COLD_WALLETS]}},
-            },
-            {"$project": {"_id": 0, "transactions_refs": 1}},
-            {"$unwind": "$transactions_refs"},
-            {"$sort": {"transactions_refs.confirmed": -1}},
-        ]
-    )
-    return [i["transactions_refs"] for i in transactions]
+    btc_tx_hashes = await InvoiceCRUD.aggregate([
+        {"$match": {
+            "$and": [
+                {"status": InvoiceStatus.COMPLETED},
+                {"invoice_type": InvoiceType.BUY if tx_type == "received" else InvoiceType.SELL}
+            ]
+        }},
+        {"$project": {"_id": 0, "btc_tx_hashes": 1}},
+        {"$unwind": "$btc_tx_hashes"},
+    ])
+    btc_tx_hashes_list = [i["btc_tx_hashes"] for i in btc_tx_hashes] if btc_tx_hashes else None
+    btc_txs = await BTCTransactionCRUD.find_many({
+        "hash": {"$in": btc_tx_hashes_list}
+    }) if btc_tx_hashes_list else []
+    return btc_txs

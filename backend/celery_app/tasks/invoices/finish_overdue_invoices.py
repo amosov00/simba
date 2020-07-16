@@ -60,5 +60,6 @@ async def finish_overdue_invoices(self, *args, **kwargs):
             await BlockCypherWebhookHandler().delete_webhook(invoice)
             counter += 1
 
-    logging.info(f"Closed {counter} invoices")
+    if counter:
+        logging.info(f"Closed {counter} overdue invoices")
     return True

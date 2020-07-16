@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from bson import Decimal128
@@ -18,12 +19,11 @@ __all__ = ["fetch_and_proceed_simba_contract"]
 async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
     """Синхронизация с Simba контрактом"""
     await EventsContractWrapper(SIMBA_CONTRACT).fetch_blocks_and_save()
-
+    counter = 0
     transactions = await EthereumTransactionCRUD.find(
         {"contract": SIMBA_CONTRACT.title, "event": {"$in": SimbaContractEvents.ALL}, "invoice_id": None}
     )
     for transaction in transactions:
-        transaction = EthereumTransactionInDB(**transaction)
 
         if transaction.event == SimbaContractEvents.Transfer:
             # Connect with sell invoices
@@ -47,6 +47,7 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
             )
 
             if invoice:
+                counter += 1
                 user = await UserCRUD.find_by_id(invoice["user_id"])
                 await InvoiceMechanics(invoice, user).proceed_new_transaction(transaction)
 
@@ -73,9 +74,9 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
             )
 
             if invoice:
-                import logging
-
-                logging.info(f"Invoice {invoice['_id']}")
+                counter += 1
                 await InvoiceMechanics(invoice).proceed_new_transaction(transaction)
 
+    if counter:
+        logging.info(f"Proceeded new {counter} simba transactions")
     return True
