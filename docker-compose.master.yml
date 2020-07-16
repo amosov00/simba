@@ -34,7 +34,7 @@ services:
       - .env.backend
 
   celeryworker:
-    container_name: simba-celeryworker-local
+    container_name: simba-celeryworker
     command: sh -c "sleep 50 && celery worker -A celery_app -P celery_pool_asyncio:TaskPool --loglevel=INFO"
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:master-latest
     volumes:
@@ -47,7 +47,7 @@ services:
       - .env.backend
 
   celerybeat:
-    container_name: simba-celerybeat-local
+    container_name: simba-celerybeat
     command: sh -c "sleep 60 && celery beat -A celery_app --scheduler celery_pool_asyncio:PersistentScheduler --loglevel=INFO"
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:master-latest
     volumes:
