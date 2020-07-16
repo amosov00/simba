@@ -18,7 +18,7 @@
           img(src="@/assets/images/logo_sm.png").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
             = ' '
-            span.has-text-weight-bold.ml-1 {{ simbaFormat(+tradeData.simba - 50000) }} SIMBA
+            span.has-text-weight-bold.ml-1 {{ simbaFormat(+tradeData.simba) }} SIMBA
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
             span {{ updated_invoice_data.target_eth_address }}
@@ -38,7 +38,7 @@
           img(src="@/assets/images/bitcoin.svg").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
             = ' '
-            span.has-text-weight-bold.ml-1 {{ parseFloat(+tradeData.btc - 0.0005) }} BTC
+            span.has-text-weight-bold.ml-1 {{ parseFloat(tradeData.btc) }} BTC
             = ' '
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
