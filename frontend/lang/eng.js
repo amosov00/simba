@@ -200,7 +200,8 @@ export default context => {
         text2: 'For total and irrevocable loss of funds when withdrawing to these address you accept the responsibility.'
       },
       security_verification: 'Security verification',
-      confirm_verification: 'To confirm, please complete the verification by entering pin-code'
+      confirm_verification: 'To confirm, please complete the verification by entering pin-code',
+      address_exist: 'This address already exists in your list!'
     },
     other: {
       confirm: 'Confirm',
