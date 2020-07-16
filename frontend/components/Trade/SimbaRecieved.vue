@@ -9,7 +9,7 @@
       div.mt-2
         div {{$t('exchange.confirms')}} {{currentConfirms}}/{{min_confirms}}
       b-loading(:active.sync="confirms_loading" :is-full-page="false")
-    div.mt-4
+    //--div.mt-4
       div {{$t('exchange.verify_auto')}}
       div.mt-1 {{ $t('exchange.payment_confirmation_sell', {min_confirms}) }}
 </template>

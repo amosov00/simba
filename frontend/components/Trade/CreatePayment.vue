@@ -106,7 +106,7 @@
                 id: created_invoice._id,
                 eth_address: this.tradeData.eth_address,
                 simba_amount: this.tradeData.simba,
-                btc_amount: this.tradeData.simba
+                btc_amount: this.tradeData.btc * 100000000
               }
 
               // Update invoice with amounts
@@ -125,7 +125,7 @@
             btc_address: this.tradeData.btc_redeem_wallet,
             eth_address: this.tradeData.eth_address,
             simba_amount: this.tradeData.simba,
-            btc_amount: this.tradeData.simba
+            btc_amount: this.tradeData.btc * 100000000
           }
           // Update invoice with amounts
           let updated_invoice_res = await this.$store.dispatch('invoices/updateTransaction', data_for_update)
