@@ -46,18 +46,13 @@ export default {
     wallet: "",
     pin_code: "",
     metamask_window_opened: false,
-    confirm_screen: false,
-    eth_wallet_check: null
+    confirm_screen: false
   }),
   computed: {
     user() {
       return this.$store.getters.user;
     }
   },
-
-/*  beforeDestroy() {
-    clearInterval(this.eth_wallet_check)
-  },*/
 
   methods: {
     check_eth_wallet() {
@@ -81,6 +76,12 @@ export default {
           })
         }
       } else {
+
+        if(this.addressExists(this.wallet, this.type)) {
+          this.$buefy.toast.open({message: this.$i18n.t('wallet.address_exist'), type:'is-danger'})
+          return
+        }
+
         if(this.user.two_factor) {
           this.confirm_screen = true
         } else {
@@ -89,9 +90,16 @@ export default {
       }
     },
 
+    addressExists(address, type) {
+      return this.user[`user_${type}_addresses`].map(el => el.address).indexOf(address) !== -1
+    },
+
     async add() {
 
-      clearInterval(this.eth_wallet_check)
+      if(this.addressExists(this.wallet, this.type)) {
+        this.$buefy.toast.open({message: this.$i18n.t('wallet.address_exist'), type:'is-danger'})
+        return
+      }
 
       if(this.type === 'eth') {
         this.metamask_window_opened = true

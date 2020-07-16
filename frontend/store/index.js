@@ -206,16 +206,6 @@ export const actions = {
         return false;
       });
   },
-  async changeProfile({}, data) {
-    return await this.$axios
-      .put("/account/user/", JSON.stringify(data))
-      .then(_ => {
-        return true;
-      })
-      .catch(err => {
-        return false;
-      });
-  },
   async changePassword({}, data) {
     return await this.$axios
       .post("/account/change_password/", data)

@@ -37,12 +37,13 @@
 
 <script>
 import WalletTable from "~/components/WalletTable";
-import WalletConnection from "~/components/WalletConnection";
+import AddNewWallet from "~/components/AddNewWallet";
+
 export default {
   name: "exchange-transfer",
   layout: "main",
   middleware: ["contract", "metamask"],
-  components: { WalletTable, WalletConnection },
+  components: { WalletTable, AddNewWallet },
   data: () => {
     return {
       transferData: {
@@ -60,9 +61,9 @@ export default {
     metamaskModal() {
       this.$buefy.modal.open({
         parent: this,
-        component: WalletConnection,
-        hasModalCard: true,
-        trapFocus: true
+        component: AddNewWallet,
+        trapFocus: true,
+        props: { type: 'eth' }
       });
     }
   },

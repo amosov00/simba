@@ -33,7 +33,7 @@
             span {{ truncateEthAddress(tradeData.admin_eth_address) }}
             CopyToClipboard(:value_to_copy="tradeData.admin_eth_address").ml-2
             TradeQRCode(:qrcode_value="tradeData.admin_eth_address" :amount="parseFloat(tradeData.simba)").ml-1
-            button.btn(@click="payWithMetamask" style="margin-left: auto") {{ $t('other.send') }}
+            button.btn(@click="payWithMetamask" style="margin-left: auto" :disabled="disablePayBtn") {{ $t('other.send') }}
         div.is-flex.align-items-center.mt-2
           img(src="@/assets/images/bitcoin.svg").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
@@ -100,19 +100,22 @@
       countdown: null,
       goneToNextStep: false,
       confirmInterval: null,
+      disablePayBtn: false
     }),
     methods: {
       truncateEthAddress(address) {
         return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
       },
 
-      payWithMetamask() {
+      async payWithMetamask() {
         let transferData = {
           address: this.tradeData.admin_eth_address,
           amount: this.tradeData.simba
         }
 
-        let transfer = this.$store.dispatch("contract/transferSimbaToken", transferData);
+        if(await this.$store.dispatch("contract/transferSimbaToken", transferData)) {
+          this.disablePayBtn = true
+        }
       },
 
       stopCountdown() {
