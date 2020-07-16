@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Literal
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from config import BTC_COLD_WALLETS
 from database.crud import BTCAddressCRUD, InvoiceCRUD
@@ -15,7 +15,7 @@ router = APIRouter()
 async def transparency_totals():
     response = {}
     cold_wallets_meta = await BTCAddressCRUD.aggregate(
-        [{"$group": {"_id": "$cold_wallet_title", "received": {"$sum": "$total_received"},}}]
+        [{"$group": {"_id": "$cold_wallet_title", "received": {"$sum": "$total_received"}, }}]
     )
     invoices_meta = await InvoiceCRUD.aggregate(
         [
@@ -42,10 +42,18 @@ async def transparency_totals():
 
 
 @router.get("/transactions/", response_model=List[TransparencyTransaction])
-async def transparency_transactions():
+async def transparency_transactions(
+        tx_type: Literal["received", "paidout"] = Query(default="received", alias="type")
+):
+    invoices = await InvoiceCRUD.find_many({
+        "status": InvoiceStatus.COMPLETED,
+        "invoice_type": InvoiceType.BUY if tx_type == "" else InvoiceType.SELL
+    }, {"target_btc_address": ""})
     transactions = await BTCAddressCRUD.aggregate(
         [
-            {"$match": {"cold_wallet_title": {"$in": [i.title for i in BTC_COLD_WALLETS]}}},
+            {"$match": {
+                "cold_wallet_title": {"$in": [i.title for i in BTC_COLD_WALLETS]}},
+            },
             {"$project": {"_id": 0, "transactions_refs": 1}},
             {"$unwind": "$transactions_refs"},
             {"$sort": {"transactions_refs.confirmed": -1}},
