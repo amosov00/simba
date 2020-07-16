@@ -18,7 +18,7 @@
           img(src="@/assets/images/logo_sm.png").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
             = ' '
-            span.has-text-weight-bold.ml-1 {{ simbaFormat(tradeData.simba) }} SIMBA
+            span.has-text-weight-bold.ml-1 {{ simbaFormat(+tradeData.simba - 50000) }} SIMBA
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
             span {{ updated_invoice_data.target_eth_address }}
@@ -38,7 +38,7 @@
           img(src="@/assets/images/bitcoin.svg").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
             = ' '
-            span.has-text-weight-bold.ml-1 {{ parseFloat(tradeData.btc) }} BTC
+            span.has-text-weight-bold.ml-1 {{ parseFloat(+tradeData.btc - 0.0005) }} BTC
             = ' '
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
@@ -134,7 +134,7 @@
             return;
           }
         } else { // Sell
-          if(this.check.eth_txs.length > 0) {
+          if(this.check.eth_txs.length > 0 && this.check.simba_amount_proceeded > 0) {
             if(this.check.eth_txs[0].bitcoins_sended) {
               this.goneToNextStep = true
               this.stopCountdown();
@@ -147,9 +147,14 @@
         this.updated_invoice_data = JSON.parse(JSON.stringify(this.check));
 
         // Confirm if invoice is not confirmed
-        if(this.updated_invoice_data.target_btc_address && this.updated_invoice_data.status === 'created') {
+
+        if(this.updated_invoice_data.status !== 'waiting') {
           await this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
         }
+
+        /*if(this.updated_invoice_data.target_btc_address && this.updated_invoice_data.status !== 'created') {
+          await this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
+        }*/
 
         await setTimeout(() => {
           this.busyChecking = false;

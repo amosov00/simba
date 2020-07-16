@@ -20,11 +20,11 @@ async def transparency_totals():
     invoices_meta = await InvoiceCRUD.aggregate(
         [
             {"$match": {"status": InvoiceStatus.COMPLETED, "invoice_type": InvoiceType.SELL}},
-            {"$group": {"_id": None, "paid_out": {"$sum": "$btc_amount_proceeded"},}},
+            {"$group": {"_id": None, "paid_out": {"$sum": "$btc_amount_proceeded"}}},
         ]
     )
     total_recieved = sum([i["received"] for i in cold_wallets_meta if i["_id"]]) or 0
-    total_paid_out = invoices_meta[0].get("paid_out") or 0
+    total_paid_out = invoices_meta[0].get("paid_out") if invoices_meta else 0
     response.update(
         {
             "total_assets": total_recieved - total_paid_out,

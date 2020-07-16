@@ -7,52 +7,36 @@
           img(:src="require('@/assets/images/bitcoin.svg')").add-new-wallet__logo
         div
           b-input(v-model="wallet" :placeholder="$i18n.t('other.address')").input--material
-        //--b-field(:label="$i18n.t('wallet.pin_code')" v-if="user.two_factor && type === 'btc'")
-          b-input(type="number" v-model="pin_code")
-        //-- && pin_code.toString().length != 6"
-        div.mt-3.add-new-wallet__btc-info By adding the BTC address of your wallet you confirm that you have entered the correct one.
-        div.add-new-wallet__btc-info For total and irrevocable loss of funds when withdrawing to these address you accept the responsibility.
+        div.mt-3.add-new-wallet__btc-info {{$t('wallet.new_btc_wallet_instruct.text1')}}
+        div.mt-1.add-new-wallet__btc-info {{$t('wallet.new_btc_wallet_instruct.text2')}}
         div.mt-3
           button(@click="next_screen" :disabled="!wallet").btn.w-100 {{$t('other.add')}}
       div(v-else)
-        div.add-new-wallet__title Security verification
-        div.add-new-wallet__complete-text To confirm, please complete the verification
-        input(v-model="pin_code").add-new-wallet__pin-code
+        div.add-new-wallet__title {{$t('wallet.security_verification')}}
+        div.add-new-wallet__complete-text {{$t('wallet.confirm_verification')}}
+        input(v-model="pin_code" maxlength="6").add-new-wallet__pin-code
         div.mt-3
-          button(@click="add" :disabled="pin_code.length !== 6").btn.w-100 Confirm
+          button(@click="add" :disabled="pin_code.length !== 6").btn.w-100 {{$t('exchange.confirm')}}
     div(v-else)
       div.add-new-wallet__title {{$t('wallet.add_new_wallet.p1')}} {{ type.toUpperCase() }} {{$t('wallet.add_new_wallet.p2')}}
       div.mb-5
         img(:src="require('@/assets/images/metamask.svg')").add-new-wallet__logo
       div(v-if="!confirm_screen")
-        div To add a new address,
-          =' '
-          nuxt-link(to="/profile/bill/").link connect
-          =' '
-          | your personal account to the Ethereum wallet.
-        div If this is your first time, please install
-          =' '
-          a(href="https://metamask.io/" target="_blank" rel="noreferrer noopener").link MetaMask
-          =' '
-          | extension.
-        div.mt-2.has-text-grey For mobile devices we recommend the
-          =' '
-          a(href="https://metamask.io/" target="_blank" rel="noreferrer noopener").link MetaMask
-          =' '
-          | or
-          =' '
-          a(href="https://token.im/" target="_blank" rel="noreferrer noopener").link imToken
-          =' '
-          | application.
+        div {{ $t('wallet.new_eth_wallet_instruct.text1') }}
+        div(v-html="$t('wallet.new_eth_wallet_instruct.text2', {metamask: \"<a href='https://metamask.io/' target='_blank' rel='noreferrer noopener' class='link'>MetaMask</a>\"})")
+        div.mt-2.has-text-grey(v-html="$t('wallet.new_eth_wallet_instruct.text3', {metamask: \"<a href='https://metamask.io/' target='_blank' rel='noreferrer noopener' class='link'>MetaMask</a>\", imtoken: \"<a href='https://token.im/' target='_blank' rel='noreferrer noopener' class='link'>imToken</a>\"})")
         div.mt-3
           button.btn.w-100(@click="next_screen") {{$t('other.add')}}
       div.mt-3(v-if="confirm_screen")
         div.add-new-wallet__eth-wallet {{ wallet }}
-        div.has-text-grey (to change the address you need to switch in the wallet)
-        button.add-new-wallet__confirm-btn.btn.w-100(@click="add" :disabled="!wallet || metamask_window_opened").btn.w-100 Confirm
+        div.has-text-grey ({{$t('wallet.eth_wallet_switch_info')}})
+        button.add-new-wallet__confirm-btn.btn.w-100(@click="add" :disabled="!wallet || metamask_window_opened").btn.w-100 {{$t('exchange.confirm')}}
 </template>
 
 <script>
+
+import Web3 from '~/plugins/web3'
+
 export default {
   name: "AddNewWallet",
   props: {
@@ -71,19 +55,17 @@ export default {
     }
   },
 
-  beforeDestroy() {
+/*  beforeDestroy() {
     clearInterval(this.eth_wallet_check)
-  },
+  },*/
 
   methods: {
     check_eth_wallet() {
-      this.eth_wallet_check = setInterval(() => {
-        if(window.ethereum !== undefined) {
-          if(this.wallet !== window.ethereum.selectedAddress) {
-            this.wallet = window.ethereum.selectedAddress
-          }
-        }
-      }, 2000)
+      if(window.ethereum !== undefined) {
+        window.ethereum.on('accountsChanged', function (accounts) {
+          this.wallet = window.ethereum.selectedAddress
+        });
+      }
     },
 
     next_screen() {
@@ -91,7 +73,12 @@ export default {
         if(window.ethereum !== undefined) {
           this.wallet = window.ethereum.selectedAddress
           this.confirm_screen = true
-          this.check_eth_wallet()
+
+          window.ethereum.on('accountsChanged', (accounts) => {
+            this.$nextTick(() => {
+              this.wallet = accounts[0]
+            })
+          })
         }
       } else {
         if(this.user.two_factor) {
