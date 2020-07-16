@@ -35,7 +35,7 @@ services:
 
   celeryworker:
     container_name: simba-celeryworker-local
-    command: sh -c "wait-for rabbitmq:5672 && celery worker -A celery_app -P celery_pool_asyncio:TaskPool --loglevel=INFO"
+    command: sh -c "sleep 50 && celery worker -A celery_app -P celery_pool_asyncio:TaskPool --loglevel=INFO"
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:master-latest
     volumes:
       - ./backend:/backend
@@ -48,7 +48,7 @@ services:
 
   celerybeat:
     container_name: simba-celerybeat-local
-    command: sh -c "wait-for rabbitmq:5672 && celery beat -A celery_app --scheduler celery_pool_asyncio:PersistentScheduler --loglevel=INFO"
+    command: sh -c "sleep 60 && celery beat -A celery_app --scheduler celery_pool_asyncio:PersistentScheduler --loglevel=INFO"
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:master-latest
     volumes:
       - ./backend:/backend

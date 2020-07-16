@@ -2,8 +2,6 @@ FROM python:3.8.3-buster
 
 ENV PYTHONUNBUFFERED=1 DOCKER=1 DEBIAN_FRONTEND=noninteractive
 
-# wait-for - useful command for celery startup
-COPY ./deployment/misc/wait-for /bin/wait-for
 COPY ./backend/ /app/
 WORKDIR /app/
 
