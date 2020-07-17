@@ -1,6 +1,9 @@
 import logging
 from datetime import datetime, timedelta
 
+from pydantic import ValidationError
+from sentry_sdk import capture_exception
+
 from celery_app.celeryconfig import app
 from core.mechanics import BlockCypherWebhookHandler
 from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
@@ -38,20 +41,25 @@ async def finish_overdue_invoices(self, *args, **kwargs):
         ]
     )
     counter = 0
-
     for invoice in invoices:
-        invoice = InvoiceExtended(**invoice)
+        try:
+            invoice = InvoiceExtended(**invoice)
+        except ValidationError as e:
+            capture_exception(e)
+            continue
+
         if all(
-            [
-                invoice.created_at + INVOICE_TIMEOUT < datetime.now(),
-                not bool(invoice.eth_txs),
-                not bool(invoice.btc_txs),
-            ]
+                [
+                    invoice.created_at + INVOICE_TIMEOUT < datetime.now(),
+                    not bool(invoice.eth_txs),
+                    not bool(invoice.btc_txs),
+                ]
         ):
             await InvoiceCRUD.update_one({"_id": invoice.id}, {"status": InvoiceStatus.CANCELLED})
             # Delete connected webhook
             await BlockCypherWebhookHandler().delete_webhook(invoice)
             counter += 1
 
-    logging.info(f"Closed {counter} invoices")
+    if counter:
+        logging.info(f"Closed {counter} overdue invoices")
     return True

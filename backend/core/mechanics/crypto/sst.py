@@ -17,7 +17,6 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
     REF3_PROF = 0.125
     REF4_PROF = 0.0625
     REF5_PROF = 0.0625
-    # TODO уточнить насчет периода
     PERIOD: int = 2500000
 
     def __init__(self):

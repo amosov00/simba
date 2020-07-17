@@ -33,12 +33,12 @@
             span {{ truncateEthAddress(tradeData.admin_eth_address) }}
             CopyToClipboard(:value_to_copy="tradeData.admin_eth_address").ml-2
             TradeQRCode(:qrcode_value="tradeData.admin_eth_address" :amount="parseFloat(tradeData.simba)").ml-1
-            button.btn(@click="payWithMetamask" style="margin-left: auto") {{ $t('other.send') }}
+            button.btn(@click="payWithMetamask" style="margin-left: auto" :disabled="disablePayBtn") {{ $t('other.send') }}
         div.is-flex.align-items-center.mt-2
           img(src="@/assets/images/bitcoin.svg").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
             = ' '
-            span.has-text-weight-bold.ml-1 {{ parseFloat(+tradeData.btc - 0.0005) }} BTC
+            span.has-text-weight-bold.ml-1 {{ parseFloat(tradeData.btc) }} BTC
             = ' '
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
@@ -100,19 +100,22 @@
       countdown: null,
       goneToNextStep: false,
       confirmInterval: null,
+      disablePayBtn: false
     }),
     methods: {
       truncateEthAddress(address) {
         return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
       },
 
-      payWithMetamask() {
+      async payWithMetamask() {
         let transferData = {
           address: this.tradeData.admin_eth_address,
           amount: this.tradeData.simba
         }
 
-        let transfer = this.$store.dispatch("contract/transferSimbaToken", transferData);
+        if(await this.$store.dispatch("contract/transferSimbaToken", transferData)) {
+          this.disablePayBtn = true
+        }
       },
 
       stopCountdown() {
@@ -134,21 +137,27 @@
             return;
           }
         } else { // Sell
-          if(this.check.eth_txs.length > 0 && this.check.simba_amount_proceeded > 0) {
+          if(this.check.status === 'processing') {
+            this.goneToNextStep = true
+            this.stopCountdown();
+            this.$parent.$emit('nextStep')
+            return;
+          }
+          /*if(this.check.eth_txs.length > 0 && this.check.simba_amount_proceeded > 0) {
             if(this.check.eth_txs[0].bitcoins_sended) {
               this.goneToNextStep = true
               this.stopCountdown();
               this.$parent.$emit('nextStep')
               return;
             }
-          }
+          }*/
         }
 
         this.updated_invoice_data = JSON.parse(JSON.stringify(this.check));
 
         // Confirm if invoice is not confirmed
 
-        if(this.updated_invoice_data.status !== 'waiting') {
+        if(this.updated_invoice_data.status !== 'waiting' && this.updated_invoice_data.status !== 'cancelled') {
           await this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
         }
 

@@ -23,30 +23,34 @@ export const actions = {
     );
     const amount = (data.amount * 1) + 5000
     const methodInputs = [data.address, amount];
-    ethereum.sendAsync(
-      {
-        method: "eth_sendTransaction",
-        params: [
-          {
-            from: ethereum.selectedAddress,
-            to: this.$contract().SIMBA._address,
-            value: "0x00",
-            gasPrice: web3.utils.toHex(web3.utils.toWei("24", "gwei")),
-            gas: web3.utils.toHex("250000"),
-            data: web3.eth.abi.encodeFunctionCall(
-              methodABI,
-              methodInputs
-            )
+    return new Promise((resolve, reject) => {
+      ethereum.sendAsync(
+        {
+          method: "eth_sendTransaction",
+          params: [
+            {
+              from: ethereum.selectedAddress,
+              to: this.$contract().SIMBA._address,
+              value: "0x00",
+              gasPrice: web3.utils.toHex(web3.utils.toWei("24", "gwei")),
+              gas: web3.utils.toHex("250000"),
+              data: web3.eth.abi.encodeFunctionCall(
+                methodABI,
+                methodInputs
+              )
+            }
+          ]
+        },
+        (err, result) => {
+          if (result.result) {
+            Toast.open({message: this.$i18n.t('wallet.transaction_success'), type: 'is-primary'})
+            resolve(true)
+          } else {
+            Toast.open({message: this.$i18n.t('wallet.transaction_failed'), type: 'is-danger'})
+            reject(false)
           }
-        ]
-      },
-      (err, result) => {
-        if (result.result) {
-          Toast.open({message: this.$i18n.t('wallet.transaction_success'), type: 'is-primary'})
-        } else {
-          Toast.open({message: this.$i18n.t('wallet.transaction_failed'), type: 'is-danger'})
         }
-      }
-    );
+      )
+    })
   }
 };

@@ -9,9 +9,6 @@
       div.mt-2
         div {{$t('exchange.confirms')}} {{currentConfirms}}/{{min_confirms}}
       b-loading(:active.sync="confirms_loading" :is-full-page="false")
-    div.mt-4
-      div {{$t('exchange.verify_auto')}}
-      div.mt-1 {{ $t('exchange.payment_confirmation_sell', {min_confirms}) }}
 </template>
 
 <script>
@@ -46,7 +43,10 @@
 
       let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id);
       this.received_payment_amount = res.simba_amount_proceeded
-      this.currentConfirms = this.findEthTransactionByEvent(res, 'Transfer')?.confirmations
+
+      let transfer_confirms = this.findEthTransactionByEvent(res, 'Transfer')?.confirmations;
+
+      this.currentConfirms = transfer_confirms > this.min_confirms ? this.min_confirms : transfer_confirms
 
       if(res.eth_txs.length > 0) {
         this.tx_hash = this.findEthTransactionByEvent(res, 'Transfer')?.transactionHash || ''
@@ -65,10 +65,10 @@
 
         let desired_tx = this.findEthTransactionByEvent(res, 'Transfer')
 
-        this.currentConfirms = desired_tx?.confirmations
+        this.currentConfirms = desired_tx?.confirmations > this.min_confirms ? this.min_confirms : desired_tx?.confirmations
 
-        if(res.btc_txs.length > 0) {
-          if(res.btc_txs[0].simba_tokens_issued) {
+        if(res.eth_txs.length > 0) {
+          if(res.eth_txs[0].confirmations >= this.min_confirms) {
             this.$store.commit('exchange/setTradeData', { prop: 'simba_issued', value: res.btc_amount_proceeded})
             this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: res.btc_txs[0].hash })
 

@@ -63,7 +63,8 @@
           let diff = plus2hours - current;
 
           if(diff < 0) {
-            return 'expired'
+            //return 'expired'
+            return '00:00:00'
           }
 
           let remain = moment.duration(diff);
@@ -77,6 +78,8 @@
           }
 
           return `${remain.hours()}:${twoDigits(remain.minutes())}:${twoDigits(remain.seconds())}`
+        } else if(item.status === 'cancelled') {
+          return 'expired'
         }
 
         return item.status

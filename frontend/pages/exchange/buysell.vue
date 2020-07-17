@@ -119,7 +119,13 @@
             this.tradeData.steps.current = 'BillPayment'
           }
           else if(single_res.status === 'processing') {
-            this.tradeData.steps.current = 'SimbaRecieved'
+            if(single_res.btc_txs.length > 0) {
+              if(single_res.btc_txs[0].simba_tokens_issued) {
+                this.tradeData.steps.current = 'Status'
+              }
+            } else {
+              this.tradeData.steps.current = 'SimbaRecieved'
+            }
           }
           else if(single_res.status === 'completed') {
             if(single_res.invoice_type === 1) {
@@ -135,6 +141,11 @@
             }
 
             this.tradeData.steps.current = 'Final'
+          }
+          else if(single_res.status === 'cancelled') {
+            this.tradeData.steps.current = 'BillPayment'
+            /*this.$buefy.toast.open({message:'Invoice cancelled!', type: 'is-danger'})
+            this.$nuxt.context.redirect('/exchange/')*/
           }
         } else {
           this.$buefy.toast.open({message:'Error: invoice not found', type: 'is-danger'})

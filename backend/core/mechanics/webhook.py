@@ -1,3 +1,4 @@
+import asyncio
 from http import HTTPStatus
 from urllib.parse import urljoin
 from typing import Literal
@@ -14,7 +15,7 @@ from schemas import (
 )
 from database.crud import BlockCypherWebhookCRUD
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
-from config import HOST_URL, BTC_MINIMAL_CONFIRMATIONS
+from config import HOST_URL, TRANSACTION_MIN_CONFIRMATIONS
 
 __all__ = ["BlockCypherWebhookHandler"]
 
@@ -59,7 +60,7 @@ class BlockCypherWebhookHandler:
             token=self.api_wrapper.api_token,
             address=wallet_address,
             hash=transaction_hash,
-            confirmations=BTC_MINIMAL_CONFIRMATIONS,
+            confirmations=TRANSACTION_MIN_CONFIRMATIONS,
         )
         response = await self.api_wrapper.create_webhook(
             webhook.dict(exclude={"invoice_id", "url_path", "created_at"}, exclude_none=True)
@@ -72,6 +73,8 @@ class BlockCypherWebhookHandler:
         webhook_obj = await BlockCypherWebhookCRUD.find_one({"invoice_id": invoice.id})
 
         if webhook_obj:
+            # Slow down cause of blockcypher limitations per sec
+            await asyncio.sleep(0.3)
             webhook_obj = BlockCypherWebhookInDB(**webhook_obj)
             await self.api_wrapper.delete_webhook(webhook_obj.blockcypher_id)
             await BlockCypherWebhookCRUD.delete_one({"_id": webhook_obj.id})

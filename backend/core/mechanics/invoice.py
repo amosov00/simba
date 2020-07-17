@@ -7,7 +7,7 @@ from typing import Union, List, Optional
 from fastapi import HTTPException
 from sentry_sdk import capture_message
 
-from config import BTC_MINIMAL_CONFIRMATIONS
+from config import TRANSACTION_MIN_CONFIRMATIONS
 from core.mechanics import SimbaWrapper, SSTWrapper, BitcoinWrapper, BlockCypherWebhookHandler
 from core.mechanics.crypto.base import CryptoValidation
 from database.crud import BTCTransactionCRUD, InvoiceCRUD, EthereumTransactionCRUD
@@ -25,7 +25,7 @@ from schemas import (
     SimbaContractEvents,
     BlockCypherWebhookEvents,
 )
-from config import SIMBA_BUY_SELL_FEE
+from config import SIMBA_BUY_SELL_FEE, SIMBA_MINIMAL_BUY_AMOUNT
 
 
 class InvoiceMechanics(CryptoValidation):
@@ -54,21 +54,27 @@ class InvoiceMechanics(CryptoValidation):
         if not self.invoice.target_eth_address:
             self.errors.append("ethereum wallet address is required")
         if not self.validate_simba_amount(self.invoice.simba_amount):
-            self.errors.append(f"min simba token amount: {self.SIMBA_TOKENS_MINIMAL_AMOUNT}")
-        if not self.validate_currency_rate(self.invoice.btc_amount, self.invoice.simba_amount):
-            self.errors.append("invalid rate")
+            self.errors.append(f"min simba token amount: {SIMBA_MINIMAL_BUY_AMOUNT}")
         if self.invoice.invoice_type not in (InvoiceType.SELL, InvoiceType.BUY):
             self.errors.append("invalid invoice type")
 
         return None
 
     def _validate_for_buy(self):
+        if not self.validate_currency_rate(
+                self.invoice.invoice_type, self.invoice.btc_amount, self.invoice.simba_amount
+        ):
+            self.errors.append("invalid rate")
         if self.user:
             if not self.user.has_address("eth", self.invoice.target_eth_address):
                 self.errors.append("user has no target_eth_address")
         return True
 
     def _validate_for_sell(self):
+        if not self.validate_currency_rate(
+                self.invoice.invoice_type, self.invoice.btc_amount, self.invoice.simba_amount
+        ):
+            self.errors.append("invalid rate")
         if self.user:
             if not self.user.has_address("eth", self.invoice.target_eth_address):
                 self.errors.append("user has no target_eth_address")
@@ -79,7 +85,7 @@ class InvoiceMechanics(CryptoValidation):
     def _validate_for_sending_btc(self):
         if not self.invoice.status == InvoiceStatus.PROCESSING:
             self.errors.append("invalid invoice status")
-        if self.invoice.simba_amount_proceeded < self.SIMBA_BUY_SELL_FEE:
+        if self.invoice.simba_amount_proceeded < SIMBA_MINIMAL_BUY_AMOUNT:
             self.errors.append("too low simba tokens value")
         if self.invoice.simba_amount_proceeded == self.invoice.btc_amount_proceeded + SIMBA_BUY_SELL_FEE:
             self.errors.append("btc are already sent")
@@ -105,7 +111,7 @@ class InvoiceMechanics(CryptoValidation):
 
     @classmethod
     def get_incoming_btc_from_outputs(
-        cls, outputs: List[BTCTransactionOutputs], target_btc_address: str
+            cls, outputs: List[BTCTransactionOutputs], target_btc_address: str
     ) -> Optional[int]:
         incoming_btc = None
 
@@ -127,10 +133,10 @@ class InvoiceMechanics(CryptoValidation):
         return value
 
     async def _issue_simba_tokens_and_save(
-        self, transaction: BTCTransaction, incoming_btc: int,
+            self, transaction: BTCTransaction, incoming_btc: int,
     ):
         self._raise_exception_if_exists()
-        eth_tx_hash = await SimbaWrapper().issue_tokens(
+        eth_tx_hash = await SimbaWrapper(self.invoice).issue_tokens(
             self.invoice.target_eth_address, incoming_btc=incoming_btc, btc_tx_hash=transaction.hash
         )
         transaction.simba_tokens_issued = True
@@ -150,7 +156,7 @@ class InvoiceMechanics(CryptoValidation):
         return True
 
     async def _proceed_new_btc_tx_buy(
-        self, new_transaction: BTCTransaction, transaction_in_db: BTCTransactionInDB
+            self, new_transaction: BTCTransaction, transaction_in_db: BTCTransactionInDB
     ):
         """Part of buy pipeline"""
         incoming_btc = self.get_incoming_btc_from_outputs(
@@ -164,31 +170,31 @@ class InvoiceMechanics(CryptoValidation):
 
         # TODO optimize and simplify algo
         if transaction_in_db:
-            if new_transaction.confirmations < BTC_MINIMAL_CONFIRMATIONS:
+            if new_transaction.confirmations < TRANSACTION_MIN_CONFIRMATIONS:
                 await BTCTransactionCRUD.update_or_insert(
                     {"hash": new_transaction.hash}, new_transaction.dict()
                 )
 
             elif (
-                new_transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS
-                and transaction_in_db.simba_tokens_issued
+                    new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS
+                    and transaction_in_db.simba_tokens_issued
             ):
                 self.errors.append("transaction already exists and simba tokens was issued")
                 self._raise_exception_if_exists()
 
             elif (
-                new_transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS
-                and not transaction_in_db.simba_tokens_issued
+                    new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS
+                    and not transaction_in_db.simba_tokens_issued
             ):
                 return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
 
         else:
-            if new_transaction.confirmations < BTC_MINIMAL_CONFIRMATIONS:
+            if new_transaction.confirmations < TRANSACTION_MIN_CONFIRMATIONS:
                 await BTCTransactionCRUD.update_or_insert(
                     {"hash": new_transaction.hash}, new_transaction.dict()
                 )
 
-            elif new_transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS:
+            elif new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS:
                 return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
 
         return True
@@ -196,8 +202,8 @@ class InvoiceMechanics(CryptoValidation):
     async def _proceed_new_btc_tx_sell(self, new_transaction: BTCTransaction):
         """Part of sell pipeline"""
         if (
-            new_transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS
-            and self.invoice.status == InvoiceStatus.PROCESSING
+                new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS
+                and self.invoice.status == InvoiceStatus.PROCESSING
         ):
 
             self.invoice.status = InvoiceStatus.COMPLETED
@@ -275,7 +281,7 @@ class InvoiceMechanics(CryptoValidation):
         return True
 
     async def proceed_new_transaction(
-        self, transaction: Union[BTCTransaction, EthereumTransaction], **kwargs
+            self, transaction: Union[BTCTransaction, EthereumTransaction], **kwargs
     ) -> Union[bool, str]:
         if isinstance(transaction, (BTCTransaction, BTCTransactionInDB)):
             return await self.proceed_new_btc_transaction(transaction)
@@ -299,7 +305,7 @@ class InvoiceMechanics(CryptoValidation):
             return False
 
         # send without fee cause of double charge
-        eth_tx_hash = await SimbaWrapper().redeem_tokens(btc_outcoming_without_fee, btc_tx.hash)
+        eth_tx_hash = await SimbaWrapper(self.invoice).redeem_tokens(btc_outcoming_without_fee, btc_tx.hash)
         btc_tx.simba_tokens_issued = True
         btc_tx.invoice_id = self.invoice.id
 

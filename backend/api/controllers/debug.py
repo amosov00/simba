@@ -4,7 +4,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from api.dependencies import get_user
-from celery_app.tasks import fetch_and_proceed_simba_contract, delete_unused_webhooks
+from celery_app.tasks import fetch_and_proceed_simba_contract
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
 from core.mechanics.crypto import SimbaWrapper, SSTWrapper, BitcoinWrapper
 from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD, ReferralCRUD
@@ -17,7 +17,7 @@ router = APIRouter()
 
 @router.get("/cron/")
 async def debug_get():
-    await delete_unused_webhooks()
+    await fetch_and_proceed_simba_contract()
     return True
 
 
@@ -36,7 +36,6 @@ async def debug_get():
     hooks = await BlockCypherWebhookAPIWrapper().list_webhooks()
     for hook in hooks:
         await BlockCypherWebhookAPIWrapper().delete_webhook(hook["id"])
-        print(hook["id"] + " deleted")
         await asyncio.sleep(0.5)
 
     return True
@@ -49,10 +48,6 @@ async def debug_get(user: User = Depends(get_user)):
 
 @router.get("/simba/")
 async def debug_get():
-    result = await SimbaWrapper().redeem_tokens(
-        100000, "e3a671d13607f8512806851e78d92341c33b1efd16093a707d39e95a04cee3a1"
-    )
-    print(f"SIMBA {result}")
     return None
 
 

@@ -15,7 +15,7 @@
       div.mt-2
         div {{$t('exchange.confirms')}} {{currentConfirms}}/{{min_confirms}}
       b-loading(:active.sync="confirms_loading" :is-full-page="false")
-    div.mt-4
+    //--div.mt-4
       div {{$t('exchange.verify_auto')}}
       div
         div(v-if="isBuy").mt-1 {{$t('exchange.payment_confirmation_buy')}}
@@ -49,19 +49,14 @@
       let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id);
       this.received_payment_amount = res.btc_amount_proceeded
 
-      if(res.btc_txs.length > 0) {
-        this.currentConfirms = res.btc_txs[0].confirmations
-        //this.tx_hash = res.btc_tx_hashes[0] || ''
-      }
-
       if(this.isBuy) {
         if(res.btc_txs.length > 0) {
-          this.currentConfirms = res.btc_txs[0].confirmations
+          this.setCurrentConfirms(res.btc_txs[0].confirmations)
           this.tx_hash = res.eth_tx_hashes[0] || ''
         }
       } else {
         if(res.eth_txs.length > 0) {
-          this.currentConfirms = res.btc_txs[0].confirmations
+          this.setCurrentConfirms(res.btc_txs[0].confirmations)
           this.tx_hash = res.btc_txs[0].hash || ''
         }
       }
@@ -78,10 +73,8 @@
         let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id)
 
         if(this.isBuy) {
-          this.currentConfirms = res.btc_txs[0].confirmations
-
-          if(res.status === 'completed') {
-
+          this.setCurrentConfirms(res.btc_txs[0].confirmations)
+          if(res.btc_txs[0].confirmations >= this.min_confirms && res.status === 'completed') {
             this.$store.commit('exchange/setTradeData', { prop: 'simba_issued', value: res.btc_amount_proceeded})
             this.$store.commit('exchange/setTradeData', { prop: 'target_eth', value: res.target_eth_address})
             this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: res.eth_tx_hashes[0] || ''})
@@ -90,8 +83,9 @@
             this.$parent.$emit('nextStep')
           }
         } else {
-          this.currentConfirms = res.btc_txs[0].confirmations
-          if(res.btc_tx_hashes.length > 0 && res.status === 'completed') {
+          this.setCurrentConfirms(res.btc_txs[0].confirmations)
+          if(res.btc_txs[0].confirmations >= this.min_confirms && res.status === 'completed') {
+            this.$store.commit('exchange/setTradeData', { prop: 'simba_issued', value: res.btc_amount_proceeded})
             this.$store.commit('exchange/setTradeData', { prop: 'btc_redeem_wallet', value: res.target_btc_address})
             this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: res.btc_txs[0].hash })
             this.$store.commit('exchange/setTradeData', { prop: 'tx_hash_redeem', value: res.eth_txs[0].transactionHash })
@@ -104,6 +98,10 @@
     },
 
     methods: {
+      setCurrentConfirms(transfer_confirms) {
+        this.currentConfirms = transfer_confirms > this.min_confirms ? this.min_confirms : transfer_confirms
+      },
+
       loadingSpinner() {
         this.confirms_loading = true
         setTimeout(() => {
