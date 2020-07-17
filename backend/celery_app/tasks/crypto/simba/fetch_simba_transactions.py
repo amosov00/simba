@@ -24,7 +24,7 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
         {"contract": SIMBA_CONTRACT.title, "event": {"$in": SimbaContractEvents.ALL}, "invoice_id": None}
     )
     for transaction in transactions:
-        transaction = EthereumTransactionInDB.construct(**transaction)
+        transaction = EthereumTransactionInDB(**transaction)
 
         if transaction.event == SimbaContractEvents.Transfer:
             # Connect with sell invoices
