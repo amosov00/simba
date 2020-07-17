@@ -55,20 +55,22 @@ class InvoiceMechanics(CryptoValidation):
             self.errors.append("ethereum wallet address is required")
         if not self.validate_simba_amount(self.invoice.simba_amount):
             self.errors.append(f"min simba token amount: {SIMBA_MINIMAL_BUY_AMOUNT}")
-        if not self.validate_currency_rate(self.invoice.btc_amount, self.invoice.simba_amount):
-            self.errors.append("invalid rate")
         if self.invoice.invoice_type not in (InvoiceType.SELL, InvoiceType.BUY):
             self.errors.append("invalid invoice type")
 
         return None
 
     def _validate_for_buy(self):
+        if not self.validate_currency_rate(self.invoice.invoice_type, self.invoice.btc_amount, self.invoice.simba_amount):
+            self.errors.append("invalid rate")
         if self.user:
             if not self.user.has_address("eth", self.invoice.target_eth_address):
                 self.errors.append("user has no target_eth_address")
         return True
 
     def _validate_for_sell(self):
+        if not self.validate_currency_rate(self.invoice.invoice_type, self.invoice.btc_amount, self.invoice.simba_amount):
+            self.errors.append("invalid rate")
         if self.user:
             if not self.user.has_address("eth", self.invoice.target_eth_address):
                 self.errors.append("user has no target_eth_address")
@@ -130,7 +132,7 @@ class InvoiceMechanics(CryptoValidation):
         self, transaction: BTCTransaction, incoming_btc: int,
     ):
         self._raise_exception_if_exists()
-        eth_tx_hash = await SimbaWrapper().issue_tokens(
+        eth_tx_hash = await SimbaWrapper(self.invoice).issue_tokens(
             self.invoice.target_eth_address, incoming_btc=incoming_btc, btc_tx_hash=transaction.hash
         )
         transaction.simba_tokens_issued = True
@@ -299,7 +301,7 @@ class InvoiceMechanics(CryptoValidation):
             return False
 
         # send without fee cause of double charge
-        eth_tx_hash = await SimbaWrapper().redeem_tokens(btc_outcoming_without_fee, btc_tx.hash)
+        eth_tx_hash = await SimbaWrapper(self.invoice).redeem_tokens(btc_outcoming_without_fee, btc_tx.hash)
         btc_tx.simba_tokens_issued = True
         btc_tx.invoice_id = self.invoice.id
 
