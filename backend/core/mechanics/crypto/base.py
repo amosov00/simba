@@ -1,17 +1,16 @@
 from abc import ABC
+from typing import Literal
 from http import HTTPStatus
 
 from fastapi import HTTPException
 
-from schemas import InvoiceInDB, InvoiceStatus, BTCTransaction
+from schemas import InvoiceType, BTCTransaction
 from config import SIMBA_BUY_SELL_FEE, SIMBA_MINIMAL_BUY_AMOUNT
 
 __all__ = ["CryptoValidation", "ParseCryptoTransaction", "CryptoCurrencyRate"]
 
 
 class CryptoCurrencyRate(ABC):
-    # TODO Remove if not necessary
-
     # 1 BTC = 100,000,000 SATOSHI
     SATOSHI_IN_BTC = 10 ** 8
     # 1 BTC = 100,000,000 SIMBA
@@ -58,12 +57,25 @@ class CryptoValidation(ABC):
         return True if simba and simba >= SIMBA_MINIMAL_BUY_AMOUNT else False
 
     @classmethod
-    def validate_currency_rate(cls, btc: int, simba: int) -> bool:
+    def validate_currency_rate(
+            cls,
+            invoice_type: Literal[InvoiceType.SELL, InvoiceType.BUY],
+            btc: int,
+            simba: int
+    ) -> bool:
         if not all([isinstance(btc, int), isinstance(simba, int)]):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc or simba amount")
         if btc <= 0 or simba <= 0:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc or simba amount")
-        if simba + SIMBA_BUY_SELL_FEE != btc:
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc and simba ratio")
+
+        if invoice_type == InvoiceType.BUY:
+            if simba + SIMBA_BUY_SELL_FEE != btc:
+                raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc and simba ratio")
+
+        elif invoice_type == InvoiceType.SELL:
+            if simba != btc + SIMBA_BUY_SELL_FEE:
+                raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc and simba ratio")
+        else:
+            raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, "invalid invoice type")
 
         return True

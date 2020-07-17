@@ -48,10 +48,6 @@ async def debug_get(user: User = Depends(get_user)):
 
 @router.get("/simba/")
 async def debug_get():
-    result = await SimbaWrapper().redeem_tokens(
-        100000, "e3a671d13607f8512806851e78d92341c33b1efd16093a707d39e95a04cee3a1"
-    )
-    print(f"SIMBA {result}")
     return None
 
 
