@@ -157,7 +157,9 @@
 
         // Confirm if invoice is not confirmed
 
-        if(this.updated_invoice_data.status !== 'waiting' && this.updated_invoice_data.status !== 'cancelled') {
+        if(this.updated_invoice_data.status !== 'waiting'
+          && this.updated_invoice_data.status !== 'cancelled'
+          && this.updated_invoice_data.status !== 'completed') {
           await this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
         }
 
