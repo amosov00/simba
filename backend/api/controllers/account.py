@@ -52,9 +52,10 @@ async def account_signup(data: UserCreationSafe = Body(...)):
     return await UserCRUD.create_safe(data)
 
 
-@router.put("/user/")
-async def account_update_user(user: User = Depends(get_user), payload: UserUpdateSafe = Body(...)):
-    return await UserCRUD.update_safe(user, payload) if payload.dict(exclude_unset=True) else {}
+# Deprecated at 17/08/20, uncomment if necessary
+# @router.put("/user/")
+# async def account_update_user(user: User = Depends(get_user), payload: UserUpdateSafe = Body(...)):
+#     return await UserCRUD.update_safe(user, payload) if payload.dict(exclude_unset=True) else {}
 
 
 @router.post("/change_password/")
