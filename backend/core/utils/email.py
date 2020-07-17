@@ -5,9 +5,11 @@ from email.mime.text import MIMEText
 from urllib.parse import urlencode
 
 from fastapi import HTTPException
-from sentry_sdk import capture_exception
+from sentry_sdk import capture_exception, capture_message
+import httpx
 
 from config import EMAIL_LOGIN, EMAIL_PASSWORD, EMAIL_PORT, EMAIL_SERVER, HOST_URL
+from config import MAILGUN_API_KEY, MAILGUN_DOMAIN_NAME
 
 
 class Email:
@@ -73,4 +75,77 @@ class Email:
         )
         self.send_message(to, msg.as_string())
         self.mailserver.quit()
+        return None
+
+
+class MailGunEmail:
+    def __init__(self):
+        self.api_key = MAILGUN_API_KEY
+        self.domain = MAILGUN_DOMAIN_NAME
+        self.send_message_link = f"https://api.eu.mailgun.net/v3/{MAILGUN_DOMAIN_NAME}/messages"
+        self.email_from = EMAIL_LOGIN
+
+    @staticmethod
+    def _get_link(code: str, email: str, method: str) -> str:
+        if method == "verification":
+            params = {f"{method}_code": code, "email": email}
+            return f"{HOST_URL}activate?{urlencode(params)}"
+        if method == "recover":
+            params = {f"{method}_code": code}
+            return f"{HOST_URL}recover?{urlencode(params)}"
+
+    def create_message(self, to: str, body: str) -> dict:
+        msg = {
+            "from": f"Simba Stablecoin {self.email_from}",
+            "subject": "Simba verification message",
+            "to": to,
+            "html": body,
+        }
+        return msg
+
+    async def _send_message(self, msg: dict) -> None:
+        async with httpx.AsyncClient() as client:
+            try:
+                email_send = (
+                    await client.post(
+                        self.send_message_link,
+
+                        auth=("api", self.api_key),
+                        data=msg,
+                    )
+                )
+                print(email_send.json())
+            except Exception as e:
+                capture_exception(e)
+                raise HTTPException(HTTPStatus.BAD_REQUEST, "Error while sending email")
+
+        if email_send.json().get("message") != "Queued. Thank you.":
+            capture_message(f"Error while sending email, response - {str(email_send.json())} ")
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Error while sending email")
+
+        return None
+
+    async def send_verification_code(self, to: str, code: str) -> None:
+
+        msg = self.create_message(
+            to,
+            "Добрый день! <br>\n"
+            'Перейдите по <a href="{}">этой</a> ссылке для регистрации в Simba<br>\n'
+            "Надеемся вам понравится! До встречи!".format(MailGunEmail._get_link(code, to, method="verification")),
+        )
+
+        await self._send_message(msg)
+
+        return None
+
+    async def send_recover_code(self, to: str, code: str) -> None:
+        msg = self.create_message(
+            to,
+            "Добрый день! <br>\n"
+            'Перейдите по <a href="{}">этой</a> ссылке для восстановления пароля в Simba<br>\n'
+            "До встречи!".format(MailGunEmail._get_link(code, "", method="recover")),
+        )
+
+        await self._send_message(msg)
+
         return None
