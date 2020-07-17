@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import List
 
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, Depends, Body, Response
+from fastapi import APIRouter, HTTPException, Depends, Body, Response, Path
 
 from api.dependencies import get_user
 from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler
@@ -49,7 +49,7 @@ async def invoice_fetch_all(user: User = Depends(get_user)):
 @router.get(
     "/{invoice_id}/", response_model=InvoiceExtended, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS
 )
-async def invoice_fetch_one(invoice_id: str, user: User = Depends(get_user)):
+async def invoice_fetch_one(invoice_id: str = Path(...), user: User = Depends(get_user)):
     resp = await InvoiceCRUD.aggregate(
         [
             {"$match": {"_id": ObjectId(invoice_id), "user_id": user.id}},
