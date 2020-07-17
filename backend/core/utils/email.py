@@ -114,7 +114,6 @@ class MailGunEmail:
                         data=msg,
                     )
                 )
-                print(email_send.json())
             except Exception as e:
                 capture_exception(e)
                 raise HTTPException(HTTPStatus.BAD_REQUEST, "Error while sending email")
