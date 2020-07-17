@@ -14,18 +14,12 @@ class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
     async def issue_tokens(self, customer_address: str, incoming_btc: int, btc_tx_hash: str) -> str:
         simba_to_issue = incoming_btc
 
-        if self.invoice:
-            self.validate_currency_rate(self.invoice.invoice_type, incoming_btc, simba_to_issue)
-
         tx_hash = await self.api_wrapper.issue_coins(customer_address, simba_to_issue, btc_tx_hash)
 
         return tx_hash.hex()
 
     async def redeem_tokens(self, outcoming_btc: int, btc_tx_hash: str):
         simba_to_redeem = outcoming_btc
-
-        if self.invoice:
-            self.validate_currency_rate(self.invoice.invoice_type, outcoming_btc, simba_to_redeem)
 
         tx_hash = await self.api_wrapper.redeem_coins(simba_to_redeem, btc_tx_hash)
 
