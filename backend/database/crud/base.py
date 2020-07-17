@@ -22,8 +22,8 @@ class BaseMongoCRUD(ABC):
             raise HTTPException(HTTPStatus.NOT_FOUND, "object is not found")
 
     @classmethod
-    async def find_one(cls, query: dict):
-        return await cls.db[cls.collection].find_one(filter=query,)
+    async def find_one(cls, query: dict, **kwargs):
+        return await cls.db[cls.collection].find_one(filter=query, **kwargs)
 
     @classmethod
     async def find_many(cls, query: dict, options: dict = None):
@@ -35,7 +35,7 @@ class BaseMongoCRUD(ABC):
 
     @classmethod
     async def insert_many(cls, payload: list, options: dict = None):
-        return await cls.db[cls.collection].insert_many(payload, options,)
+        return await cls.db[cls.collection].insert_many(payload, options)
 
     @classmethod
     async def update_one(cls, query: dict, payload: dict, with_set_option: bool = True, **kwargs):

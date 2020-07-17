@@ -1,1 +1,1 @@
-from .update_addresses_info import update_empty_btc_addresses_info
+from .update_addresses_info import fetch_empty_btc_addresses_info

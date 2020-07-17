@@ -15,7 +15,7 @@ from schemas import (
 )
 from database.crud import BlockCypherWebhookCRUD
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
-from config import HOST_URL, BTC_MINIMAL_CONFIRMATIONS
+from config import HOST_URL, TRANSACTION_MIN_CONFIRMATIONS
 
 __all__ = ["BlockCypherWebhookHandler"]
 
@@ -60,7 +60,7 @@ class BlockCypherWebhookHandler:
             token=self.api_wrapper.api_token,
             address=wallet_address,
             hash=transaction_hash,
-            confirmations=BTC_MINIMAL_CONFIRMATIONS,
+            confirmations=TRANSACTION_MIN_CONFIRMATIONS,
         )
         response = await self.api_wrapper.create_webhook(
             webhook.dict(exclude={"invoice_id", "url_path", "created_at"}, exclude_none=True)

@@ -7,7 +7,7 @@ from typing import Union, List, Optional
 from fastapi import HTTPException
 from sentry_sdk import capture_message
 
-from config import BTC_MINIMAL_CONFIRMATIONS
+from config import TRANSACTION_MIN_CONFIRMATIONS
 from core.mechanics import SimbaWrapper, SSTWrapper, BitcoinWrapper, BlockCypherWebhookHandler
 from core.mechanics.crypto.base import CryptoValidation
 from database.crud import BTCTransactionCRUD, InvoiceCRUD, EthereumTransactionCRUD
@@ -107,7 +107,7 @@ class InvoiceMechanics(CryptoValidation):
 
     @classmethod
     def get_incoming_btc_from_outputs(
-        cls, outputs: List[BTCTransactionOutputs], target_btc_address: str
+            cls, outputs: List[BTCTransactionOutputs], target_btc_address: str
     ) -> Optional[int]:
         incoming_btc = None
 
@@ -129,7 +129,7 @@ class InvoiceMechanics(CryptoValidation):
         return value
 
     async def _issue_simba_tokens_and_save(
-        self, transaction: BTCTransaction, incoming_btc: int,
+            self, transaction: BTCTransaction, incoming_btc: int,
     ):
         self._raise_exception_if_exists()
         eth_tx_hash = await SimbaWrapper(self.invoice).issue_tokens(
@@ -152,7 +152,7 @@ class InvoiceMechanics(CryptoValidation):
         return True
 
     async def _proceed_new_btc_tx_buy(
-        self, new_transaction: BTCTransaction, transaction_in_db: BTCTransactionInDB
+            self, new_transaction: BTCTransaction, transaction_in_db: BTCTransactionInDB
     ):
         """Part of buy pipeline"""
         incoming_btc = self.get_incoming_btc_from_outputs(
@@ -166,31 +166,31 @@ class InvoiceMechanics(CryptoValidation):
 
         # TODO optimize and simplify algo
         if transaction_in_db:
-            if new_transaction.confirmations < BTC_MINIMAL_CONFIRMATIONS:
+            if new_transaction.confirmations < TRANSACTION_MIN_CONFIRMATIONS:
                 await BTCTransactionCRUD.update_or_insert(
                     {"hash": new_transaction.hash}, new_transaction.dict()
                 )
 
             elif (
-                new_transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS
-                and transaction_in_db.simba_tokens_issued
+                    new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS
+                    and transaction_in_db.simba_tokens_issued
             ):
                 self.errors.append("transaction already exists and simba tokens was issued")
                 self._raise_exception_if_exists()
 
             elif (
-                new_transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS
-                and not transaction_in_db.simba_tokens_issued
+                    new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS
+                    and not transaction_in_db.simba_tokens_issued
             ):
                 return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
 
         else:
-            if new_transaction.confirmations < BTC_MINIMAL_CONFIRMATIONS:
+            if new_transaction.confirmations < TRANSACTION_MIN_CONFIRMATIONS:
                 await BTCTransactionCRUD.update_or_insert(
                     {"hash": new_transaction.hash}, new_transaction.dict()
                 )
 
-            elif new_transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS:
+            elif new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS:
                 return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
 
         return True
@@ -198,8 +198,8 @@ class InvoiceMechanics(CryptoValidation):
     async def _proceed_new_btc_tx_sell(self, new_transaction: BTCTransaction):
         """Part of sell pipeline"""
         if (
-            new_transaction.confirmations >= BTC_MINIMAL_CONFIRMATIONS
-            and self.invoice.status == InvoiceStatus.PROCESSING
+                new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS
+                and self.invoice.status == InvoiceStatus.PROCESSING
         ):
 
             self.invoice.status = InvoiceStatus.COMPLETED
@@ -277,7 +277,7 @@ class InvoiceMechanics(CryptoValidation):
         return True
 
     async def proceed_new_transaction(
-        self, transaction: Union[BTCTransaction, EthereumTransaction], **kwargs
+            self, transaction: Union[BTCTransaction, EthereumTransaction], **kwargs
     ) -> Union[bool, str]:
         if isinstance(transaction, (BTCTransaction, BTCTransactionInDB)):
             return await self.proceed_new_btc_transaction(transaction)
