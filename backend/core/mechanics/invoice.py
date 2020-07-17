@@ -61,7 +61,9 @@ class InvoiceMechanics(CryptoValidation):
         return None
 
     def _validate_for_buy(self):
-        if not self.validate_currency_rate(self.invoice.invoice_type, self.invoice.btc_amount, self.invoice.simba_amount):
+        if not self.validate_currency_rate(
+                self.invoice.invoice_type, self.invoice.btc_amount, self.invoice.simba_amount
+        ):
             self.errors.append("invalid rate")
         if self.user:
             if not self.user.has_address("eth", self.invoice.target_eth_address):
@@ -69,7 +71,9 @@ class InvoiceMechanics(CryptoValidation):
         return True
 
     def _validate_for_sell(self):
-        if not self.validate_currency_rate(self.invoice.invoice_type, self.invoice.btc_amount, self.invoice.simba_amount):
+        if not self.validate_currency_rate(
+                self.invoice.invoice_type, self.invoice.btc_amount, self.invoice.simba_amount
+        ):
             self.errors.append("invalid rate")
         if self.user:
             if not self.user.has_address("eth", self.invoice.target_eth_address):

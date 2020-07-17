@@ -69,7 +69,7 @@ class CryptoValidation(ABC):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc or simba amount")
 
         if invoice_type == InvoiceType.BUY:
-            if simba + SIMBA_BUY_SELL_FEE != btc:
+            if simba != btc:
                 raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc and simba ratio")
 
         elif invoice_type == InvoiceType.SELL:

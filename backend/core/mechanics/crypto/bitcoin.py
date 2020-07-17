@@ -83,6 +83,10 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
 
         self._validate_payables(payables)
 
+        if not spendables:
+            capture_message("Invalid spendables value", level="error")
+            raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, "Invalid spendables value")
+
         tx = create_signed_tx(
             self.api_wrapper.network,
             spendables=spendables,
