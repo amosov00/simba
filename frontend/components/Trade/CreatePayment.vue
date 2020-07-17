@@ -105,7 +105,7 @@
               let data_for_update = {
                 id: created_invoice._id,
                 eth_address: this.tradeData.eth_address,
-                simba_amount: this.tradeData.simba,
+                simba_amount: this.tradeData.btc * 100000000,
                 btc_amount: this.tradeData.btc * 100000000
               }
 
