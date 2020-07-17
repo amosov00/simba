@@ -71,11 +71,11 @@ export default context => {
       payment_confirmation_buy: 'Как только сеть получит 3 подтверждения, токены SIMBA будут отправлены на ваш ETH адрес.',
       payment_confirmation_sell: 'Как только сеть получит {min_confirms} подтверждение(-я), BTC будут отправлены на ваш адрес.',
       statuses: {
-        completed: 'Оплачено',
-        created: 'Создан',
+        completed: 'Оплачена',
+        created: 'Создана',
         waiting: 'В ожидании',
-        cancelled: 'Отменен',
-        expired: 'Просрочен',
+        cancelled: 'Отменена',
+        expired: 'Просрочена',
         processing: 'В обработке'
       },
       error_creating_invoice: 'Произошла ошибка при создании инвойса',

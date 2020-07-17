@@ -18,7 +18,7 @@
           img(src="@/assets/images/logo_sm.png").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
             = ' '
-            span.has-text-weight-bold.ml-1 {{ simbaFormat(+tradeData.simba) }} SIMBA
+            span.has-text-weight-bold.ml-1 {{ simbaFormat(+tradeData.simba - 50000) }} SIMBA
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
             span {{ updated_invoice_data.target_eth_address }}
@@ -137,21 +137,27 @@
             return;
           }
         } else { // Sell
-          if(this.check.eth_txs.length > 0 && this.check.simba_amount_proceeded > 0) {
+          if(this.check.status === 'processing') {
+            this.goneToNextStep = true
+            this.stopCountdown();
+            this.$parent.$emit('nextStep')
+            return;
+          }
+          /*if(this.check.eth_txs.length > 0 && this.check.simba_amount_proceeded > 0) {
             if(this.check.eth_txs[0].bitcoins_sended) {
               this.goneToNextStep = true
               this.stopCountdown();
               this.$parent.$emit('nextStep')
               return;
             }
-          }
+          }*/
         }
 
         this.updated_invoice_data = JSON.parse(JSON.stringify(this.check));
 
         // Confirm if invoice is not confirmed
 
-        if(this.updated_invoice_data.status !== 'waiting') {
+        if(this.updated_invoice_data.status !== 'waiting' && this.updated_invoice_data.status !== 'cancelled') {
           await this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
         }
 
