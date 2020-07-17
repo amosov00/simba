@@ -1,10 +1,12 @@
 from typing import List, Literal
 
 from fastapi import APIRouter, Query
+from pydantic import parse_obj_as
 
-from config import BTC_COLD_WALLETS
 from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
-from schemas import TransparencyTransaction, InvoiceStatus, InvoiceType, Invoice
+from schemas import TransparencyTransaction, InvoiceStatus, InvoiceType, BTCTransactionOutputs, BTCAddressInDB
+from core.mechanics import InvoiceMechanics
+from config import BTC_COLD_WALLETS, BTC_HOT_WALLET_ADDRESS
 
 __all__ = ["router"]
 
@@ -14,17 +16,27 @@ router = APIRouter()
 @router.get("/")
 async def transparency_totals():
     response = {}
+    total_recieved = 0
+    total_paid_out = 0
+
     cold_wallets_meta = await BTCAddressCRUD.aggregate(
-        [{"$group": {"_id": "$cold_wallet_title", "received": {"$sum": "$total_received"}, }}]
+        [{"$group": {"_id": "$cold_wallet_title", "received": {"$sum": "$total_received"}}}]
     )
     invoices_meta = await InvoiceCRUD.aggregate(
         [
-            {"$match": {"status": InvoiceStatus.COMPLETED, "invoice_type": InvoiceType.SELL}},
-            {"$group": {"_id": None, "paid_out": {"$sum": "$btc_amount_proceeded"}}},
+            {"$match": {"status": InvoiceStatus.COMPLETED}},
+            {"$group": {
+                "_id": "$invoice_type",
+                "btc_amount_proceeded": {"$sum": "$btc_amount_proceeded"},
+            }},
         ]
     )
-    total_recieved = sum([i["received"] for i in cold_wallets_meta if i["_id"]]) or 0
-    total_paid_out = invoices_meta[0].get("paid_out") if invoices_meta else 0
+    for i in invoices_meta:
+        if i["_id"] == InvoiceType.BUY:
+            total_recieved = i["btc_amount_proceeded"]
+        elif i["_id"] == InvoiceType.SELL:
+            total_paid_out = i["btc_amount_proceeded"]
+
     response.update(
         {
             "total_assets": total_recieved - total_paid_out,
@@ -41,22 +53,40 @@ async def transparency_totals():
     return response
 
 
-@router.get("/transactions/", response_model=List[TransparencyTransaction])
+@router.get("/transactions/")
 async def transparency_transactions(
-        tx_type: Literal["received", "paidout"] = Query(default="received", alias="type")
+        tx_type: Literal["received", "paidout"] = Query(..., alias="type")
 ):
-    btc_tx_hashes = await InvoiceCRUD.aggregate([
-        {"$match": {
-            "$and": [
-                {"status": InvoiceStatus.COMPLETED},
-                {"invoice_type": InvoiceType.BUY if tx_type == "received" else InvoiceType.SELL}
-            ]
-        }},
-        {"$project": {"_id": 0, "btc_tx_hashes": 1}},
-        {"$unwind": "$btc_tx_hashes"},
-    ])
-    btc_tx_hashes_list = [i["btc_tx_hashes"] for i in btc_tx_hashes] if btc_tx_hashes else None
-    btc_txs = await BTCTransactionCRUD.find_many({
-        "hash": {"$in": btc_tx_hashes_list}
-    }) if btc_tx_hashes_list else []
-    return btc_txs
+    response = []
+    invoices = await InvoiceCRUD.aggregate(
+        [
+            {"$match": {
+                "status": InvoiceStatus.COMPLETED,
+                "invoice_type": InvoiceType.BUY if tx_type == "received" else InvoiceType.SELL,
+            }},
+            {"$lookup": {
+                "from": BTCTransactionCRUD.collection,
+                "localField": "_id",
+                "foreignField": "invoice_id",
+                "as": "btc_txs",
+            }},
+        ]
+    )
+    for invoice in invoices:
+        for btc_tx in invoice["btc_txs"]:
+            target_btc_address = invoice["target_btc_address"] if tx_type == "received" else BTC_HOT_WALLET_ADDRESS
+
+            if target_btc_address not in btc_tx["addresses"]:
+                continue
+
+            amount_from_outputs = InvoiceMechanics.get_incoming_btc_from_outputs(
+                parse_obj_as(List[BTCTransactionOutputs], btc_tx["outputs"]), target_btc_address
+            ) or 0
+
+            response.append({
+                "hash": btc_tx["hash"],
+                "received": btc_tx["received"],
+                "amount": amount_from_outputs if tx_type == "received" else btc_tx["total"] - amount_from_outputs
+            })
+
+    return response

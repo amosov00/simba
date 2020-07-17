@@ -4,7 +4,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from api.dependencies import get_user
-from celery_app.tasks import fetch_and_proceed_simba_contract, delete_unused_webhooks
+from celery_app.tasks import fetch_empty_btc_addresses_info, delete_unused_webhooks
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
 from core.mechanics.crypto import SimbaWrapper, SSTWrapper, BitcoinWrapper
 from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD, ReferralCRUD
@@ -17,7 +17,7 @@ router = APIRouter()
 
 @router.get("/cron/")
 async def debug_get():
-    await delete_unused_webhooks()
+    await fetch_empty_btc_addresses_info()
     return True
 
 
@@ -36,7 +36,6 @@ async def debug_get():
     hooks = await BlockCypherWebhookAPIWrapper().list_webhooks()
     for hook in hooks:
         await BlockCypherWebhookAPIWrapper().delete_webhook(hook["id"])
-        print(hook["id"] + " deleted")
         await asyncio.sleep(0.5)
 
     return True

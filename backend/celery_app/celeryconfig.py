@@ -51,8 +51,8 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute="30", hour="*/12"),
         "args": (),
     },
-    "update_empty_btc_addresses_info": {
-        "task": "update_empty_btc_addresses_info",
+    "fetch_empty_btc_addresses_info": {
+        "task": "fetch_empty_btc_addresses_info",
         "schedule": crontab(minute="0", hour="*/12"),
         "args": (),
     },

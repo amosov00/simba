@@ -14,7 +14,7 @@ class BlockCypherAPIWrapper(BlockCypherBaseAPIWrapper):
 
     async def fetch_address_info(self, address_hash: str) -> Optional[BTCAddress]:
         endpoint = f"/addrs/{address_hash}/"
-        res = await self.request(endpoint)
+        res = await self.request(endpoint, with_token=True)
         return BTCAddress(**res) if res else None
 
     async def fetch_transaction_info(self, transaction_hash: str) -> Optional[BTCTransaction]:
@@ -40,9 +40,6 @@ class BlockCypherAPIWrapper(BlockCypherBaseAPIWrapper):
         return res.get("final_balance")
 
     async def push_raw_tx(self, tx: Tx):
-        # endpoint = f"/txs/push/"
-        # data = {"tx": tx.as_hex()}
-        # res = await self.request(endpoint, request_type="POST", data=data, with_token=True)
         return self.broadcast_tx(tx)
 
     async def get_spendables(self, address: str):

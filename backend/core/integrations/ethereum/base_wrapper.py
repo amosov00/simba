@@ -9,7 +9,7 @@ from hexbytes import HexBytes
 from web3 import Web3
 from web3.datastructures import AttributeDict
 
-from config import INFURA_WS_URL, IS_PRODUCTION
+from config import INFURA_WS_URL, IS_PRODUCTION, TRANSACTION_MIN_CONFIRMATIONS
 from schemas import EthereumContract, EthereumTransaction
 
 __all__ = ["EthereumBaseCommonWrapper", "EthereumBaseContractWrapper"]
@@ -70,7 +70,7 @@ class EthereumBaseContractWrapper(EthereumBaseWrapper):
         self.blocks: List[EthereumTransaction] = []
         self.filters = []
         self.last_block = None
-        self.min_confirmations = 3 if IS_PRODUCTION else 1
+        self.min_confirmations = TRANSACTION_MIN_CONFIRMATIONS
 
     def fetch_transaction_by_hash(self, transaction_hash: Union[str, HexBytes]):
         return self.w3.eth.getBlock(transaction_hash, full_transactions=True)
