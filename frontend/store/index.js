@@ -13,14 +13,18 @@ export const state = () => ({
     simba: 0,
     btc: 0
   },
-  loginDataBuffer: {}
+  loginDataBuffer: {},
+  users: [],
+  userById: null
 });
 
 export const getters = {
   user: s => s.user,
   contract: s => s.contract,
   tradeData: s => s.tradeData,
-  loginDataBuffer: s => s.loginDataBuffer
+  loginDataBuffer: s => s.loginDataBuffer,
+  users: s => s.users,
+  userById: s => s.userById
 };
 
 export const mutations = {
@@ -35,7 +39,9 @@ export const mutations = {
     state.user.signed_addresses.push(payload),
   setLoginDataBuffer: (state, payload) => {
     state.loginDataBuffer = payload;
-  }
+  },
+  setUsers: (state, data) => (state.users = data),
+  setUserById: (state, data) => (state.user = data)
 };
 
 export const actions = {
@@ -62,15 +68,15 @@ export const actions = {
         .then(() => {
           dispatch("getUser");
           Toast.open({
-            message: this.$i18n.t('wallet.address_added'),
+            message: this.$i18n.t("wallet.address_added"),
             type: "is-primary"
           });
         })
         .catch(_ => {
-          let error_msg = this.$i18n.t('wallet.address_failed_to_add')
+          let error_msg = this.$i18n.t("wallet.address_failed_to_add");
 
-          if(this.getters.user.two_factor) {
-            error_msg = this.$i18n.t('wallet.address_failed_with_pin')
+          if (this.getters.user.two_factor) {
+            error_msg = this.$i18n.t("wallet.address_failed_with_pin");
           }
 
           Toast.open({
@@ -94,7 +100,7 @@ export const actions = {
         .then(() => {
           dispatch("getUser");
           Toast.open({
-            message: this.$i18n.t('wallet.address_deleted'),
+            message: this.$i18n.t("wallet.address_deleted"),
             type: "is-primary"
           });
         })
@@ -111,7 +117,7 @@ export const actions = {
         .then(() => {
           dispatch("getUser");
           Toast.open({
-            message: this.$i18n.t('wallet.address_deleted'),
+            message: this.$i18n.t("wallet.address_deleted"),
             type: "is-primary"
           });
         })
@@ -276,5 +282,15 @@ export const actions = {
           type: "is-danger"
         });
       });
+  },
+
+  async fetchUsers({ commit }) {
+    const { data } = await this.$axios.get("/admin/users/");
+    commit("setUsers", data);
+  },
+
+  async fetchUserById({ commit }, id) {
+    const { data } = await this.$axios.get(`/admin/users/${id}`);
+    commit("setUserById", data);
   }
 };
