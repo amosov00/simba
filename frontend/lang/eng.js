@@ -153,8 +153,11 @@ export default context => {
         "How it works?<br><br>" +
         "1. You copy the link and send it to your friend.<br>" +
         "2. After sign up with your link, it will be tied to your account.<br>" +
-        "3. With each recharge, you will receive SST tokens that you can sell" +
-        "on the exchange at the current rate.<br><br>The offer is limited by amount of provided SST tokens.",
+        "3. With each recharge, you will receive SST tokens that you can sell <br>" +
+        "on the exchange at the current rate.<br>" +
+        "4. When your referrals invite with their partner link, you'll recieve an additional bonus.<br>" +
+        "So for 5 levels you will get: 5%, 1%, 1%, 0.5% and 0.5%<br>" +
+        "<br>The offer is limited by amount of provided SST tokens.",
       invited: "Invited",
       your_ref_link: "Your partner link",
       your_ref_code: "Your partner code",

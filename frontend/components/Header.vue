@@ -14,6 +14,8 @@
       div.column.is-8.pa-0
         nuxt-link(:to="menuItem.to" v-for="(menuItem, i) in menu" :key="i" active-class="link--active").menu-item.link {{ $t(menuItem.title) }}
         a(href="https://simba.storage/transparency" target="_blank" rel="noopener noreferrer").menu-item.link {{$t('header_menu.transparency')}}
+        nuxt-link(to="/invoices" v-if="user.is_superuser").menu-item.link Invoices
+        nuxt-link(to="/users" v-if="user.is_superuser").menu-item.link Users
       div.column.is-4.has-text-right.pa-0
         HeaderBalance(:simbaBalance="simbaBalance")
 </template>
