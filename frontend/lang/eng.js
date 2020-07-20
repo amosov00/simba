@@ -109,7 +109,7 @@ export default context => {
       discord: "https://discord.com/channels/SimbaStorage#6018",
       streemit: "https://steemit.com/@simbastorage",
       github: "#",
-      linkedin: "http://www.linkedin.cn/company/simbastorage"
+      linkedin: "https://www.linkedin.com/company/simbastorage/"
     },
     profile: {
       sidebar: {

@@ -105,11 +105,11 @@ export default context => {
       twitter: "https://twitter.com/SWISSSST",
       vk: "https://vk.com/simbastorage",
       telegram: "https://t.me/simbastorage",
-      telegram_chat: "https://t.me/simbastablecoin_ru",
+      telegram_chat: "https://t.me/simbastorage_ru",
       discord: "https://discord.com/channels/SimbaStorage#6018",
       streemit: "https://steemit.com/@simbastorage",
       github: "#",
-      linkedin: "http://www.linkedin.cn/company/simbastorage"
+      linkedin: "https://www.linkedin.com/company/simbastorage/"
     },
     profile: {
       sidebar: {
