@@ -1,15 +1,13 @@
 from core.integrations.ethereum import FunctionsContractWrapper
 from .base import CryptoValidation, CryptoCurrencyRate
-from schemas import InvoiceInDB
 from config import SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
 
 
 class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
-    def __init__(self, invoice: InvoiceInDB):
+    def __init__(self):
         self.api_wrapper = FunctionsContractWrapper(
             SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
         )
-        self.invoice = invoice
 
     async def issue_tokens(self, customer_address: str, incoming_btc: int, btc_tx_hash: str) -> str:
         simba_to_issue = incoming_btc

@@ -136,7 +136,7 @@ class InvoiceMechanics(CryptoValidation):
             self, transaction: BTCTransaction, incoming_btc: int,
     ):
         self._raise_exception_if_exists()
-        eth_tx_hash = await SimbaWrapper(self.invoice).issue_tokens(
+        eth_tx_hash = await SimbaWrapper().issue_tokens(
             self.invoice.target_eth_address, incoming_btc=incoming_btc, btc_tx_hash=transaction.hash
         )
         transaction.simba_tokens_issued = True
@@ -168,52 +168,47 @@ class InvoiceMechanics(CryptoValidation):
             self.errors.append("Failed to parse btc amount from transaction")
             self._raise_exception_if_exists()
 
-        # TODO optimize and simplify algo
-        if transaction_in_db:
-            if new_transaction.confirmations < TRANSACTION_MIN_CONFIRMATIONS:
-                await BTCTransactionCRUD.update_or_insert(
-                    {"hash": new_transaction.hash}, new_transaction.dict()
-                )
-
-            elif (
-                    new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS
-                    and transaction_in_db.simba_tokens_issued
-            ):
-                self.errors.append("transaction already exists and simba tokens was issued")
-                self._raise_exception_if_exists()
-
-            elif (
-                    new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS
-                    and not transaction_in_db.simba_tokens_issued
-            ):
-                return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
+        if all([
+            new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS,
+            transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
+            self.invoice.status == InvoiceStatus.WAITING
+        ]):
+            return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
 
         else:
-            if new_transaction.confirmations < TRANSACTION_MIN_CONFIRMATIONS:
-                await BTCTransactionCRUD.update_or_insert(
-                    {"hash": new_transaction.hash}, new_transaction.dict()
-                )
+            return await BTCTransactionCRUD.update_or_insert(
+                {"hash": new_transaction.hash}, new_transaction.dict(exclude_unset=True)
+            )
 
-            elif new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS:
-                return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
-
-        return True
-
-    async def _proceed_new_btc_tx_sell(self, new_transaction: BTCTransaction):
+    async def _proceed_new_btc_tx_sell(self, new_transaction: BTCTransaction, transaction_in_db: BTCTransactionInDB):
         """Part of sell pipeline"""
-        if (
-                new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS
-                and self.invoice.status == InvoiceStatus.PROCESSING
-        ):
+        if all([
+            new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS,
+            transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
+            self.invoice.status == InvoiceStatus.PROCESSING
+        ]):
 
             self.invoice.status = InvoiceStatus.COMPLETED
             self.invoice.finised_at = datetime.now()
 
+            # send without fee cause of double fee charge
+            btc_outcoming_without_fee = self.invoice.btc_amount_proceeded + SIMBA_BUY_SELL_FEE
+
+            eth_tx_hash = await SimbaWrapper().redeem_tokens(
+                btc_outcoming_without_fee,
+                new_transaction.hash
+            )
+            self.invoice.add_hash("eth", eth_tx_hash)
+
             await self.update_invoice()
-            await BTCTransactionCRUD.update_or_insert({"hash": new_transaction.hash}, new_transaction.dict())
+            await BTCTransactionCRUD.update_or_insert(
+                {"hash": new_transaction.hash}, new_transaction.dict(exclude_unset=True)
+            )
 
         else:
-            await BTCTransactionCRUD.update_or_insert({"hash": new_transaction.hash}, new_transaction.dict())
+            await BTCTransactionCRUD.update_or_insert(
+                {"hash": new_transaction.hash}, new_transaction.dict(exclude_unset=True)
+            )
 
         return True
 
@@ -233,7 +228,7 @@ class InvoiceMechanics(CryptoValidation):
             return await self._proceed_new_btc_tx_buy(transaction, transaction_in_db)
 
         elif self.invoice.invoice_type == InvoiceType.SELL:
-            return await self._proceed_new_btc_tx_sell(transaction)
+            return await self._proceed_new_btc_tx_sell(transaction, transaction_in_db)
 
         return True
 
@@ -304,13 +299,8 @@ class InvoiceMechanics(CryptoValidation):
             capture_message(f"failed to get btc tx info from invoice {self.invoice.id}", level="error")
             return False
 
-        # send without fee cause of double charge
-        eth_tx_hash = await SimbaWrapper(self.invoice).redeem_tokens(btc_outcoming_without_fee, btc_tx.hash)
-        btc_tx.simba_tokens_issued = True
         btc_tx.invoice_id = self.invoice.id
-
         self.invoice.btc_amount_proceeded = btc_outcoming_with_fee
-        self.invoice.add_hash("eth", eth_tx_hash)
         self.invoice.add_hash("btc", btc_tx.hash)
 
         await BTCTransactionCRUD.insert_one(btc_tx.dict())
