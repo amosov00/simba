@@ -18,4 +18,4 @@ async def gas_price_from_ethgasstation() -> int:
     )
 
     # Filter dangerous gas price
-    return gas_station_gwei if gas_station_gwei < MAX_GAS_PRICE_GWEI else MAX_GAS_PRICE_GWEI
+    return min(gas_station_gwei, MAX_GAS_PRICE_GWEI)
