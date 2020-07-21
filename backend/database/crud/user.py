@@ -168,7 +168,7 @@ class UserCRUD(BaseMongoCRUD):
         return {"success": True}
 
     @classmethod
-    async def update_not_safe(cls, user_id: str, payload: UserUpdateNotSafe) -> Union[dict, User]:
+    async def update_not_safe(cls, user_id: str, payload: UserUpdateNotSafe):
         user = await cls.find_by_id(user_id)
 
         if not user:
@@ -177,16 +177,16 @@ class UserCRUD(BaseMongoCRUD):
         if not payload.dict(exclude_unset=True):
             return user
 
-        await cls.update_one(
-            query={"_id": user["_id"]},
-            payload=payload.dict(exclude=set(FIELDS_TO_EXCLUDE), exclude_unset=True),
-        )
-
-        return payload.dict(
+        payload = payload.dict(
             exclude=set.union(set(FIELDS_TO_EXCLUDE), {"password", "repeat_password"}),
             exclude_unset=True,
             exclude_defaults=True,
         )
+
+        return bool((await cls.update_one(
+            query={"_id": user["_id"]},
+            payload=payload
+        )).modified_count)
 
     @classmethod
     async def change_password(cls, user: User, payload: UserChangePassword) -> bool:
@@ -254,26 +254,3 @@ class UserCRUD(BaseMongoCRUD):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin-code")
         await cls.update_one(query={"_id": user.id}, payload={"secret_2fa": None, "two_factor": False})
         return True
-
-    @classmethod
-    async def referrals_info(cls, user: User):
-        referral = await ReferralCRUD.find_by_user_id(user.id)
-        # TODO invalid logic
-        if referral is None:
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "No referral data")
-        parsed_data = {"referrals": []}
-        for i in range(1, 6):
-            user = await cls.find_by_id(referral[f"ref{i}"])
-            if user is not None:
-                email = user["email"].split("@")[0] + "@***.**"
-                parsed_data["referrals"].append(
-                    UserReferralInfo(
-                        created_at=user["created_at"],
-                        email=email,
-                        first_name=user["first_name"],
-                        last_name=user["last_name"],
-                        level=i,
-                    )
-                )
-
-        return parsed_data

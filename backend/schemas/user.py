@@ -52,8 +52,6 @@ USER_MODEL_INCLUDE_FIELDS = frozenset(
         "user_btc_addresses",
         "user_eth_addresses",
         "btc_address",
-        "telegram_chat_id",
-        "telegram_id",
         "is_staff",
         "is_superuser",
         "is_active",
@@ -117,9 +115,6 @@ class User(BaseModel):
 
     btc_address: str = Field(default=None, description="Linked BTC address to user for transactions")
 
-    telegram_chat_id: Optional[int] = Field(default=None)
-    telegram_id: Optional[int] = Field(default=None)
-
     is_staff: Optional[bool] = Field(default=False, description="Staff role")
     is_superuser: Optional[bool] = Field(default=False, description="Superuser role")
     is_active: Optional[bool] = Field(default=True, description="User is active")
@@ -127,11 +122,6 @@ class User(BaseModel):
     terms_and_condition: Optional[bool] = Field(default=False, description="Terms and conditions checkbox")
 
     created_at: Optional[datetime] = Field(default=None)
-
-    # Is these fields in necessery ?
-    # ethereum_wallet: Optional[str] = Field(default=None)
-    # btc_wallet: Optional[str] = Field(default=None)
-    # simba_wallet: Optional[str] = Field(default=None)
 
     @property
     def is_authenticated(self):
@@ -224,12 +214,6 @@ class UserCreationNotSafe(BaseModel):
     verification_code: Optional[str] = Field(
         default_factory=pwd.genword, description="Code which will send to email"
     )
-    referral_id: Optional[str] = Field(default=None)
-    telegram_id: Optional[int] = Field(default=None)
-    telegram_chat_id: Optional[int] = Field(default=None)
-    ethereum_wallet: Optional[str] = Field(default=None)
-    btc_wallet: Optional[str] = Field(default=None)
-    simba_wallet: Optional[str] = Field(default=None)
     is_active: Optional[bool] = Field(default=True, description="User is active")
     is_manager: Optional[bool] = Field(default=False, description="Manager role")
     is_superuser: Optional[bool] = Field(default=False, description="Superuser role")
@@ -240,8 +224,17 @@ class UserCreationNotSafe(BaseModel):
     _validate_passwords = validator("password", allow_reuse=True)(validate_password)
 
 
-class UserUpdateNotSafe(UserCreationNotSafe):
-    pass
+class UserUpdateNotSafe(BaseModel):
+    email: str = Field(default=None)
+    email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
+    first_name: Optional[str] = Field(default=None)
+    last_name: Optional[str] = Field(default=None)
+    is_active: Optional[bool] = Field(default=True, description="User is active")
+    is_manager: Optional[bool] = Field(default=False, description="Manager role")
+    is_superuser: Optional[bool] = Field(default=False, description="Superuser role")
+    two_factor: Optional[bool] = Field(defaul=False, description="On/off 2fa")
+
+    _validate_email = validator("email", pre=True, allow_reuse=True)(validate_email)
 
 
 class User2faURL(BaseModel):

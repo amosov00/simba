@@ -5,7 +5,8 @@ from fastapi import APIRouter, HTTPException, Query, Body, Path
 
 from database.crud import UserCRUD, InvoiceCRUD
 from schemas import (
-    User
+    User,
+    UserUpdateNotSafe
 )
 
 __all__ = ["users_router"]
@@ -36,3 +37,13 @@ async def admin_users_fetch_all(
 )
 async def admin_users_fetch_one(user_id: str = Path(...)):
     return await UserCRUD.find_by_id(user_id)
+
+
+@users_router.put(
+    "/{user_id}/",
+)
+async def admin_users_update(
+        user_id: str = Path(...),
+        payload: UserUpdateNotSafe = Body(...)
+):
+    return await UserCRUD.update_not_safe(user_id, payload)
