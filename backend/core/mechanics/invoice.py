@@ -238,21 +238,21 @@ class InvoiceMechanics(CryptoValidation):
             capture_message("failed to parse incoming eth from transaction", level="error")
             self.errors.append("failed to parse incoming eth from transaction")
 
-        if not self.invoice.status == InvoiceStatus.WAITING:
-            capture_message("invalid invoice status in sell invoice pipeline", level="error")
-            self.errors.append("invalid invoice status in sell invoice pipeline")
-
         self._raise_exception_if_exists()
 
         transaction.invoice_id = self.invoice.id
-        transaction.bitcoins_sended = True  # TODO is it correct ?
 
-        self.invoice.status = InvoiceStatus.PROCESSING
-        self.invoice.simba_amount_proceeded = incoming_eth
+        if self.invoice.invoice_type == InvoiceType.SELL and self.invoice.status == InvoiceStatus.WAITING:
+            self.invoice.status = InvoiceStatus.PROCESSING
+            self.invoice.simba_amount_proceeded = incoming_eth
+
         self.invoice.add_hash("eth", transaction.transactionHash)
 
-        await EthereumTransactionCRUD.update_one({"_id": transaction.id}, transaction.dict(exclude={"id"}))
+        await EthereumTransactionCRUD.update_one(
+            {"_id": transaction.id}, transaction.dict(exclude={"id"}, exclude_unset=True)
+        )
         await self.update_invoice()
+
         return True
 
     async def _proceed_new_eth_tx_issue_redeem(self, transaction: EthereumTransactionInDB):
@@ -260,7 +260,9 @@ class InvoiceMechanics(CryptoValidation):
         transaction.invoice_id = self.invoice.id
         self.invoice.add_hash("eth", transaction.transactionHash)
 
-        await EthereumTransactionCRUD.update_one({"_id": transaction.id}, transaction.dict(exclude={"id"}))
+        await EthereumTransactionCRUD.update_one(
+            {"_id": transaction.id}, transaction.dict(exclude={"id"}, exclude_unset=True)
+        )
         await self.update_invoice()
         return True
 
@@ -282,7 +284,9 @@ class InvoiceMechanics(CryptoValidation):
             return await self.proceed_new_eth_transaction(transaction)
 
     async def update_invoice(self):
-        return await InvoiceCRUD.update_one({"_id": self.invoice.id}, self.invoice.dict(exclude={"id"}))
+        return await InvoiceCRUD.update_one(
+            {"_id": self.invoice.id}, self.invoice.dict(exclude={"id"}, exclude_unset=True)
+        )
 
     async def send_bitcoins(self):
         self._validate_for_sending_btc()
