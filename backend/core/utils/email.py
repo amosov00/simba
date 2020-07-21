@@ -116,11 +116,11 @@ class MailGunEmail:
                 )
             except Exception as e:
                 capture_exception(e)
-                raise HTTPException(HTTPStatus.BAD_REQUEST, "Error while sending email")
+                raise HTTPException(HTTPStatus.BAD_REQUEST, f"Error while sending email, {e}")
 
         if email_send.json().get("message") != "Queued. Thank you.":
             capture_message(f"Error while sending email, response - {str(email_send.json())} ")
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "Error while sending email")
+            raise HTTPException(HTTPStatus.BAD_REQUEST, f"Error while sending email, {str(email_send.json())}")
 
         return None
 
