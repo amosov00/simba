@@ -9,7 +9,7 @@ from sentry_sdk import capture_exception, capture_message
 import httpx
 
 from config import EMAIL_LOGIN, EMAIL_PASSWORD, EMAIL_PORT, EMAIL_SERVER, HOST_URL
-from config import MAILGUN_API_KEY, MAILGUN_DOMAIN_NAME
+from config import MAILGUN_API_KEY, MAILGUN_DOMAIN_NAME, MAILGUN_MESSAGE_LINK
 
 
 class Email:
@@ -82,7 +82,7 @@ class MailGunEmail:
     def __init__(self):
         self.api_key = MAILGUN_API_KEY
         self.domain = MAILGUN_DOMAIN_NAME
-        self.send_message_link = f"https://api.eu.mailgun.net/v3/{MAILGUN_DOMAIN_NAME}/messages"
+        self.send_message_link = MAILGUN_MESSAGE_LINK
         self.email_from = EMAIL_LOGIN
 
     @staticmethod
@@ -116,11 +116,11 @@ class MailGunEmail:
                 )
             except Exception as e:
                 capture_exception(e)
-                raise HTTPException(HTTPStatus.BAD_REQUEST, "Error while sending email")
+                raise HTTPException(HTTPStatus.BAD_REQUEST, f"Error while sending email, {e}")
 
         if email_send.json().get("message") != "Queued. Thank you.":
             capture_message(f"Error while sending email, response - {str(email_send.json())} ")
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "Error while sending email")
+            raise HTTPException(HTTPStatus.BAD_REQUEST, f"Error while sending email, {str(email_send.json())}")
 
         return None
 
