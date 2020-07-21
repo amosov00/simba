@@ -15,7 +15,7 @@ INVOICE_TIMEOUT = timedelta(hours=2)
 
 
 @app.task(
-    name="finish_overdue_invoices", bind=True, soft_time_limit=42, time_limit=300,
+    name="finish_overdue_invoices", bind=True, soft_time_limit=55, time_limit=300,
 )
 async def finish_overdue_invoices(self, *args, **kwargs):
     """Крон для завершения счетов, которые неактивны > 2 часов и у которых нет транзакций"""

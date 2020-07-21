@@ -169,6 +169,7 @@ class InvoiceMechanics(CryptoValidation):
             self._raise_exception_if_exists()
 
         if all([
+            bool(new_transaction.block_height),
             new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS,
             transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
             self.invoice.status == InvoiceStatus.WAITING
@@ -183,6 +184,7 @@ class InvoiceMechanics(CryptoValidation):
     async def _proceed_new_btc_tx_sell(self, new_transaction: BTCTransaction, transaction_in_db: BTCTransactionInDB):
         """Part of sell pipeline"""
         if all([
+            bool(new_transaction.block_height),
             new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS,
             transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
             self.invoice.status == InvoiceStatus.PROCESSING
@@ -213,10 +215,6 @@ class InvoiceMechanics(CryptoValidation):
         return True
 
     async def proceed_new_btc_transaction(self, transaction: BTCTransaction):
-        if transaction.block_height < 0 or transaction.confirmations == 0:
-            logging.warning("Got unconfirmed transation from webhook")
-            return False
-
         transaction.invoice_id = self.invoice.id
 
         if transaction_in_db := await BTCTransactionCRUD.find_one({"hash": transaction.hash}):
