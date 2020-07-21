@@ -19,9 +19,10 @@ async def transparency_totals():
     total_recieved = 0
     total_paid_out = 0
 
-    cold_wallets_meta = await BTCAddressCRUD.aggregate(
-        [{"$group": {"_id": "$cold_wallet_title", "received": {"$sum": "$total_received"}}}]
-    )
+    cold_wallets_meta = await BTCAddressCRUD.aggregate([
+        {"$match": {"address": {"$ne": BTC_HOT_WALLET_ADDRESS}}},
+        {"$group": {"_id": "$cold_wallet_title", "received": {"$sum": "$total_received"}}}
+    ])
     invoices_meta = await InvoiceCRUD.aggregate(
         [
             {"$match": {"status": InvoiceStatus.COMPLETED}},
@@ -53,9 +54,9 @@ async def transparency_totals():
     return response
 
 
-@router.get("/transactions/")
+@router.get("/transactions/", response_model=List[TransparencyTransaction])
 async def transparency_transactions(
-        tx_type: Literal["received", "paidout"] = Query(..., alias="type")
+        tx_type: Literal["received", "paidout"] = Query(..., alias="type"),
 ):
     response = []
     invoices = await InvoiceCRUD.aggregate(
