@@ -11,7 +11,7 @@
         div.mt-3.is-size-6 {{$t('exchange.sent_payment')}} {{ parseFloat(convert(received_payment_amount)) }} BTC
         div.mt-2 {{$t('exchange.transaction_hash')}}:
           =' '
-          a(:href="'https://live.blockcypher.com/btc-testnet/tx/' + tx_hash" target="_blank").link {{ tx_hash }}
+          a(:href="'https://www.blockchain.com/btc/tx/' + tx_hash" target="_blank").link {{ tx_hash }}
       div.mt-2
         div {{$t('exchange.confirms')}} {{currentConfirms}}/{{min_confirms}}
       b-loading(:active.sync="confirms_loading" :is-full-page="false")
@@ -44,7 +44,9 @@
     },
 
     async created() {
-      this.min_confirms = process.env.NODE_ENV === 'production' ? 3 : 1
+      //this.min_confirms = process.env.NODE_ENV === 'production' ? 3 : 1
+
+      this.min_confirms = process.env.NODE_ENV === 'develop' || 'development' ? 1 : 3
 
       let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id);
       this.received_payment_amount = res.btc_amount_proceeded

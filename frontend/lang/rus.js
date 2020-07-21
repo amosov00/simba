@@ -105,11 +105,11 @@ export default context => {
       twitter: "https://twitter.com/SWISSSST",
       vk: "https://vk.com/simbastorage",
       telegram: "https://t.me/simbastorage",
-      telegram_chat: "https://t.me/simbastablecoin_ru",
+      telegram_chat: "https://t.me/simbastorage_ru",
       discord: "https://discord.com/channels/SimbaStorage#6018",
       streemit: "https://steemit.com/@simbastorage",
       github: "#",
-      linkedin: "http://www.linkedin.cn/company/simbastorage"
+      linkedin: "https://www.linkedin.com/company/simbastorage/"
     },
     profile: {
       sidebar: {
@@ -153,7 +153,8 @@ export default context => {
         "1. Вы копируете ссылку и отправляете вашему другу.<br>" +
         "2. Регистрируясь по вашей ссылке он будет привязан к вашему аккаунту.<br>" +
         "3. При каждом пополнении вы получите токены SST, которые сможете продать на бирже по актуальному курсу.<br>" +
-        "4. Когда ваши друзья будут приглашать своих, вы будете получать дополнительный бонус. Так за 5 уровней вы получите: 5%, 1%, 1%, 0.5% и 0.5%.<br><br>" +
+        "4. Когда ваши друзья будут приглашать своих, вы будете получать дополнительный бонус.<br>" +
+        "Так за 5 уровней вы получите: 5%, 1%, 1%, 0.5% и 0.5%.<br>" +
         "Предложение ограничено количеством предоставленных SST токенов.",
       invited: "Приглашенные пользователи",
       your_ref_link: "Ваша партнерская ссылка",
