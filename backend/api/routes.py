@@ -26,6 +26,12 @@ api_router.include_router(
     tags=["admin"],
     dependencies=[Depends(user_is_superuser)]
 )
+api_router.include_router(
+    admin.btc_xpub_router,
+    prefix="/admin/btc-xpub",
+    tags=["admin"],
+    dependencies=[Depends(user_is_superuser)]
+)
 
 
 if DEBUG:
