@@ -168,42 +168,23 @@ class InvoiceMechanics(CryptoValidation):
             self.errors.append("Failed to parse btc amount from transaction")
             self._raise_exception_if_exists()
 
-        # TODO optimize and simplify algo
-        if transaction_in_db:
-            if new_transaction.confirmations < TRANSACTION_MIN_CONFIRMATIONS:
-                await BTCTransactionCRUD.update_or_insert(
-                    {"hash": new_transaction.hash}, new_transaction.dict(exclude_unset=True)
-                )
-
-            elif all([
-                new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS,
-                transaction_in_db.simba_tokens_issued
-            ]):
-                self.errors.append("transaction already exists and simba tokens was issued")
-                self._raise_exception_if_exists()
-
-            elif (
-                    new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS
-                    and not transaction_in_db.simba_tokens_issued
-            ):
-                return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
+        if all([
+            new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS,
+            transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
+            self.invoice.status == InvoiceStatus.WAITING
+        ]):
+            return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
 
         else:
-            if new_transaction.confirmations < TRANSACTION_MIN_CONFIRMATIONS:
-                await BTCTransactionCRUD.update_or_insert(
-                    {"hash": new_transaction.hash}, new_transaction.dict(exclude_unset=True)
-                )
+            return await BTCTransactionCRUD.update_or_insert(
+                {"hash": new_transaction.hash}, new_transaction.dict(exclude_unset=True)
+            )
 
-            elif new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS:
-                return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
-
-        return True
-
-    async def _proceed_new_btc_tx_sell(self, new_transaction: BTCTransaction, transaction_in_db):
+    async def _proceed_new_btc_tx_sell(self, new_transaction: BTCTransaction, transaction_in_db: BTCTransactionInDB):
         """Part of sell pipeline"""
         if all([
             new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS,
-            new_transaction.simba_tokens_issued is False,
+            transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
             self.invoice.status == InvoiceStatus.PROCESSING
         ]):
 
@@ -247,7 +228,7 @@ class InvoiceMechanics(CryptoValidation):
             return await self._proceed_new_btc_tx_buy(transaction, transaction_in_db)
 
         elif self.invoice.invoice_type == InvoiceType.SELL:
-            return await self._proceed_new_btc_tx_sell(transaction)
+            return await self._proceed_new_btc_tx_sell(transaction, transaction_in_db)
 
         return True
 
