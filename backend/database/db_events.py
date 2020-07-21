@@ -47,7 +47,10 @@ async def prepopulate_xpubs():
     for wallet in BTC_COLD_WALLETS:
         if not await BTCxPubCRUD.find_by_title(wallet.title):
             await BTCxPubCRUD.insert_one(
-                wallet.dict()
+                payload={
+                    **wallet.dict(exclude={"xpub"}),
+                    "xpub": wallet.xpub.get_secret_value(),
+                }
             )
     return True
 
