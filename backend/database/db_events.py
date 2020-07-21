@@ -1,9 +1,10 @@
 import logging
+import sys
 
 import sentry_sdk
 
-from config import ENV, IS_PRODUCTION
-from database.crud import UserCRUD
+from config import ENV, IS_PRODUCTION, BTC_COLD_WALLETS
+from database.crud import UserCRUD, BTCxPubCRUD
 from database.init import mongo_client
 from schemas import UserCreationNotSafe
 
@@ -42,27 +43,40 @@ async def prepopulate_users():
     return True
 
 
+async def prepopulate_xpubs():
+    for wallet in BTC_COLD_WALLETS:
+        if not await BTCxPubCRUD.find_by_title(wallet.title):
+            await BTCxPubCRUD.insert_one(
+                wallet.dict()
+            )
+    return True
+
+
 async def prepopulate_db():
     logging.info("Starting prepopulate db")
-    is_failed = None
 
     try:
         await mongo_client.admin.command("ping")
     except Exception as e:
-        is_failed = True
         logging.error(f"Unable to connect DB, error {e.__class__.__name__}")
         sentry_sdk.capture_exception(e)
-        return None
+        sys.exit(1)
+
     try:
         await prepopulate_users()
     except Exception as e:
-        is_failed = True
         logging.error(f"Unable to create users, error {e.__class__.__name__}")
         sentry_sdk.capture_exception(e)
+        sys.exit(1)
 
-    if not is_failed:
-        logging.info(f"Successfully prepopulated db")
+    try:
+        await prepopulate_xpubs()
+    except Exception as e:
+        logging.error(f"Unable to create users, error {e.__class__.__name__}")
+        sentry_sdk.capture_exception(e)
+        sys.exit(1)
 
+    logging.info(f"Successfully prepopulated db")
     return True
 
 

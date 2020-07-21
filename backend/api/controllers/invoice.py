@@ -27,16 +27,11 @@ router = APIRouter()
 
 @router.post("/", response_model=InvoiceInDB, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS)
 async def create_invoice(
-    user: User = Depends(get_user), data: InvoiceCreate = Body(...),
+        user: User = Depends(get_user), data: InvoiceCreate = Body(...),
 ):
     invoice = Invoice(user_id=user.id, status=InvoiceStatus.CREATED, invoice_type=data.invoice_type)
 
     created_invoice = await InvoiceCRUD.create_invoice(invoice)
-
-    if invoice.invoice_type == InvoiceType.BUY:
-        created_invoice["target_btc_address"] = await BitcoinWrapper().create_wallet_address(
-            created_invoice, user
-        )
 
     return created_invoice
 
@@ -113,10 +108,16 @@ async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Invoice not found or modification is forbidden")
 
     invoice = InvoiceInDB(**invoice)
+
+    # pre validate actions
+    if invoice.invoice_type == InvoiceType.BUY:
+        invoice.target_btc_address = await BitcoinWrapper().create_wallet_address(invoice, user)
+
     InvoiceMechanics(invoice, user).validate()
 
     invoice.status = InvoiceStatus.WAITING
 
+    # post validate actions
     if invoice.invoice_type == InvoiceType.BUY:
         await BlockCypherWebhookHandler().create_webhook(
             invoice=invoice,
@@ -124,5 +125,7 @@ async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
             wallet_address=invoice.target_btc_address,
         )
 
-    await InvoiceCRUD.update_invoice_not_safe(invoice.id, user.id, {"status": InvoiceStatus.WAITING})
+    await InvoiceCRUD.update_invoice_not_safe(
+        invoice.id, user.id, {"status": InvoiceStatus.WAITING, "target_btc_address": invoice.target_btc_address}
+    )
     return invoice

@@ -5,7 +5,7 @@ from pydantic import Field
 
 from .base import BaseModel, ObjectIdPydantic
 
-__all__ = ["BTCAddress", "BTCAddressInDB", "BTCAddressTransactions", "BTCXPUB"]
+__all__ = ["BTCAddress", "BTCAddressInDB", "BTCAddressTransactions"]
 
 
 class BTCAddressTransactions(BaseModel):
@@ -39,8 +39,3 @@ class BTCAddress(BaseModel):
 
 class BTCAddressInDB(BTCAddress):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
-
-
-class BTCXPUB(BaseModel):
-    title: str = None
-    xpub: str = None
