@@ -14,7 +14,7 @@ __all__ = ["fetch_and_proceed_simba_contract"]
 
 
 @app.task(
-    name="fetch_and_proceed_simba_contract", bind=True, soft_time_limit=42, time_limit=300,
+    name="fetch_and_proceed_simba_contract", bind=True, soft_time_limit=55, time_limit=300,
 )
 async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
     """Синхронизация с Simba контрактом"""
@@ -23,28 +23,33 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
     transactions = await EthereumTransactionCRUD.find(
         {"contract": SIMBA_CONTRACT.title, "event": {"$in": SimbaContractEvents.ALL}, "invoice_id": None}
     )
+
+    logging.info(f"Simba TX to proceed: {len(transactions)}")
+
     for transaction in transactions:
         transaction = EthereumTransactionInDB(**transaction)
 
         if transaction.event == SimbaContractEvents.Transfer:
             # Connect with sell invoices
-            sender_hash = transaction.args.get("from")
-            receiver_hash = transaction.args.get("to")
+            sender_hash = transaction.args.get("from") or "error"
+            receiver_hash = transaction.args.get("to") or "error"
 
             if not SIMBA_ADMIN_ADDRESS.lower() == receiver_hash.lower():
                 continue
 
-            invoice = (
-                await InvoiceCRUD.find_one(
+            invoice = await InvoiceCRUD.find_one(
+                {"$or": [
                     {
                         "status": InvoiceStatus.WAITING,
                         "invoice_type": InvoiceType.SELL,
                         "target_eth_address": {"$regex": sender_hash, "$options": "i"},
                         "created_at": {"$lte": transaction.fetched_at},
+                    },
+                    {
+                        "invoice_type": InvoiceType.SELL,
+                        "eth_tx_hashes": transaction.transactionHash
                     }
-                )
-                if sender_hash
-                else None
+                ]}
             )
 
             if invoice:
@@ -65,13 +70,19 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
             )
 
             invoice = await InvoiceCRUD.find_one(
-                {
-                    "status": InvoiceStatus.COMPLETED,
-                    "invoice_type": invoice_type,
-                    "target_eth_address": {"$regex": customer_address, "$options": "i"},
-                    "created_at": {"$lte": tx_datetime},
-                    "btc_tx_hashes": btc_tx_hash,
-                }
+                {"$or": [
+                    {
+                        "status": InvoiceStatus.COMPLETED,
+                        "invoice_type": invoice_type,
+                        "target_eth_address": {"$regex": customer_address, "$options": "i"},
+                        "created_at": {"$lte": tx_datetime},
+                        "btc_tx_hashes": btc_tx_hash,
+                    },
+                    {
+                        "invoice_type": invoice_type,
+                        "eth_tx_hashes": transaction.transactionHash,
+                    }
+                ]}
             )
 
             if invoice:
