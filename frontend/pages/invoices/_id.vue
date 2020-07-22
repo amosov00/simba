@@ -1,7 +1,7 @@
 <template lang="pug">
   div.main-content
     div.is-size-4.mb-3
-      strong Invoice
+      strong {{$t('su_invoices.invoice')}}
       =' — '
       span {{this.$route.params.id}}
     div(v-for="(el, key) in invoice").is-flex.invoice-field
@@ -17,7 +17,9 @@
         div(v-else)
           div(v-if="el === null") {{ $t(`su_invoices.not_available`) }}
           div(v-else)
-            div(v-if="key === 'status'") {{ $t(`exchange.statuses.${el}`)}}
+            div(v-if="key === 'invoice_type'") {{ el === 1 ? $i18n.t('exchange.buy') : $i18n.t('exchange.sell') }}
+            div(v-else-if="key === 'status'") {{ $t(`exchange.statuses.${el}`)}}
+            div(v-else-if="key === 'created_at' || key === 'finised_at'") {{ timestampFromUtc(el) }}
             div(v-else) {{ el }}
 </template>
 

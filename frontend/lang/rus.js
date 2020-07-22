@@ -270,6 +270,8 @@ export default context => {
       account_changed_error: 'Не удалось изменить данные учетной записи!'
     },
     su_invoices: {
+      invoices: 'Сделки',
+      invoice: 'Сделка',
       user_id: "ID пользователя",
       status: "Статус",
       invoice_type: "Операция",
@@ -287,7 +289,8 @@ export default context => {
       eth_txs: "ETH транзакции",
       btc_txs: "BTC транзакции",
       not_available: "Н/Д",
-      empty: "Отсутствует",
+      empty: "Отсутствует(-ют)",
+      sst_tx_hashes: 'Хеши SST транзакций'
     }
   };
 
