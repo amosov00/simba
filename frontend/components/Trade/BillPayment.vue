@@ -4,7 +4,7 @@
       h3.text-large.has-text-weight-bold {{ $t('exchange.bill_payment')}}
       div.mt-2(v-if="isBuy")
         div.is-flex.align-items-center
-          img(src="@/assets/images/bitcoin.svg").mr-2
+          img(src="@/assets/images/bitcoin-new.png" style="height: 36px").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.send')}}
             = ' '
             span.has-text-weight-bold.ml-1 {{ parseFloat(tradeData.btc) }} BTC
@@ -39,7 +39,7 @@
             TradeQRCode(:qrcode_value="tradeData.admin_eth_address" :amount="parseFloat(tradeData.simba)").ml-1
             button.btn(@click="payWithMetamask" style="margin-left: auto" :disabled="disablePayBtn") {{ $t('other.send') }}
         div.is-flex.align-items-center.mt-2
-          img(src="@/assets/images/bitcoin.svg").mr-2
+          img(src="@/assets/images/bitcoin-new.png" style="height: 36px").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
             = ' '
             span.has-text-weight-bold.ml-1 {{ parseFloat(tradeData.btc) }} BTC

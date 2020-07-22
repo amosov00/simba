@@ -230,7 +230,7 @@ export default context => {
       first_name: 'First name',
       last_name: 'Last name',
       save: 'Save',
-      copied_to_clipboard: 'Copied to clipboard'
+      copied_to_clipboard: 'Copied to clipboard',
     },
     about: {
       company_goal: "Company goal",
@@ -293,6 +293,14 @@ export default context => {
       not_available: "N/A",
       empty: "Empty",
       sst_tx_hashes: 'SST transaction hashes'
+    },
+    xpub: {
+      confirm_your_action: 'Confirm your action',
+      confirm_change_status: 'Are you sure you want to change the status?',
+      something_went_wrong: 'Something went wrong!',
+      status_changed: 'Status successfully changed!',
+      status_active: 'Active',
+      status_inactive: 'Inactive',
     }
   };
 

@@ -291,6 +291,14 @@ export default context => {
       not_available: "Н/Д",
       empty: "Отсутствует(-ют)",
       sst_tx_hashes: 'Хеши SST транзакций'
+    },
+    xpub: {
+      confirm_your_action: 'Подтвердите ваше действие',
+      confirm_change_status: 'Вы уверены что хотите изменить статус?',
+      something_went_wrong: 'Что-то пошло не так!',
+      status_changed: 'Статус успешно изменен!',
+      status_active: 'Активен',
+      status_inactive: 'Неактивен',
     }
   };
 

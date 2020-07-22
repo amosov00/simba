@@ -1,3 +1,5 @@
+import Vue from 'vue'
+
 export const state = () => ({
   state: {
     xpubList: []
@@ -9,7 +11,9 @@ export const getters = {
 }
 
 export const mutations = {
-  setXpubList: (state, data) => (state.xpubList = data)
+  setXpubList: (state, data) => {
+    Vue.set(state, 'xpubList', data)
+  }
 }
 
 export const actions = {
