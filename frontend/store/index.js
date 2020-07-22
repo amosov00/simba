@@ -14,8 +14,6 @@ export const state = () => ({
     btc: 0
   },
   loginDataBuffer: {},
-  users: [],
-  userById: null
 });
 
 export const getters = {
@@ -23,8 +21,6 @@ export const getters = {
   contract: s => s.contract,
   tradeData: s => s.tradeData,
   loginDataBuffer: s => s.loginDataBuffer,
-  users: s => s.users,
-  userById: s => s.userById
 };
 
 export const mutations = {
@@ -39,9 +35,7 @@ export const mutations = {
     state.user.signed_addresses.push(payload),
   setLoginDataBuffer: (state, payload) => {
     state.loginDataBuffer = payload;
-  },
-  setUsers: (state, data) => (state.users = data),
-  setUserById: (state, data) => (state.user = data)
+  }
 };
 
 export const actions = {
@@ -284,15 +278,13 @@ export const actions = {
       });
   },
 
-  async fetchUsers({ commit }) {
-    const { data } = await this.$axios.get("/admin/users/");
-    commit("setUsers", data);
+  async fetchUsers() {
+    return await this.$axios.get(`/admin/users/`).then(res => {
+      return res.data
+    }).catch(() => {});
   },
 
   async fetchUserById({}, id) {
-    //const { data } = await this.$axios.get(`/admin/users/${id}`);
-    //commit("setUserById", data);
-
     return await this.$axios.get(`/admin/users/${id}/`).then(res => {
       return res.data
     }).catch(() => {});

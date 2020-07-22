@@ -260,7 +260,34 @@ export default context => {
       is_superuser: 'Суперпользователь',
       is_active: 'Активен',
       terms_and_condition: 'Принял условия и положения',
-      created_at: 'Дата регистрации'
+      created_at: 'Дата регистрации',
+      list_is_empty: 'Список пуст',
+      yes: 'Да',
+      no: 'Нет',
+      not_available: 'Н/Д',
+      account_info: 'Учетная запись',
+      account_changed_success: 'Данные учетной записи успешно изменены!',
+      account_changed_error: 'Не удалось изменить данные учетной записи!'
+    },
+    su_invoices: {
+      user_id: "ID пользователя",
+      status: "Статус",
+      invoice_type: "Операция",
+      btc_amount: "Сумма BTC",
+      simba_amount: "Сумма SIMBA",
+      btc_amount_proceeded: "Сумма обработанных BTC",
+      simba_amount_proceeded: "Сумма обработанных SIMBA",
+      target_eth_address: "Целевой ETH адрес",
+      target_btc_address: "Целевой BTC адрес",
+      eth_tx_hashes: "Хеши транзакций ETH",
+      btc_tx_hashes: "Хеши транзакций BTC",
+      created_at: "Дата создания",
+      finised_at: "Дата заверщения",
+      _id: "ID",
+      eth_txs: "ETH транзакции",
+      btc_txs: "BTC транзакции",
+      not_available: "Н/Д",
+      empty: "Отсутствует",
     }
   };
 

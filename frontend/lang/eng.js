@@ -262,7 +262,34 @@ export default context => {
       is_superuser: 'Is superuser',
       is_active: 'Is active',
       terms_and_condition: 'Accepted terms and condition',
-      created_at: 'Date of registration'
+      created_at: 'Date of registration',
+      list_is_empty: 'Empty',
+      yes: 'Yes',
+      no: 'No',
+      not_available: 'N/A',
+      account_info: 'Account information',
+      account_changed_success: 'Account data successfully changed!',
+      account_changed_error: 'Error changing account data!'
+    },
+    su_invoices: {
+      user_id: "User ID",
+      status: "Status",
+      invoice_type: "Operation",
+      btc_amount: "BTC amount",
+      simba_amount: "SIMBA amount",
+      btc_amount_proceeded: "BTC amount proceeded",
+      simba_amount_proceeded: "Simba amount proceeded",
+      target_eth_address: "Target ETH address",
+      target_btc_address: "Target BTC address",
+      eth_tx_hashes: "ETH transaction hashes",
+      btc_tx_hashes: "BTC transaction hashes",
+      created_at: "Date of creation",
+      finised_at: "Date of completion",
+      _id: "ID",
+      eth_txs: "ETH transactions",
+      btc_txs: "BTC transactions",
+      not_available: "N/A",
+      empty: "Empty",
     }
   };
 

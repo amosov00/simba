@@ -3,18 +3,15 @@ import _ from "lodash";
 import { ToastProgrammatic as Toast } from "buefy";
 
 export const state = () => ({
-  invoices: [],
-  invoiceById: null
+  invoices: []
 });
 
 export const getters = {
-  invoices: s => s.invoices,
-  invoiceById: s => s.invoiceById
+  invoices: s => s.invoices
 };
 
 export const mutations = {
-  setInvoices: (state, data) => (state.invoices = data),
-  setInvoiceById: (state, data) => (state.invoiceById = data)
+  setInvoices: (state, data) => (state.invoices = data)
 };
 
 export const actions = {
@@ -91,19 +88,11 @@ export const actions = {
       });
   },
 
-  async fetchInvoices({ commit }) {
+  async fetchInvoices() {
     return await this.$axios
       .get("/admin/invoices/")
-      .then(res => {
-        commit("setInvoices", res.data);
-        return true;
-      })
-      .catch(_ => false);
-  },
-  async fetchInvoiceById({ commit }, id) {
-    const { data } = await this.$axios.get(`/invoices/${id}/`);
-    commit("setInvoiceById", data);
-    console.log(data);
+      .then(res => res.data)
+      .catch(() => {});
   },
 
   async fetchSingle({ commit }, id) {
