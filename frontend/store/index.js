@@ -289,8 +289,12 @@ export const actions = {
     commit("setUsers", data);
   },
 
-  async fetchUserById({ commit }, id) {
-    const { data } = await this.$axios.get(`/admin/users/${id}`);
-    commit("setUserById", data);
+  async fetchUserById({}, id) {
+    //const { data } = await this.$axios.get(`/admin/users/${id}`);
+    //commit("setUserById", data);
+
+    return await this.$axios.get(`/admin/users/${id}/`).then(res => {
+      return res.data
+    }).catch(() => {});
   }
 };
