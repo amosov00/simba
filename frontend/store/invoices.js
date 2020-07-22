@@ -102,6 +102,13 @@ export const actions = {
       .catch(() => {});
   },
 
+  async fetchAdminSingleInvoice({}, id) {
+    return await this.$axios
+      .get(`/admin/invoices/${id}/`)
+      .then(res => res.data)
+      .catch(() => {});
+  },
+
   async fetchSingle({ commit }, id) {
     return await this.$axios
       .get(`/invoices/${id}/`)
