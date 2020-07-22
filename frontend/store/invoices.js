@@ -88,7 +88,14 @@ export const actions = {
       });
   },
 
-  async fetchInvoices() {
+  async fetchInvoices({commit}) {
+    return await this.$axios
+      .get("/invoices/")
+      .then(res => { commit('setInvoices', res.data)})
+      .catch(() => {});
+  },
+
+  async fetchAdminInvoices({}) {
     return await this.$axios
       .get("/admin/invoices/")
       .then(res => res.data)

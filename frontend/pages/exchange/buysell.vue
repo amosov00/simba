@@ -116,6 +116,8 @@
           }
 
           if(single_res.status === 'waiting' || single_res.status === 'created') {
+            this.$store.commit('exchange/setTradeData', {prop: 'btc', value: single_res.btc_amount})
+            this.$store.commit('exchange/setTradeData', {prop: 'simba', value: single_res.simba_amount})
             this.tradeData.steps.current = 'BillPayment'
           }
           else if(single_res.status === 'processing') {
@@ -158,7 +160,6 @@
     data: () => {
       return {
         stepFail: null,
-        multi_props: {},
         operation: '',
         tradeData: {
           ethAddress: '',

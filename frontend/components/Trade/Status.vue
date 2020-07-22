@@ -6,7 +6,7 @@
         div.mt-3.is-size-6 {{$t('exchange.received_payment')}} {{ parseFloat(convert(received_payment_amount)) }} BTC
         div.mt-2 {{$t('exchange.transaction_hash')}}:
           =' '
-          a(:href="'https://etherscan.io/tx/' + tx_hash" target="_blank").link {{ tx_hash }}
+          a(:href="'https://www.blockchain.com/btc/tx/' + tx_hash" target="_blank").link {{ tx_hash }}
       div(v-else)
         div.mt-3.is-size-6 {{$t('exchange.sent_payment')}} {{ parseFloat(convert(received_payment_amount)) }} BTC
         div.mt-2 {{$t('exchange.transaction_hash')}}:
@@ -54,7 +54,8 @@
       if(this.isBuy) {
         if(res.btc_txs.length > 0) {
           this.setCurrentConfirms(res.btc_txs[0].confirmations)
-          this.tx_hash = res.eth_tx_hashes[0] || ''
+          //this.tx_hash = res.eth_tx_hashes[0] || ''
+          this.tx_hash = res.btc_txs[0].hash
         }
       } else {
         if(res.eth_txs.length > 0) {
