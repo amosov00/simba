@@ -136,9 +136,9 @@
 
         if(this.isBuy) { // Buy
 
-          if(this.check.target_btc_address) {
+          /*if(this.check.target_btc_address) {
             this.btc_address_fetched = true
-          }
+          }*/
 
           if(this.check.btc_txs.length > 0) {
             this.goneToNextStep = true
@@ -170,7 +170,20 @@
         if(this.updated_invoice_data.status !== 'waiting'
           && this.updated_invoice_data.status !== 'cancelled'
           && this.updated_invoice_data.status !== 'completed') {
-          await this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
+
+          // Confirm & set confirm_status
+          let confirm_status = this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
+
+          confirm_status.then(res => {
+            if(this.isBuy && res.target_btc_address) {
+              this.updated_invoice_data.target_btc_address = res.target_btc_address
+              this.btc_address_fetched = true
+            }
+          })
+        }
+
+        if(this.updated_invoice_data.status === 'waiting') {
+          this.btc_address_fetched = true
         }
 
         /*if(this.updated_invoice_data.target_btc_address && this.updated_invoice_data.status !== 'created') {

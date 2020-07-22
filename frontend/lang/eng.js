@@ -272,6 +272,8 @@ export default context => {
       account_changed_error: 'Error changing account data!'
     },
     su_invoices: {
+      invoices: 'Invoices',
+      invoice: 'Invoice',
       user_id: "User ID",
       status: "Status",
       invoice_type: "Operation",
@@ -290,6 +292,7 @@ export default context => {
       btc_txs: "BTC transactions",
       not_available: "N/A",
       empty: "Empty",
+      sst_tx_hashes: 'SST transaction hashes'
     }
   };
 
