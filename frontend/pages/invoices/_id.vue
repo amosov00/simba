@@ -9,7 +9,10 @@
       div.flex-1
         div(v-if="Array.isArray(el)")
           div(v-if="el.length > 0")
-            div(v-for="(item, i) in el" :key="i") {{ item }}
+            div(v-for="(item, i) in el" :key="i")
+              div(v-if="typeof item === 'object'") -
+                //--div(v-for="(value, key) in item") {{key}}: {{value}}
+              div(v-else) {{ item }}
           div(v-else) {{ $t(`su_invoices.empty`) }}
         div(v-else)
           div(v-if="el === null") {{ $t(`su_invoices.not_available`) }}
@@ -28,7 +31,7 @@ export default {
   mixins: [formatDate, formatCurrency],
 
   async asyncData({store, route}) {
-    const invoice = await store.dispatch('invoices/fetchSingle', route.params.id)
+    const invoice = await store.dispatch('invoices/fetchAdminSingleInvoice', route.params.id)
 
     return {
       invoice
