@@ -17,10 +17,10 @@ class BaseMongoCRUD(ABC):
     @classmethod
     async def find_by_id(cls, _id: Union[str, ObjectId], raise_404: bool = False, **kwargs):
         obj = await cls.db[cls.collection].find_one({"_id": ObjectId(_id)}, **kwargs)
-        if obj or not raise_404:
-            return obj
-        else:
+        if not obj and raise_404:
             raise HTTPException(HTTPStatus.NOT_FOUND, "object is not found")
+        else:
+            return obj
 
     @classmethod
     async def find_one(cls, query: dict, **kwargs):

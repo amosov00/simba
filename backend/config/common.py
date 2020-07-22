@@ -15,4 +15,6 @@ API_HOST = getenv("API_HOST", "0.0.0.0")
 API_PORT = getenv("API_PORT", 4000)
 DEBUG = getenv("DEBUG") == "True"
 
+SIMBA_SUPPORT_EMAIL = getenv("SIMBA_SUPPORT_EMAIL")
+
 ALLOWED_ORIGINS = ["*"]

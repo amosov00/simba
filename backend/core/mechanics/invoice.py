@@ -137,7 +137,10 @@ class InvoiceMechanics(CryptoValidation):
     ):
         self._raise_exception_if_exists()
         eth_tx_hash = await SimbaWrapper().issue_tokens(
-            self.invoice.target_eth_address, incoming_btc=incoming_btc, btc_tx_hash=transaction.hash
+            customer_address=self.invoice.target_eth_address,
+            incoming_btc=incoming_btc,
+            btc_tx_hash=transaction.hash,
+            invoice=self.invoice
         )
         transaction.simba_tokens_issued = True
         await BTCTransactionCRUD.update_or_insert({"hash": transaction.hash}, transaction.dict())
@@ -198,7 +201,8 @@ class InvoiceMechanics(CryptoValidation):
 
             eth_tx_hash = await SimbaWrapper().redeem_tokens(
                 btc_outcoming_without_fee,
-                new_transaction.hash
+                new_transaction.hash,
+                invoice=self.invoice
             )
             self.invoice.add_hash("eth", eth_tx_hash)
 
