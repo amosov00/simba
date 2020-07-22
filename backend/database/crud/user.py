@@ -37,10 +37,6 @@ class UserCRUD(BaseMongoCRUD):
     collection: str = "users"
 
     @classmethod
-    async def find_by_id(cls, _id: Union[str, ObjectId], **kwargs) -> Optional[dict]:
-        return await super().find_one(query={"_id": to_objectid(_id)}) if _id else None
-
-    @classmethod
     async def find_by_email(cls, email: str) -> Optional[dict]:
         return await super().find_one(query={"email": email}) if email else None
 

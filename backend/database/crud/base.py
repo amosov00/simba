@@ -1,5 +1,6 @@
 from abc import ABC
 from http import HTTPStatus
+from typing import Union
 
 from bson import ObjectId
 from fastapi import HTTPException
@@ -14,7 +15,7 @@ class BaseMongoCRUD(ABC):
     collection = NotImplemented
 
     @classmethod
-    async def find_by_id(cls, _id: str, raise_404: bool = False, **kwargs):
+    async def find_by_id(cls, _id: Union[str, ObjectId], raise_404: bool = False, **kwargs):
         obj = await cls.db[cls.collection].find_one({"_id": ObjectId(_id)}, **kwargs)
         if obj or not raise_404:
             return obj
