@@ -4,7 +4,7 @@
     img.balance__img(v-if="!showBtc" src="../assets/images/bitcoin-min-disabled.svg" @click="setBtc")
     img.balance__img(v-if="showTether" src="../assets/images/tether.svg" @click="setTether")
     img.balance__img(v-if="!showTether" src="../assets/images/tether-disabled.svg" @click="setTether")
-    span.balance__amount(v-if="showBtc") {{btcFormat(btcBalance)}} BTC
+    span.balance__amount(v-if="showBtc") {{ btcBalance }} BTC
     span.balance__amount(v-else-if="showTether") {{simbaFormat(tetherBalance)}} USDT
 </template>
 
@@ -35,7 +35,7 @@ export default {
       return (((this.simbaBalance * 1) / 100000000) * this.btcPrice).toFixed(2);
     },
     btcBalance() {
-      return (this.simbaBalance * 1) / 100000000;
+      return ((this.simbaBalance * 1) / 100000000).toFixed(4);
     }
   },
   async created() {

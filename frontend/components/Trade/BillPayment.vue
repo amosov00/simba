@@ -11,9 +11,13 @@
             = ' '
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
-            span {{ btc_address }}
-            CopyToClipboard(:value_to_copy="btc_address").ml-2
-            TradeQRCode(:qrcode_value="btc_address" :amount="parseFloat(tradeData.btc)").ml-1
+          div.flex-1.is-flex.align-items-center
+            template(v-if="btc_address_fetched")
+              span.text-large {{ btc_address }}
+              CopyToClipboard(:value_to_copy="btc_address").ml-2
+              TradeQRCode(:qrcode_value="btc_address" :amount="parseFloat(tradeData.btc)").ml-1
+            b-skeleton(width="75%" size="is-large" :active="!btc_address_fetched").simba-skeleton
+          //--div(v-if="btc_address_fetched").is-flex.align-items-center
         div.is-flex.align-items-center.mt-2
           img(src="@/assets/images/logo_sm.png").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
@@ -100,7 +104,8 @@
       countdown: null,
       goneToNextStep: false,
       confirmInterval: null,
-      disablePayBtn: false
+      disablePayBtn: false,
+      btc_address_fetched: false
     }),
     methods: {
       truncateEthAddress(address) {
@@ -130,6 +135,11 @@
         this.check = await this.$store.dispatch('invoices/fetchSingle', this.created_invoice_id)
 
         if(this.isBuy) { // Buy
+
+          if(this.check.target_btc_address) {
+            this.btc_address_fetched = true
+          }
+
           if(this.check.btc_txs.length > 0) {
             this.goneToNextStep = true
             this.stopCountdown();

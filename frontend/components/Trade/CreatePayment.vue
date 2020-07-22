@@ -75,9 +75,9 @@
     },
 
     methods: {
-      async checkBitcoinAddress(id) {
+      /*async checkBitcoinAddress(id) {
         return await this.$store.dispatch('invoices/fetchSingle', id)
-      },
+      },*/
 
       async confirm() {
 
@@ -96,7 +96,24 @@
         this.$store.commit('exchange/setTradeData', {prop: 'invoice_id', value: created_invoice._id})
 
         if(this.isBuy) {
-          this.check_btc_address_interval = setInterval(async () => {
+          let data_for_update = {
+            id: created_invoice._id,
+            eth_address: this.tradeData.eth_address,
+            simba_amount: (this.tradeData.btc * 100000000).toFixed(0),
+            btc_amount: (this.tradeData.btc * 100000000).toFixed(0)
+          }
+
+          // Update invoice with amounts
+          let updated_invoice_res = await this.$store.dispatch('invoices/updateTransaction', data_for_update)
+
+          // Add invoice id to url, go to next step
+
+          this.btn_loading = false;
+          if(updated_invoice_res) {
+            this.$nuxt.$router.push({ path: '/exchange/buysell', query: {id: created_invoice._id }})
+          }
+
+          /*this.check_btc_address_interval = setInterval(async () => {
             let invoice = await this.checkBitcoinAddress(created_invoice._id)
 
             if(invoice.target_btc_address) {
@@ -118,14 +135,14 @@
                 //this.$parent.$emit('nextStep')
               }
             }
-          }, 3000)
+          }, 3000)*/
         } else {
           let data_for_update = {
             id: created_invoice._id,
             btc_address: this.tradeData.btc_redeem_wallet,
             eth_address: this.tradeData.eth_address,
             simba_amount: this.tradeData.simba,
-            btc_amount: this.tradeData.btc * 100000000
+            btc_amount: (this.tradeData.btc * 100000000).toFixed(0)
           }
           // Update invoice with amounts
           let updated_invoice_res = await this.$store.dispatch('invoices/updateTransaction', data_for_update)

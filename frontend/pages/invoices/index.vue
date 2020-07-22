@@ -26,7 +26,7 @@
     middleware: ["adminRequired"],
     mixins: [formatDate, formatCurrency],
     async asyncData({store}) {
-      const res = await store.dispatch('invoices/fetchInvoices')
+      const res = await store.dispatch('invoices/fetchAdminInvoices')
 
       res.forEach(el => {
         el.created_at = moment(el.created_at).utc().valueOf()
