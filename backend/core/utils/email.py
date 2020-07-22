@@ -1,5 +1,6 @@
 import smtplib
 from http import HTTPStatus
+from typing import Literal
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from urllib.parse import urlencode
@@ -8,8 +9,11 @@ from fastapi import HTTPException
 from sentry_sdk import capture_exception, capture_message
 import httpx
 
-from config import EMAIL_LOGIN, EMAIL_PASSWORD, EMAIL_PORT, EMAIL_SERVER, HOST_URL
-from config import MAILGUN_API_KEY, MAILGUN_DOMAIN_NAME, MAILGUN_MESSAGE_LINK
+from schemas import InvoiceInDB
+from config import (
+    EMAIL_LOGIN, EMAIL_PASSWORD, EMAIL_PORT, EMAIL_SERVER, HOST_URL, SIMBA_SUPPORT_EMAIL,
+    MAILGUN_API_KEY, MAILGUN_DOMAIN_NAME, MAILGUN_MESSAGE_LINK,
+)
 
 
 class Email:
@@ -94,10 +98,10 @@ class MailGunEmail:
             params = {f"{method}_code": code}
             return f"{HOST_URL}recover?{urlencode(params)}"
 
-    def create_message(self, to: str, body: str) -> dict:
+    def create_message(self, to: str, body: str, subject: str = "Simba verification message") -> dict:
         msg = {
             "from": f"Simba Stablecoin {self.email_from}",
-            "subject": "Simba verification message",
+            "subject": subject,
             "to": to,
             "html": body,
         }
@@ -119,8 +123,10 @@ class MailGunEmail:
                 raise HTTPException(HTTPStatus.BAD_REQUEST, f"Error while sending email, {e}")
 
         if email_send.json().get("message") != "Queued. Thank you.":
-            capture_message(f"Error while sending email, response - {str(email_send.json())} ")
-            raise HTTPException(HTTPStatus.BAD_REQUEST, f"Error while sending email, {str(email_send.json())}")
+            capture_message(f"Error while sending email, response - {str(email_send.json())}", level="error")
+            raise HTTPException(
+                HTTPStatus.BAD_REQUEST, f"Error while sending email, {str(email_send.json())}"
+            )
 
         return None
 
@@ -147,4 +153,47 @@ class MailGunEmail:
 
         await self._send_message(msg)
 
+        return None
+
+    async def send_message_to_support(
+            self,
+            error_type: Literal["simba_issue", "simba_redeem", "sst_transfer", "btc"],
+            **kwargs
+    ) -> None:
+        assert SIMBA_SUPPORT_EMAIL is not None
+        assert error_type not in ("simba", "sst", "btc")
+
+        if error_type == "simba_issue" or error_type == "sst_transfer":
+            invoice: InvoiceInDB = kwargs["invoice"]
+            customer_address: str = kwargs["customer_address"]
+            amount: int = kwargs["amount"]
+            body = f"<b>Error</b> while executing {' '.join(error_type.split('_'))}\n" \
+                   f"Invoice ID: {str(invoice.id) if invoice else '?'}\n" \
+                   f"Client address: {customer_address}\n" \
+                   f"Amount: {amount}\n"
+        elif error_type == "simba_redeem":
+            invoice: InvoiceInDB = kwargs["invoice"]
+            amount: int = kwargs["amount"]
+            body = f"<b>Error</b> while executing {' '.join(error_type.split('_'))}\n" \
+                   f"Invoice ID: {str(invoice.id) if invoice else '?'}\n" \
+                   f"Amount: {amount}\n"
+
+        elif error_type == "btc":
+            hot_wallet_balance = kwargs["hot_wallet_balance"]
+            btc_amount_to_send = kwargs["btc_amount_to_send"]
+            invoices_in_queue = kwargs["invoices_in_queue"]
+            total_btc_amount_to_send = kwargs["total_btc_amount_to_send"]
+            body = f"<b>Warning</b> while sending BTC from hot wallet\n" \
+                   f"Hot wallet balance: {hot_wallet_balance}\n" \
+                   f"BTC amount to send {btc_amount_to_send}; Total BTC amount to send {total_btc_amount_to_send}\n" \
+                   f"Invoices in queue: {invoices_in_queue}\n"
+        else:
+            body = "Unknown error"
+
+        msg = self.create_message(
+            SIMBA_SUPPORT_EMAIL,
+            body,
+            subject="Warning/Error from Simba"
+        )
+        await self._send_message(msg)
         return None

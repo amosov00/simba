@@ -24,7 +24,7 @@ __all__ = [
     "INVOICE_MODEL_EXCLUDE_FIELDS",
 ]
 
-INVOICE_MODEL_EXCLUDE_FIELDS = frozenset(("validation_md5_hash",))
+INVOICE_MODEL_EXCLUDE_FIELDS = frozenset(("sst_tx_hashes",))
 
 
 class InvoiceStatus:
@@ -65,21 +65,21 @@ class Invoice(BaseModel):
     # Connected transactions
     eth_tx_hashes: List[str] = Field(default=[])
     btc_tx_hashes: List[str] = Field(default=[])
+    sst_tx_hashes: List[str] = Field(default=[])
 
     # Datetimes
     created_at: datetime = Field(default_factory=datetime.utcnow, description="UTC")
     finised_at: Optional[datetime] = Field(default=None, description="Update when completed status")
 
-    # Validate transaction before processing
-    validation_md5_hash: str = Field(default="")
-
-    def add_hash(self, crypto: Literal["eth", "btc"], hash_: str) -> None:
+    def add_hash(self, crypto: Literal["eth", "btc", "sst"], hash_: str) -> None:
         if not hash_:
             return None
         if crypto == "eth":
             self.eth_tx_hashes = list({*self.eth_tx_hashes, hash_})
         elif crypto == "btc":
             self.btc_tx_hashes = list({*self.btc_tx_hashes, hash_})
+        elif crypto == "sst":
+            self.sst_tx_hashes = list({*self.sst_tx_hashes, hash_})
 
 
 class InvoiceInDB(Invoice):

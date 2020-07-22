@@ -7,6 +7,7 @@ from api.dependencies import get_user
 from celery_app.tasks import fetch_and_proceed_simba_contract
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
 from core.mechanics.crypto import SimbaWrapper, SSTWrapper, BitcoinWrapper
+from core.utils.email import MailGunEmail
 from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD, ReferralCRUD
 from schemas import BlockCypherWebhookInDB, User, ReferralInDB, InvoiceInDB
 
@@ -69,6 +70,13 @@ async def debug_get():
 
 @router.get("/")
 async def debug_get():
+    inst = MailGunEmail()
+    msg = inst.create_message(
+        "nikita@elastoo.com",
+        "Test message\n"
+        "From local"
+    )
+    await MailGunEmail()._send_message(msg)
     return True
 
 
