@@ -1,10 +1,13 @@
 <template lang="pug">
   div.main-content
     h1.title.is-size-4 xPub
-    div.mt-4.xpub
+    div.mt-4.xpub.position-relative
       div.xpub__block(v-for="(item, i) in xpub" :key="i" @click="update(item)")
+        img(:src="require(`@/assets/images/${flagImages[item.title.toLowerCase()]}`)").xpub__image
         div.xpub__title {{ item.title }}
-        div.xpub__status(:class="{'xpub__status--active': item.is_active}") {{ item.is_active ? 'Active' : 'Not active' }}
+        div.xpub__status(:class="{'xpub__status--active': item.is_active}")
+          |{{ item.is_active ? $i18n.t('xpub.status_active') : $i18n.t('xpub.status_inactive') }}
+      b-loading(:active.sync="isLoading" :is-full-page="false")
 </template>
 
 <script>
@@ -13,13 +16,21 @@
     layout: "main",
     middleware: ["adminRequired"],
 
-
     computed: {
       xpub() {
         return this.$store.getters['xpub/xpubList']
       }
     },
 
+    data: () => ({
+      isLoading: false,
+      flagImages: {
+        uae: 'uae.svg',
+        liechtenstein: 'liechtenstein.png',
+        newzealand: 'new-zeland.png',
+        switzerland: 'switzerland.svg',
+      }
+    }),
 
     methods: {
       async update(xpub) {
@@ -31,12 +42,22 @@
           }
         }
 
-        if(await this.$store.dispatch('xpub/btcXpubUpdateSingle', data_to_send)) {
-          this.$buefy.toast.open({message:'success', type:'is-primary'})
-          await this.$store.dispatch("xpub/btcXpubFetchAll")
-        } else {
-          this.$buefy.toast.open({message:'error', type:'is-danger'})
-        }
+        this.$buefy.dialog.confirm({
+          title: this.$i18n.t('xpub.confirm_your_action'),
+          message: this.$i18n.t('xpub.confirm_change_status'),
+          cancelText: this.$i18n.t('other.cancel'),
+          confirmText: this.$i18n.t('other.confirm'),
+          onConfirm: async () => {
+            this.isLoading = true
+            if(await this.$store.dispatch('xpub/btcXpubUpdateSingle', data_to_send)) {
+              this.$buefy.toast.open({message: this.$i18n.t('xpub.status_changed'), type:'is-primary'})
+              await this.$store.dispatch("xpub/btcXpubFetchAll")
+            } else {
+              this.$buefy.toast.open({message: this.$i18n.t('xpub.something_went_wrong'), type:'is-danger'})
+            }
+            this.isLoading = false
+          }
+        })
       }
     },
 
@@ -47,9 +68,15 @@
 </script>
 
 <style lang="sass">
+.dialog .modal-card
+  min-width: 400px
+
 .xpub
   display: flex
   flex-wrap: wrap
+  &__image
+    margin-bottom: 10px
+    max-height: 16px
   &__status
     margin-top: 5px
     &--active
