@@ -2,7 +2,7 @@
   header.header
     div.columns.is-flex.align-items-center.mb-zero
       div.column.is-6.is-flex.align-items-center
-        n-link(to='/')
+        n-link(to='/exchange/')
           img.logo(src="~/assets/images/SIMBA.svg")
         div
           div.logo-text SIMBA
