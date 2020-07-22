@@ -49,15 +49,26 @@
       this.min_confirms = process.env.NODE_ENV === 'develop' || 'development' ? 1 : 3
 
       let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id);
-      this.received_payment_amount = res.btc_amount_proceeded
+
 
       if(this.isBuy) {
+
+        const btc_addr = res.target_btc_address
+
+        let found = res.btc_txs[0].outputs.find(el => {
+          return el.addresses.indexOf(btc_addr) !== -1
+        })
+
+        this.received_payment_amount = found.value
+
         if(res.btc_txs.length > 0) {
           this.setCurrentConfirms(res.btc_txs[0].confirmations)
           //this.tx_hash = res.eth_tx_hashes[0] || ''
           this.tx_hash = res.btc_txs[0].hash
         }
       } else {
+        this.received_payment_amount = res.btc_amount_proceeded
+
         if(res.eth_txs.length > 0) {
           this.setCurrentConfirms(res.btc_txs[0].confirmations)
           this.tx_hash = res.btc_txs[0].hash || ''
