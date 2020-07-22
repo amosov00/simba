@@ -1,6 +1,21 @@
 <template lang="pug">
   div.main-content
-    h1.title.is-size-4 Invoices by ID — {{this.$route.params.id}}
+    div.is-size-4.mb-3
+      strong Invoice
+      =' — '
+      span {{this.$route.params.id}}
+    div(v-for="(el, key) in invoice").is-flex.invoice-field
+      div.invoice-field__label {{ $t(`su_invoices.${key}`) }}:
+      div.flex-1
+        div(v-if="Array.isArray(el)")
+          div(v-if="el.length > 0")
+            div(v-for="(item, i) in el" :key="i") {{ item }}
+          div(v-else) {{ $t(`su_invoices.empty`) }}
+        div(v-else)
+          div(v-if="el === null") {{ $t(`su_invoices.not_available`) }}
+          div(v-else)
+            div(v-if="key === 'status'") {{ $t(`exchange.statuses.${el}`)}}
+            div(v-else) {{ el }}
 </template>
 
 <script>
@@ -11,15 +26,25 @@ export default {
   layout: "main",
   middleware: ["adminRequired"],
   mixins: [formatDate, formatCurrency],
-  computed: {
-    invoiceById() {
-      return this.$store.getters['invoice/invoiceById']
+
+  async asyncData({store, route}) {
+    const invoice = await store.dispatch('invoices/fetchSingle', route.params.id)
+
+    return {
+      invoice
     }
-  },
-  created() {
-    this.$store.dispatch("invoices/fetchInvoiceById", this.$route.params.id);
   }
 };
 </script>
 
-<style lang="scss"></style>
+<style lang="sass">
+.invoice-field
+  margin-left: -10px
+  margin-right: -10px
+  padding: 10px
+  &__label
+    width: 300px
+    font-weight: 600
+  &:nth-child(even)
+    background-color: #FCFCFC
+</style>
