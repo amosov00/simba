@@ -155,7 +155,9 @@ class InvoiceMechanics(CryptoValidation):
         await self.update_invoice()
         user = await UserCRUD.find_by_id(self.invoice.user_id)
         user = User(**user)
-        asyncio.create_task(SSTWrapper().send_sst_to_referrals(user, self.invoice.btc_amount))
+        asyncio.create_task(
+            SSTWrapper(self.invoice).send_sst_to_referrals(user, self.invoice.btc_amount)
+        )
         return True
 
     async def _proceed_new_btc_tx_buy(
