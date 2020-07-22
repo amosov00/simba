@@ -1,7 +1,7 @@
 <template lang="pug">
   div.main-content
     h1.title.is-size-4 {{$t('su_invoices.invoices')}}
-    b-table(:data="invoices" paginated per-page="30" default-sort="created_at" default-sort-direction="desc")
+    b-table(:data="invoices" paginated per-page="20" default-sort="created_at" default-sort-direction="desc")
       template(slot-scope="props")
         b-table-column(field="created_at" label="Date" width="150" sortable) {{ timestampFromUtc(props.row.created_at) }}
         b-table-column(field="_id" label="ID" width="50" sortable)
