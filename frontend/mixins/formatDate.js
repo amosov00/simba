@@ -12,7 +12,7 @@ export default {
     timestampFromUtc(timestamp) {
       return moment(timestamp)
         .utc()
-        .format("DD MMMM YYYY HH:mm:ss");
+        .format("DD.MM.YYYY HH:mm:ss");
     },
     readableDate(timestamp) {
       return moment

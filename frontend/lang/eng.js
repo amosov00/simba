@@ -244,6 +244,25 @@ export default context => {
       our_mission: "Our mission",
       mission:
         'The common goal of our team is to provide the best service for the followers and supporters of cryptocurrencies and the whole blockchain industry. Each of us had a development path in the crypto industry in his or her own way. We were brought together by a common belief that we are able to show the world a unique product that will serve people. That is why it is so reliable, transparent and convenient that every user can be proud to say "I store my Bitcoins in the SIMBA storage". The cold SIMBA storage means a secure future with no worries. Our mission is to maintain these standards at the highest level, grow and soar to new heights.'
+    },
+    account_page: {
+      _id: 'ID',
+      email: 'Email',
+      email_is_active: 'Email is activated',
+      verification_code: 'Verification code',
+      recover_code: 'Recovery code',
+      secret_2fa: '2FA secret',
+      two_factor: '2FA enabled',
+      first_name: 'First name',
+      last_name: 'Last name',
+      user_btc_addresses: 'Bitcoin address list',
+      user_eth_addresses: 'Ethereum address list',
+      btc_address: 'BTC address',
+      is_staff: 'Is staff',
+      is_superuser: 'Is superuser',
+      is_active: 'Is active',
+      terms_and_condition: 'Accepted terms and condition',
+      created_at: 'Date of registration'
     }
   };
 
