@@ -10,7 +10,7 @@ __all__ = ["BTCxPub", "BTCxPubInDB", "BTCxPubUpdate"]
 
 class BTCxPub(BaseModel):
     title: str = Field(...)
-    xpub: SecretStr = Field(...)
+    xpub: SecretStr = Field(default=None)
     is_active: bool = Field(default=True)
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: Optional[datetime] = Field(default=None)

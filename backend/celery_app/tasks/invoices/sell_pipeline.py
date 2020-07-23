@@ -32,7 +32,6 @@ async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
 
         invoice = InvoiceInDB(**invoice)
         user = await UserCRUD.find_by_id(invoice.id)
-        logging.debug(f"Balance: {hot_wallet_info.balance}\nInvoice {invoice.id}")
         if invoice.simba_amount_proceeded >= hot_wallet_info.balance:
             total_btc_amount_to_send = sum([
                 i["simba_amount_proceeded"] for i in proceeding_invoices if i.get("simba_amount_proceeded")

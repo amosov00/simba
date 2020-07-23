@@ -55,7 +55,6 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
                 resp = await client.get(url, params=params)
 
         if resp.is_error:
-            logging.debug(resp.text)
             capture_message(
                 f"Invalid request to BlockCypher; status: {resp.status_code}; url: {url}; error {resp.text}",
                 level="info"
