@@ -3,7 +3,7 @@ import sys
 
 import sentry_sdk
 
-from config import ENV, IS_PRODUCTION, BTC_COLD_WALLETS
+from config import ENV, IS_PRODUCTION, BTC_COLD_WALLETS, BTC_COLD_XPUB_SWISS
 from database.crud import UserCRUD, BTCxPubCRUD
 from database.init import mongo_client
 from schemas import UserCreationNotSafe
@@ -44,14 +44,22 @@ async def prepopulate_users():
 
 
 async def prepopulate_xpubs():
-    for wallet in BTC_COLD_WALLETS:
-        if not await BTCxPubCRUD.find_by_title(wallet.title):
-            await BTCxPubCRUD.insert_one(
-                payload={
-                    **wallet.dict(exclude={"xpub"}),
-                    "xpub": wallet.xpub.get_secret_value(),
-                }
-            )
+    # for wallet in BTC_COLD_WALLETS:
+    #     if not await BTCxPubCRUD.find_by_title(wallet.title):
+    #         await BTCxPubCRUD.insert_one(
+    #             payload={
+    #                 **wallet.dict(exclude={"xpub"}),
+    #                 "xpub": wallet.xpub.get_secret_value(),
+    #             }
+    #         )
+
+    if not await BTCxPubCRUD.find_by_title(BTC_COLD_XPUB_SWISS.title):
+        await BTCxPubCRUD.insert_one(
+                    payload={
+                        **BTC_COLD_XPUB_SWISS.dict(exclude={"xpub"}),
+                        "xpub": BTC_COLD_XPUB_SWISS.xpub.get_secret_value(),
+                    }
+                )
     return True
 
 
