@@ -1,10 +1,10 @@
-import asyncio
+import asyncio, logging
 from typing import List
 
 from fastapi import APIRouter, Depends
 
 from api.dependencies import get_user
-from celery_app.tasks import fetch_and_proceed_simba_contract
+from celery_app.tasks import send_btc_to_proceeding_invoices
 from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
 from core.mechanics.crypto import SimbaWrapper, SSTWrapper, BitcoinWrapper
 from core.utils.email import MailGunEmail
@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.get("/cron/")
 async def debug_get():
-    await fetch_and_proceed_simba_contract()
+    await send_btc_to_proceeding_invoices()
     return True
 
 
@@ -70,13 +70,6 @@ async def debug_get():
 
 @router.get("/")
 async def debug_get():
-    inst = MailGunEmail()
-    msg = inst.create_message(
-        "nikita@elastoo.com",
-        "Test message\n"
-        "From local"
-    )
-    await MailGunEmail()._send_message(msg)
     return True
 
 
