@@ -5,15 +5,14 @@ from urllib.parse import urlencode, urljoin
 from fastapi import APIRouter, HTTPException, Depends, Body, Path
 
 from api.dependencies import get_user
-from config import HOST_URL
+from config import HOST_URL, SST_CONTRACT
 from core.mechanics.referrals import ReferralMechanics
-from database.crud import UserCRUD
+from database.crud import UserCRUD, EthereumTransactionCRUD
 from schemas import (
     UserLogin,
     User,
     UserLoginResponse,
     UserCreationSafe,
-    UserUpdateSafe,
     UserChangePassword,
     UserVerifyEmail,
     SuccessResponse,
@@ -107,7 +106,13 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
 @router.get("/referrals/", response_model=UserReferralsResponse)
 async def account_referrals_info(user: User = Depends(get_user)):
     referrals = await ReferralMechanics(user).fetch_referrals()
-    transactions = []
+    transactions = await EthereumTransactionCRUD.find({
+        "contract": SST_CONTRACT.title, "user_id": user.id,
+    })
+
+    transactions = [
+        {"transactionHash": tx["transactionHash"], "amount": tx["args"]["value"]} for tx in transactions
+    ]
 
     return {"referrals": referrals, "transactions": transactions}
 

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Query
 from pydantic import parse_obj_as
 
 from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
-from schemas import TransparencyTransaction, InvoiceStatus, InvoiceType, BTCTransactionOutputs, BTCAddressInDB
+from schemas import TransparencyTransaction, InvoiceStatus, InvoiceType, BTCTransactionOutputs
 from core.mechanics import InvoiceMechanics
 from config import BTC_COLD_WALLETS, BTC_HOT_WALLET_ADDRESS
 
