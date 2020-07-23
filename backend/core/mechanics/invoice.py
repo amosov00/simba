@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from datetime import datetime
 from http import HTTPStatus
 from typing import Union, List, Optional
@@ -174,7 +173,6 @@ class InvoiceMechanics(CryptoValidation):
             self._raise_exception_if_exists()
 
         if all([
-            bool(new_transaction.block_height),
             new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS,
             transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
             self.invoice.status == InvoiceStatus.WAITING
@@ -289,11 +287,6 @@ class InvoiceMechanics(CryptoValidation):
         elif isinstance(transaction, (EthereumTransaction, EthereumTransactionInDB)):
             return await self.proceed_new_eth_transaction(transaction)
 
-    async def update_invoice(self):
-        return await InvoiceCRUD.update_one(
-            {"_id": self.invoice.id}, self.invoice.dict(exclude={"id"}, exclude_unset=True)
-        )
-
     async def send_bitcoins(self):
         self._validate_for_sending_btc()
 
@@ -322,3 +315,8 @@ class InvoiceMechanics(CryptoValidation):
             )
         )
         return True
+
+    async def update_invoice(self):
+        return await InvoiceCRUD.update_one(
+            {"_id": self.invoice.id}, self.invoice.dict(exclude={"id"})
+        )

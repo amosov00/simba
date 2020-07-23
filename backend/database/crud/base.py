@@ -27,8 +27,8 @@ class BaseMongoCRUD(ABC):
         return await cls.db[cls.collection].find_one(filter=query, **kwargs)
 
     @classmethod
-    async def find_many(cls, query: dict, options: dict = None):
-        return [i async for i in cls.db[cls.collection].find(query, options)]
+    async def find_many(cls, query: dict, **kwargs):
+        return [i async for i in cls.db[cls.collection].find(query, **kwargs)]
 
     @classmethod
     async def insert_one(cls, payload: dict, options: dict = None):
