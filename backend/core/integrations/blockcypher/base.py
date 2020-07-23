@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from sentry_sdk import capture_message
 from pycoin.services.blockcypher import BlockcypherProvider
 from pycoin.symbols import btc, tbtx
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from config import IS_PRODUCTION, BLOCKCYPHER_TOKEN, BLOCKCYPHER_WALLET_TITLE
 
@@ -25,6 +26,7 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
         self.network = btc.network if IS_PRODUCTION else tbtx.network
         super().__init__(self.api_token, self.netcode)
 
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(3))
     async def request(
         self,
         endpoint: str,
@@ -52,8 +54,11 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
                 resp = await client.get(url, params=params)
 
         if resp.is_error:
-            capture_message(f"Invalid request to BlockCypher; status: {resp.status_code}; url: {url}")
-            raise HTTPException(HTTPStatus.BAD_REQUEST, resp.json().get("error"))
+            capture_message(
+                f"Invalid request to BlockCypher; status: {resp.status_code}; url: {url}; error {resp.text}",
+                level="info"
+            )
+            raise HTTPException(HTTPStatus.BAD_REQUEST, resp.text)
 
         if resp.text:
             return resp.json()

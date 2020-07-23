@@ -8,6 +8,7 @@ from urllib.parse import urlencode
 from fastapi import HTTPException
 from sentry_sdk import capture_exception, capture_message
 import httpx
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from schemas import InvoiceInDB
 from config import (
@@ -111,13 +112,13 @@ class MailGunEmail:
         }
         return msg
 
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(3))
     async def _send_message(self, msg: dict) -> None:
         async with httpx.AsyncClient() as client:
             try:
-                email_send = (
+                resp = (
                     await client.post(
                         self.send_message_link,
-
                         auth=("api", self.api_key),
                         data=msg,
                     )
@@ -126,13 +127,13 @@ class MailGunEmail:
                 capture_exception(e)
                 raise HTTPException(HTTPStatus.BAD_REQUEST, f"Error while sending email, {e}")
 
-        if email_send.json().get("message") != "Queued. Thank you.":
-            capture_message(f"Error while sending email, response - {str(email_send.json())}", level="error")
+        if resp.text and resp.json().get("message") != "Queued. Thank you.":
+            return None
+        else:
+            capture_message(f"Error while sending email, response - {str(resp.json())}", level="error")
             raise HTTPException(
-                HTTPStatus.BAD_REQUEST, f"Error while sending email, {str(email_send.json())}"
+                HTTPStatus.BAD_REQUEST, f"Error while sending email, {str(resp.json())}"
             )
-
-        return None
 
     async def send_verification_code(self, to: str, code: str) -> None:
 
