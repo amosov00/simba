@@ -121,11 +121,9 @@
             this.tradeData.steps.current = 'BillPayment'
           }
           else if(single_res.status === 'processing') {
-            if(single_res.btc_txs.length > 0) {
-              if(single_res.btc_txs[0].simba_tokens_issued) {
-                this.tradeData.steps.current = 'Status'
-              }
-            } else {
+            if(single_res.btc_txs.length > 0 && single_res.eth_txs.length > 0) {
+              this.tradeData.steps.current = 'Status'
+            } else if (single_res.eth_txs.length > 0){
               this.tradeData.steps.current = 'SimbaRecieved'
             }
           }
