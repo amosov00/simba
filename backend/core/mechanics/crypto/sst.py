@@ -64,17 +64,20 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
             capture_message(f"Referral obj is not found for user {user.email}", level="error")
             return False
 
-        for i in range(1, 6):
-            if not referral.get(f"ref{i}"):
+        for level in range(1, 6):
+            if not referral.get(f"ref{level}"):
                 continue
-            current_user = await UserCRUD.find_by_id(ObjectId(referral[f"ref{i}"]))
-            wallet: str = current_user["user_eth_addresses"][0] \
-                if current_user.get("user_eth_addresses") else None
 
-            if wallet is not None:
+            current_user = await UserCRUD.find_by_id(ObjectId(referral[f"ref{level}"]))
+
+            current_user = User(**current_user)
+
+            if current_user.user_eth_addresses:
+                customer_address = current_user.user_eth_addresses[0].address
+
                 tx_hash: str = await self._freeze_and_transfer(
-                    customer_address=wallet,
-                    amount=self._calculate_referrals_accurals(i, sst_tokens),
+                    customer_address=customer_address,
+                    amount=self._calculate_referrals_accurals(level, sst_tokens),
                 )
                 tx_hashes.add(tx_hash) if tx_hashes else None
                 await asyncio.sleep(5.0)
