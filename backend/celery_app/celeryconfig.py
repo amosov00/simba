@@ -44,7 +44,7 @@ app.conf.beat_schedule = {
     },
     "delete_unused_webhooks": {
         "task": "delete_unused_webhooks",
-        "schedule": crontab(minute="*/60"),
+        "schedule": crontab(minute="20", hour="*/3"),
         "args": ()
     },
     "fetch_and_proceed_sst_contract": {
