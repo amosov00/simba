@@ -4,7 +4,6 @@ from pydantic import Field
 
 from schemas.base import BaseModel, ObjectIdPydantic
 from schemas.user import UserReferralInfo
-from schemas.eth_transaction import EthereumTransactionReferral
 
 __all__ = ["Referral", "ReferralInDB", "UserReferralsResponse"]
 
@@ -22,6 +21,13 @@ class ReferralInDB(Referral):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
 
 
+class ReferralTransaction(BaseModel):
+    transactionHash: str = Field(...)
+    amount: int = Field(...)
+    email: str = Field(default=None)
+    level: int = Field(default=None)
+
+
 class UserReferralsResponse(BaseModel):
     referrals: List[UserReferralInfo] = Field(default=[])
-    transactions: List[EthereumTransactionReferral] = Field(default=[])
+    transactions: List[ReferralTransaction] = Field(default=[])

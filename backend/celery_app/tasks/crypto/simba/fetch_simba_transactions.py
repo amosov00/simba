@@ -20,9 +20,11 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
     """Синхронизация с Simba контрактом"""
     await EventsContractWrapper(SIMBA_CONTRACT).fetch_blocks_and_save()
     counter = 0
-    transactions = await EthereumTransactionCRUD.find(
-        {"contract": SIMBA_CONTRACT.title, "event": {"$in": SimbaContractEvents.ALL}, "invoice_id": None}
-    )
+    transactions = await EthereumTransactionCRUD.find({
+        "contract": SIMBA_CONTRACT.title,
+        "event": {"$in": SimbaContractEvents.ALL},
+        "invoice_id": None
+    })
 
     logging.info(f"Simba TX to proceed: {len(transactions)}")
 
