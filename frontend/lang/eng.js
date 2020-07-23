@@ -161,6 +161,7 @@ export default context => {
       invited: "Invited",
       your_ref_link: "Your partner link",
       your_ref_code: "Your partner code",
+      your_reward_address: 'Your ETH reward address',
       refs_empty: "You don't have invited users yet",
       how_to_get_code: {p1: "To get your partner code, ", p2: "add", p3: "your reward wallet"}
     },
