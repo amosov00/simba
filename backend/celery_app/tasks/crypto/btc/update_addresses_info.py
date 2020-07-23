@@ -32,14 +32,23 @@ async def fetch_empty_btc_addresses_info(self, *args, **kwargs):
 
         if new_btc_address_data.transactions_number != old_btc_address_data.transactions_number:
             new_btc_address_data.fetch_address = False
-            await BTCAddressCRUD.update_one({"_id": old_btc_address_data.id}, new_btc_address_data.dict())
+
+            await BTCAddressCRUD.update_one(
+                {"_id": old_btc_address_data.id},
+                new_btc_address_data.dict(exclude_defaults=True, exclude_unset=True)
+            )
+            counter += 1
         else:
             linked_invoice = await InvoiceCRUD.find_one({"_id": old_btc_address_data.invoice_id})
 
-            if not linked_invoice or (
-                    linked_invoice and linked_invoice.get("status") == InvoiceStatus.CANCELLED
-            ):
-                await BTCAddressCRUD.update_one({"_id": old_btc_address_data.id}, {"fetch_address": False})
+            if new_btc_address_data.transactions_number == 0 and \
+                    linked_invoice.get("status") == InvoiceStatus.CANCELLED:
+
+                new_btc_address_data.fetch_address = False
+                await BTCAddressCRUD.update_one(
+                    {"_id": old_btc_address_data.id},
+                    new_btc_address_data.dict(exclude_defaults=True, exclude_unset=True)
+                )
 
         # Wait to bypass blockcypher limitation
         await asyncio.sleep(0.5)

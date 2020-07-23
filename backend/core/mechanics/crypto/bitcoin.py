@@ -47,7 +47,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
 
         if address_info and save:
             await BTCAddressCRUD.update_or_create(
-                address_info.address, address_info.dict(exclude_none=True, exclude_unset=True)
+                address_info.address, address_info.dict(exclude_defaults=True, exclude_unset=True)
             )
 
         return address_info

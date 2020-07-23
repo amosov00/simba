@@ -1,4 +1,5 @@
 from typing import Literal, Union
+import logging
 from urllib.parse import urlencode, urljoin
 from http import HTTPStatus
 
@@ -18,7 +19,7 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
         self.api_url = (
             "https://api.blockcypher.com/v1/btc/main"
             if IS_PRODUCTION
-            else "https://api.blockcypher.com/v1/btc/test3"
+            else "https://api.blockcypher.com/v1/btc/main"
         )
 
         self.blockcypher_wallet_name = BLOCKCYPHER_WALLET_TITLE
@@ -54,6 +55,7 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
                 resp = await client.get(url, params=params)
 
         if resp.is_error:
+            logging.debug(resp.text)
             capture_message(
                 f"Invalid request to BlockCypher; status: {resp.status_code}; url: {url}; error {resp.text}",
                 level="info"
