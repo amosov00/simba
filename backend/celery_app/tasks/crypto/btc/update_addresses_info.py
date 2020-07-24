@@ -42,7 +42,7 @@ async def fetch_empty_btc_addresses_info(self, *args, **kwargs):
             linked_invoice = await InvoiceCRUD.find_one({"_id": old_btc_address_data.invoice_id})
 
             if new_btc_address_data.transactions_number == 0 and \
-                    linked_invoice.get("status") == InvoiceStatus.CANCELLED:
+                    (linked_invoice and linked_invoice.get("status") == InvoiceStatus.CANCELLED):
 
                 new_btc_address_data.fetch_address = False
                 await BTCAddressCRUD.update_one(
