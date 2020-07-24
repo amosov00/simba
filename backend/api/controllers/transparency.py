@@ -4,7 +4,7 @@ from fastapi import APIRouter, Query
 from pydantic import parse_obj_as
 
 from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
-from schemas import TransparencyTransaction, InvoiceStatus, InvoiceType, BTCTransactionOutputs, BTCAddressInDB
+from schemas import TransparencyTransaction, InvoiceStatus, InvoiceType, BTCTransactionOutputs
 from core.mechanics import InvoiceMechanics
 from config import BTC_COLD_WALLETS, BTC_HOT_WALLET_ADDRESS
 
@@ -16,26 +16,27 @@ router = APIRouter()
 @router.get("/")
 async def transparency_totals():
     response = {}
-    total_recieved = 0
-    total_paid_out = 0
 
-    cold_wallets_meta = await BTCAddressCRUD.aggregate(
-        [{"$group": {"_id": "$cold_wallet_title", "received": {"$sum": "$total_received"}}}]
-    )
-    invoices_meta = await InvoiceCRUD.aggregate(
+    cold_wallets_meta = await BTCAddressCRUD.aggregate([
+        {"$match": {"address": {"$ne": BTC_HOT_WALLET_ADDRESS}}},
+        {"$group": {"_id": "$cold_wallet_title", "received": {"$sum": "$total_received"}}}
+    ])
+
+    total_recieved = sum([i["received"] for i in cold_wallets_meta])
+
+    invoices_sell = await InvoiceCRUD.aggregate(
         [
-            {"$match": {"status": InvoiceStatus.COMPLETED}},
+            {"$match": {
+                "status": InvoiceStatus.COMPLETED,
+                "invoice_type": InvoiceType.SELL
+            }},
             {"$group": {
-                "_id": "$invoice_type",
+                "_id": None,
                 "btc_amount_proceeded": {"$sum": "$btc_amount_proceeded"},
             }},
         ]
     )
-    for i in invoices_meta:
-        if i["_id"] == InvoiceType.BUY:
-            total_recieved = i["btc_amount_proceeded"]
-        elif i["_id"] == InvoiceType.SELL:
-            total_paid_out = i["btc_amount_proceeded"]
+    total_paid_out = invoices_sell[0]["btc_amount_proceeded"] if invoices_sell else 0
 
     response.update(
         {
@@ -53,9 +54,9 @@ async def transparency_totals():
     return response
 
 
-@router.get("/transactions/")
+@router.get("/transactions/", response_model=List[TransparencyTransaction])
 async def transparency_transactions(
-        tx_type: Literal["received", "paidout"] = Query(..., alias="type")
+        tx_type: Literal["received", "paidout"] = Query(..., alias="type"),
 ):
     response = []
     invoices = await InvoiceCRUD.aggregate(

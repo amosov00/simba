@@ -1,5 +1,6 @@
 from abc import ABC
 from http import HTTPStatus
+from typing import Union
 
 from bson import ObjectId
 from fastapi import HTTPException
@@ -14,20 +15,20 @@ class BaseMongoCRUD(ABC):
     collection = NotImplemented
 
     @classmethod
-    async def find_by_id(cls, _id: str, raise_404: bool = False, **kwargs):
+    async def find_by_id(cls, _id: Union[str, ObjectId], raise_404: bool = False, **kwargs):
         obj = await cls.db[cls.collection].find_one({"_id": ObjectId(_id)}, **kwargs)
-        if obj or not raise_404:
-            return obj
-        else:
+        if not obj and raise_404:
             raise HTTPException(HTTPStatus.NOT_FOUND, "object is not found")
+        else:
+            return obj
 
     @classmethod
     async def find_one(cls, query: dict, **kwargs):
         return await cls.db[cls.collection].find_one(filter=query, **kwargs)
 
     @classmethod
-    async def find_many(cls, query: dict, options: dict = None):
-        return [i async for i in cls.db[cls.collection].find(query, options)]
+    async def find_many(cls, query: dict, **kwargs):
+        return [i async for i in cls.db[cls.collection].find(query, **kwargs)]
 
     @classmethod
     async def insert_one(cls, payload: dict, options: dict = None):

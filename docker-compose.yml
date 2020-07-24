@@ -21,7 +21,7 @@ services:
 
   backend:
     container_name: simba-backend-local
-    command: uvicorn main:app --host 0.0.0.0 --port 8010 --loop 'uvloop' --lifespan on --reload --proxy-headers
+    command: uvicorn main:app --host 0.0.0.0 --port 8010 --loop 'uvloop' --lifespan on --reload --proxy-headers --log-level "debug"
     build:
       context: ./
       dockerfile: deployment/dockerfiles/Dockerfile.backend.local

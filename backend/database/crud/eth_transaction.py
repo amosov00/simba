@@ -7,8 +7,8 @@ class EthereumTransactionCRUD(BaseMongoCRUD):
     collection = "ethblock"
 
     @classmethod
-    async def find(cls, query: dict, options: dict = None):
-        return await super().find_many(query=query, options=options)
+    async def find(cls, query: dict):
+        return await super().find_many(query)
 
     @classmethod
     async def find_last_block(cls, contract_title: str = None):

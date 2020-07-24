@@ -105,11 +105,11 @@ export default context => {
       twitter: "https://twitter.com/SWISSSST",
       vk: "https://vk.com/simbastorage",
       telegram: "https://t.me/simbastorage",
-      telegram_chat: "https://t.me/simbastablecoin_ru",
+      telegram_chat: "https://t.me/simbastorage_ru",
       discord: "https://discord.com/channels/SimbaStorage#6018",
       streemit: "https://steemit.com/@simbastorage",
       github: "#",
-      linkedin: "http://www.linkedin.cn/company/simbastorage"
+      linkedin: "https://www.linkedin.com/company/simbastorage/"
     },
     profile: {
       sidebar: {
@@ -153,11 +153,13 @@ export default context => {
         "1. Вы копируете ссылку и отправляете вашему другу.<br>" +
         "2. Регистрируясь по вашей ссылке он будет привязан к вашему аккаунту.<br>" +
         "3. При каждом пополнении вы получите токены SST, которые сможете продать на бирже по актуальному курсу.<br>" +
-        "4. Когда ваши друзья будут приглашать своих, вы будете получать дополнительный бонус. Так за 5 уровней вы получите: 5%, 1%, 1%, 0.5% и 0.5%.<br><br>" +
+        "4. Когда ваши друзья будут приглашать своих, вы будете получать дополнительный бонус.<br>" +
+        "Так за 5 уровней вы получите: 5%, 1%, 1%, 0.5% и 0.5%.<br>" +
         "Предложение ограничено количеством предоставленных SST токенов.",
       invited: "Приглашенные пользователи",
       your_ref_link: "Ваша партнерская ссылка",
       your_ref_code: "Ваш партнерский код",
+      your_reward_address: 'Ваш ETH адрес для вознаграждений',
       refs_empty: "У вас еще нет приглашенных пользователей",
       how_to_get_code: {p1: "Чтобы принять участие в партнерской программе, ", p2: "добавьте", p3:"Ethereum адрес"},
     },
@@ -241,6 +243,63 @@ export default context => {
       our_mission: "Наша миссия",
       mission:
         "Общая задача нашей команды заключается в том, чтобы предоставить лучший сервис для поклонников и сторонников блокчейн индустрии и криптовалют. Каждый из нас по-разному прошел этот тернистый путь развития в новой и высокотехнологичной индустрии. Нас объединила общая вера в то, что мы в силах явить миру уникальный продукт, который будет служить людям. И поэтому мы создали его таким надежным, прозрачным и удобным, что каждый пользователь сможет гордиться, говоря «я храню свои биткоины в хранилище SIMBA». Для вас холодное хранилище SIMBA - это безопасность и спокойствие за будущее. Наша миссия - поддерживать эти характеристики на высочайшем уровне и расти, покоряя новые вершины."
+    },
+    account_page: {
+      _id: 'ID',
+      email: 'Email',
+      email_is_active: 'Email подтвержден',
+      verification_code: 'Код подтверждения',
+      recover_code: 'Код восстановления',
+      secret_2fa: 'Секретный ключ 2FA',
+      two_factor: '2FA включена',
+      first_name: 'Имя',
+      last_name: 'Фамилия',
+      user_btc_addresses: 'Список адресов Bitcoin',
+      user_eth_addresses: 'Список адресов Ethereum',
+      btc_address: 'BTC address',
+      is_staff: 'Сотрудник',
+      is_superuser: 'Суперпользователь',
+      is_active: 'Активен',
+      terms_and_condition: 'Принял условия и положения',
+      created_at: 'Дата регистрации',
+      list_is_empty: 'Список пуст',
+      yes: 'Да',
+      no: 'Нет',
+      not_available: 'Н/Д',
+      account_info: 'Учетная запись',
+      account_changed_success: 'Данные учетной записи успешно изменены!',
+      account_changed_error: 'Не удалось изменить данные учетной записи!'
+    },
+    su_invoices: {
+      invoices: 'Сделки',
+      invoice: 'Сделка',
+      user_id: "ID пользователя",
+      status: "Статус",
+      invoice_type: "Операция",
+      btc_amount: "Сумма BTC",
+      simba_amount: "Сумма SIMBA",
+      btc_amount_proceeded: "Сумма обработанных BTC",
+      simba_amount_proceeded: "Сумма обработанных SIMBA",
+      target_eth_address: "Целевой ETH адрес",
+      target_btc_address: "Целевой BTC адрес",
+      eth_tx_hashes: "Хеши транзакций ETH",
+      btc_tx_hashes: "Хеши транзакций BTC",
+      created_at: "Дата создания",
+      finised_at: "Дата заверщения",
+      _id: "ID",
+      eth_txs: "ETH транзакции",
+      btc_txs: "BTC транзакции",
+      not_available: "Н/Д",
+      empty: "Отсутствует(-ют)",
+      sst_tx_hashes: 'Хеши SST транзакций'
+    },
+    xpub: {
+      confirm_your_action: 'Подтвердите ваше действие',
+      confirm_change_status: 'Вы уверены что хотите изменить статус?',
+      something_went_wrong: 'Что-то пошло не так!',
+      status_changed: 'Статус успешно изменен!',
+      status_active: 'Активен',
+      status_inactive: 'Неактивен',
     }
   };
 

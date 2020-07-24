@@ -4,16 +4,20 @@
       h3.text-large.has-text-weight-bold {{ $t('exchange.bill_payment')}}
       div.mt-2(v-if="isBuy")
         div.is-flex.align-items-center
-          img(src="@/assets/images/bitcoin.svg").mr-2
+          img(src="@/assets/images/bitcoin-new.png" style="height: 36px").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.send')}}
             = ' '
             span.has-text-weight-bold.ml-1 {{ parseFloat(tradeData.btc) }} BTC
             = ' '
             span.bill-arrow
               img(:src="require('@/assets/images/arrow-right.svg')")
-            span {{ btc_address }}
-            CopyToClipboard(:value_to_copy="btc_address").ml-2
-            TradeQRCode(:qrcode_value="btc_address" :amount="parseFloat(tradeData.btc)").ml-1
+          div.flex-1.is-flex.align-items-center
+            template(v-if="btc_address_fetched")
+              span.text-large {{ btc_address }}
+              CopyToClipboard(:value_to_copy="btc_address").ml-2
+              TradeQRCode(:qrcode_value="btc_address" :amount="parseFloat(tradeData.btc)").ml-1
+            b-skeleton(width="75%" size="is-large" :active="!btc_address_fetched").simba-skeleton
+          //--div(v-if="btc_address_fetched").is-flex.align-items-center
         div.is-flex.align-items-center.mt-2
           img(src="@/assets/images/logo_sm.png").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
@@ -35,7 +39,7 @@
             TradeQRCode(:qrcode_value="tradeData.admin_eth_address" :amount="parseFloat(tradeData.simba)").ml-1
             button.btn(@click="payWithMetamask" style="margin-left: auto" :disabled="disablePayBtn") {{ $t('other.send') }}
         div.is-flex.align-items-center.mt-2
-          img(src="@/assets/images/bitcoin.svg").mr-2
+          img(src="@/assets/images/bitcoin-new.png" style="height: 36px").mr-2
           div.text-large.is-flex.align-items-center {{ $t('exchange.receive')}}
             = ' '
             span.has-text-weight-bold.ml-1 {{ parseFloat(tradeData.btc) }} BTC
@@ -100,7 +104,8 @@
       countdown: null,
       goneToNextStep: false,
       confirmInterval: null,
-      disablePayBtn: false
+      disablePayBtn: false,
+      btc_address_fetched: false
     }),
     methods: {
       truncateEthAddress(address) {
@@ -130,6 +135,11 @@
         this.check = await this.$store.dispatch('invoices/fetchSingle', this.created_invoice_id)
 
         if(this.isBuy) { // Buy
+
+          /*if(this.check.target_btc_address) {
+            this.btc_address_fetched = true
+          }*/
+
           if(this.check.btc_txs.length > 0) {
             this.goneToNextStep = true
             this.stopCountdown();
@@ -157,8 +167,23 @@
 
         // Confirm if invoice is not confirmed
 
-        if(this.updated_invoice_data.status !== 'waiting' && this.updated_invoice_data.status !== 'cancelled') {
-          await this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
+        if(this.updated_invoice_data.status !== 'waiting'
+          && this.updated_invoice_data.status !== 'cancelled'
+          && this.updated_invoice_data.status !== 'completed') {
+
+          // Confirm & set confirm_status
+          let confirm_status = this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
+
+          confirm_status.then(res => {
+            if(this.isBuy && res.target_btc_address) {
+              this.updated_invoice_data.target_btc_address = res.target_btc_address
+              this.btc_address_fetched = true
+            }
+          })
+        }
+
+        if(this.updated_invoice_data.status === 'waiting') {
+          this.btc_address_fetched = true
         }
 
         /*if(this.updated_invoice_data.target_btc_address && this.updated_invoice_data.status !== 'created') {

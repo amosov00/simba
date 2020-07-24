@@ -1,8 +1,10 @@
+import random
+from typing import Optional
 from datetime import datetime
 
 from config import IS_PRODUCTION, BTC_COLD_XPUB_SWISS
-from database.crud import BTCAddressCRUD, InvoiceCRUD
-from schemas import BTCAddress, User, InvoiceInDB, BTCXPUB
+from database.crud import BTCAddressCRUD, InvoiceCRUD, BTCxPubCRUD
+from schemas import BTCAddress, User, InvoiceInDB, BTCxPub, BTCxPubInDB
 
 if IS_PRODUCTION:
     from pycoin.symbols.btc import network
@@ -14,10 +16,9 @@ __all__ = ["PycoinWrapper"]
 
 class PycoinWrapper:
     def __init__(self, *, user: User, invoice: InvoiceInDB):
-        self.cold_wallet = self._get_cold_wallet()
-        assert self.cold_wallet.xpub is not None
+        self.cold_wallet: Optional[BTCxPub] = None
+        self.key = None
 
-        self.key = network.parse.bip32(self.cold_wallet.xpub)
         self.user = user or None
         self.invoice = invoice or None
 
@@ -27,8 +28,13 @@ class PycoinWrapper:
         return path if not include_m else f"m/{path}"
 
     @staticmethod
-    def _get_cold_wallet() -> BTCXPUB:
-        return BTC_COLD_XPUB_SWISS
+    async def _get_cold_wallet() -> BTCxPubInDB:
+        active_xpubs = await BTCxPubCRUD.find_active()
+
+        if not active_xpubs:
+            raise ValueError("active xpub not exists")
+
+        return BTCxPubInDB(**random.choice(active_xpubs))
 
     @staticmethod
     async def _created_address_is_valid(address: str):
@@ -37,9 +43,13 @@ class PycoinWrapper:
             bool(await BTCAddressCRUD.find_one({"address": address}))
         ])
 
-    @staticmethod
-    async def _get_last_path_index():
-        last_address = await BTCAddressCRUD.find_latest()
+    async def create_key(self):
+        self.cold_wallet = await self._get_cold_wallet()
+        self.key = network.parse.bip32(self.cold_wallet.xpub.get_secret_value())
+        return True
+
+    async def _get_last_path_index(self):
+        last_address = await BTCAddressCRUD.find_latest(self.cold_wallet.title)
         return last_address.get("path") if last_address else None
 
     def _generate_subkey(self, path: str):
@@ -77,6 +87,7 @@ class PycoinWrapper:
         return True
 
     async def generate_new_address(self, *, shift: int = 0) -> str:
+        await self.create_key()
         path_without_m = await self._generate_new_path(shift)
         path_with_m = "m/" + path_without_m
         key = self._generate_subkey(path_without_m)

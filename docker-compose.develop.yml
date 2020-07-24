@@ -3,7 +3,7 @@ version: '3'
 services:
   frontend:
     container_name: simba-frontend
-    restart: always
+    restart: unless-stopped
     command: yarn start
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/frontend:develop-latest
     volumes:
@@ -20,7 +20,7 @@ services:
 
   backend:
     container_name: simba-backend
-    restart: always
+    restart: unless-stopped
     command: uvicorn main:app --host 0.0.0.0 --port 8010 --loop 'uvloop' --lifespan on --proxy-headers
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:develop-latest
     depends_on:
@@ -35,6 +35,7 @@ services:
 
   celeryworker:
     container_name: simba-celeryworker-local
+    restart: unless-stopped
     command: sh -c "sleep 50 && celery worker -A celery_app -P celery_pool_asyncio:TaskPool --loglevel=INFO"
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:develop-latest
     volumes:
@@ -48,6 +49,7 @@ services:
 
   celerybeat:
     container_name: simba-celerybeat-local
+    restart: unless-stopped
     command: sh -c "sleep 60 && celery beat -A celery_app --scheduler celery_pool_asyncio:PersistentScheduler --loglevel=INFO"
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:develop-latest
     volumes:
@@ -62,7 +64,7 @@ services:
 
   db:
     container_name: simba-mongodb
-    restart: always
+    restart: unless-stopped
     image: mongo:4.2-bionic
     command: mongod --port 27022 --auth
     ports:
@@ -73,6 +75,7 @@ services:
 
   rabbitmq:
     container_name: simba-rabbitmq-local
+    restart: unless-stopped
     image: rabbitmq:3.8.4-alpine
     ports:
       - 5672:5672

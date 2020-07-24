@@ -1,5 +1,6 @@
 import smtplib
 from http import HTTPStatus
+from typing import Literal
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from urllib.parse import urlencode
@@ -7,12 +8,20 @@ from urllib.parse import urlencode
 from fastapi import HTTPException
 from sentry_sdk import capture_exception, capture_message
 import httpx
+from tenacity import retry, stop_after_attempt, wait_fixed
 
-from config import EMAIL_LOGIN, EMAIL_PASSWORD, EMAIL_PORT, EMAIL_SERVER, HOST_URL
-from config import MAILGUN_API_KEY, MAILGUN_DOMAIN_NAME, MAILGUN_MESSAGE_LINK
+from schemas import InvoiceInDB
+from config import (
+    EMAIL_LOGIN, EMAIL_PASSWORD, EMAIL_PORT, EMAIL_SERVER, HOST_URL, SIMBA_SUPPORT_EMAIL,
+    MAILGUN_API_KEY, MAILGUN_DOMAIN_NAME, MAILGUN_MESSAGE_LINK,
+)
+
+__all__ = ["MailGunEmail"]
 
 
 class Email:
+    """Deprecated"""
+
     def __init__(self):
         self.email_from = EMAIL_LOGIN
         self.password = EMAIL_PASSWORD
@@ -94,22 +103,22 @@ class MailGunEmail:
             params = {f"{method}_code": code}
             return f"{HOST_URL}recover?{urlencode(params)}"
 
-    def create_message(self, to: str, body: str) -> dict:
+    def _create_message(self, to: str, body: str, subject: str = "Simba verification message") -> dict:
         msg = {
             "from": f"Simba Stablecoin {self.email_from}",
-            "subject": "Simba verification message",
+            "subject": subject,
             "to": to,
             "html": body,
         }
         return msg
 
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(3))
     async def _send_message(self, msg: dict) -> None:
         async with httpx.AsyncClient() as client:
             try:
-                email_send = (
+                resp = (
                     await client.post(
                         self.send_message_link,
-
                         auth=("api", self.api_key),
                         data=msg,
                     )
@@ -118,15 +127,17 @@ class MailGunEmail:
                 capture_exception(e)
                 raise HTTPException(HTTPStatus.BAD_REQUEST, f"Error while sending email, {e}")
 
-        if email_send.json().get("message") != "Queued. Thank you.":
-            capture_message(f"Error while sending email, response - {str(email_send.json())} ")
-            raise HTTPException(HTTPStatus.BAD_REQUEST, f"Error while sending email, {str(email_send.json())}")
-
-        return None
+        if resp.text and resp.json().get("message") != "Queued. Thank you.":
+            return None
+        else:
+            capture_message(f"Error while sending email, response - {str(resp.json())}", level="error")
+            raise HTTPException(
+                HTTPStatus.BAD_REQUEST, f"Error while sending email, {str(resp.json())}"
+            )
 
     async def send_verification_code(self, to: str, code: str) -> None:
 
-        msg = self.create_message(
+        msg = self._create_message(
             to,
             "Добрый день! <br>\n"
             'Перейдите по <a href="{}">этой</a> ссылке для регистрации в Simba<br>\n'
@@ -138,7 +149,7 @@ class MailGunEmail:
         return None
 
     async def send_recover_code(self, to: str, code: str) -> None:
-        msg = self.create_message(
+        msg = self._create_message(
             to,
             "Добрый день! <br>\n"
             'Перейдите по <a href="{}">этой</a> ссылке для восстановления пароля в Simba<br>\n'
@@ -147,4 +158,48 @@ class MailGunEmail:
 
         await self._send_message(msg)
 
+        return None
+
+    async def send_message_to_support(
+            self,
+            error_type: Literal["simba_issue", "simba_redeem", "sst_transfer", "btc"],
+            **kwargs
+    ) -> None:
+        assert SIMBA_SUPPORT_EMAIL is not None
+        assert error_type in ("simba_issue", "simba_redeem", "sst_transfer", "btc")
+
+        if error_type == "simba_issue" or error_type == "sst_transfer":
+            invoice: InvoiceInDB = kwargs["invoice"]
+            customer_address: str = kwargs["customer_address"]
+            amount: int = kwargs["amount"]
+            body = f"<b>Error</b> while executing {' '.join(error_type.split('_'))}<br>" \
+                   f"Invoice ID: {str(invoice.id) if invoice else '?'}<br>" \
+                   f"Client address: {customer_address}<br>" \
+                   f"Amount: {amount}<br>"
+        elif error_type == "simba_redeem":
+            invoice: InvoiceInDB = kwargs["invoice"]
+            amount: int = kwargs["amount"]
+            body = f"<b>Error</b> while executing {' '.join(error_type.split('_'))}<br>" \
+                   f"Invoice ID: {str(invoice.id) if invoice else '?'}<br>" \
+                   f"Amount: {amount}<br>"
+
+        elif error_type == "btc":
+            hot_wallet_balance = kwargs["hot_wallet_balance"]
+            btc_amount_to_send = kwargs["btc_amount_to_send"]
+            invoices_in_queue = kwargs["invoices_in_queue"]
+            total_btc_amount_to_send = kwargs["total_btc_amount_to_send"]
+            body = f"<b>Warning</b> while sending BTC from hot wallet<br>" \
+                   f"Hot wallet balance: {hot_wallet_balance} Satoshi<br>" \
+                   f"Satoshi amount to send {btc_amount_to_send}; " \
+                   f"Total Satoshi amount to send {total_btc_amount_to_send}<br>" \
+                   f"Invoices in queue: {invoices_in_queue}<br>"
+        else:
+            body = "Unknown error"
+
+        msg = self._create_message(
+            SIMBA_SUPPORT_EMAIL,
+            body,
+            subject="Warning/Error from Simba"
+        )
+        await self._send_message(msg)
         return None

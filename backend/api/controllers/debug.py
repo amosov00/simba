@@ -1,12 +1,10 @@
-import asyncio
+import asyncio, logging
 from typing import List
 
 from fastapi import APIRouter, Depends
 
 from api.dependencies import get_user
-from celery_app.tasks import fetch_and_proceed_simba_contract
-from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
-from core.mechanics.crypto import SimbaWrapper, SSTWrapper, BitcoinWrapper
+from celery_app.tasks import fetch_and_proceed_sst_contract
 from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD, ReferralCRUD
 from schemas import BlockCypherWebhookInDB, User, ReferralInDB, InvoiceInDB
 
@@ -17,7 +15,7 @@ router = APIRouter()
 
 @router.get("/cron/")
 async def debug_get():
-    await fetch_and_proceed_simba_contract()
+    await fetch_and_proceed_sst_contract()
     return True
 
 
@@ -29,16 +27,6 @@ async def debug_get():
 @router.get("/webhooks/", response_model=List[BlockCypherWebhookInDB])
 async def debug_get():
     return await BlockCypherWebhookCRUD.find_many({})
-
-
-@router.delete("/webhooks/")
-async def debug_get():
-    hooks = await BlockCypherWebhookAPIWrapper().list_webhooks()
-    for hook in hooks:
-        await BlockCypherWebhookAPIWrapper().delete_webhook(hook["id"])
-        await asyncio.sleep(0.5)
-
-    return True
 
 
 @router.get("/refs/", response_model=ReferralInDB)
@@ -53,17 +41,11 @@ async def debug_get():
 
 @router.get("/sst/")
 async def debug_get():
-    await asyncio.sleep(15.0)
-    result = SSTWrapper().api_wrapper.freeze_and_transfer(
-        "0xBeb3EC5BCE587420c00eC547cA2DD5626f497B73", 15, 250000
-    )
-    print(f"SST {result.hex()}")
     return None
 
 
 @router.get("/btc/")
 async def debug_get():
-    res = await BitcoinWrapper().create_and_sign_transaction("mgcEs8CPgX1uJjjyLRbv4vLVuabevKe9LE", 72544)
     return None
 
 

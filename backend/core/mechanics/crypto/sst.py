@@ -1,13 +1,13 @@
 import asyncio
 
 from bson import ObjectId
-from sentry_sdk import capture_message
+from sentry_sdk import capture_message, capture_exception
 
 from config import SST_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
 from core.integrations.ethereum import FunctionsContractWrapper
-from database.crud.referral import ReferralCRUD
-from database.crud.user import UserCRUD
-from schemas import User
+from core.utils.email import MailGunEmail
+from database.crud import UserCRUD, ReferralCRUD, InvoiceCRUD
+from schemas import User, InvoiceInDB
 from .base import CryptoValidation, CryptoCurrencyRate
 
 
@@ -19,8 +19,10 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
     REF5_PROF = 0.0625
     PERIOD: int = 2500000
 
-    def __init__(self):
+    def __init__(self, invoice: InvoiceInDB):
         self.api_wrapper = FunctionsContractWrapper(SST_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY)
+        self.invoice = invoice
+        assert invoice is not None
 
     @classmethod
     def _calculate_referrals_accurals(cls, ref_level: int, sst_tokens: int) -> int:
@@ -37,9 +39,24 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
             result_sst *= cls.REF5_PROF
         return round(result_sst)
 
+    async def _freeze_and_transfer(self, customer_address: str, amount: int) -> str:
+        try:
+            tx_hash = await self.api_wrapper.freeze_and_transfer(customer_address, amount, self.PERIOD)
+        except ValueError as e:
+            await MailGunEmail().send_message_to_support(
+                "sst_transfer",
+                invoice=self.invoice,
+                customer_address=customer_address,
+                amount=amount
+            )
+            capture_exception(e)
+            return ""
+
+        return tx_hash.hex()
+
     async def send_sst_to_referrals(self, user: User, simba_tokens: int):
         # initial wait between simba issue and sst freeze_and_transfer
-        await asyncio.sleep(15.0)
+        tx_hashes = set()
         sst_tokens = self.simba_to_sst(simba_tokens)
         referral = await ReferralCRUD.find_by_user_id(user.id)
 
@@ -47,17 +64,27 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
             capture_message(f"Referral obj is not found for user {user.email}", level="error")
             return False
 
-        for i in range(1, 6):
-            if not referral.get(f"ref{i}"):
+        for level in range(1, 6):
+            if not referral.get(f"ref{level}"):
                 continue
-            current_user = await UserCRUD.find_by_id(ObjectId(referral[f"ref{i}"]))
-            wallet: str = current_user["user_eth_addresses"][0] if current_user.get(
-                "user_eth_addresses"
-            ) else None
-            if wallet is not None:
-                await self.api_wrapper.freeze_and_transfer(
-                    wallet, self._calculate_referrals_accurals(i, sst_tokens), self.PERIOD,
+
+            current_user = await UserCRUD.find_by_id(ObjectId(referral[f"ref{level}"]))
+
+            current_user = User(**current_user)
+
+            if current_user.user_eth_addresses:
+                customer_address = current_user.user_eth_addresses[0].address
+
+                tx_hash: str = await self._freeze_and_transfer(
+                    customer_address=customer_address,
+                    amount=self._calculate_referrals_accurals(level, sst_tokens),
                 )
-                # Wait between eth transations
-                await asyncio.sleep(15.0)
+                tx_hashes.add(tx_hash) if tx_hashes else None
+                await asyncio.sleep(5.0)
+
+        if list(tx_hashes):
+            tx_hashes = list({*self.invoice.sst_tx_hashes, *tx_hashes})
+            await InvoiceCRUD.update_one(
+                {"_id": self.invoice.id}, {"sst_tx_hashes": tx_hashes}
+            )
         return True

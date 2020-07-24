@@ -116,14 +116,14 @@
           }
 
           if(single_res.status === 'waiting' || single_res.status === 'created') {
+            this.$store.commit('exchange/setTradeData', {prop: 'btc', value: single_res.btc_amount})
+            this.$store.commit('exchange/setTradeData', {prop: 'simba', value: single_res.simba_amount})
             this.tradeData.steps.current = 'BillPayment'
           }
           else if(single_res.status === 'processing') {
-            if(single_res.btc_txs.length > 0) {
-              if(single_res.btc_txs[0].simba_tokens_issued) {
-                this.tradeData.steps.current = 'Status'
-              }
-            } else {
+            if(single_res.btc_txs.length > 0 && single_res.eth_txs.length > 0) {
+              this.tradeData.steps.current = 'Status'
+            } else if (single_res.eth_txs.length > 0){
               this.tradeData.steps.current = 'SimbaRecieved'
             }
           }
@@ -158,7 +158,6 @@
     data: () => {
       return {
         stepFail: null,
-        multi_props: {},
         operation: '',
         tradeData: {
           ethAddress: '',

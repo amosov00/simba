@@ -1,11 +1,12 @@
 from typing import List, Optional
-from http import HTTPStatus
 
-from fastapi import APIRouter, HTTPException, Query, Body, Path
+from fastapi import APIRouter, Query, Body, Path
 
-from database.crud import UserCRUD, InvoiceCRUD
+from database.crud import UserCRUD
 from schemas import (
-    User
+    User,
+    UserUpdateNotSafe,
+    USER_MODEL_INCLUDE_FIELDS
 )
 
 __all__ = ["users_router"]
@@ -33,6 +34,17 @@ async def admin_users_fetch_all(
 @users_router.get(
     "/{user_id}/",
     response_model=User,
+    response_model_include=USER_MODEL_INCLUDE_FIELDS.union({"_id", "email_is_active"}),
 )
 async def admin_users_fetch_one(user_id: str = Path(...)):
     return await UserCRUD.find_by_id(user_id)
+
+
+@users_router.put(
+    "/{user_id}/",
+)
+async def admin_users_update(
+        user_id: str = Path(...),
+        payload: UserUpdateNotSafe = Body(...)
+):
+    return await UserCRUD.update_not_safe(user_id, payload)

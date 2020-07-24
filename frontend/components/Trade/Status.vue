@@ -6,12 +6,12 @@
         div.mt-3.is-size-6 {{$t('exchange.received_payment')}} {{ parseFloat(convert(received_payment_amount)) }} BTC
         div.mt-2 {{$t('exchange.transaction_hash')}}:
           =' '
-          a(:href="'https://etherscan.io/tx/' + tx_hash" target="_blank").link {{ tx_hash }}
+          a(:href="'https://www.blockchain.com/btc/tx/' + tx_hash" target="_blank").link {{ tx_hash }}
       div(v-else)
         div.mt-3.is-size-6 {{$t('exchange.sent_payment')}} {{ parseFloat(convert(received_payment_amount)) }} BTC
         div.mt-2 {{$t('exchange.transaction_hash')}}:
           =' '
-          a(:href="'https://live.blockcypher.com/btc-testnet/tx/' + tx_hash" target="_blank").link {{ tx_hash }}
+          a(:href="'https://www.blockchain.com/btc/tx/' + tx_hash" target="_blank").link {{ tx_hash }}
       div.mt-2
         div {{$t('exchange.confirms')}} {{currentConfirms}}/{{min_confirms}}
       b-loading(:active.sync="confirms_loading" :is-full-page="false")
@@ -44,17 +44,31 @@
     },
 
     async created() {
-      this.min_confirms = process.env.NODE_ENV === 'production' ? 3 : 1
+      //this.min_confirms = process.env.NODE_ENV === 'production' ? 3 : 1
+
+      this.min_confirms = process.env.NODE_ENV === 'develop' || 'development' ? 1 : 3
 
       let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id);
-      this.received_payment_amount = res.btc_amount_proceeded
+
 
       if(this.isBuy) {
+
+        const btc_addr = res.target_btc_address
+
+        let found = res.btc_txs[0].outputs.find(el => {
+          return el.addresses.indexOf(btc_addr) !== -1
+        })
+
+        this.received_payment_amount = found.value
+
         if(res.btc_txs.length > 0) {
           this.setCurrentConfirms(res.btc_txs[0].confirmations)
-          this.tx_hash = res.eth_tx_hashes[0] || ''
+          //this.tx_hash = res.eth_tx_hashes[0] || ''
+          this.tx_hash = res.btc_txs[0].hash
         }
       } else {
+        this.received_payment_amount = res.btc_amount_proceeded
+
         if(res.eth_txs.length > 0) {
           this.setCurrentConfirms(res.btc_txs[0].confirmations)
           this.tx_hash = res.btc_txs[0].hash || ''

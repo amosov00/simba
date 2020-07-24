@@ -39,7 +39,7 @@
     },
 
     async created() {
-      this.min_confirms = process.env.NODE_ENV === 'production' ? 3 : 1
+      this.min_confirms = process.env.NODE_ENV === 'develop' || 'development' ? 1 : 3
 
       let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id);
       this.received_payment_amount = res.simba_amount_proceeded
@@ -68,7 +68,7 @@
         this.currentConfirms = desired_tx?.confirmations > this.min_confirms ? this.min_confirms : desired_tx?.confirmations
 
         if(res.eth_txs.length > 0) {
-          if(res.eth_txs[0].confirmations >= this.min_confirms) {
+          if(res.eth_txs[0].confirmations >= this.min_confirms && res.btc_txs.length > 0) {
             this.$store.commit('exchange/setTradeData', { prop: 'simba_issued', value: res.btc_amount_proceeded})
             this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: res.btc_txs[0].hash })
 

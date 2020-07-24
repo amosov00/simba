@@ -1,7 +1,7 @@
 from os import getenv, path
 
 from .common import IS_PRODUCTION, BASE_DIR
-from schemas import EthereumContract, BTCXPUB
+from schemas import EthereumContract, BTCxPub
 
 BLOCKCYPHER_TOKEN = getenv("BLOCKCYPHER_TOKEN")
 BLOCKCYPHER_WALLET_TITLE = getenv("BLOCKCYPHER_WALLET_TITLE")
@@ -63,10 +63,10 @@ else:
 # BTC
 ############################
 
-BTC_COLD_XPUB_UAE = BTCXPUB(title="UAE", xpub=getenv("BTC_COLD_XPUB_UAE"))
-BTC_COLD_XPUB_LIECH = BTCXPUB(title="Liechtenstein", xpub=getenv("BTC_COLD_XPUB_LIECH"),)
-BTC_COLD_XPUB_NEWZEL = BTCXPUB(title="NewZealand", xpub=getenv("BTC_COLD_XPUB_NEWZEL"),)
-BTC_COLD_XPUB_SWISS = BTCXPUB(title="Switzerland", xpub=getenv("BTC_COLD_XPUB_SWISS"),)
+BTC_COLD_XPUB_UAE = BTCxPub(title="UAE", xpub=getenv("BTC_COLD_XPUB_UAE"))  # noqa
+BTC_COLD_XPUB_LIECH = BTCxPub(title="Liechtenstein", xpub=getenv("BTC_COLD_XPUB_LIECH"))  # noqa
+BTC_COLD_XPUB_NEWZEL = BTCxPub(title="NewZealand", xpub=getenv("BTC_COLD_XPUB_NEWZEL"))  # noqa
+BTC_COLD_XPUB_SWISS = BTCxPub(title="Switzerland", xpub=getenv("BTC_COLD_XPUB_SWISS"))  # noqa
 
 BTC_COLD_WALLETS = (BTC_COLD_XPUB_UAE, BTC_COLD_XPUB_LIECH, BTC_COLD_XPUB_NEWZEL, BTC_COLD_XPUB_SWISS)
 

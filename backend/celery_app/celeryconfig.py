@@ -39,17 +39,18 @@ app.conf.beat_schedule = {
     },
     "send_btc_to_proceeding_invoices": {
         "task": "send_btc_to_proceeding_invoices",
-        "schedule": crontab(minute="*/1"),
+        "schedule": crontab(minute="*/2"),
         "args": (),
     },
     "delete_unused_webhooks": {
         "task": "delete_unused_webhooks",
-        "schedule": crontab(minute="*/60"),
+        "schedule": crontab(minute="20", hour="*/3"),
         "args": ()
     },
+    # TODO slower later
     "fetch_and_proceed_sst_contract": {
         "task": "fetch_and_proceed_sst_contract",
-        "schedule": crontab(minute="30", hour="*/12"),
+        "schedule": crontab(minute="30", hour="*/1"),
         "args": (),
     },
     "fetch_empty_btc_addresses_info": {

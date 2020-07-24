@@ -109,7 +109,7 @@ export default context => {
       discord: "https://discord.com/channels/SimbaStorage#6018",
       streemit: "https://steemit.com/@simbastorage",
       github: "#",
-      linkedin: "http://www.linkedin.cn/company/simbastorage"
+      linkedin: "https://www.linkedin.com/company/simbastorage/"
     },
     profile: {
       sidebar: {
@@ -153,11 +153,15 @@ export default context => {
         "How it works?<br><br>" +
         "1. You copy the link and send it to your friend.<br>" +
         "2. After sign up with your link, it will be tied to your account.<br>" +
-        "3. With each recharge, you will receive SST tokens that you can sell" +
-        "on the exchange at the current rate.<br><br>The offer is limited by amount of provided SST tokens.",
+        "3. With each recharge, you will receive SST tokens that you can sell <br>" +
+        "on the exchange at the current rate.<br>" +
+        "4. When your referrals invite with their partner link, you'll recieve an additional bonus.<br>" +
+        "So for 5 levels you will get: 5%, 1%, 1%, 0.5% and 0.5%<br>" +
+        "<br>The offer is limited by amount of provided SST tokens.",
       invited: "Invited",
       your_ref_link: "Your partner link",
       your_ref_code: "Your partner code",
+      your_reward_address: 'Your ETH reward address',
       refs_empty: "You don't have invited users yet",
       how_to_get_code: {p1: "To get your partner code, ", p2: "add", p3: "your reward wallet"}
     },
@@ -227,7 +231,7 @@ export default context => {
       first_name: 'First name',
       last_name: 'Last name',
       save: 'Save',
-      copied_to_clipboard: 'Copied to clipboard'
+      copied_to_clipboard: 'Copied to clipboard',
     },
     about: {
       company_goal: "Company goal",
@@ -241,6 +245,63 @@ export default context => {
       our_mission: "Our mission",
       mission:
         'The common goal of our team is to provide the best service for the followers and supporters of cryptocurrencies and the whole blockchain industry. Each of us had a development path in the crypto industry in his or her own way. We were brought together by a common belief that we are able to show the world a unique product that will serve people. That is why it is so reliable, transparent and convenient that every user can be proud to say "I store my Bitcoins in the SIMBA storage". The cold SIMBA storage means a secure future with no worries. Our mission is to maintain these standards at the highest level, grow and soar to new heights.'
+    },
+    account_page: {
+      _id: 'ID',
+      email: 'Email',
+      email_is_active: 'Email is activated',
+      verification_code: 'Verification code',
+      recover_code: 'Recovery code',
+      secret_2fa: '2FA secret',
+      two_factor: '2FA enabled',
+      first_name: 'First name',
+      last_name: 'Last name',
+      user_btc_addresses: 'Bitcoin address list',
+      user_eth_addresses: 'Ethereum address list',
+      btc_address: 'BTC address',
+      is_staff: 'Is staff',
+      is_superuser: 'Is superuser',
+      is_active: 'Is active',
+      terms_and_condition: 'Accepted terms and condition',
+      created_at: 'Date of registration',
+      list_is_empty: 'Empty',
+      yes: 'Yes',
+      no: 'No',
+      not_available: 'N/A',
+      account_info: 'Account information',
+      account_changed_success: 'Account data successfully changed!',
+      account_changed_error: 'Error changing account data!'
+    },
+    su_invoices: {
+      invoices: 'Invoices',
+      invoice: 'Invoice',
+      user_id: "User ID",
+      status: "Status",
+      invoice_type: "Operation",
+      btc_amount: "BTC amount",
+      simba_amount: "SIMBA amount",
+      btc_amount_proceeded: "BTC amount proceeded",
+      simba_amount_proceeded: "Simba amount proceeded",
+      target_eth_address: "Target ETH address",
+      target_btc_address: "Target BTC address",
+      eth_tx_hashes: "ETH transaction hashes",
+      btc_tx_hashes: "BTC transaction hashes",
+      created_at: "Date of creation",
+      finised_at: "Date of completion",
+      _id: "ID",
+      eth_txs: "ETH transactions",
+      btc_txs: "BTC transactions",
+      not_available: "N/A",
+      empty: "Empty",
+      sst_tx_hashes: 'SST transaction hashes'
+    },
+    xpub: {
+      confirm_your_action: 'Confirm your action',
+      confirm_change_status: 'Are you sure you want to change the status?',
+      something_went_wrong: 'Something went wrong!',
+      status_changed: 'Status successfully changed!',
+      status_active: 'Active',
+      status_inactive: 'Inactive',
     }
   };
 

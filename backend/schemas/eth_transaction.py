@@ -8,7 +8,6 @@ from schemas.base import BaseModel, ObjectIdPydantic
 __all__ = [
     "EthereumTransaction",
     "EthereumTransactionInDB",
-    "EthereumTransactionReferral",
     "SimbaContractEvents",
     "SSTContractEvents",
 ]
@@ -47,7 +46,3 @@ class EthereumTransaction(BaseModel):
 
 class EthereumTransactionInDB(EthereumTransaction):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
-
-
-class EthereumTransactionReferral(EthereumTransactionInDB):
-    referral_level: int = None

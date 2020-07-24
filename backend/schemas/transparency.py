@@ -7,10 +7,5 @@ __all__ = ["TransparencyTransaction"]
 
 class TransparencyTransaction(BaseModel):
     hash: str = None
-    value: int = 0
-    confirmed: datetime = None
-
-    class Config:
-        json_encoders = {
-            datetime: lambda o: int(o.timestamp()),
-        }
+    amount: int = 0
+    received: datetime = None
