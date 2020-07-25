@@ -127,13 +127,18 @@ class MailGunEmail:
                 capture_exception(e)
                 raise HTTPException(HTTPStatus.BAD_REQUEST, f"Error while sending email, {e}")
 
-        if resp.text and resp.json().get("message") != "Queued. Thank you.":
-            return None
-        else:
+        if resp.json().get("message") != "Queued. Thank you.":
             capture_message(f"Error while sending email, response - {str(resp.json())}", level="error")
-            raise HTTPException(
-                HTTPStatus.BAD_REQUEST, f"Error while sending email, {str(resp.json())}"
-            )
+
+        return None
+
+        # if resp.text and resp.json().get("message") != "Queued. Thank you.":
+        #     return None
+        # else:
+        #     capture_message(f"Error while sending email, response - {str(resp.json())}", level="error")
+        #     raise HTTPException(
+        #         HTTPStatus.BAD_REQUEST, f"Error while sending email, {str(resp.json())}"
+        #     )
 
     async def send_verification_code(self, to: str, code: str) -> None:
 
