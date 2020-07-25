@@ -1,4 +1,5 @@
 import asyncio
+from typing import Optional
 
 from bson import ObjectId
 from sentry_sdk import capture_message, capture_exception
@@ -39,7 +40,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
             result_sst *= cls.REF5_PROF
         return round(result_sst)
 
-    async def _freeze_and_transfer(self, customer_address: str, amount: int) -> str:
+    async def _freeze_and_transfer(self, customer_address: str, amount: int) -> Optional[str]:
         try:
             tx_hash = await self.api_wrapper.freeze_and_transfer(customer_address, amount, self.PERIOD)
         except ValueError as e:
@@ -50,7 +51,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
                 amount=amount
             )
             capture_exception(e)
-            return ""
+            return None
 
         return tx_hash.hex()
 
@@ -79,7 +80,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
                     customer_address=customer_address,
                     amount=self._calculate_referrals_accurals(level, sst_tokens),
                 )
-                tx_hashes.add(tx_hash) if tx_hashes else None
+                tx_hashes.add(tx_hash) if tx_hash else None
                 await asyncio.sleep(5.0)
 
         if list(tx_hashes):

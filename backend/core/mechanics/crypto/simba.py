@@ -1,3 +1,5 @@
+from sentry_sdk import capture_exception
+
 from .base import CryptoValidation, CryptoCurrencyRate
 from core.integrations.ethereum import FunctionsContractWrapper
 from core.utils.email import MailGunEmail
@@ -31,6 +33,7 @@ class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
                 customer_address=customer_address,
                 amount=simba_to_issue
             )
+            capture_exception(e)
             raise e
 
         return tx_hash.hex()
@@ -46,6 +49,7 @@ class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
                 invoice=invoice,
                 amount=simba_to_redeem
             )
+            capture_exception(e)
             raise e
 
         return tx_hash.hex()
