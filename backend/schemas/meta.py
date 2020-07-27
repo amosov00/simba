@@ -2,7 +2,15 @@ from datetime import datetime
 
 from .base import BaseModel, ObjectIdPydantic, Field
 
-__all__ = ["Meta", "MetaInDB"]
+__all__ = ["Meta", "MetaInDB", "MetaSlugs", "MetaManualPayoutPayload"]
+
+
+class MetaSlugs:
+    MANUAL_PAYOUT = "manual_payout"
+
+
+class MetaManualPayoutPayload(BaseModel):
+    is_active: bool = Field(default=False)
 
 
 class Meta(BaseModel):
