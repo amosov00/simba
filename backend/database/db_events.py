@@ -1,12 +1,11 @@
-import logging
-import sys
+import logging, sys, datetime
 
 import sentry_sdk
 
 from config import ENV, IS_PRODUCTION, BTC_COLD_WALLETS, BTC_COLD_XPUB_SWISS
-from database.crud import UserCRUD, BTCxPubCRUD
+from database.crud import UserCRUD, BTCxPubCRUD, MetaCRUD
 from database.init import mongo_client
-from schemas import UserCreationNotSafe
+from schemas import UserCreationNotSafe, Meta, MetaSlugs, MetaManualPayoutPayload
 
 if IS_PRODUCTION:
     admin_user = {
@@ -63,6 +62,16 @@ async def prepopulate_xpubs():
     return True
 
 
+async def prepopulate_meta():
+    if not await MetaCRUD.find_by_slug(MetaSlugs.MANUAL_PAYOUT, raise_404=False):
+        await MetaCRUD.insert_one(Meta(
+            slug=MetaSlugs.MANUAL_PAYOUT,
+            payload=MetaManualPayoutPayload(is_active=False).dict()
+        ).dict())
+
+    return True
+
+
 async def prepopulate_db():
     logging.info("Starting prepopulate db")
 
@@ -83,7 +92,14 @@ async def prepopulate_db():
     try:
         await prepopulate_xpubs()
     except Exception as e:
-        logging.error(f"Unable to create users, error {e.__class__.__name__}")
+        logging.error(f"Unable to create xpubs, error {e.__class__.__name__}")
+        sentry_sdk.capture_exception(e)
+        sys.exit(1)
+
+    try:
+        await prepopulate_meta()
+    except Exception as e:
+        logging.error(f"Unable to create meta, error {e.__class__.__name__}")
         sentry_sdk.capture_exception(e)
         sys.exit(1)
 

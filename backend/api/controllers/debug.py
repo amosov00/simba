@@ -4,7 +4,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from api.dependencies import get_user
-from celery_app.tasks import fetch_and_proceed_sst_contract
+from celery_app.tasks import send_btc_to_proceeding_invoices
 from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD, ReferralCRUD
 from schemas import BlockCypherWebhookInDB, User, ReferralInDB, InvoiceInDB
 
@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.get("/cron/")
 async def debug_get():
-    await fetch_and_proceed_sst_contract()
+    await send_btc_to_proceeding_invoices()
     return True
 
 

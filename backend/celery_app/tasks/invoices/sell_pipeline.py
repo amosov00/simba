@@ -6,8 +6,8 @@ from celery_app.celeryconfig import app
 from config import BTC_HOT_WALLET_ADDRESS
 from core.mechanics import BitcoinWrapper, InvoiceMechanics
 from core.utils import MailGunEmail
-from database.crud import InvoiceCRUD, UserCRUD
-from schemas import InvoiceInDB, InvoiceStatus, InvoiceType
+from database.crud import InvoiceCRUD, UserCRUD, MetaCRUD
+from schemas import InvoiceInDB, InvoiceStatus, InvoiceType, MetaSlugs
 
 __all__ = ["send_btc_to_proceeding_invoices"]
 
@@ -16,9 +16,16 @@ __all__ = ["send_btc_to_proceeding_invoices"]
     name="send_btc_to_proceeding_invoices", bind=True, soft_time_limit=55, time_limit=300,
 )
 async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
-    """Крон для завершение пайплайна продажи (отсылка BTC + redeem)"""
+    """Крон для след. этапа пайплайна продажи (отсылка BTC)"""
+    meta_manual_payout = await MetaCRUD.find_by_slug(MetaSlugs.MANUAL_PAYOUT)
+    # Finish pipeline if manual mode
+    if meta_manual_payout["payload"]["is_active"] is True:
+        logging.warning("Manual mode is active")
+        return True
+
     btc_wrapper = BitcoinWrapper()
     hot_wallet_info = await btc_wrapper.fetch_address_and_save(BTC_HOT_WALLET_ADDRESS)
+
     proceeding_invoices = await InvoiceCRUD.find_many({
         "invoice_type": InvoiceType.SELL,
         "status": InvoiceStatus.PROCESSING,
@@ -27,8 +34,9 @@ async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
     }, sort=[("created_at", 1)])
 
     for invoice in proceeding_invoices:
+        # Finish pipeline if wallet has unconfirmed transactions
         if hot_wallet_info.unconfirmed_transactions_number:
-            break
+            return True
 
         invoice = InvoiceInDB(**invoice)
         user = await UserCRUD.find_by_id(invoice.id)
