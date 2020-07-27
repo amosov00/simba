@@ -67,6 +67,7 @@ async def admin_invoice_fetch_one(invoice_id: str = Path(...)):
 
 @invoices_router.post(
     "/{invoice_id}/pay/",
+    response_model=InvoiceInDB,
 )
 async def admin_invoice_pay(invoice_id: str = Path(...)):
     invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
@@ -93,7 +94,7 @@ async def admin_invoice_pay(invoice_id: str = Path(...)):
         capture_exception(e)
         raise HTTPException(HTTPStatus.BAD_REQUEST, "failed to send bitcoins")
 
-    return {"success": True}
+    return await InvoiceCRUD.find_by_id(invoice.id)
 
 
 @invoices_router.post(
