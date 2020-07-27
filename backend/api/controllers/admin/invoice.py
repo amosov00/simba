@@ -3,10 +3,11 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, Path, Query, Response, HTTPException
 from sentry_sdk import capture_exception
+from bson import ObjectId, errors
 
 from database.crud import UserCRUD, InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD, MetaCRUD
 from schemas import InvoiceInDB, InvoiceExtended, InvoiceStatus, InvoiceType, MetaSlugs
-from core.mechanics import BitcoinWrapper, InvoiceMechanics
+from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler
 from core.utils import to_objectid
 
 from config import BTC_HOT_WALLET_ADDRESS
@@ -21,9 +22,11 @@ invoices_router = APIRouter()
     response_model=List[InvoiceInDB],
 )
 async def admin_invoices_fetch_all(
+        invoice_id: Optional[str] = Query(default=None),
+        user_id: Optional[str] = Query(default=None),
+        tx_hash: Optional[str] = Query(default=None),
         status: Optional[Literal[InvoiceStatus.ALL]] = Query(default=None),  # noqa
         invoice_type: Optional[Literal[str(InvoiceType.BUY.value), str(InvoiceType.SELL.value)]] = Query(default=None),
-        user_id: Optional[str] = Query(default=None),
 ):
     q = []
     if status:
@@ -31,9 +34,20 @@ async def admin_invoices_fetch_all(
     if invoice_type:
         q.append({"invoice_type": int(invoice_type)})
     if user_id:
-        q.append({"user_id": to_objectid(user_id)})
+        try:
+            q.append({"user_id": ObjectId(user_id)})
+        except errors.InvalidId:
+            pass
+    if invoice_id:
+        try:
+            q.append({"_id": ObjectId(invoice_id)})
+        except errors.InvalidId:
+            pass
+    if tx_hash:
+        for crypto in ("btc", "eth", "sst"):
+            q.append({f"{crypto}_tx_hashes": {"$regex": tx_hash, "$options": "i"}})
 
-    q = {"$and": q} if q else {}
+    q = {"$or": q} if q else {}
     return await InvoiceCRUD.find_many(q)
 
 
@@ -67,6 +81,7 @@ async def admin_invoice_fetch_one(invoice_id: str = Path(...)):
 
 @invoices_router.post(
     "/{invoice_id}/pay/",
+    response_model=InvoiceInDB,
 )
 async def admin_invoice_pay(invoice_id: str = Path(...)):
     invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
@@ -93,4 +108,21 @@ async def admin_invoice_pay(invoice_id: str = Path(...)):
         capture_exception(e)
         raise HTTPException(HTTPStatus.BAD_REQUEST, "failed to send bitcoins")
 
-    return {"success": True}
+    return await InvoiceCRUD.find_by_id(invoice.id)
+
+
+@invoices_router.post(
+    "/{invoice_id}/cancel/",
+    response_model=InvoiceInDB
+)
+async def admin_invoice_cancel(invoice_id: str = Path(...)):
+    invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
+
+    if invoice.status not in (InvoiceStatus.CREATED, InvoiceStatus.WAITING, InvoiceStatus.PROCESSING):
+        raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid invoice status")
+
+    invoice.status = InvoiceStatus.CANCELLED
+    await InvoiceCRUD.update_one({"_id": invoice.id}, invoice.dict(include={"status"}))
+    await BlockCypherWebhookHandler().delete_webhook(invoice)
+
+    return invoice

@@ -63,9 +63,9 @@ class Invoice(BaseModel):
     target_btc_address: Optional[str] = Field(default=None, description="Address which will be scanned")
 
     # Connected transactions
-    eth_tx_hashes: List[str] = Field(default=[])
+    eth_tx_hashes: List[str] = Field(default=[], description="Simba contract TX hashes")
     btc_tx_hashes: List[str] = Field(default=[])
-    sst_tx_hashes: List[str] = Field(default=[])
+    sst_tx_hashes: List[str] = Field(default=[], description="SST contract TX hashes")
 
     # Datetimes
     created_at: datetime = Field(default_factory=datetime.utcnow, description="UTC")
