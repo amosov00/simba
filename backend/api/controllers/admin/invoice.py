@@ -6,7 +6,7 @@ from sentry_sdk import capture_exception
 
 from database.crud import UserCRUD, InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD, MetaCRUD
 from schemas import InvoiceInDB, InvoiceExtended, InvoiceStatus, InvoiceType, MetaSlugs
-from core.mechanics import BitcoinWrapper, InvoiceMechanics
+from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler
 from core.utils import to_objectid
 
 from config import BTC_HOT_WALLET_ADDRESS
@@ -94,3 +94,20 @@ async def admin_invoice_pay(invoice_id: str = Path(...)):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "failed to send bitcoins")
 
     return {"success": True}
+
+
+@invoices_router.post(
+    "/{invoice_id}/cancel/",
+    response_model=InvoiceInDB
+)
+async def admin_invoice_cancel(invoice_id: str = Path(...)):
+    invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
+
+    if invoice.status not in (InvoiceStatus.CREATED, InvoiceStatus.WAITING, InvoiceStatus.PROCESSING):
+        raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid invoice status")
+
+    invoice.status = InvoiceStatus.CANCELLED
+    await InvoiceCRUD.update_one({"_id": invoice.id}, invoice.dict(include={"status"}))
+    await BlockCypherWebhookHandler().delete_webhook(invoice)
+
+    return invoice
