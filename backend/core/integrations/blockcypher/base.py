@@ -18,7 +18,7 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
         self.api_token = BLOCKCYPHER_TOKEN
         self.api_url = (
             "https://api.blockcypher.com/v1/btc/main"
-            if True
+            if IS_PRODUCTION
             else "https://api.blockcypher.com/v1/btc/test3"
         )
 
