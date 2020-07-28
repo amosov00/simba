@@ -19,7 +19,7 @@ class BlockCypherAPIWrapper(BlockCypherBaseAPIWrapper):
 
     async def fetch_transaction_info(self, transaction_hash: str) -> Optional[BTCTransaction]:
         endpoint = f"/txs/{transaction_hash}/"
-        res = await self.request(endpoint)
+        res = await self.request(endpoint, params={"limit": 50})
         if not res:
             pass
         return BTCTransaction(**res) if res else None
