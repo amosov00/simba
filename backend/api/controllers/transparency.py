@@ -21,7 +21,7 @@ async def transparency_totals():
         {"$match": {"address": {"$ne": BTC_HOT_WALLET_ADDRESS}}},
         {"$group": {"_id": "$cold_wallet_title", "received": {"$sum": "$total_received"}}}
     ])
-
+    cold_wallets_meta = [i for i in cold_wallets_meta if i.get("_id") is not None]
     total_recieved = sum([i["received"] for i in cold_wallets_meta])
 
     invoices_sell = await InvoiceCRUD.aggregate(

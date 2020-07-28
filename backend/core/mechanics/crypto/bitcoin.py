@@ -121,27 +121,5 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
     async def create_wallet_address(cls, invoice: InvoiceInDB, user: User):
         return await PycoinWrapper(user=user, invoice=invoice).generate_new_address()
 
-    async def fetch_transaction(self, invoice: InvoiceInDB, transaction_hash: str) -> BTCTransaction:
+    async def fetch_transaction(self, transaction_hash: str) -> BTCTransaction:
         return await self.api_wrapper.fetch_transaction_info(transaction_hash)
-
-    async def fetch_and_save_transaction(self, invoice: InvoiceInDB, transaction_hash: str) -> dict:
-        """
-        TODO deprecated
-        """
-        transaction = await self.api_wrapper.fetch_transaction_info(transaction_hash)
-
-        await self.validate_btc_transaction_with_invoice(invoice, transaction)
-
-        tx_id = (await BTCTransactionCRUD.insert_one(transaction.dict())).inserted_id
-
-        incoming_btc = self.get_btc_amount_btc_transaction(transaction, invoice.target_btc_address)
-
-        invoice.btc_tx_ids = list({*invoice.btc_tx_ids, tx_id})
-        invoice.status = InvoiceStatus.COMPLETED
-        invoice.btc_amount_proceeded = (
-            invoice.btc_amount_proceeded + incoming_btc if invoice.btc_amount_proceeded else incoming_btc
-        )
-
-        await InvoiceCRUD.update_one({"_id": invoice.id}, invoice.dict(exclude={"_id"}))
-
-        return {"incoming_btc": incoming_btc, "tx_hash": transaction.hash}
