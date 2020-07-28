@@ -4,7 +4,7 @@ from fastapi import APIRouter, Query
 from pydantic import parse_obj_as
 
 from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
-from schemas import TransparencyTransaction, InvoiceStatus, InvoiceType, BTCTransactionOutputs
+from schemas import TransparencyTransactionResponse, InvoiceStatus, InvoiceType, BTCTransactionOutputs
 from core.mechanics import InvoiceMechanics
 from config import BTC_COLD_WALLETS, BTC_HOT_WALLET_ADDRESS
 
@@ -54,11 +54,14 @@ async def transparency_totals():
     return response
 
 
-@router.get("/transactions/", response_model=List[TransparencyTransaction])
+@router.get("/transactions/", response_model=TransparencyTransactionResponse)
 async def transparency_transactions(
         tx_type: Literal["received", "paidout"] = Query(..., alias="type"),
 ):
-    response = []
+    response = {
+        "total": 0,
+        "transactions": []
+    }
     invoices = await InvoiceCRUD.aggregate(
         [
             {"$match": {
@@ -84,10 +87,13 @@ async def transparency_transactions(
                 parse_obj_as(List[BTCTransactionOutputs], btc_tx["outputs"]), target_btc_address
             ) or 0
 
-            response.append({
+            amount = amount_from_outputs if tx_type == "received" else btc_tx["total"] - amount_from_outputs
+
+            response["total"] += amount
+            response["transactions"].append({
                 "hash": btc_tx["hash"],
                 "received": btc_tx["received"],
-                "amount": amount_from_outputs if tx_type == "received" else btc_tx["total"] - amount_from_outputs
+                "amount": amount
             })
 
     return response
