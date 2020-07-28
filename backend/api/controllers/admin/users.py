@@ -21,27 +21,9 @@ users_router = APIRouter()
     response_model_include={"id", "email", "is_superuser", "is_active", "first_name", "last_name"}
 )
 async def admin_users_fetch_all(
-        user_id: Optional[str] = Query(default=None),
-        email: Optional[str] = Query(default=None),
-        first_name: Optional[str] = Query(default=None),
-        last_name: Optional[str] = Query(default=None),
+        q: Optional[str] = Query(default=None, description="query for many fields"),
 ):
-    q = []
-
-    if email:
-        q.append({"email": email})
-    if first_name:
-        q.append({"first_name": first_name})
-    if last_name:
-        q.append({"last_name": last_name})
-    if user_id:
-        try:
-            q.append({"_id": ObjectId(user_id)})
-        except errors.InvalidId:
-            pass
-
-    q = {"$or": q} if q else {}
-    return await UserCRUD.find_many(q)
+    return await UserCRUD.find_by_query(q)
 
 
 @users_router.get(

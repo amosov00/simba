@@ -22,33 +22,9 @@ invoices_router = APIRouter()
     response_model=List[InvoiceInDB],
 )
 async def admin_invoices_fetch_all(
-        invoice_id: Optional[str] = Query(default=None),
-        user_id: Optional[str] = Query(default=None),
-        tx_hash: Optional[str] = Query(default=None),
-        status: Optional[Literal[InvoiceStatus.ALL]] = Query(default=None),  # noqa
-        invoice_type: Optional[Literal[str(InvoiceType.BUY.value), str(InvoiceType.SELL.value)]] = Query(default=None),
+        q: Optional[str] = Query(default=None, description="query for many fields"),
 ):
-    q = []
-    if status:
-        q.append({"status": status})
-    if invoice_type:
-        q.append({"invoice_type": int(invoice_type)})
-    if user_id:
-        try:
-            q.append({"user_id": ObjectId(user_id)})
-        except errors.InvalidId:
-            pass
-    if invoice_id:
-        try:
-            q.append({"_id": ObjectId(invoice_id)})
-        except errors.InvalidId:
-            pass
-    if tx_hash:
-        for crypto in ("btc", "eth", "sst"):
-            q.append({f"{crypto}_tx_hashes": {"$regex": tx_hash, "$options": "i"}})
-
-    q = {"$or": q} if q else {}
-    return await InvoiceCRUD.find_many(q)
+    return await InvoiceCRUD.find_by_query(q)
 
 
 @invoices_router.get(
