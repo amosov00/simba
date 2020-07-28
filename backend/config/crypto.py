@@ -63,10 +63,10 @@ else:
 # BTC
 ############################
 
-BTC_COLD_XPUB_UAE = BTCxPub(title="UAE", xpub=getenv("BTC_COLD_XPUB_UAE"))  # noqa
-BTC_COLD_XPUB_LIECH = BTCxPub(title="Liechtenstein", xpub=getenv("BTC_COLD_XPUB_LIECH"))  # noqa
-BTC_COLD_XPUB_NEWZEL = BTCxPub(title="NewZealand", xpub=getenv("BTC_COLD_XPUB_NEWZEL"))  # noqa
-BTC_COLD_XPUB_SWISS = BTCxPub(title="Switzerland", xpub=getenv("BTC_COLD_XPUB_SWISS"))  # noqa
+BTC_COLD_XPUB_UAE = BTCxPub(title="UAE", xpub=getenv("BTC_COLD_XPUB_UAE"), xpub_preview="")  # noqa
+BTC_COLD_XPUB_LIECH = BTCxPub(title="Liechtenstein", xpub=getenv("BTC_COLD_XPUB_LIECH"), xpub_preview="")  # noqa
+BTC_COLD_XPUB_NEWZEL = BTCxPub(title="NewZealand", xpub=getenv("BTC_COLD_XPUB_NEWZEL"), xpub_preview="")  # noqa
+BTC_COLD_XPUB_SWISS = BTCxPub(title="Switzerland", xpub=getenv("BTC_COLD_XPUB_SWISS"), xpub_preview="")  # noqa
 
 BTC_COLD_WALLETS = (BTC_COLD_XPUB_UAE, BTC_COLD_XPUB_LIECH, BTC_COLD_XPUB_NEWZEL, BTC_COLD_XPUB_SWISS)
 

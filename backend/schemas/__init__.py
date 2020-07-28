@@ -10,3 +10,4 @@ from .referral import *
 from .transparency import *
 from .meta import *
 from .btc_xpub import *
+from .user_addresses_archive import *

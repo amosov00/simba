@@ -1,13 +1,14 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Query, Body, Path
-from bson import ObjectId, errors
 
-from database.crud import UserCRUD
+from core.utils import to_objectid
+from database.crud import UserCRUD, UserAddressesArchiveCRUD
 from schemas import (
     User,
     UserUpdateNotSafe,
-    USER_MODEL_INCLUDE_FIELDS
+    UserAddressesArchive,
+    USER_MODEL_INCLUDE_FIELDS,
 )
 
 __all__ = ["users_router"]
@@ -43,3 +44,13 @@ async def admin_users_update(
         payload: UserUpdateNotSafe = Body(...)
 ):
     return await UserCRUD.update_not_safe(user_id, payload)
+
+
+@users_router.get(
+    "/{user_id}/archived_addresses/",
+    response_model=List[UserAddressesArchive]
+)
+async def admin_users_fetch_archived_addresses(
+        user_id: str = Path(...),
+):
+    return await UserAddressesArchiveCRUD.find_many({"user_id": to_objectid(user_id)}, sort=[("deleted_at", -1)])

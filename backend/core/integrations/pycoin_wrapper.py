@@ -1,8 +1,11 @@
-import random
+import random, http
 from typing import Optional
 from datetime import datetime
 
-from config import IS_PRODUCTION, BTC_COLD_XPUB_SWISS
+from sentry_sdk import capture_message
+from fastapi import HTTPException
+
+from config import IS_PRODUCTION, BTC_COLD_WALLETS
 from database.crud import BTCAddressCRUD, InvoiceCRUD, BTCxPubCRUD
 from schemas import BTCAddress, User, InvoiceInDB, BTCxPub, BTCxPubInDB
 
@@ -34,7 +37,10 @@ class PycoinWrapper:
         if not active_xpubs:
             raise ValueError("active xpub not exists")
 
-        return BTCxPubInDB(**random.choice(active_xpubs))
+        chosen_xpub = random.choice(active_xpubs)
+        chosen_xpub = list(filter(lambda o: o.title == chosen_xpub.get("title"), BTC_COLD_WALLETS))
+
+        return chosen_xpub[0] if chosen_xpub else None
 
     @staticmethod
     async def _created_address_is_valid(address: str):
@@ -45,6 +51,11 @@ class PycoinWrapper:
 
     async def create_key(self):
         self.cold_wallet = await self._get_cold_wallet()
+
+        if not self.cold_wallet:
+            capture_message("xpub from cold wallet is not found")
+            raise HTTPException(http.HTTPStatus.INTERNAL_SERVER_ERROR, "xpub is not found")
+
         self.key = network.parse.bip32(self.cold_wallet.xpub.get_secret_value())
         return True
 

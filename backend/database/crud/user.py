@@ -1,5 +1,5 @@
 import asyncio
-from typing import Optional
+from typing import Optional, Union
 from passlib import pwd
 from datetime import datetime, timedelta
 from http import HTTPStatus
@@ -25,6 +25,7 @@ from schemas.user import (
     User2faConfirm,
     User2faDelete
 )
+from schemas.base import ObjectIdPydantic
 
 __all__ = ["UserCRUD"]
 
@@ -63,7 +64,7 @@ class UserCRUD(BaseMongoCRUD):
         return await super().find_many(query)
 
     @classmethod
-    async def check_2fa(cls, user_id: ObjectId, pin_code: str) -> bool:
+    async def check_2fa(cls, user_id: Union[ObjectId, ObjectIdPydantic], pin_code: str) -> bool:
         user = await cls.find_by_id(user_id)
         totp = pyotp.TOTP(user["secret_2fa"])
         current_pin_code = totp.now()
