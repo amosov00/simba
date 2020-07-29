@@ -23,7 +23,8 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
     transactions = await EthereumTransactionCRUD.find({
         "contract": SIMBA_CONTRACT.title,
         "event": {"$in": SimbaContractEvents.ALL},
-        "invoice_id": None
+        "invoice_id": None,
+        "skip": {"$ne": True},
     })
 
     logging.info(f"Simba TX to proceed: {len(transactions)}")
@@ -33,10 +34,19 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
 
         if transaction.event == SimbaContractEvents.Transfer:
             # Connect with sell invoices
-            sender_hash = transaction.args.get("from") or "error"
-            receiver_hash = transaction.args.get("to") or "error"
+            sender_hash = transaction.args.get("from")
+            receiver_hash = transaction.args.get("to")
 
-            if not SIMBA_ADMIN_ADDRESS.lower() == receiver_hash.lower():
+            if all([
+                transaction.event == SimbaContractEvents.Transfer,
+                SIMBA_ADMIN_ADDRESS.lower() != receiver_hash.lower(),
+                SIMBA_ADMIN_ADDRESS.lower() != sender_hash.lower()
+            ]):
+                # Mark transaction as service
+                transaction.skip = True
+                await EthereumTransactionCRUD.update_one(
+                    {"_id": transaction.id}, transaction.dict(exclude={"id"})
+                )
                 continue
 
             invoice = await InvoiceCRUD.find_one(
