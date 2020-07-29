@@ -1,4 +1,6 @@
-import asyncio, logging
+import asyncio
+import logging
+from datetime import datetime, timedelta
 
 from sentry_sdk import capture_message, push_scope, capture_exception
 
@@ -7,7 +9,7 @@ from config import BTC_HOT_WALLET_ADDRESS
 from core.mechanics import BitcoinWrapper, InvoiceMechanics
 from core.utils import MailGunEmail
 from database.crud import InvoiceCRUD, UserCRUD, MetaCRUD
-from schemas import InvoiceInDB, InvoiceStatus, InvoiceType, MetaSlugs
+from schemas import InvoiceInDB, InvoiceStatus, InvoiceType, MetaSlugs, MetaInDB
 
 __all__ = ["send_btc_to_proceeding_invoices"]
 
@@ -41,6 +43,14 @@ async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
         invoice = InvoiceInDB(**invoice)
         user = await UserCRUD.find_by_id(invoice.id)
         if invoice.simba_amount_proceeded >= hot_wallet_info.balance:
+            # Check meta
+            meta_email_time = await MetaCRUD.find_by_slug(MetaSlugs.EMAIL_TO_SUPPORT_TIME)
+
+            if meta_email_time \
+                    and datetime.now() - meta_email_time["args"].get("sent_at") < timedelta(minutes=10):
+                break
+
+            # Send alarms
             total_btc_amount_to_send = sum([
                 i["simba_amount_proceeded"] for i in proceeding_invoices if i.get("simba_amount_proceeded")
             ])
@@ -57,6 +67,8 @@ async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
                 scope.set_extra("BTC to be sended", invoice.simba_amount_proceeded)
                 scope.set_extra("Pending invoices", len(proceeding_invoices))
                 capture_message("Hot wallet balance should be increased")
+
+            await MetaCRUD.update_by_slug(MetaSlugs.EMAIL_TO_SUPPORT_TIME, {"sent_at": datetime.now()})
             break
 
         try:

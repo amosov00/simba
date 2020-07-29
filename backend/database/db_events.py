@@ -1,13 +1,14 @@
-import logging, sys, datetime
+import logging
+import sys
+from datetime import datetime
 
 import sentry_sdk
 
-from config import ENV, IS_PRODUCTION, BTC_COLD_WALLETS, BTC_COLD_XPUB_SWISS
+from config import ENV, BTC_COLD_WALLETS, BTC_COLD_XPUB_SWISS
+from config import IS_PRODUCTION
 from database.crud import UserCRUD, BTCxPubCRUD, MetaCRUD
 from database.init import mongo_client
 from schemas import UserCreationNotSafe, Meta, MetaSlugs, MetaManualPayoutPayload
-
-from config import IS_PRODUCTION
 
 if IS_PRODUCTION:
     admin_user = {
@@ -62,6 +63,11 @@ async def prepopulate_meta():
             payload=MetaManualPayoutPayload(is_active=False).dict()
         ).dict())
 
+    if not await MetaCRUD.find_by_slug(MetaSlugs.EMAIL_TO_SUPPORT_TIME, raise_404=False):
+        await MetaCRUD.insert_one(Meta(
+            slug=MetaSlugs.EMAIL_TO_SUPPORT_TIME,
+            payload={"sent_at": datetime.now()}
+        ).dict())
     return True
 
 
