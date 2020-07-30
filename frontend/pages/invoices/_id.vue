@@ -12,7 +12,9 @@
             div(v-for="(item, i) in el" :key="i")
               div(v-if="typeof item === 'object'") -
                 //--div(v-for="(value, key) in item") {{key}}: {{value}}
-              div(v-else) {{ item }}
+              div(v-else)
+                a(:href="getBlockchainLink(item, 'tx', 'eth')" target="_blank" rel="noreferrer noopener" v-if="key === 'eth_tx_hashes'") {{ item }}
+                a(:href="getBlockchainLink(item, 'tx', 'btc')" target="_blank" rel="noreferrer noopener" v-if="key === 'btc_tx_hashes'") {{ item }}
           div(v-else) {{ $t(`su_invoices.empty`) }}
         div(v-else)
           div(v-if="el === null") {{ $t(`su_invoices.not_available`) }}
@@ -21,17 +23,23 @@
             div(v-else-if="key === 'status'") {{ $t(`exchange.statuses.${el}`)}}
             div(v-else-if="key === 'created_at' || key === 'finised_at'") {{ timestampFromUtc(el) }}
             div(v-else-if="key === 'btc_amount_proceeded' || key === 'btc_amount'") {{ btcFormat(el) }}
+            a(v-else-if="key === 'target_eth_address'" :href="getBlockchainLink(el, 'address', 'eth')" target="_blank" rel="noreferrer noopener") {{ el }}
+            a(v-else-if="key === 'target_btc_address'" :href="getBlockchainLink(el, 'address', 'btc')" target="_blank" rel="noreferrer noopener") {{ el }}
+            n-link(v-else-if="key === 'user_id'" :to="`/users/${el}`") {{ el }}
             div(v-else) {{ el }}
 </template>
 
 <script>
 import formatDate from "~/mixins/formatDate";
 import formatCurrency from "~/mixins/formatCurrency";
+
+import invoiceMixins from "~/mixins/invoiceMixins";
+
 export default {
   name: "invoicesById",
   layout: "main",
   middleware: ["adminRequired"],
-  mixins: [formatDate, formatCurrency],
+  mixins: [formatDate, formatCurrency, invoiceMixins],
 
   async asyncData({store, route}) {
     const invoice = await store.dispatch('invoices/fetchAdminSingleInvoice', route.params.id)

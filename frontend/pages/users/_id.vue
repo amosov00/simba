@@ -1,9 +1,9 @@
 <template lang="pug">
   div.main-content
     div.is-size-4.mb-3
-      span {{$t('account_page.account_info')}}
+      strong {{$t('account_page.account_info')}}
       =' — '
-      strong {{ user_data.email.value }}
+      span {{ user_data.email.value }}
     ValidationObserver(ref="validation_obs" tag="div" v-slot="{ invalid }")
       div(v-for="(field, key) in user_data").is-flex.account-field
         div.account-field__label {{ $t(`account_page.${key}`) }}:
@@ -115,7 +115,6 @@ export default {
   },
 
   async asyncData({store, route}) {
-
     let user_data = await store.dispatch("fetchUserById", route.params.id)
 
     let archived = await store.$axios.get(`/admin/users/${route.params.id}/archived_addresses/`)

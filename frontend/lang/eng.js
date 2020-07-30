@@ -93,15 +93,16 @@ export default context => {
       bill_details: "Bill details",
       personal_data: "Personal data",
       security: "Security Settings",
+      partner_program: 'Partner program',
       logout: "Log out"
     },
     socials: {
       facebook: "https://www.facebook.com/simbastorage",
-      bitcoin: "https://bitcointalk.org/index.php?action=profile;u=2816745",
+      bitcoin: "https://bitcointalk.org/index.php?topic=5260057.msg54734561#msg54734561",
       instagram: "https://www.instagram.com/simbastorage/",
       medium: "https://medium.com/@simbastorage",
       zen: "https://zen.yandex.ru/simba",
-      reddit: "https://www.reddit.com/r/simbastorage",
+      reddit: "https://www.reddit.com/r/simba_official/",
       twitter: "https://twitter.com/SWISSSST",
       vk: "https://vk.com/simbastorage",
       telegram: "https://t.me/simbastorage",
