@@ -297,7 +297,7 @@ export default context => {
       btc_txs: "BTC transactions",
       not_available: "N/A",
       empty: "Empty",
-      sst_tx_hashes: 'SST transaction hashes'
+      sst_tx_hashes: 'SST transaction hashes',
     },
     xpub: {
       confirm_your_action: 'Confirm your action',
@@ -309,6 +309,9 @@ export default context => {
     },
     su_users: {
       users: 'Users'
+    },
+    su_payouts_mm: {
+      manage_payouts: 'Manage payouts'
     }
   };
 
