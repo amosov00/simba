@@ -20,6 +20,7 @@
             div(v-if="key === 'invoice_type'") {{ el === 1 ? $i18n.t('exchange.buy') : $i18n.t('exchange.sell') }}
             div(v-else-if="key === 'status'") {{ $t(`exchange.statuses.${el}`)}}
             div(v-else-if="key === 'created_at' || key === 'finised_at'") {{ timestampFromUtc(el) }}
+            div(v-else-if="key === 'btc_amount_proceeded' || key === 'btc_amount'") {{ btcFormat(el) }}
             div(v-else) {{ el }}
 </template>
 
