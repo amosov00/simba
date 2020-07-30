@@ -270,7 +270,8 @@ export default context => {
       not_available: 'Н/Д',
       account_info: 'Учетная запись',
       account_changed_success: 'Данные учетной записи успешно изменены!',
-      account_changed_error: 'Не удалось изменить данные учетной записи!'
+      account_changed_error: 'Не удалось изменить данные учетной записи!',
+      deleted_addresses: 'Архивные адреса (удаленные)'
     },
     su_invoices: {
       invoices: 'Сделки',
@@ -302,6 +303,9 @@ export default context => {
       status_changed: 'Статус успешно изменен!',
       status_active: 'Активен',
       status_inactive: 'Неактивен',
+    },
+    su_users: {
+      users: 'Пользователи'
     }
   };
 

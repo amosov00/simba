@@ -115,8 +115,4 @@ export const actions = {
       .then(res => res.data)
       .catch(_ => false);
   },
-
-  async getConfirm() {
-    const { data } = this.$axios.get("");
-  }
 };

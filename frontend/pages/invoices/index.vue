@@ -6,12 +6,12 @@
     div(v-if="invoicesToView.length <= 0") {{ $t('other.search_empty_results') }}
     b-table(v-if="invoicesToView.length > 0" :data="invoicesToView" paginated per-page="20" default-sort="created_at" default-sort-direction="desc")
       template(slot-scope="props")
-        b-table-column(field="created_at" label="Date" width="150" sortable) {{ timestampFromUtc(props.row.created_at) }}
+        b-table-column(field="created_at" :label="$i18n.t('su_invoices.created_at')" width="150" sortable) {{ timestampFromUtc(props.row.created_at) }}
         b-table-column(field="_id" label="ID" width="50" sortable)
           n-link(:to="`/invoices/${props.row._id}`") {{ props.row._id }}
-        b-table-column(field="user_id" label="User ID" width="50" sortable)
+        b-table-column(field="user_id" :label="$i18n.t('su_invoices.user_id')" width="50" sortable)
           n-link(:to="`/users/${props.row.user_id}`") {{ (props.row.user_id) }}
-        b-table-column(field="status" label="Status"  width="50" sortable) {{ props.row.status }}
+        b-table-column(field="status" :label="$i18n.t('su_invoices.status')"  width="50" sortable) {{ props.row.status }}
         b-table-column(field="btc_amount" label="BTC"  width="50" sortable) {{ btcFormat(props.row.btc_amount) }}
         b-table-column(field="simba_amount" label="SIMBA"  width="50" sortable) {{ simbaFormat(props.row.simba_amount) }}
 
