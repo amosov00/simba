@@ -8,10 +8,11 @@
       div.profile-dropdown__content
         n-link(to="/profile/bill/").profile-dropdown__link {{$t('dropdown.bill_details')}}
         n-link(to="/profile/data/").profile-dropdown__link {{$t('dropdown.personal_data')}}
+        n-link(to="/profile/partner/").profile-dropdown__link {{$t('dropdown.partner_program')}}
         n-link(to="/profile/2fa/").profile-dropdown__link {{$t('dropdown.security')}}
-        n-link(to="/invoices" v-if="user.is_superuser" active-class="link--active").profile-dropdown__link {{$t('su_invoices.invoices')}}
-        n-link(to="/users" v-if="user.is_superuser" active-class="link--active").profile-dropdown__link {{$t('su_users.users')}}
-        n-link(to="/xpub" v-if="user.is_superuser" active-class="link--active").profile-dropdown__link xPub
+        n-link(to="/invoices" v-if="user.is_superuser").profile-dropdown__link.su-link {{$t('su_invoices.invoices')}}
+        n-link(to="/users" v-if="user.is_superuser").profile-dropdown__link.su-link {{$t('su_users.users')}}
+        n-link(to="/xpub" v-if="user.is_superuser").profile-dropdown__link.su-link xPub
       div.profile-dropdown__footer
         a(href="#" @click="logout").profile-dropdown__logout {{$t('dropdown.logout')}}
 </template>
@@ -50,11 +51,12 @@
     display: flex
     flex-direction: column
     border-radius: 10px
-    transition: 100ms all
     margin-left: auto
     position: absolute
     right: -20px
     z-index: 10
+    height: 100%
+    overflow: hidden
     &__wrapper
       position: relative
       text-align: left
@@ -76,7 +78,7 @@
         background-color: #0060FF
         color: #ffffff
     &__content
-      display: none
+      display: flex
       padding: 10px 0
       flex-direction: column
       border-top: 1px solid #E5E5E5
@@ -104,6 +106,7 @@
       display: none
       padding: 10px 20px
     &.profile-dropdown--opened
+      height: auto
       background: #FFFFFF
       box-shadow: -6px 6px 12px rgba(0, 0, 0, 0.12)
       & .profile-dropdown__name
@@ -116,4 +119,7 @@
         display: flex
       & > .profile-dropdown__footer
         display: flex
+
+  .su-link
+    color: #fa0000
 </style>
