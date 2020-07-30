@@ -307,6 +307,9 @@ export default context => {
     },
     su_users: {
       users: 'Пользователи'
+    },
+    su_payouts_mm: {
+      manage_payouts: 'Выплата'
     }
   };
 

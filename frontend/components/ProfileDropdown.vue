@@ -11,6 +11,7 @@
         n-link(to="/profile/partner/").profile-dropdown__link {{$t('dropdown.partner_program')}}
         n-link(to="/profile/2fa/").profile-dropdown__link {{$t('dropdown.security')}}
         n-link(to="/invoices" v-if="user.is_superuser").profile-dropdown__link.su-link {{$t('su_invoices.invoices')}}
+        n-link(to="/manual-approval" v-if="user.is_superuser").profile-dropdown__link.su-link {{ $t('su_payouts_mm.manage_payouts')}}
         n-link(to="/users" v-if="user.is_superuser").profile-dropdown__link.su-link {{$t('su_users.users')}}
         n-link(to="/xpub" v-if="user.is_superuser").profile-dropdown__link.su-link xPub
       div.profile-dropdown__footer
