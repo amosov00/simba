@@ -2,9 +2,9 @@
   div.main-content
     h1.title.is-size-4 Users
     div.mb-3
-      b-input(v-model="searchQuery" @input="onSearchInputWrapper" placeholder="Поиск..." icon="magnify")
-    div(v-if="usersToView.length <= 0") Пользователей не найдено
-    b-table(:data="usersToView" default-sort="_id" paginated per-page="20" default-sort-direction="asc" searchable).users-table
+      b-input(v-model="searchQuery" @input="onSearchInput" :placeholder="`${this.$i18n.t('other.search')}...`" icon="magnify")
+    div(v-if="usersToView.length <= 0") {{ $t('other.search_empty_results') }}
+    b-table(v-if="usersToView.length > 0" :data="usersToView" default-sort="_id" paginated per-page="20" default-sort-direction="asc" searchable).users-table
       template(slot-scope="props")
         b-table-column(field="_id" label="ID" width="50" sortable)
           nuxt-link(:to="`/users/${props.row._id}`") {{ props.row._id }}
@@ -28,21 +28,14 @@
       searchQuery: '',
     }),
 
-    mounted() {
-      console.log(this.usersCache === this.usersToView)
-    },
-
     methods: {
-
-      onSearchInputWrapper() {
-        this.onSearchInput()
-      },
-
       onSearchInput: _.debounce(function() {
-        if(this.searchQuery !== '' || this.searchQuery.length <= 0) {
+        let properSearchQuery = this.searchQuery.toLowerCase().trim()
+
+        if(properSearchQuery !== '' || properSearchQuery.length <= 0) {
           this.usersToView = this.usersCache.filter(el => {
             for(let key in el){
-              if(String(el[key]).toLowerCase().includes(this.searchQuery.toLowerCase())) {
+              if(String(el[key]).toLowerCase().includes(properSearchQuery)) {
                 return true
               }
             }

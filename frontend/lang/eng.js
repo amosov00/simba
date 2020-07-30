@@ -232,6 +232,8 @@ export default context => {
       last_name: 'Last name',
       save: 'Save',
       copied_to_clipboard: 'Copied to clipboard',
+      search: 'Search',
+      search_empty_results: 'No results found'
     },
     about: {
       company_goal: "Company goal",

@@ -230,6 +230,8 @@ export default context => {
       last_name: 'Фамилия',
       save: 'Сохранить',
       copied_to_clipboard: 'Скопировано в буфер обмена',
+      search: 'Поиск',
+      search_empty_results: 'Нет результатов'
     },
     about: {
       company_goal: "Цель компании",
