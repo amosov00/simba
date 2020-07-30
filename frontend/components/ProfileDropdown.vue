@@ -9,6 +9,9 @@
         n-link(to="/profile/bill/").profile-dropdown__link {{$t('dropdown.bill_details')}}
         n-link(to="/profile/data/").profile-dropdown__link {{$t('dropdown.personal_data')}}
         n-link(to="/profile/2fa/").profile-dropdown__link {{$t('dropdown.security')}}
+        n-link(to="/invoices" v-if="user.is_superuser" active-class="link--active").profile-dropdown__link {{$t('su_invoices.invoices')}}
+        n-link(to="/users" v-if="user.is_superuser" active-class="link--active").profile-dropdown__link {{$t('su_users.users')}}
+        n-link(to="/xpub" v-if="user.is_superuser" active-class="link--active").profile-dropdown__link xPub
       div.profile-dropdown__footer
         a(href="#" @click="logout").profile-dropdown__logout {{$t('dropdown.logout')}}
 </template>
@@ -22,6 +25,11 @@
       name: String
     },
     components: {InlineSvg},
+    computed: {
+      user() {
+        return this.$store.getters.user;
+      }
+    },
     data: () => ({
       showFull: false
     }),
@@ -35,7 +43,6 @@
 
 <style lang="sass">
   .profile-dropdown
-    cursor: pointer
     font-weight: 300
     font-size: 16px
     line-height: 100%
@@ -47,6 +54,7 @@
     margin-left: auto
     position: absolute
     right: -20px
+    z-index: 10
     &__wrapper
       position: relative
       text-align: left
@@ -58,6 +66,7 @@
       &:hover
         color: red
     &__link
+      position: relative
       color: #0060FF
       padding: 4px 20px
       margin-bottom: 2px
@@ -80,6 +89,7 @@
     &__header
       text-align: left
       padding: 13px 20px 13px 20px
+      cursor: pointer
     &__name
       color: #0060FF
       font-weight: bold

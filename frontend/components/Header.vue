@@ -14,9 +14,6 @@
       div.column.is-9.pa-0
         nuxt-link(:to="menuItem.to" v-for="(menuItem, i) in menu" :key="i" active-class="link--active").menu-item.link {{ $t(menuItem.title) }}
         a(href="https://simba.storage/transparency" target="_blank" rel="noopener noreferrer").menu-item.link {{$t('header_menu.transparency')}}
-        nuxt-link(to="/invoices" v-if="user.is_superuser" active-class="link--active").menu-item.link Invoices
-        nuxt-link(to="/users" v-if="user.is_superuser" active-class="link--active").menu-item.link Users
-        nuxt-link(to="/xpub" v-if="user.is_superuser" active-class="link--active").menu-item.link xPub
       div.column.is-3.has-text-right.pa-0
         HeaderBalance(:simbaBalance="simbaBalance")
 </template>
@@ -46,9 +43,9 @@ export default {
     this.menu = [
       { title: "header_menu.exchange", to: "/exchange/" },
       { title: "header_menu.about", to: "/about" },
-      { title: "header_menu.howtouse", to: "/howtouse" },
+      // { title: "header_menu.howtouse", to: "/howtouse" },
       { title: "header_menu.wallet", to: "/wallet" },
-      { title: "header_menu.contacts", to: "/contacts" }
+      // { title: "header_menu.contacts", to: "/contacts" }
     ];
 
     if (this.$cookies.get("token")) {

@@ -272,7 +272,8 @@ export default context => {
       not_available: 'N/A',
       account_info: 'Account information',
       account_changed_success: 'Account data successfully changed!',
-      account_changed_error: 'Error changing account data!'
+      account_changed_error: 'Error changing account data!',
+      deleted_addresses: 'Archived addresses (deleted)'
     },
     su_invoices: {
       invoices: 'Invoices',
@@ -304,6 +305,9 @@ export default context => {
       status_changed: 'Status successfully changed!',
       status_active: 'Active',
       status_inactive: 'Inactive',
+    },
+    su_users: {
+      users: 'Users'
     }
   };
 

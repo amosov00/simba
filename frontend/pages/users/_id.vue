@@ -20,6 +20,15 @@
             div(v-for="(el, i) in field.value" :key="i" style="height: 36px").is-flex.align-items-center
               div {{ el.address }}
               CopyToClipboard(:value_to_copy="el.address").ml-1
+          div(v-else-if="field.type === 'addresses'")
+            div(v-if="field.value.length === 0") {{ $t('account_page.list_is_empty') }}
+            div(v-for="(el, i) in field.value.active" :key="i" style="height: 36px").is-flex.align-items-center
+              div {{ el.address }}
+              CopyToClipboard(:value_to_copy="el.address").ml-1
+            div(v-if="field.value.archived.length > 0").mt-3
+              div.deleted-addresses {{ $t('account_page.deleted_addresses') }}:
+              div(v-for="(el, i) in field.value.archived" :key="i" style="height: 25px").is-flex.align-items-center
+                div {{ timestampFromUtc(el.deleted_at) }} — {{ el.address }}
           div(v-else-if="field.type === 'date'") {{ timestampFromUtc(field.value) }}
           div(v-else-if="field.type === 'boolean'")
             div(v-if="field.editable" )
@@ -77,9 +86,6 @@ export default {
   watch: {
     editable_data: {
       handler: function(val, oldVal){
-
-        console.log(val, oldVal)
-
         if(JSON.stringify(val) !== JSON.stringify(this.editable_data_inital)) {
           this.disabled_save = false
         } else {
@@ -111,6 +117,20 @@ export default {
   async asyncData({store, route}) {
 
     let user_data = await store.dispatch("fetchUserById", route.params.id)
+
+    let archived = await store.$axios.get(`/admin/users/${route.params.id}/archived_addresses/`)
+      .then(res => res.data).catch(() => [])
+
+    let addresses = {
+      archived,
+      active: {
+        btc: [...user_data['user_btc_addresses']],
+        eth: [...user_data['user_eth_addresses']]
+      }
+    }
+
+    delete user_data['user_eth_addresses']
+    delete user_data['user_btc_addresses']
 
     if(!_.isEmpty(user_data)) {
       for(const prop in user_data) {
@@ -145,6 +165,39 @@ export default {
           user_data[prop]['pre_hidden'] = true
         }
       }
+
+      // set addresses active + archived
+      // Archived addresses (deleted)
+      if(archived.length > 0) {
+
+        user_data['user_eth_addresses'] = {
+          value: {
+            active: addresses.active.eth,
+            archived: []
+          },
+          editable: false,
+          pre_hidden: false,
+          type: 'addresses'
+        }
+
+        user_data['user_btc_addresses'] = {
+          value: {
+            active: addresses.active.btc,
+            archived: []
+          },
+          editable: false,
+          pre_hidden: false,
+          type: 'addresses'
+        }
+
+        archived.forEach(el => {
+          if(el.signature) {
+            user_data['user_eth_addresses'].value.archived.push(el)
+          } else {
+            user_data['user_btc_addresses'].value.archived.push(el)
+          }
+        })
+      }
     }
 
     return {
@@ -155,6 +208,9 @@ export default {
 </script>
 
 <style lang="sass">
+.deleted-addresses
+  color: #bc6464
+
 .account-field
   margin-left: -10px
   margin-right: -10px

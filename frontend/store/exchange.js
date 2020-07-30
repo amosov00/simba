@@ -8,7 +8,6 @@ export const state = () => ({
   admin_eth_address: '',
   simba: 0,
   btc: 0,
-  no_create: false,
   btc_amount_proceeded: 0,
   target_eth: '',
   tx_hash: '',
