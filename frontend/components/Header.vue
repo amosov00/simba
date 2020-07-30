@@ -1,17 +1,17 @@
 <template lang="pug">
   header.header
     div.columns.is-flex.align-items-center.mb-zero
-      div.column.is-6.is-flex.align-items-center
+      div.column.is-7.is-flex.align-items-center
         n-link(to='/exchange/')
           img.logo(src="~/assets/images/SIMBA.svg")
         div
           div.logo-text SIMBA
           div.logo-subtext Swiss Quality Stablecoin
-      div.column.is-6.has-text-right(v-if="user")
+      div.column.is-5.has-text-right(v-if="user")
         ProfileDropdown(:name="`${user.first_name} ${user.last_name}`")
         div.has-text-weight-bold.text-large {{simbaFormat(simbaBalance)}} SIMBA
     div.header-menu.columns.is-flex(v-if="user")
-      div.column.is-9.pa-0
+      div(style="padding-left: 102px").column.is-9.pa-0
         nuxt-link(:to="menuItem.to" v-for="(menuItem, i) in menu" :key="i" active-class="link--active").menu-item.link {{ $t(menuItem.title) }}
         a(href="https://simba.storage/transparency" target="_blank" rel="noopener noreferrer").menu-item.link {{$t('header_menu.transparency')}}
       div.column.is-3.has-text-right.pa-0
