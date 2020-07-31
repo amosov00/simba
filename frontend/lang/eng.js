@@ -298,6 +298,15 @@ export default context => {
       not_available: "N/A",
       empty: "Empty",
       sst_tx_hashes: 'SST transaction hashes',
+      sst_tx_detailed: 'SST transactions (detailed)',
+      sst_tx_table: {
+        show: 'Show',
+        hide: 'Hide',
+        transactionHash: 'Hash',
+        amount: 'Reward',
+        user_id: 'User ID',
+        level: 'Level'
+      }
     },
     xpub: {
       confirm_your_action: 'Confirm your action',
@@ -308,10 +317,11 @@ export default context => {
       status_inactive: 'Inactive',
     },
     su_users: {
-      users: 'Users'
+      users: 'Users',
+
     },
     su_payouts_mm: {
-      manage_payouts: 'Manage payouts',
+      manage_payouts: { full: 'Payouts management', short: 'Manage payouts' },
       date: "Date",
       transactions: "Transactions",
       payout: "Payout",

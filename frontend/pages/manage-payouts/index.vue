@@ -1,7 +1,7 @@
 <template lang="pug">
   div
     div.main-content(style="padding-left: 10px; padding-right: 10px")
-      h1.title.is-size-4 {{ $t('su_payouts_mm.manage_payouts') }}
+      h1.title.is-size-4 {{ $t('su_payouts_mm.manage_payouts.full') }}
       div.is-flex.space-between.mt-4.mb-3.align-items-center
         div
           div.is-flex.align-items-center.is-size-6.mb-2

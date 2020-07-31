@@ -3,7 +3,7 @@
     div.is-size-4.mb-3
       strong {{$t('su_invoices.invoice')}}
       =' — '
-      span {{this.$route.params.id}}
+      span {{invoice._id}}
     div(v-for="(el, key) in invoice").is-flex.invoice-field
       div.invoice-field__label {{ $t(`su_invoices.${key}`) }}:
       div.flex-1
@@ -28,6 +28,19 @@
             a(v-else-if="key === 'target_btc_address'" :href="getBlockchainLink(el, 'address', 'btc')" target="_blank" rel="noreferrer noopener") {{ el }}
             n-link(v-else-if="key === 'user_id'" :to="`/users/${el}`") {{ el }}
             div(v-else) {{ el }}
+    div.is-flex.invoice-field
+      div.invoice-field__label {{ $t(`su_invoices.sst_tx_detailed`) }}:
+      div.flex-1
+        div(@click="loadSstTransactions" v-if="!sstTableShow").link {{ $t(`su_invoices.sst_tx_table.show`) }}
+        div(v-else @click="sstTableShow = false").link {{ $t(`su_invoices.sst_tx_table.hide`) }}
+        div(v-if="sstTableShow && sstTransactions.length <= 0").mt-2 {{ $t(`su_invoices.empty`) }}
+        div(v-if="sstTableShow && sstTransactions.length > 0").sst-table.mt-2
+          div(v-for="(el, i) in sstTransactions" :key="i")
+            div(v-if="i === 0")
+              div.is-flex
+                div.sst-table-cell.flex-1.has-text-weight-bold(v-for="(_, key) in sstTransactions[0]" :key="key") {{ $t(`su_invoices.sst_tx_table.${key}`) }}
+            div.is-flex
+              div(v-for="(val, key) in el" :key="key").sst-table-cell.flex-1 {{ val }}
 </template>
 
 <script>
@@ -42,8 +55,41 @@ export default {
   middleware: ["adminRequired"],
   mixins: [formatDate, formatCurrency, invoiceMixins],
 
+  data: () => ({
+    sstTransactions: [],
+    sstTableShow: false
+  }),
+
+  methods: {
+    async loadSstTransactions() {
+      this.sstTransactions = await this.$store.dispatch('meta/fetchInvoiceSstTransactions', this.invoice._id)
+
+/*      this.sstTransactions = [
+        {
+          "transactionHash": "444444444444",
+          "amount": 50,
+          "user_id": "2d3123r12w31",
+          "level": 1
+        },
+        {
+          "transactionHash": "444444444444",
+          "amount": 50,
+          "user_id": "2d3123r12w31",
+          "level": 1
+        }
+      ]*/
+
+      this.sstTableShow = true
+    }
+  },
+
   async asyncData({store, route}) {
     const invoice = await store.dispatch('invoices/fetchAdminSingleInvoice', route.params.id)
+
+    if('btc_txs' && 'eth_txs' in invoice) {
+      delete invoice['btc_txs']
+      delete invoice['eth_txs']
+    }
 
     return {
       invoice
@@ -52,7 +98,18 @@ export default {
 };
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
+.sst-table
+  border-top: 1px solid #eeeeee
+  border-left: 1px solid #eeeeee
+.sst-table-cell
+  border-bottom: 1px solid #eeeeee
+  border-right: 1px solid #eeeeee
+  padding: 8px
+
+.link
+  cursor: pointer
+
 .invoice-field
   margin-left: -10px
   margin-right: -10px

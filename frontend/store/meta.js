@@ -36,4 +36,10 @@ export const actions = {
       .then(() => true)
       .catch(() => false)
   },
+
+  async fetchInvoiceSstTransactions({}, id) {
+    return await this.$axios.get(`/admin/invoices/${id}/sst_transactions/`)
+      .then((res) => res.data)
+      .catch(() => [])
+  },
 }
