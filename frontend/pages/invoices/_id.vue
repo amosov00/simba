@@ -22,6 +22,7 @@
             div(v-if="key === 'invoice_type'") {{ el === 1 ? $i18n.t('exchange.buy') : $i18n.t('exchange.sell') }}
             div(v-else-if="key === 'status'") {{ $t(`exchange.statuses.${el}`)}}
             div(v-else-if="key === 'created_at' || key === 'finised_at'") {{ timestampFromUtc(el) }}
+            div(v-else-if="key === 'simba_amount_proceeded' || key === 'simba_amount'") {{ simbaFormat(el) }}
             div(v-else-if="key === 'btc_amount_proceeded' || key === 'btc_amount'") {{ btcFormat(el) }}
             a(v-else-if="key === 'target_eth_address'" :href="getBlockchainLink(el, 'address', 'eth')" target="_blank" rel="noreferrer noopener") {{ el }}
             a(v-else-if="key === 'target_btc_address'" :href="getBlockchainLink(el, 'address', 'btc')" target="_blank" rel="noreferrer noopener") {{ el }}

@@ -1,51 +1,46 @@
 <template lang="pug">
-  div.main-content
-    h1.title.is-size-4 Manual payout approval
-    //--div.has-text-grey-light
-      div.mb-3 {{ meta }}
-      div {{ manualPayout }}
-    div.is-flex.space-between.mt-4.mb-3.align-items-center
-      div
-        div.is-flex.align-items-center.is-size-6.mb-2
-          span.mr-2 Status:
-          div.mr-2.has-text-weight-bold {{ manualPayout ? 'Enabled' : 'Disabled'}}
-        button.btn(@click="changeManualPayoutStatus") Change status
-        div.is-flex.align-items-center.mt-4
+  div
+    div.main-content(style="padding-left: 10px; padding-right: 10px")
+      h1.title.is-size-4 {{ $t('su_payouts_mm.manage_payouts') }}
+      div.is-flex.space-between.mt-4.mb-3.align-items-center
+        div
+          div.is-flex.align-items-center.is-size-6.mb-2
+            span.mr-2 {{ $t('su_payouts_mm.status') }}:
+            div.mr-2.has-text-weight-bold {{ manualPayout ? $t('su_payouts_mm.enabled') : $t('su_payouts_mm.disabled')}}
+          button.btn(@click="changeManualPayoutStatus") {{ $t('su_payouts_mm.change_status') }}
+      div.is-flex.align-items-center(style="justify-content: center")
+        div.is-flex.align-items-center.mr-4
           b-switch(v-model="onlyWithProcessingStatus" @input="showProcessingOnly")
-          span.ml-1 With 'Processing' status only
-      div
-        button.btn--outlined(@click="$fetch") Refresh
-    b-table(:loading="isLoading" :data="invoicesToView" hoverable paginated per-page="20" default-sort="created_at" default-sort-direction="desc").mt-2
-      template(slot-scope="props")
-        b-table-column(field="created_at" :label="$i18n.t('su_invoices.created_at')" sortable) {{ timestampFromUtc(props.row.created_at) }}
-        b-table-column(field="tx_hashes" label="Transactions")
-          div
-            //--div.has-text-weight-bold ETH transcations:
-            div(v-for="(hash, i) in props.row.eth_tx_hashes" :key="i" style="white-space: nowrap")
-              span.has-text-weight-bold eth:
-              =' '
-              b-tooltip(:label="hash")
-                a(:href="getBlockchainLink(hash, 'tx', 'eth')" target="blank" rel="noopener noreferrer") {{ truncateHash(hash) }}
-          div.mt-2
-            //-- div.has-text-weight-bold BTC transcations:
-            div(v-for="(hash, i) in props.row.btc_tx_hashes" :key="i" style="white-space: nowrap")
-              span.has-text-weight-bold btc:
-              =' '
-              b-tooltip(:label="hash")
-                a(:href="getBlockchainLink(hash, 'tx', 'btc')" target="blank" rel="noopener noreferrer") {{ truncateHash(hash) }}
-        b-table-column(field="btc_amount" label="BTC (Payout)" sortable) {{ btcFormat(props.row.btc_amount) }}
-        b-table-column(field="simba_amount" label="SIMBA" sortable) {{ simbaFormat(props.row.simba_amount) }}
-        b-table-column(field="actions" label="Actions")
-          button.manual-btn(:disabled="props.row.status !== 'processing'" @click="makeDecision('pay', props.row._id)") pay
-          button.manual-btn.manual-btn--red(:disabled="props.row.status !== 'processing'" @click="makeDecision('cancel', props.row._id)") cancel
-        //--b-table-column(field="_id" label="ID" width="50" sortable)
-          n-link(:to="`/invoices/${props.row._id}`") {{ truncateHash(props.row._id) }}
-        //--b-table-column(field="user_id" :label="$i18n.t('su_invoices.user_id')" width="50" sortable)
-          n-link(:to="`/users/${props.row.user_id}`") {{ truncateHash(props.row.user_id) }}
-        b-table-column(field="target_btc_address" label="Target BTC")
-          b-tooltip(:label="props.row.target_btc_address")
-            a(:href="getBlockchainLink(props.row.target_btc_address, 'address', 'btc')" target="blank" rel="noopener noreferrer") {{ truncateHash(props.row.target_btc_address) }}
-        b-table-column(field="status" :label="$i18n.t('su_invoices.status')" sortable) {{ props.row.status }}
+          span.ml-1 {{ $t('su_payouts_mm.processing_only') }}
+        button.btn--outlined(@click="$fetch") {{ $t('su_payouts_mm.refresh') }}
+      b-table(:loading="isLoading" :data="invoicesToView" hoverable paginated per-page="20" default-sort="created_at" default-sort-direction="desc").mt-4
+        template(slot-scope="props")
+          b-table-column(field="created_at" :label="$i18n.t('su_payouts_mm.date')" width="140" sortable)
+            span.is-size-7 {{ timestampFromUtc(props.row.created_at) }}
+          b-table-column(field="_id" label="ID" sortable)
+            n-link(:to="`/invoices/${props.row._id}`") {{ truncateHash(props.row._id, 4, 6) }}
+          b-table-column(field="tx_hashes" :label="$i18n.t('su_payouts_mm.transactions')" width="200")
+            div
+              div(v-for="(hash, i) in props.row.eth_tx_hashes" :key="i" style="white-space: nowrap")
+                span.has-text-weight-bold eth:
+                =' '
+                b-tooltip(:label="hash")
+                  a(:href="getBlockchainLink(hash, 'tx', 'eth')" target="blank" rel="noopener noreferrer") {{ truncateHash(hash) }}
+            div.mt-2
+              div(v-for="(hash, i) in props.row.btc_tx_hashes" :key="i" style="white-space: nowrap")
+                span.has-text-weight-bold btc:
+                =' '
+                b-tooltip(:label="hash")
+                  a(:href="getBlockchainLink(hash, 'tx', 'btc')" target="blank" rel="noopener noreferrer") {{ truncateHash(hash) }}
+          b-table-column(field="btc_amount" label="BTC" sortable) {{ btcFormat(props.row.btc_amount) }}
+          b-table-column(field="simba_amount" label="SIMBA" sortable width="100") {{ simbaFormat(props.row.simba_amount) }}
+          b-table-column(field="actions" :label="$i18n.t('su_payouts_mm.actions')" width="180")
+            button.manual-btn(:disabled="props.row.status !== 'processing'" @click="makeDecision('pay', props.row._id, props.row.target_btc_address, btcFormat(props.row.btc_amount))") {{ $t('su_payouts_mm.pay') }}
+            button.manual-btn.manual-btn--red(:disabled="props.row.status !== 'processing'" @click="makeDecision('cancel', props.row._id, props.row.target_btc_address, btcFormat(props.row.btc_amount))") {{ $t('su_payouts_mm.cancel') }}
+          b-table-column(field="target_btc_address" :label="$i18n.t('su_payouts_mm.target_address')" width="120")
+            b-tooltip(:label="props.row.target_btc_address")
+              a(:href="getBlockchainLink(props.row.target_btc_address, 'address', 'btc')" target="blank" rel="noopener noreferrer") {{ truncateHash(props.row.target_btc_address) }}
+          b-table-column(field="status" :label="$i18n.t('su_invoices.status')" sortable) {{ $t(`exchange.statuses.${props.row.status}`) }}
 
 </template>
 
@@ -96,12 +91,25 @@
     },
 
     methods: {
-      makeDecision(type, id) {
+      makeDecision(type, id, targetWallet, amount) {
+
+        let message = `<div>ID: <strong>${id}</strong></div>` +
+          `<div class="mt-1">Target address: <strong>${targetWallet}</strong></div>` +
+          `<div class="mt-1">Amount: <strong>${amount}</strong></div>`;
+
+        if(type === 'cancel') {
+          message = `<div class="mb-3">${this.$i18n.t('su_payouts_mm.confirm_cancel_msg')}</div>` + message
+
+        } else if (type === 'pay') {
+          message = `<div class="mb-3">${this.$i18n.t('su_payouts_mm.confirm_pay_msg')}</div>` + message
+        }
+
         this.$buefy.dialog.confirm({
-          message: 'Please confirm your action',
+          title: this.$i18n.t('xpub.confirm_your_action'),
+          message,
           cancelText: this.$i18n.t('other.cancel'),
           confirmText: this.$i18n.t('other.confirm'),
-          type: type === 'cancel' ? 'is-danger' : 'is-primary',
+          type: type === 'cancel' ? 'is-danger' : 'is-success',
           onConfirm: async () => {
             this.isLoading = true
 
@@ -127,7 +135,7 @@
         }
       },
 
-      truncateHash(hash) {
+      truncateHash(hash, fromStart = 6, fromEnd = 12) {
 
         if(!hash) {
           return ''
@@ -135,7 +143,7 @@
           return ''
         }
 
-        return `${hash.substring(0, 6)}...${hash.substring(hash.length - 12)}`
+        return `${hash.substring(0, fromStart)}...${hash.substring(hash.length - fromEnd)}`
       },
 
       changeManualPayoutStatus() {
@@ -168,24 +176,26 @@
   };
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
   .manual-btn
     border: 0
-    background: #028a36
+    background: #0ACA62
     color: #ffffff
-    padding: 4px 8px
+    padding-top: 4px
+    padding-bottom: 4px
     border-radius: 3px
-    display: block
+    margin-right: 4px
     margin-bottom: 4px
-    min-width: 65px
+    width: 70px
     text-align: center
+    font-size: 12px
     &:hover:not(:disabled)
       cursor: pointer
       opacity: 0.9
     &:last-child
       margin-right: 0
     &--red
-      background: #FA172F
+      background: #DC6161
     &:disabled
-      background: #acacac
+      background: #c1c1c1
 </style>

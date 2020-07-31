@@ -1,13 +1,13 @@
 <template lang="pug">
   header.header
     div.columns.is-flex.align-items-center.mb-zero
-      div.column.is-7.is-flex.align-items-center
-        n-link(to='/exchange/')
+      div.column.is-5
+        n-link(to='/exchange/').is-flex.align-items-center.logo-link
           img.logo(src="~/assets/images/SIMBA.svg")
-        div
-          div.logo-text SIMBA
-          div.logo-subtext Swiss Quality Stablecoin
-      div.column.is-5.has-text-right(v-if="user")
+          div
+            div.logo-text SIMBA
+            div.logo-subtext Swiss Quality Stablecoin
+      div.column.is-7.has-text-right(v-if="user")
         ProfileDropdown(:name="`${user.first_name} ${user.last_name}`")
         div.has-text-weight-bold.text-large {{simbaFormat(simbaBalance)}} SIMBA
     div.header-menu.columns.is-flex(v-if="user")
@@ -70,6 +70,13 @@ export default {
 .header
   padding-top: 40px
   padding-bottom: 14px
+.logo-link
+  color: #000000
+  transition: 100ms opacity
+  &:hover
+    opacity: 0.8
+  &:active
+    opacity: 1
 .logo
   margin-right: 20px
   height: 70px
@@ -100,7 +107,6 @@ export default {
   &__img
     margin-right: 10px
     cursor: pointer
-  &__amount
 .pa-0
   padding-top: 0
   padding-bottom: 0

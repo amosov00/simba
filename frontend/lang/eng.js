@@ -311,7 +311,22 @@ export default context => {
       users: 'Users'
     },
     su_payouts_mm: {
-      manage_payouts: 'Manage payouts'
+      manage_payouts: 'Manage payouts',
+      date: "Date",
+      transactions: "Transactions",
+      payout: "Payout",
+      actions: "Actions",
+      target_address: "Payout address",
+      pay: "Pay",
+      cancel: "Cancel",
+      confirm_cancel_msg: "Are you sure you want to CANCEL this invoice?",
+      confirm_pay_msg: "Are you sure you want to PAYOUT on this invoice?",
+      status: "Manual mode",
+      enabled: "Enabled",
+      disabled: "Disabled",
+      change_status: "Change status",
+      processing_only: "With \"Processing\" status only",
+      refresh: "Refresh"
     }
   };
 
