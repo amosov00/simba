@@ -21,7 +21,7 @@ async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
     """Крон для след. этапа пайплайна продажи (отсылка BTC)"""
     meta_manual_payout = await MetaCRUD.find_by_slug(MetaSlugs.MANUAL_PAYOUT)
     # Finish pipeline if manual mode
-    if meta_manual_payout["payload"]["is_active"] is False:
+    if meta_manual_payout["payload"]["is_active"] is True:
         return True
 
     btc_wrapper = BitcoinWrapper()
