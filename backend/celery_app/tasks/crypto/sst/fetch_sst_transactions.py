@@ -18,10 +18,15 @@ async def fetch_and_proceed_sst_contract(self, *args, **kwargs):
 
     transactions = await EthereumTransactionCRUD.find(
         {
-            "contract": SST_CONTRACT.title,
-            "event": SSTContractEvents.Transfer,
-            "user_id": None,
-            "args.from": {"$regex": SST_ADMIN_ADDRESS, "$options": "i"},
+            "$and": [
+                {"contract": SST_CONTRACT.title},
+                {"event": SSTContractEvents.Transfer},
+                {"args.from": {"$regex": SST_ADMIN_ADDRESS, "$options": "i"}},
+                {"$or": [
+                    {"user_id": None},
+                    {"invoice_id": None}
+                ]}
+            ]
         }
     )
     logging.info(f"SST TX to proceed: {len(transactions)}")
@@ -38,10 +43,10 @@ async def fetch_and_proceed_sst_contract(self, *args, **kwargs):
                 {"user_id": user["_id"]}
             )
 
-        elif invoice := await InvoiceCRUD.find_one({"sst_tx_hashes": tx_hash}):
+        if invoice := await InvoiceCRUD.find_one({"sst_tx_hashes": tx_hash}):
             await EthereumTransactionCRUD.update_one(
                 {"_id": transaction["_id"]},
-                {"user_id": invoice["user_id"]}
+                {"invoice_id": invoice["_id"]}
             )
 
     return True

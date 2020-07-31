@@ -52,8 +52,7 @@ class ReferralMechanics:
         full_sst_txs = await EthereumTransactionCRUD.find_many({
             "contract": SST_CONTRACT.title, "transactionHash": {"$in": invoice.sst_tx_hashes}
         }) if invoice.sst_tx_hashes else None
-        import logging;
-        logging.debug(full_sst_txs)
+
         if not full_sst_txs:
             return []
 
