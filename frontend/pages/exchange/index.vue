@@ -9,7 +9,7 @@
         div(v-if="billsToShow.length === 0").no-bills {{ $t('exchange.empty_bills') }}
         n-link(:to="'/exchange/buysell?id=' + item._id" v-for="(item, i) in billsToShow" :key="i").is-flex.bills-table__container
           div {{ item._id }}
-          div {{ item.simba_amount }}
+          div {{ simbaFormat(item.simba_amount) }}
           div {{ (new Date(item.created_at)).toLocaleString() }}
           div {{ getType(item.invoice_type) }}
           div(v-if="!getStatus(item).includes(':')") {{ $t(`exchange.statuses.${getStatus(item)}`) }}
@@ -21,9 +21,12 @@
 <script>
   import moment from 'moment';
 
+  import formatCurrency from "~/mixins/formatCurrency";
+
   export default {
     name: "exchange-index",
     layout: 'main',
+    mixins: [formatCurrency],
     computed: {
       invoiceData() {
         let array_data = JSON.parse(JSON.stringify(this.$store.getters['invoices/invoices'])).reverse();

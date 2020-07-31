@@ -21,7 +21,8 @@
               div {{ el.address }}
               CopyToClipboard(:value_to_copy="el.address").ml-1
           div(v-else-if="field.type === 'addresses'")
-            div(v-if="field.value.length === 0") {{ $t('account_page.list_is_empty') }}
+            div.active-addresses Активные адреса
+            div(v-if="field.value.active.length === 0").mt-1 {{ $t('account_page.list_is_empty') }}
             div(v-for="(el, i) in field.value.active" :key="i" style="height: 36px").is-flex.align-items-center
               div {{ el.address }}
               CopyToClipboard(:value_to_copy="el.address").ml-1
@@ -167,36 +168,36 @@ export default {
 
       // set addresses active + archived
       // Archived addresses (deleted)
-      if(archived.length > 0) {
+      /*if(archived.length > 0) {
+      }*/
 
-        user_data['user_eth_addresses'] = {
-          value: {
-            active: addresses.active.eth,
-            archived: []
-          },
-          editable: false,
-          pre_hidden: false,
-          type: 'addresses'
-        }
-
-        user_data['user_btc_addresses'] = {
-          value: {
-            active: addresses.active.btc,
-            archived: []
-          },
-          editable: false,
-          pre_hidden: false,
-          type: 'addresses'
-        }
-
-        archived.forEach(el => {
-          if(el.signature) {
-            user_data['user_eth_addresses'].value.archived.push(el)
-          } else {
-            user_data['user_btc_addresses'].value.archived.push(el)
-          }
-        })
+      user_data['user_eth_addresses'] = {
+        value: {
+          active: addresses.active.eth,
+          archived: []
+        },
+        editable: false,
+        pre_hidden: false,
+        type: 'addresses'
       }
+
+      user_data['user_btc_addresses'] = {
+        value: {
+          active: addresses.active.btc,
+          archived: []
+        },
+        editable: false,
+        pre_hidden: false,
+        type: 'addresses'
+      }
+
+      archived.forEach(el => {
+        if(el.signature) {
+          user_data['user_eth_addresses'].value.archived.push(el)
+        } else {
+          user_data['user_btc_addresses'].value.archived.push(el)
+        }
+      })
     }
 
     return {
@@ -207,8 +208,10 @@ export default {
 </script>
 
 <style lang="sass">
+.active-addresses
+  color: #0ACA62
 .deleted-addresses
-  color: #bc6464
+  color: #DC6161
 
 .account-field
   margin-left: -10px

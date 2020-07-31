@@ -309,7 +309,22 @@ export default context => {
       users: 'Пользователи'
     },
     su_payouts_mm: {
-      manage_payouts: 'Выплата'
+      manage_payouts: 'Управление выплатами',
+      date: "Дата",
+      transactions: "Транзакции",
+      payout: "Выплата",
+      actions: "Действия",
+      target_address: "Адрес для выплаты",
+      pay: "Оплатить",
+      cancel: "Отменить",
+      confirm_cancel_msg: "Вы действительно хотите отменить эту сделку?",
+      confirm_pay_msg: "Вы действительно хотите произвести оплату по этой сделке?",
+      status: "Ручной режим",
+      enabled: "Включен",
+      disabled: "Выключен",
+      change_status: "Изменить статус",
+      processing_only: "Только со статусом \"В обработке\"",
+      refresh: "Обновить"
     }
   };
 
