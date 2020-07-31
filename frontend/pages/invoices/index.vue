@@ -11,7 +11,7 @@
           n-link(:to="`/invoices/${props.row._id}`") {{ props.row._id }}
         b-table-column(field="user_id" :label="$i18n.t('su_invoices.user_id')" width="50" sortable)
           n-link(:to="`/users/${props.row.user_id}`") {{ (props.row.user_id) }}
-        b-table-column(field="status" :label="$i18n.t('su_invoices.status')"  width="50" sortable) {{ props.row.status }}
+        b-table-column(field="status" :label="$i18n.t('su_invoices.status')"  width="50" sortable) {{ $t(`exchange.statuses.${props.row.status}`) }}
         b-table-column(field="btc_amount" label="BTC"  width="50" sortable) {{ btcFormat(props.row.btc_amount) }}
         b-table-column(field="simba_amount" label="SIMBA"  width="50" sortable) {{ simbaFormat(props.row.simba_amount) }}
 

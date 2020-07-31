@@ -295,7 +295,16 @@ export default context => {
       btc_txs: "BTC транзакции",
       not_available: "Н/Д",
       empty: "Отсутствует(-ют)",
-      sst_tx_hashes: 'Хеши SST транзакций'
+      sst_tx_hashes: 'Хеши SST транзакций',
+      sst_tx_detailed: 'SST транзакции (подробно)',
+      sst_tx_table: {
+        show: 'Показать',
+        hide: 'Скрыть',
+        transactionHash: 'Хеш',
+        amount: 'Вознаграждение',
+        user_id: 'ID пользователя',
+        level: 'Уровень'
+      }
     },
     xpub: {
       confirm_your_action: 'Подтвердите ваше действие',
@@ -309,7 +318,7 @@ export default context => {
       users: 'Пользователи'
     },
     su_payouts_mm: {
-      manage_payouts: 'Управление выплатами',
+      manage_payouts: { full: 'Управление выплатами', short: 'Управл. выплатами' },
       date: "Дата",
       transactions: "Транзакции",
       payout: "Выплата",
