@@ -12,7 +12,7 @@
         div.is-flex.align-items-center.mr-4
           b-switch(v-model="onlyWithProcessingStatus" @input="showProcessingOnly")
           span.ml-1 {{ $t('su_payouts_mm.processing_only') }}
-        button.btn--outlined(@click="$fetch") {{ $t('su_payouts_mm.refresh') }}
+        button.btn--outlined(@click="$fetch" :disabled="isLoading") {{ $t('su_payouts_mm.refresh') }}
       b-table(:loading="isLoading" :data="invoicesToView" hoverable paginated per-page="20" default-sort="created_at" default-sort-direction="desc").mt-4
         template(slot-scope="props")
           b-table-column(field="created_at" :label="$i18n.t('su_payouts_mm.date')" width="140" sortable)
@@ -35,7 +35,7 @@
           b-table-column(field="btc_amount" label="BTC" sortable) {{ btcFormat(props.row.btc_amount) }}
           b-table-column(field="simba_amount" label="SIMBA" sortable width="100") {{ simbaFormat(props.row.simba_amount) }}
           b-table-column(field="actions" :label="$i18n.t('su_payouts_mm.actions')" width="180")
-            button.manual-btn(:disabled="props.row.status !== 'processing'" @click="makeDecision('pay', props.row._id, props.row.target_btc_address, btcFormat(props.row.btc_amount))") {{ $t('su_payouts_mm.pay') }}
+            button.manual-btn(:disabled="props.row.status !== 'processing' || props.row.btc_tx_hashes.length > 0" @click="makeDecision('pay', props.row._id, props.row.target_btc_address, btcFormat(props.row.btc_amount))") {{ $t('su_payouts_mm.pay') }}
             button.manual-btn.manual-btn--red(:disabled="props.row.status !== 'processing'" @click="makeDecision('cancel', props.row._id, props.row.target_btc_address, btcFormat(props.row.btc_amount))") {{ $t('su_payouts_mm.cancel') }}
           b-table-column(field="target_btc_address" :label="$i18n.t('su_payouts_mm.target_address')" width="120")
             b-tooltip(:label="props.row.target_btc_address")
