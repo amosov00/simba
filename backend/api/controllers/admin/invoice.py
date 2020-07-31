@@ -74,7 +74,7 @@ async def admin_invoice_pay(invoice_id: str = Path(...)):
     invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
 
     meta_manual_payout = await MetaCRUD.find_by_slug(MetaSlugs.MANUAL_PAYOUT)
-    if meta_manual_payout["payload"]["is_active"] is True:
+    if meta_manual_payout["payload"]["is_active"] is False:
         raise HTTPException(HTTPStatus.BAD_REQUEST, "payout mode is auto")
 
     if invoice.invoice_type != InvoiceType.SELL or invoice.status != InvoiceStatus.PROCESSING:
