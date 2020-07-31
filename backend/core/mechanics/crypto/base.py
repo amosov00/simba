@@ -28,7 +28,7 @@ class CryptoCurrencyRate(ABC):
 
     @classmethod
     def simba_to_sst(cls, simba_tokens: int) -> int:
-        return round(simba_tokens / cls.SIMBA_IN_SST) # * 10**18
+        return round(simba_tokens / cls.SIMBA_IN_SST) * 10**18
 
 
 class ParseCryptoTransaction:
