@@ -106,7 +106,7 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
 
 @router.get("/referrals/", response_model=UserReferralsResponse)
 async def account_referrals_info(user: User = Depends(get_user)):
-    referrals = await ReferralMechanics(user).fetch_referrals()
+    referrals = await ReferralMechanics(user).fetch_referrals_top_to_bottom()
     transactions = await EthereumTransactionCRUD.find({
         "contract": SST_CONTRACT.title, "user_id": user.id,
     })
@@ -116,6 +116,11 @@ async def account_referrals_info(user: User = Depends(get_user)):
     ]
 
     return {"referrals": referrals, "transactions": transactions}
+
+
+@router.get("/referrals/transactions/")
+async def account_referrals_info(user: User = Depends(get_user)):
+    return []
 
 
 @router.post("/eth-address/")

@@ -3,11 +3,10 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, Path, Query, Response, HTTPException
 from sentry_sdk import capture_exception
-from bson import ObjectId, errors
 
 from database.crud import UserCRUD, InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD, MetaCRUD
-from schemas import InvoiceInDB, InvoiceExtended, InvoiceStatus, InvoiceType, MetaSlugs
-from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler
+from schemas import InvoiceInDB, InvoiceExtended, InvoiceStatus, InvoiceType, MetaSlugs, ReferralTransactionUserID
+from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler, ReferralMechanics
 from core.utils import to_objectid
 
 from config import BTC_HOT_WALLET_ADDRESS
@@ -53,6 +52,18 @@ async def admin_invoice_fetch_one(invoice_id: str = Path(...)):
         ]
     )
     return resp[0] if resp else Response(status_code=404)
+
+
+@invoices_router.get(
+    "/{invoice_id}/sst_transactions/", response_model=List[ReferralTransactionUserID]
+)
+async def admin_invoice_fetch_sst_tx_info(
+        invoice_id: str = Path(...)
+):
+    invoice = await InvoiceCRUD.find_by_id(invoice_id, raise_404=True)
+    invoice = InvoiceInDB(**invoice)
+
+    return await ReferralMechanics.fetch_ref_txs_info_from_invoice(invoice)
 
 
 @invoices_router.post(

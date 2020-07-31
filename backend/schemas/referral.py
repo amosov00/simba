@@ -5,7 +5,7 @@ from pydantic import Field
 from schemas.base import BaseModel, ObjectIdPydantic
 from schemas.user import UserReferralInfo
 
-__all__ = ["Referral", "ReferralInDB", "UserReferralsResponse"]
+__all__ = ["Referral", "ReferralInDB", "UserReferralsResponse", "ReferralTransactionUserID", "ReferralTransactionEmail"]
 
 
 class Referral(BaseModel):
@@ -21,7 +21,14 @@ class ReferralInDB(Referral):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
 
 
-class ReferralTransaction(BaseModel):
+class ReferralTransactionUserID(BaseModel):
+    transactionHash: str = Field(...)
+    amount: int = Field(...)
+    user_id: ObjectIdPydantic = Field(default=None)
+    level: int = Field(default=None)
+
+
+class ReferralTransactionEmail(BaseModel):
     transactionHash: str = Field(...)
     amount: int = Field(...)
     email: str = Field(default=None)
@@ -30,4 +37,4 @@ class ReferralTransaction(BaseModel):
 
 class UserReferralsResponse(BaseModel):
     referrals: List[UserReferralInfo] = Field(default=[])
-    transactions: List[ReferralTransaction] = Field(default=[])
+    transactions: List[ReferralTransactionEmail] = Field(default=[])
