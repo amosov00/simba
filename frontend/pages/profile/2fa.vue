@@ -2,7 +2,11 @@
   div
     div
       button.mt-4.btn(type="button" v-if="!is2fa" @click="show2faModal") {{$t('other.enable')}} 2FA
-      button.mt-4.btn(type="button" v-else @click="disableConfirmation") {{$t('other.disable')}} 2FA
+      div(v-else)
+        div.is-flex.align-items-center
+          img(:src="require('~/assets/images/check.svg')").mr-2
+          span.has-text-weight-bold.is-size-6 {{ $t('account_page.enabled_2fa') }}
+        button.mt-4.btn(type="button" @click="disableConfirmation") {{$t('other.disable')}} 2FA
     div
       b-modal(:active.sync="modal2FA" has-modal-card)
         Modal2FA
