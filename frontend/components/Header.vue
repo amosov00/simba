@@ -72,9 +72,9 @@ export default {
   padding-bottom: 14px
 .logo-link
   color: #000000
-  transition: 100ms opacity
+  transition: 300ms opacity
   &:hover
-    opacity: 0.8
+    opacity: 0.7
   &:active
     opacity: 1
 .logo
