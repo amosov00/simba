@@ -8,7 +8,12 @@
       div.profile-dropdown__content
         n-link(to="/profile/bill/").profile-dropdown__link {{$t('dropdown.bill_details')}}
         n-link(to="/profile/data/").profile-dropdown__link {{$t('dropdown.personal_data')}}
+        n-link(to="/profile/partner/").profile-dropdown__link {{$t('dropdown.partner_program')}}
         n-link(to="/profile/2fa/").profile-dropdown__link {{$t('dropdown.security')}}
+        n-link(to="/invoices" v-if="user.is_superuser").profile-dropdown__link.su-link {{$t('su_invoices.invoices')}}
+        n-link(to="/manage-payouts" v-if="user.is_superuser").profile-dropdown__link.su-link {{ $t('su_payouts_mm.manage_payouts.short')}}
+        n-link(to="/users" v-if="user.is_superuser").profile-dropdown__link.su-link {{$t('su_users.users')}}
+        n-link(to="/xpub" v-if="user.is_superuser").profile-dropdown__link.su-link xPub
       div.profile-dropdown__footer
         a(href="#" @click="logout").profile-dropdown__logout {{$t('dropdown.logout')}}
 </template>
@@ -22,6 +27,11 @@
       name: String
     },
     components: {InlineSvg},
+    computed: {
+      user() {
+        return this.$store.getters.user;
+      }
+    },
     data: () => ({
       showFull: false
     }),
@@ -35,7 +45,6 @@
 
 <style lang="sass">
   .profile-dropdown
-    cursor: pointer
     font-weight: 300
     font-size: 16px
     line-height: 100%
@@ -43,10 +52,12 @@
     display: flex
     flex-direction: column
     border-radius: 10px
-    transition: 100ms all
     margin-left: auto
     position: absolute
     right: -20px
+    z-index: 10
+    height: 100%
+    overflow: hidden
     &__wrapper
       position: relative
       text-align: left
@@ -58,6 +69,7 @@
       &:hover
         color: red
     &__link
+      position: relative
       color: #0060FF
       padding: 4px 20px
       margin-bottom: 2px
@@ -67,7 +79,7 @@
         background-color: #0060FF
         color: #ffffff
     &__content
-      display: none
+      display: flex
       padding: 10px 0
       flex-direction: column
       border-top: 1px solid #E5E5E5
@@ -80,6 +92,7 @@
     &__header
       text-align: left
       padding: 13px 20px 13px 20px
+      cursor: pointer
     &__name
       color: #0060FF
       font-weight: bold
@@ -94,6 +107,7 @@
       display: none
       padding: 10px 20px
     &.profile-dropdown--opened
+      height: auto
       background: #FFFFFF
       box-shadow: -6px 6px 12px rgba(0, 0, 0, 0.12)
       & .profile-dropdown__name
@@ -106,4 +120,7 @@
         display: flex
       & > .profile-dropdown__footer
         display: flex
+
+  .su-link
+    color: #fa0000
 </style>

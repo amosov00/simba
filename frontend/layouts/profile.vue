@@ -71,6 +71,8 @@
       padding-right: 30px
     &__links-block
       padding-left: 20px
+      a
+        white-space: nowrap
   .profile-content
     padding-left: 40px
 

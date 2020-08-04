@@ -1,9 +1,7 @@
 from datetime import datetime
 from typing import Union
 
-from pydantic import Field
-
-from schemas.base import BaseModel, ObjectIdPydantic
+from schemas.base import BaseModel, ObjectIdPydantic, Field
 
 __all__ = [
     "EthereumTransaction",
@@ -42,6 +40,7 @@ class EthereumTransaction(BaseModel):
     event: str = None
     contract: str = None
     fetched_at: datetime = None
+    skip: bool = Field(default=False, description="Skip in search cause transaction is irrelevant in processing")
 
 
 class EthereumTransactionInDB(EthereumTransaction):

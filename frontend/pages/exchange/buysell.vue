@@ -97,10 +97,6 @@
         let single_res = await this.$store.dispatch('invoices/fetchSingle', this.$nuxt.$route.query['id']);
 
         this.$store.commit('exchange/setTradeData', {
-          prop: 'no_create',  value: 'true'
-        })
-
-        this.$store.commit('exchange/setTradeData', {
           prop: 'invoice_id', value: this.$nuxt.$route.query['id']
         })
 

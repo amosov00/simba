@@ -1,12 +1,14 @@
 import logging
 import sys
+from datetime import datetime
 
 import sentry_sdk
 
-from config import ENV, IS_PRODUCTION, BTC_COLD_WALLETS, BTC_COLD_XPUB_SWISS
-from database.crud import UserCRUD, BTCxPubCRUD
+from config import ENV, BTC_COLD_WALLETS, BTC_COLD_XPUB_SWISS
+from config import IS_PRODUCTION
+from database.crud import UserCRUD, BTCxPubCRUD, MetaCRUD
 from database.init import mongo_client
-from schemas import UserCreationNotSafe
+from schemas import UserCreationNotSafe, Meta, MetaSlugs, MetaManualPayoutPayload
 
 if IS_PRODUCTION:
     admin_user = {
@@ -44,22 +46,28 @@ async def prepopulate_users():
 
 
 async def prepopulate_xpubs():
-    # for wallet in BTC_COLD_WALLETS:
-    #     if not await BTCxPubCRUD.find_by_title(wallet.title):
-    #         await BTCxPubCRUD.insert_one(
-    #             payload={
-    #                 **wallet.dict(exclude={"xpub"}),
-    #                 "xpub": wallet.xpub.get_secret_value(),
-    #             }
-    #         )
+    if IS_PRODUCTION:
+        if not await BTCxPubCRUD.find_by_title(BTC_COLD_XPUB_SWISS.title):
+            await BTCxPubCRUD.insert_one(BTC_COLD_XPUB_SWISS.dict(exclude={"xpub"}))
+    else:
+        for wallet in BTC_COLD_WALLETS:
+            if not await BTCxPubCRUD.find_by_title(wallet.title):
+                await BTCxPubCRUD.insert_one(wallet.dict(exclude={"xpub"}))
+    return True
 
-    if not await BTCxPubCRUD.find_by_title(BTC_COLD_XPUB_SWISS.title):
-        await BTCxPubCRUD.insert_one(
-                    payload={
-                        **BTC_COLD_XPUB_SWISS.dict(exclude={"xpub"}),
-                        "xpub": BTC_COLD_XPUB_SWISS.xpub.get_secret_value(),
-                    }
-                )
+
+async def prepopulate_meta():
+    if not await MetaCRUD.find_by_slug(MetaSlugs.MANUAL_PAYOUT, raise_404=False):
+        await MetaCRUD.insert_one(Meta(
+            slug=MetaSlugs.MANUAL_PAYOUT,
+            payload=MetaManualPayoutPayload(is_active=False).dict()
+        ).dict())
+
+    if not await MetaCRUD.find_by_slug(MetaSlugs.EMAIL_TO_SUPPORT_TIME, raise_404=False):
+        await MetaCRUD.insert_one(Meta(
+            slug=MetaSlugs.EMAIL_TO_SUPPORT_TIME,
+            payload={"sent_at": datetime.now()}
+        ).dict())
     return True
 
 
@@ -83,7 +91,14 @@ async def prepopulate_db():
     try:
         await prepopulate_xpubs()
     except Exception as e:
-        logging.error(f"Unable to create users, error {e.__class__.__name__}")
+        logging.error(f"Unable to create xpubs, error {e.__class__.__name__}")
+        sentry_sdk.capture_exception(e)
+        sys.exit(1)
+
+    try:
+        await prepopulate_meta()
+    except Exception as e:
+        logging.error(f"Unable to create meta, error {e.__class__.__name__}")
         sentry_sdk.capture_exception(e)
         sys.exit(1)
 

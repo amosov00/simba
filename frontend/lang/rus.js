@@ -93,15 +93,16 @@ export default context => {
       bill_details: "Реквизиты",
       personal_data: "Мои данные",
       security: "Безопасность",
+      partner_program: 'Партнер. программа',
       logout: "Выход"
     },
     socials: {
       facebook: "https://www.facebook.com/simbastorageRU",
-      bitcoin: "https://bitcointalk.org/index.php?action=profile;u=2816745",
+      bitcoin: "https://bitcointalk.org/index.php?topic=5260056.msg54734523#msg54734523",
       instagram: "https://www.instagram.com/simbastorageRU",
       medium: "https://medium.com/@simbastorage",
       zen: "https://zen.yandex.ru/simba",
-      reddit: "https://www.reddit.com/r/simbastorage",
+      reddit: "https://www.reddit.com/r/simba_official/",
       twitter: "https://twitter.com/SWISSSST",
       vk: "https://vk.com/simbastorage",
       telegram: "https://t.me/simbastorage",
@@ -230,6 +231,8 @@ export default context => {
       last_name: 'Фамилия',
       save: 'Сохранить',
       copied_to_clipboard: 'Скопировано в буфер обмена',
+      search: 'Поиск',
+      search_empty_results: 'Нет результатов'
     },
     about: {
       company_goal: "Цель компании",
@@ -268,7 +271,8 @@ export default context => {
       not_available: 'Н/Д',
       account_info: 'Учетная запись',
       account_changed_success: 'Данные учетной записи успешно изменены!',
-      account_changed_error: 'Не удалось изменить данные учетной записи!'
+      account_changed_error: 'Не удалось изменить данные учетной записи!',
+      deleted_addresses: 'Архивные адреса (удаленные)'
     },
     su_invoices: {
       invoices: 'Сделки',
@@ -291,7 +295,16 @@ export default context => {
       btc_txs: "BTC транзакции",
       not_available: "Н/Д",
       empty: "Отсутствует(-ют)",
-      sst_tx_hashes: 'Хеши SST транзакций'
+      sst_tx_hashes: 'Хеши SST транзакций',
+      sst_tx_detailed: 'SST транзакции (подробно)',
+      sst_tx_table: {
+        show: 'Показать',
+        hide: 'Скрыть',
+        transactionHash: 'Хеш',
+        amount: 'Вознаграждение',
+        user_id: 'ID пользователя',
+        level: 'Уровень'
+      }
     },
     xpub: {
       confirm_your_action: 'Подтвердите ваше действие',
@@ -300,6 +313,27 @@ export default context => {
       status_changed: 'Статус успешно изменен!',
       status_active: 'Активен',
       status_inactive: 'Неактивен',
+    },
+    su_users: {
+      users: 'Пользователи'
+    },
+    su_payouts_mm: {
+      manage_payouts: { full: 'Управление выплатами', short: 'Управл. выплатами' },
+      date: "Дата",
+      transactions: "Транзакции",
+      payout: "Выплата",
+      actions: "Действия",
+      target_address: "Адрес для выплаты",
+      pay: "Оплатить",
+      cancel: "Отменить",
+      confirm_cancel_msg: "Вы действительно хотите отменить эту сделку?",
+      confirm_pay_msg: "Вы действительно хотите произвести оплату по этой сделке?",
+      status: "Ручной режим",
+      enabled: "Включен",
+      disabled: "Выключен",
+      change_status: "Изменить статус",
+      processing_only: "Только со статусом \"В обработке\"",
+      refresh: "Обновить"
     }
   };
 

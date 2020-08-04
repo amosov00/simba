@@ -47,6 +47,7 @@
           message: this.$i18n.t('xpub.confirm_change_status'),
           cancelText: this.$i18n.t('other.cancel'),
           confirmText: this.$i18n.t('other.confirm'),
+          type: xpub.is_active ? 'is-danger' : 'is-primary',
           onConfirm: async () => {
             this.isLoading = true
             if(await this.$store.dispatch('xpub/btcXpubUpdateSingle', data_to_send)) {

@@ -6,13 +6,12 @@ from http import HTTPStatus
 
 import pyotp
 from fastapi.exceptions import HTTPException
+from bson import ObjectId, errors
 
 from database.crud.base import BaseMongoCRUD
 from database.crud.referral import ReferralCRUD
 from core.utils.jwt import decode_jwt_token, encode_jwt_token
-from core.utils.email import Email, MailGunEmail
-from core.utils import to_objectid
-from .base import ObjectId
+from core.utils.email import MailGunEmail
 from schemas.user import (
     User,
     UserCreationSafe,
@@ -24,9 +23,9 @@ from schemas.user import (
     UserRecover,
     UserRecoverLink,
     User2faConfirm,
-    User2faDelete,
-    UserReferralInfo,
+    User2faDelete
 )
+from schemas.base import ObjectIdPydantic
 
 __all__ = ["UserCRUD"]
 
@@ -41,7 +40,31 @@ class UserCRUD(BaseMongoCRUD):
         return await super().find_one(query={"email": email}) if email else None
 
     @classmethod
-    async def check_2fa(cls, user_id: ObjectId, pin_code: str) -> bool:
+    async def find_by_query(cls, q: str) -> list:
+        if q:
+            query = []
+
+            if len(q) == 24:
+                try:
+                    query.append({"_id": ObjectId(q)})
+                except errors.InvalidId:
+                    pass
+
+            if len(q) >= 30:
+                for f in ("user_eth_addresses.address", "user_btc_addresses.address"):
+                    query.append({f: {"$regex": q, "$options": "i"}})
+
+            for f in ("email", "first_name", "last_name"):
+                query.append({f: q})
+
+            query = {"$or": query}
+        else:
+            query = {}
+
+        return await super().find_many(query)
+
+    @classmethod
+    async def check_2fa(cls, user_id: Union[ObjectId, ObjectIdPydantic], pin_code: str) -> bool:
         user = await cls.find_by_id(user_id)
         totp = pyotp.TOTP(user["secret_2fa"])
         current_pin_code = totp.now()

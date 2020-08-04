@@ -63,7 +63,7 @@ export default {
     await this.$axios
       .get(
         `https://cors-anywhere.herokuapp.com/http://${networkAPI}.etherscan.io/api?module=account&action=tokentx&address=${window.ethereum.selectedAddress}&startblock=0&endblock=999999999&sort=desc&apikey=HSZVFZ1WQ255V3CIJYSPVI3PB3BGSSIYAH`
-      )
+      , { timeout: 30 * 1000 })
       .then(res => {
         this.tableData = res.data.result
           .filter(

@@ -13,12 +13,12 @@ class BlockCypherAPIWrapper(BlockCypherBaseAPIWrapper):
         return await self.request(endpoint, "POST", {"count": quantity}, with_token=True)
 
     async def fetch_address_info(self, address_hash: str) -> Optional[BTCAddress]:
-        endpoint = f"/addrs/{address_hash}/"
+        endpoint = f"/addrs/{address_hash}"
         res = await self.request(endpoint, with_token=True)
         return BTCAddress(**res) if res else None
 
     async def fetch_transaction_info(self, transaction_hash: str) -> Optional[BTCTransaction]:
-        endpoint = f"/txs/{transaction_hash}/"
+        endpoint = f"/txs/{transaction_hash}"
         res = await self.request(endpoint, params={"limit": 50})
         if not res:
             pass
@@ -35,7 +35,7 @@ class BlockCypherAPIWrapper(BlockCypherBaseAPIWrapper):
         return res
 
     async def current_balance(self, address: str):
-        endpoint = f"/addrs/{address}/"
+        endpoint = f"/addrs/{address}"
         res = await self.request(endpoint, request_type="GET")
         return res.get("final_balance")
 

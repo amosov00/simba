@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Depends, Body, Path
 from api.dependencies import get_user
 from config import HOST_URL, SST_CONTRACT
 from core.mechanics.referrals import ReferralMechanics
-from database.crud import UserCRUD, EthereumTransactionCRUD
+from database.crud import UserCRUD, EthereumTransactionCRUD, UserAddressesArchiveCRUD
 from schemas import (
     UserLogin,
     User,
@@ -27,6 +27,7 @@ from schemas import (
     USER_MODEL_INCLUDE_FIELDS,
     UserBitcoinAddressDelete,
     UserBitcoinAddressInput,
+    UserAddressesArchive
 )
 
 __all__ = ["router"]
@@ -42,7 +43,7 @@ async def account_get_user(user: User = Depends(get_user)):
 @router.post(
     "/login/", response_model=UserLoginResponse,
 )
-async def account_login(data: UserLogin = Body(...),):
+async def account_login(data: UserLogin = Body(...), ):
     return await UserCRUD.authenticate(data.email, data.password, data.pin_code)
 
 
@@ -81,9 +82,9 @@ async def account_recover(data: UserRecoverLink = Body(...)):
 async def account_get_referral_link(user: User = Depends(get_user)):
     params = {"referral_id": user.id}
     url = (
-        urljoin(HOST_URL, "register")
-        + "?"
-        + (urlencode(params) if user.user_eth_addresses != [] else "referral_id=*************")
+            urljoin(HOST_URL, "register")
+            + "?"
+            + (urlencode(params) if user.user_eth_addresses != [] else "referral_id=*************")
     )
     return {"URL": url}
 
@@ -105,7 +106,7 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
 
 @router.get("/referrals/", response_model=UserReferralsResponse)
 async def account_referrals_info(user: User = Depends(get_user)):
-    referrals = await ReferralMechanics(user).fetch_referrals()
+    referrals = await ReferralMechanics(user).fetch_referrals_top_to_bottom()
     transactions = await EthereumTransactionCRUD.find({
         "contract": SST_CONTRACT.title, "user_id": user.id,
     })
@@ -117,9 +118,14 @@ async def account_referrals_info(user: User = Depends(get_user)):
     return {"referrals": referrals, "transactions": transactions}
 
 
+@router.get("/referrals/transactions/")
+async def account_referrals_info(user: User = Depends(get_user)):
+    return []
+
+
 @router.post("/eth-address/")
 async def account_eth_address_add(data: UserEthereumSignedAddress = Body(...), user: User = Depends(get_user)):
-    filtered_addresses = list(filter(lambda o: o.address == data.address, user.user_eth_addresses))
+    filtered_addresses = list(filter(lambda o: o.address.lower() == data.address.lower(), user.user_eth_addresses))
 
     if filtered_addresses:
         raise HTTPException(HTTPStatus.BAD_REQUEST, "address already exists")
@@ -135,12 +141,20 @@ async def account_eth_address_add(data: UserEthereumSignedAddress = Body(...), u
 
 @router.delete("/eth-address/{address}")
 async def account_add_eth_address_delete(address: str = Path(...), user: User = Depends(get_user)):
-    filtered_addresses = list(filter(lambda o: o.address != address, user.user_eth_addresses))
-
-    if len(filtered_addresses) == len(user.user_eth_addresses):
+    addresses_to_save = list(filter(lambda o: o.address.lower() != address.lower(), user.user_eth_addresses))
+    if len(addresses_to_save) == len(user.user_eth_addresses):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Address does not exist")
 
-    await UserCRUD.update_one({"_id": user.id}, {"user_eth_addresses": [i.dict() for i in filtered_addresses]})
+    address_to_delete = list(filter(lambda o: o.address.lower() == address.lower(), user.user_eth_addresses))[0]
+
+    await UserCRUD.update_one({"_id": user.id}, {"user_eth_addresses": [i.dict() for i in addresses_to_save]})
+    await UserAddressesArchiveCRUD.insert_one(
+        UserAddressesArchive(
+            user_id=user.id,
+            address=address_to_delete.address,
+            signature=address_to_delete.signature,
+        ).dict()
+    )
 
     return True
 
@@ -151,7 +165,7 @@ async def account_add_btc_address(user: User = Depends(get_user), data: UserBitc
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin-code")
 
     data.created_at = datetime.now()
-    filtered_addresses = list(filter(lambda o: o.address == data.address, user.user_btc_addresses))
+    filtered_addresses = list(filter(lambda o: o.address.lower() == data.address.lower(), user.user_btc_addresses))
 
     if filtered_addresses:
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Address already exists")
@@ -168,16 +182,24 @@ async def account_add_btc_address(user: User = Depends(get_user), data: UserBitc
 
 @router.delete("/btc-address/")
 async def account_add_btc_address_delete(
-    data: UserBitcoinAddressDelete = Body(...), user: User = Depends(get_user)
+        data: UserBitcoinAddressDelete = Body(...), user: User = Depends(get_user)
 ):
     if user.two_factor and not await UserCRUD.check_2fa(user_id=user.id, pin_code=data.pin_code):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin-code")
 
-    filtered_addresses = list(filter(lambda o: o.address != data.address, user.user_btc_addresses))
+    addresses_to_save = list(filter(lambda o: o.address.lower() != data.address.lower(), user.user_btc_addresses))
 
-    if len(filtered_addresses) == len(user.user_btc_addresses):
+    if len(addresses_to_save) == len(user.user_btc_addresses):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Address does not exist")
 
-    await UserCRUD.update_one({"_id": user.id}, {"user_btc_addresses": [i.dict() for i in filtered_addresses]})
+    address_to_delete = list(filter(lambda o: o.address.lower() == data.address.lower(), user.user_btc_addresses))[0]
+
+    await UserCRUD.update_one({"_id": user.id}, {"user_btc_addresses": [i.dict() for i in addresses_to_save]})
+    await UserAddressesArchiveCRUD.insert_one(
+        UserAddressesArchive(
+            user_id=user.id,
+            address=address_to_delete.address,
+        ).dict()
+    )
 
     return True

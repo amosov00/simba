@@ -93,15 +93,16 @@ export default context => {
       bill_details: "Bill details",
       personal_data: "Personal data",
       security: "Security Settings",
+      partner_program: 'Partner program',
       logout: "Log out"
     },
     socials: {
       facebook: "https://www.facebook.com/simbastorage",
-      bitcoin: "https://bitcointalk.org/index.php?action=profile;u=2816745",
+      bitcoin: "https://bitcointalk.org/index.php?topic=5260057.msg54734561#msg54734561",
       instagram: "https://www.instagram.com/simbastorage/",
       medium: "https://medium.com/@simbastorage",
       zen: "https://zen.yandex.ru/simba",
-      reddit: "https://www.reddit.com/r/simbastorage",
+      reddit: "https://www.reddit.com/r/simba_official/",
       twitter: "https://twitter.com/SWISSSST",
       vk: "https://vk.com/simbastorage",
       telegram: "https://t.me/simbastorage",
@@ -232,6 +233,8 @@ export default context => {
       last_name: 'Last name',
       save: 'Save',
       copied_to_clipboard: 'Copied to clipboard',
+      search: 'Search',
+      search_empty_results: 'No results found'
     },
     about: {
       company_goal: "Company goal",
@@ -270,7 +273,8 @@ export default context => {
       not_available: 'N/A',
       account_info: 'Account information',
       account_changed_success: 'Account data successfully changed!',
-      account_changed_error: 'Error changing account data!'
+      account_changed_error: 'Error changing account data!',
+      deleted_addresses: 'Archived addresses (deleted)'
     },
     su_invoices: {
       invoices: 'Invoices',
@@ -293,7 +297,16 @@ export default context => {
       btc_txs: "BTC transactions",
       not_available: "N/A",
       empty: "Empty",
-      sst_tx_hashes: 'SST transaction hashes'
+      sst_tx_hashes: 'SST transaction hashes',
+      sst_tx_detailed: 'SST transactions (detailed)',
+      sst_tx_table: {
+        show: 'Show',
+        hide: 'Hide',
+        transactionHash: 'Hash',
+        amount: 'Reward',
+        user_id: 'User ID',
+        level: 'Level'
+      }
     },
     xpub: {
       confirm_your_action: 'Confirm your action',
@@ -302,6 +315,28 @@ export default context => {
       status_changed: 'Status successfully changed!',
       status_active: 'Active',
       status_inactive: 'Inactive',
+    },
+    su_users: {
+      users: 'Users',
+
+    },
+    su_payouts_mm: {
+      manage_payouts: { full: 'Payouts management', short: 'Manage payouts' },
+      date: "Date",
+      transactions: "Transactions",
+      payout: "Payout",
+      actions: "Actions",
+      target_address: "Payout address",
+      pay: "Pay",
+      cancel: "Cancel",
+      confirm_cancel_msg: "Are you sure you want to CANCEL this invoice?",
+      confirm_pay_msg: "Are you sure you want to PAYOUT on this invoice?",
+      status: "Manual mode",
+      enabled: "Enabled",
+      disabled: "Disabled",
+      change_status: "Change status",
+      processing_only: "With \"Processing\" status only",
+      refresh: "Refresh"
     }
   };
 

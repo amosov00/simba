@@ -12,27 +12,12 @@ api_router.include_router(account.router, prefix="/account", tags=["account"])
 api_router.include_router(meta.router, prefix="/meta", tags=["meta"])
 api_router.include_router(invoice.router, prefix="/invoices", tags=["invoice"])
 api_router.include_router(transparency.router, prefix="/transparency", tags=["transparency"])
-
-# Admin
 api_router.include_router(
-    admin.users_router,
-    prefix="/admin/users",
+    admin.admin_router,
+    prefix="/admin",
     tags=["admin"],
-    dependencies=[Depends(user_is_superuser)]
+    dependencies=[Depends(user_is_superuser)],
 )
-api_router.include_router(
-    admin.invoices_router,
-    prefix="/admin/invoices",
-    tags=["admin"],
-    dependencies=[Depends(user_is_superuser)]
-)
-api_router.include_router(
-    admin.btc_xpub_router,
-    prefix="/admin/btc-xpub",
-    tags=["admin"],
-    dependencies=[Depends(user_is_superuser)]
-)
-
 
 if DEBUG:
     api_router.include_router(debug.router, prefix="/debug", tags=["debug"])
