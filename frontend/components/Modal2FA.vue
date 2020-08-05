@@ -26,7 +26,11 @@
     <div class="card-content">
       <div class="title is-5 main-title">{{$t('other.enable')}} 2FA</div>
       <div class="two-fa-step">
-        <div class="title is-6">{{ $t('account_page.two_factor_modal.step1.title')}}</div>
+        <i18n class="title is-6" path="account_page.two_factor_modal.step1.title" tag="div">
+          <template #link>
+            <a href="https://support.google.com/accounts/answer/1066447?co=GENIE.Platform%3DAndroid&hl=en&oco=0" rel="noreferrer noopener" target="_blank">Google Authenticator</a>
+          </template>
+        </i18n>
         <div>{{ $t('account_page.two_factor_modal.step1.subtitle')}}</div>
       </div>
       <div class="two-fa-step">
@@ -35,7 +39,7 @@
       </div>
       <div class="two-fa-step">
         <div class="title is-6">{{ $t('account_page.two_factor_modal.step3.title')}}</div>
-        <div class="is-flex">
+        <div class="is-flex align-items-center">
           <qrcode-vue
             :value="value"
             :size="size"
@@ -72,7 +76,7 @@ export default {
   data() {
     return {
       value: "",
-      size: 160,
+      size: 180,
       confirm2faData: {
         token: '',
         pin_code: null,
@@ -108,6 +112,7 @@ export default {
   color: #DC6161
   width: 220px
   padding-top: 5px
+  font-size: 12px
 
 .smb-input
   border: 1px solid #000000

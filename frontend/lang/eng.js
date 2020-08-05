@@ -277,7 +277,7 @@ export default context => {
       deleted_addresses: 'Archived addresses (deleted)',
       two_factor_modal: {
         step1: {
-          title: '1. Install OTP Mobile App (we recommend Google Authenticator).',
+          title: '1. Install OTP Mobile App (we recommend {link}).',
           subtitle: 'Use an app on your mobile to obtain single-use validation codes, even when your phone is offline. Available on Android, iPhone and Windows Phone.'
         },
         step2: {
