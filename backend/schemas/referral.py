@@ -1,8 +1,8 @@
-from typing import Optional, List
+from typing import Optional, List, Union
 
-from pydantic import Field
+from pydantic import Field, validator
 
-from schemas.base import BaseModel, ObjectIdPydantic
+from schemas.base import BaseModel, ObjectIdPydantic, DecimalPydantic
 from schemas.user import UserReferralInfo
 
 __all__ = ["Referral", "ReferralInDB", "UserReferralsResponse", "ReferralTransactionUserID", "ReferralTransactionEmail"]
@@ -30,9 +30,15 @@ class ReferralTransactionUserID(BaseModel):
 
 class ReferralTransactionEmail(BaseModel):
     transactionHash: str = Field(...)
-    amount: int = Field(...)
+    amount: DecimalPydantic = Field(...)
     email: str = Field(default=None)
     level: int = Field(default=None)
+
+    @validator("email")
+    def hide_email(cls, v):
+        if v:
+            v = "@".join([v.split("@")[0], "***.***"])
+        return v
 
 
 class UserReferralsResponse(BaseModel):

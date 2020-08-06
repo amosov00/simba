@@ -111,9 +111,7 @@ async def account_referrals_info(user: User = Depends(get_user)):
         "contract": SST_CONTRACT.title, "user_id": user.id,
     })
 
-    transactions = [
-        {"transactionHash": tx["transactionHash"], "amount": tx["args"]["value"]} for tx in transactions
-    ]
+    transactions = await ReferralMechanics(user).fetch_sst_tx_info_for_user(transactions)
 
     return {"referrals": referrals, "transactions": transactions}
 

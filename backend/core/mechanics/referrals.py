@@ -1,8 +1,10 @@
-from typing import List
+from typing import List, Optional
 
-from database.crud import UserCRUD, ReferralCRUD, EthereumTransactionCRUD
+from bson import ObjectId
+
+from database.crud import UserCRUD, ReferralCRUD, EthereumTransactionCRUD, InvoiceCRUD
 from config import SST_CONTRACT
-from schemas import User, InvoiceInDB, EthereumTransactionInDB
+from schemas import User, InvoiceInDB, EthereumTransactionInDB, ReferralTransactionEmail
 
 __all__ = ["ReferralMechanics"]
 
@@ -16,8 +18,21 @@ class ReferralMechanics:
         self.referrals_transactions: List[dict] = []
 
     async def _fetch_referral_object(self):
-        self.referral_object = await ReferralCRUD.find_by_user_id(self.user.id)
+        if not self.referral_object:
+            self.referral_object = await ReferralCRUD.find_by_user_id(self.user.id)
+
         return self.referral_object
+
+    @staticmethod
+    def get_user_level_from_referral_object(user_id: ObjectId, referral_object: dict) -> Optional[int]:
+        if not referral_object:
+            return None
+
+        for key, val in referral_object.items():
+            if key.startswith("ref") and val == user_id:
+                return int(key[-1])
+
+        return None
 
     async def _parse_sst_txs_with_user(self) -> list:
         parsed_txs = []
@@ -83,7 +98,6 @@ class ReferralMechanics:
     async def fetch_referrals_top_to_bottom(self) -> list:
         """
         Поиск приглашенных рефералов сверху вниз по вершинам
-        :return:
         """
         for ref_level in range(1, 6):
             ref_objects = await ReferralCRUD.find_many({f"ref{ref_level}": self.user.id})
@@ -96,3 +110,39 @@ class ReferralMechanics:
                 self.referrals.extend(users)
 
         return self.referrals
+
+    async def fetch_sst_tx_info_for_user(self, transactions: List[dict]) -> list:
+        """
+        Поиск информации (уровень, сумма и почта связанного юзера) по SST транзакциям
+        """
+        resp = []
+
+        for transaction in transactions:
+            transaction = EthereumTransactionInDB(**transaction)
+            amount = transaction.args.get("value")
+            invoice = await InvoiceCRUD.find_by_id(transaction.invoice_id)
+
+            if not invoice:
+                resp.append(
+                    ReferralTransactionEmail(
+                        transactionHash=transaction.transactionHash,
+                        amount=amount
+                    )
+                )
+                continue
+
+            connected_user = await UserCRUD.find_by_id(invoice["user_id"])
+            connected_user_ref_object = await ReferralCRUD.find_by_user_id(connected_user["_id"])
+
+            level = self.get_user_level_from_referral_object(connected_user["_id"], connected_user_ref_object)
+
+            resp.append(
+                ReferralTransactionEmail(
+                    transactionHash=transaction.transactionHash,
+                    amount=amount,
+                    email=connected_user.get("email"),
+                    level=level
+                )
+            )
+
+        return resp
