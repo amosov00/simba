@@ -1,12 +1,10 @@
-from typing import List, Literal
+from typing import Literal
 
 from fastapi import APIRouter, Query
-from pydantic import parse_obj_as
 
 from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
-from schemas import TransparencyTransactionResponse, InvoiceStatus, InvoiceType, BTCTransactionOutputs
-from core.mechanics import InvoiceMechanics
-from config import BTC_COLD_WALLETS, BTC_HOT_WALLET_ADDRESS
+from schemas import TransparencyTransactionResponse, InvoiceStatus, InvoiceType
+from config import BTC_COLD_WALLETS
 
 __all__ = ["router"]
 
@@ -15,14 +13,33 @@ router = APIRouter()
 
 @router.get("/")
 async def transparency_totals():
-    response = {}
+    response = {
+        "total_assets": 0,
+        "total_recieved": 0,
+        "total_paid_out": 0,
+        **{wallet.title: 0 for wallet in BTC_COLD_WALLETS}
+    }
 
-    cold_wallets_meta = await BTCAddressCRUD.aggregate([
-        {"$match": {"address": {"$ne": BTC_HOT_WALLET_ADDRESS}}},
-        {"$group": {"_id": "$cold_wallet_title", "received": {"$sum": "$total_received"}}}
-    ])
-    cold_wallets_meta = [i for i in cold_wallets_meta if i.get("_id") is not None]
-    total_recieved = sum([i["received"] for i in cold_wallets_meta])
+    invoices_buy = await InvoiceCRUD.aggregate(
+        [
+            {"$match": {
+                "status": InvoiceStatus.COMPLETED,
+                "invoice_type": InvoiceType.BUY,
+            }},
+            {"$lookup": {
+                "from": BTCAddressCRUD.collection,
+                "localField": "target_btc_address",
+                "foreignField": "address",
+                "as": "btc_address_obj",
+            }},
+        ]
+    )
+    for invoice in invoices_buy:
+        response["total_recieved"] += invoice["btc_amount_proceeded"] if invoice.get("btc_amount_proceeded") else 0
+        if invoice["btc_address_obj"]:
+            cold_wallet_title = invoice["btc_address_obj"][0]["cold_wallet_title"]
+            if cold_wallet_title in response.keys():
+                response[cold_wallet_title] += invoice["btc_amount_proceeded"]
 
     invoices_sell = await InvoiceCRUD.aggregate(
         [
@@ -36,20 +53,8 @@ async def transparency_totals():
             }},
         ]
     )
-    total_paid_out = invoices_sell[0]["btc_amount_proceeded"] if invoices_sell else 0
-
-    response.update(
-        {
-            "total_assets": total_recieved - total_paid_out,
-            "total_recieved": total_recieved,
-            "total_paid_out": total_paid_out,
-        }
-    )
-
-    for cold_wallet in BTC_COLD_WALLETS:
-        meta = list(filter(lambda o: o["_id"] == cold_wallet.title, cold_wallets_meta))
-        received = meta[0].get("received") if meta else 0
-        response.update({cold_wallet.title: {"received": received}})
+    response["total_paid_out"] = invoices_sell[0]["btc_amount_proceeded"] if invoices_sell else 0
+    response["total_assets"] = response["total_recieved"] - response["total_paid_out"]
 
     return response
 
@@ -78,22 +83,11 @@ async def transparency_transactions(
     )
     for invoice in invoices:
         for btc_tx in invoice["btc_txs"]:
-            target_btc_address = invoice["target_btc_address"] if tx_type == "received" else BTC_HOT_WALLET_ADDRESS
-
-            if target_btc_address not in btc_tx["addresses"]:
-                continue
-
-            amount_from_outputs = InvoiceMechanics.get_incoming_btc_from_outputs(
-                parse_obj_as(List[BTCTransactionOutputs], btc_tx["outputs"]), target_btc_address
-            ) or 0
-
-            amount = amount_from_outputs if tx_type == "received" else btc_tx["total"] - amount_from_outputs
-
-            response["total"] += amount
+            response["total"] += invoice["btc_amount_proceeded"]
             response["transactions"].append({
                 "hash": btc_tx["hash"],
                 "received": btc_tx["received"],
-                "amount": amount
+                "amount": invoice["btc_amount_proceeded"]
             })
 
     return response

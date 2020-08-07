@@ -234,7 +234,7 @@ export default context => {
       save: 'Save',
       copied_to_clipboard: 'Copied to clipboard',
       search: 'Search',
-      search_empty_results: 'No results found'
+      search_empty_results: 'No results found',
     },
     about: {
       company_goal: "Company goal",
@@ -274,7 +274,27 @@ export default context => {
       account_info: 'Account information',
       account_changed_success: 'Account data successfully changed!',
       account_changed_error: 'Error changing account data!',
-      deleted_addresses: 'Archived addresses (deleted)'
+      deleted_addresses: 'Archived addresses (deleted)',
+      two_factor_modal: {
+        step1: {
+          title: '1. Install OTP Mobile App (we recommend {link}).',
+          subtitle: 'Use an app on your mobile to obtain single-use validation codes, even when your phone is offline. Available on Android, iPhone and Windows Phone.'
+        },
+        step2: {
+          title: '2. Attention!',
+          subtitle: 'The code in Step 3 should be saved to restore access to your personal account, if you lose your device or access to application that generates one-time passwords.'
+        },
+        step3: {
+          title: '3. Scan QR Code',
+          subtitle: 'If you unable to scan the QR code, please enter this code manually into the app.'
+        },
+        attention: 'THIS IS BACKUP CODE. PLEASE SAVE IT ON A PAPER CAREFULLY',
+        step4: {
+          title: '4. Enter the code generated in your App'
+        },
+        six_digit_code: '6 digit code'
+      },
+      enabled_2fa: 'Enabled 2FA'
     },
     su_invoices: {
       invoices: 'Invoices',
