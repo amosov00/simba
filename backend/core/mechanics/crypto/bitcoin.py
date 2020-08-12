@@ -5,22 +5,22 @@ from fastapi import HTTPException
 from pycoin.coins.tx_utils import create_signed_tx
 from sentry_sdk import capture_message
 
-from config import BTC_HOT_WALLET_ADDRESS, BTC_HOT_WALLET_WIF
 from core.integrations.blockcypher import BlockCypherAPIWrapper
 from core.integrations.pycoin_wrapper import PycoinWrapper
 from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
 from schemas import User, InvoiceInDB, InvoiceStatus, BTCTransaction, BTCAddress, ObjectIdPydantic
 from .base import CryptoValidation, ParseCryptoTransaction
+from config import BTC_HOT_WALLET_ADDRESS, BTC_HOT_WALLET_WIF, BTC_FEE
 
 
 class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
-    FEE = 10000
     BTC_HOT_WALLET_WIF = BTC_HOT_WALLET_WIF
     BTC_HOT_WALLET_ADDRESS = BTC_HOT_WALLET_ADDRESS
 
     def __init__(self):
         self.api_wrapper = BlockCypherAPIWrapper()
-        self.service_wallet_balance = 0
+        self.hot_wallet_balance = 0
+        self.multisig_wallet_balance = 0
 
     @staticmethod
     def _validate_payables(payables: List[Tuple[str, int]]) -> bool:
@@ -31,6 +31,13 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
                 raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, "Invalid payable")
 
         return True
+
+    @classmethod
+    async def create_wallet_address(cls, invoice: InvoiceInDB, user: User):
+        return await PycoinWrapper(user=user, invoice=invoice).generate_new_address()
+
+    async def fetch_transaction(self, transaction_hash: str) -> BTCTransaction:
+        return await self.api_wrapper.fetch_transaction_info(transaction_hash)
 
     async def fetch_address_and_save(
             self,
@@ -62,7 +69,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         address from - адрес отправляющего кошелька
         :return:
         """
-        btc_difference = self.service_wallet_balance - amount - fee
+        btc_difference = self.hot_wallet_balance - amount - fee
         destination_payable = (destination_address, amount)
         difference_payable = (address_from, btc_difference)
 
@@ -76,8 +83,8 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         destination_payables - Payable клиентского кошелька
         Wif передавать в формате [<wif>, ]
         """
-        fee = fee or self.FEE
-        self.service_wallet_balance = await self.api_wrapper.current_balance(self.BTC_HOT_WALLET_ADDRESS)
+        fee = fee or BTC_FEE
+        self.hot_wallet_balance = await self.api_wrapper.current_balance(self.BTC_HOT_WALLET_ADDRESS)
         spendables = await self.api_wrapper.get_spendables(self.BTC_HOT_WALLET_ADDRESS)
         payables = self.proceed_payables(address, amount, self.BTC_HOT_WALLET_ADDRESS, fee)
 
@@ -98,28 +105,3 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         result = result.get("tx")
         return BTCTransaction(**result) if result else None
 
-    async def _create_wallet_address(self, invoice: dict):
-        """ TODO Deprecated, delete after 15/07/20 """
-        resp = await self.api_wrapper.create_wallet_address(1)
-
-        if "errors" in resp:
-            capture_message("error while creating wallet")
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "error while creating wallet")
-
-        address = resp["chains"][0]["chain_addresses"][0]
-        address_full_info = await self.api_wrapper.fetch_address_info(address.get("address"))
-        address_full_info.invoice_id = invoice["_id"]
-        address_full_info.public_key = address.get("public")
-        address_full_info.path = address.get("path")
-
-        await BTCAddressCRUD.insert_one(address_full_info.dict())
-        await InvoiceCRUD.update_one({"_id": invoice["_id"]}, {"target_btc_address": address_full_info.address})
-
-        return address_full_info.address
-
-    @classmethod
-    async def create_wallet_address(cls, invoice: InvoiceInDB, user: User):
-        return await PycoinWrapper(user=user, invoice=invoice).generate_new_address()
-
-    async def fetch_transaction(self, transaction_hash: str) -> BTCTransaction:
-        return await self.api_wrapper.fetch_transaction_info(transaction_hash)

@@ -1,5 +1,4 @@
-from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 from pycoin.coins.Tx import Tx
 
@@ -39,8 +38,23 @@ class BlockCypherAPIWrapper(BlockCypherBaseAPIWrapper):
         res = await self.request(endpoint, request_type="GET")
         return res.get("final_balance")
 
-    async def push_raw_tx(self, tx: Tx):
-        return self.broadcast_tx(tx)
+    async def decode_tx(self, tx: Union[str, Tx]):
+        if isinstance(tx, Tx):
+            tx = tx.as_hex()
+
+        endpoint = "/txs/decode"
+        data = {"tx": tx}
+        resp = await self.request(endpoint, request_type="POST", data=data, with_token=False)
+        return BTCTransaction(**resp) if resp else None
+
+    async def push_raw_tx(self, tx: Union[str, Tx]):
+        if isinstance(tx, Tx):
+            tx = tx.as_hex()
+
+        endpoint = "/txs/push"
+        data = {"tx": tx}
+        resp = await self.request(endpoint, request_type="POST", data=data, with_token=False)
+        return BTCTransaction(**resp) if resp else None
 
     async def get_spendables(self, address: str):
-        return self.spendables_for_address(address)
+        return [i.as_dict() for i in self.spendables_for_address(address)]

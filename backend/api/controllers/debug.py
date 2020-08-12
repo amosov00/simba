@@ -41,6 +41,13 @@ async def debug_get():
 
 @router.get("/sst/")
 async def debug_get():
+    inst = SSTWrapper(None)
+    sst = 32 * 10**18
+    period = 2500000
+    tx = await inst._freeze_and_transfer(
+        "0xeab67ecf3d5404fee42e18702f60b0e7defd269d", sst, period
+    )
+    print(tx)
     return None
 
 
