@@ -1,7 +1,7 @@
 from typing import List, Literal, Optional
 from http import HTTPStatus
 
-from fastapi import APIRouter, Path, Query, Response, HTTPException
+from fastapi import APIRouter, Path, Query, Response, HTTPException, Body
 from sentry_sdk import capture_exception
 
 from database.crud import UserCRUD, InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD, MetaCRUD
@@ -96,6 +96,30 @@ async def admin_invoice_pay(invoice_id: str = Path(...)):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "failed to send bitcoins")
 
     return await InvoiceCRUD.find_by_id(invoice.id)
+
+
+@invoices_router.get(
+    "/{invoice_id}/multisig/",
+)
+async def admin_invoice_pay(invoice_id: str = Path(...)):
+    invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
+
+    user = await UserCRUD.find_by_id(invoice.id)
+
+    return await InvoiceMechanics(invoice, user).fetch_multisig_transaction_data()
+
+
+@invoices_router.post(
+    "/{invoice_id}/multisig/",
+)
+async def admin_invoice_pay(
+        invoice_id: str = Path(...),
+        transaction_hash: str = Body(...)
+):
+    invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
+    user = await UserCRUD.find_by_id(invoice.id)
+
+    return await InvoiceMechanics(invoice, user).proceed_multisig_transaction(transaction_hash)
 
 
 @invoices_router.post(

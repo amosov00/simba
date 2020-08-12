@@ -42,14 +42,17 @@
               a(:href="getBlockchainLink(props.row.target_btc_address, 'address', 'btc')" target="blank" rel="noopener noreferrer") {{ truncateHash(props.row.target_btc_address) }}
           b-table-column(field="status" :label="$i18n.t('su_invoices.status')" sortable) {{ $t(`exchange.statuses.${props.row.status}`) }}
 
+      b-modal(:active.sync="modalBitcore" has-modal-card)
+        // TODO pass invoice id into modal
+        ModalBitcore
+
+
 </template>
 
 <script>
   import formatDate from "~/mixins/formatDate";
   import formatCurrency from "~/mixins/formatCurrency";
-
-  import moment from 'moment'
-  import _ from 'lodash'
+  import ModalBitcore from "~/components/ModalBitcore";
 
   import invoiceMixins from "~/mixins/invoiceMixins";
 
@@ -57,8 +60,10 @@
     layout: "main",
     middleware: ["adminRequired"],
     mixins: [formatDate, formatCurrency, invoiceMixins],
+    components: {ModalBitcore},
 
     data: () => ({
+      modalBitcore: false,
       onlyWithProcessingStatus: false,
       invoices: [],
       invoicesToView: [],
