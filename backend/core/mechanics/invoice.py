@@ -24,6 +24,7 @@ from schemas import (
     MetaSlugs,
 )
 from config import (
+    IS_PRODUCTION,
     SIMBA_BUY_SELL_FEE,
     SIMBA_MINIMAL_BUY_AMOUNT,
     TRANSACTION_MIN_CONFIRMATIONS,
@@ -370,7 +371,7 @@ class InvoiceMechanics(CryptoValidation):
 
         spendables = await BitcoinWrapper().api_wrapper.get_spendables(BTC_MULTISIG_WALLET_ADDRESS)
         payables = [
-            (self.invoice.target_btc_address, self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE - BTC_FEE)
+            (self.invoice.target_btc_address, self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE)
         ]
         return {
             "spendables": spendables,
@@ -379,6 +380,7 @@ class InvoiceMechanics(CryptoValidation):
             "cosig_1_wif": BTC_MULTISIG_COSIG_1_WIF,
             "cosig_2_pub": BTC_MULTISIG_COSIG_2_PUB,
             "fee": BTC_FEE,
+            "testnet": not IS_PRODUCTION,
         }
 
     async def proceed_multisig_transaction(self, transaction_hash: str) -> InvoiceInDB:

@@ -36,15 +36,15 @@
           b-table-column(field="simba_amount" label="SIMBA" sortable width="100") {{ simbaFormat(props.row.simba_amount) }}
           b-table-column(field="actions" :label="$i18n.t('su_payouts_mm.actions')" width="180")
             button.manual-btn(:disabled="props.row.status !== 'processing' || props.row.btc_tx_hashes.length > 0" @click="makeDecision('pay', props.row._id, props.row.target_btc_address, btcFormat(props.row.btc_amount))") {{ $t('su_payouts_mm.pay') }}
+            <!--        button.manual-btn(:disabled="props.row.status !== 'processing' || props.row.btc_tx_hashes.length > 0" @click="showModalBitcore(props.row._id)") {{ $t('su_payouts_mm.pay') }}-->
             button.manual-btn.manual-btn--red(:disabled="props.row.status !== 'processing'" @click="makeDecision('cancel', props.row._id, props.row.target_btc_address, btcFormat(props.row.btc_amount))") {{ $t('su_payouts_mm.cancel') }}
-            button.manual-btn.manual-btn--red(@click="showModalBitcore(props.row._id)") Modal bitcore
+            button.manual-btn.manual-btn--red(@click="showModalBitcore(props.row._id)") multisig
           b-table-column(field="target_btc_address" :label="$i18n.t('su_payouts_mm.target_address')" width="120")
             b-tooltip(:label="props.row.target_btc_address")
               a(:href="getBlockchainLink(props.row.target_btc_address, 'address', 'btc')" target="blank" rel="noopener noreferrer") {{ truncateHash(props.row.target_btc_address) }}
           b-table-column(field="status" :label="$i18n.t('su_invoices.status')" sortable) {{ $t(`exchange.statuses.${props.row.status}`) }}
 
       b-modal(:active.sync="modalBitcore" has-modal-card)
-        // TODO pass invoice id into modal
         ModalBitcore
 
 
@@ -102,7 +102,7 @@
           parent: this,
           component: ModalBitcore,
           trapFocus: true,
-          props: { invoice_id: invoice }
+          props: { invoiceId: invoice }
         });
       },
 

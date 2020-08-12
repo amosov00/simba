@@ -1,10 +1,10 @@
 <template lang="pug">
   div.invoice-modal
     div.title.is-5.main-title Multisignature transaction
+    div Invoice ID: {{invoiceId}}
     div {{rawTransactionData}}
     div {{rawSignatureData}}
     div {{rawSignedTransaction}}
-    div Invoice ID: {{invoice_id}}
 </template>
 
 <script>
@@ -12,7 +12,7 @@ import {createTransaction} from "~/plugins/bitcoreFunctions"
 
 export default {
   name: "ModalBitcore",
-  props: ["invoice_id"],
+  props: ["invoiceId"],
   data() {
     return {
       rawTransactionData: null,
@@ -25,16 +25,17 @@ export default {
   },
   methods: {
     async fetchData() {
-      this.$axios.get(`/admin/invoices/${this.invoice_id}/multisig`).then(resp => {
+      this.$axios.get(`/admin/invoices/${this.invoiceId}/multisig`).then(resp => {
         let data = resp.data
         try {
-          let {rawTransactionData, rawSignatureData} = createTransaction(
-            data.cosig_1_wif, data.cosig_2_pub, data.spendables, data.payables, data.fee
+          let {rawTransactionData} = createTransaction(
+            data.cosig_1_wif, data.cosig_2_pub, data.spendables, data.payables, data.fee, data.testnet
           )
-          this.rawSignatureData = rawSignatureData;
           this.rawTransactionData = rawTransactionData;
+          this.rawSignatureData = rawSignatureData;
         } catch (e) {
-          this.$buefy.toast.open({type: "is-danger", message: `Error: ${e}`})
+          console.log(e.valueOf())
+          this.$buefy.toast.open({type: "is-danger", message: `${e}`})
         }
       }).catch(resp => {
         resp.response.data.map(i => this.$buefy.toast.open({type: "is-danger", message: `Error: ${i.message}`}))
@@ -42,7 +43,7 @@ export default {
     },
     async sendRawTransaction() {
       let data = {transaction_hash: this.rawSignedTransaction}
-      this.$axios.post(`/admin/invoices/${this.invoice_id}/multisig`, data).then(resp => {
+      this.$axios.post(`/admin/invoices/${this.invoiceId}/multisig`, data).then(resp => {
         // TODO add updated invoice to store
       }).catch(resp => {
         resp.response.data.map(i => this.$buefy.toast.open({type: "is-danger", message: `Error: ${i.message}`}))
