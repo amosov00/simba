@@ -37,6 +37,7 @@
           b-table-column(field="actions" :label="$i18n.t('su_payouts_mm.actions')" width="180")
             button.manual-btn(:disabled="props.row.status !== 'processing' || props.row.btc_tx_hashes.length > 0" @click="makeDecision('pay', props.row._id, props.row.target_btc_address, btcFormat(props.row.btc_amount))") {{ $t('su_payouts_mm.pay') }}
             button.manual-btn.manual-btn--red(:disabled="props.row.status !== 'processing'" @click="makeDecision('cancel', props.row._id, props.row.target_btc_address, btcFormat(props.row.btc_amount))") {{ $t('su_payouts_mm.cancel') }}
+            button.manual-btn.manual-btn--red(@click="showModalBitcore(props.row._id)") Modal bitcore
           b-table-column(field="target_btc_address" :label="$i18n.t('su_payouts_mm.target_address')" width="120")
             b-tooltip(:label="props.row.target_btc_address")
               a(:href="getBlockchainLink(props.row.target_btc_address, 'address', 'btc')" target="blank" rel="noopener noreferrer") {{ truncateHash(props.row.target_btc_address) }}
@@ -96,6 +97,15 @@
     },
 
     methods: {
+      showModalBitcore(invoice) {
+        this.$buefy.modal.open({
+          parent: this,
+          component: ModalBitcore,
+          trapFocus: true,
+          props: { invoice_id: invoice }
+        });
+      },
+
       makeDecision(type, id, targetWallet, amount) {
 
         let message = `<div>ID: <strong>${id}</strong></div>` +

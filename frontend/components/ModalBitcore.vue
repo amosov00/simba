@@ -1,8 +1,10 @@
 <template lang="pug">
-  div.card
-    div.card-content
-      div.title.is-5.main-title Multisignature transaction
-
+  div.invoice-modal
+    div.title.is-5.main-title Multisignature transaction
+    div {{rawTransactionData}}
+    div {{rawSignatureData}}
+    div {{rawSignedTransaction}}
+    div Invoice ID: {{invoice_id}}
 </template>
 
 <script>
@@ -10,7 +12,7 @@ import {createTransaction} from "~/plugins/bitcoreFunctions"
 
 export default {
   name: "ModalBitcore",
-  props: ["invoice"],
+  props: ["invoice_id"],
   data() {
     return {
       rawTransactionData: null,
@@ -23,7 +25,7 @@ export default {
   },
   methods: {
     async fetchData() {
-      this.$axios.get(`/admin/invoices/${this.invoice._id}/multisig`).then(resp => {
+      this.$axios.get(`/admin/invoices/${this.invoice_id}/multisig`).then(resp => {
         let data = resp.data
         try {
           let {rawTransactionData, rawSignatureData} = createTransaction(
@@ -40,7 +42,7 @@ export default {
     },
     async sendRawTransaction() {
       let data = {transaction_hash: this.rawSignedTransaction}
-      this.$axios.post(`/admin/invoices/${this.invoice._id}/multisig`, data).then(resp => {
+      this.$axios.post(`/admin/invoices/${this.invoice_id}/multisig`, data).then(resp => {
         // TODO add updated invoice to store
       }).catch(resp => {
         resp.response.data.map(i => this.$buefy.toast.open({type: "is-danger", message: `Error: ${i.message}`}))
@@ -50,6 +52,10 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style lang="sass" scoped>
+.invoice-modal
+  background: #ffffff
+  max-width: 647px
+  padding: 40px 73px
+  margin: auto
 </style>
