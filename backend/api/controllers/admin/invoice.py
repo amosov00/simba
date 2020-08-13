@@ -7,6 +7,7 @@ from sentry_sdk import capture_exception
 from database.crud import UserCRUD, InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD, MetaCRUD
 from schemas import InvoiceInDB, InvoiceExtended, InvoiceStatus, InvoiceType, MetaSlugs, ReferralTransactionUserID
 from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler, ReferralMechanics
+from core.integrations import SimbaNodeJSWrapper
 from core.utils import to_objectid
 
 from config import BTC_HOT_WALLET_ADDRESS
@@ -103,10 +104,8 @@ async def admin_invoice_pay(invoice_id: str = Path(...)):
 )
 async def admin_invoice_pay(invoice_id: str = Path(...)):
     invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
-
-    user = await UserCRUD.find_by_id(invoice.id)
-
-    return await InvoiceMechanics(invoice, user).fetch_multisig_transaction_data()
+    data = await InvoiceMechanics(invoice).fetch_multisig_transaction_data()
+    return await SimbaNodeJSWrapper().fetch_multisig_transaction(data)
 
 
 @invoices_router.post(
@@ -114,12 +113,11 @@ async def admin_invoice_pay(invoice_id: str = Path(...)):
 )
 async def admin_invoice_pay(
         invoice_id: str = Path(...),
-        transaction_hash: str = Body(...)
+        transaction_hash: dict = Body(...)
 ):
+    transaction_hash = transaction_hash.get("transaction_hash")
     invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
-    user = await UserCRUD.find_by_id(invoice.id)
-
-    return await InvoiceMechanics(invoice, user).proceed_multisig_transaction(transaction_hash)
+    return await InvoiceMechanics(invoice).proceed_multisig_transaction(transaction_hash) if transaction_hash else None
 
 
 @invoices_router.post(

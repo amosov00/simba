@@ -119,17 +119,16 @@ class InvoiceMechanics(CryptoValidation):
         if self.invoice.target_btc_address not in tx.addresses:
             self.errors.append("Invalid target btc address")
 
-        output = list(filter(lambda o: self.invoice.target_btc_address in o.addresses, tx.outputs))
+        output_value = self.get_incoming_btc_from_outputs(tx.outputs, self.invoice.target_btc_address)
 
-        if not output:
+        if not output_value:
             self.errors.append("BTC output is not found")
 
-        output = output[0]
-
-        if self.invoice.invoice_type == InvoiceType.BUY and output.value != self.invoice.btc_amount_proceeded:
+        if self.invoice.invoice_type == InvoiceType.BUY and output_value != self.invoice.btc_amount_proceeded:
             self.errors.append("Invalid btc amount")
 
-        if self.invoice.invoice_type == InvoiceType.SELL and output.value != self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE:
+        if self.invoice.invoice_type == InvoiceType.SELL \
+                and output_value != self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE:
             self.errors.append("Invalid btc amount")
 
         return True
@@ -359,7 +358,7 @@ class InvoiceMechanics(CryptoValidation):
         """ Fetch data for cosigner 1 """
         self.validate()
         await self._validate_for_multisig()
-        # self._raise_exception_if_exists()
+        self._raise_exception_if_exists()
 
         multisig_wallet = await BitcoinWrapper().fetch_address_and_save(BTC_MULTISIG_WALLET_ADDRESS)
 
@@ -374,11 +373,10 @@ class InvoiceMechanics(CryptoValidation):
             (self.invoice.target_btc_address, self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE)
         ]
         return {
+            "cosig1Priv": BTC_MULTISIG_COSIG_1_WIF,
+            "cosig2Pub": BTC_MULTISIG_COSIG_2_PUB,
             "spendables": spendables,
             "payables": payables,
-            "multisig_address": BTC_MULTISIG_WALLET_ADDRESS,
-            "cosig_1_wif": BTC_MULTISIG_COSIG_1_WIF,
-            "cosig_2_pub": BTC_MULTISIG_COSIG_2_PUB,
             "fee": BTC_FEE,
             "testnet": not IS_PRODUCTION,
         }

@@ -1,18 +1,21 @@
 <template lang="pug">
   div.invoice-modal
     div.title.is-5.main-title Multisignature transaction
-    div Invoice ID: {{invoiceId}}
-    div {{rawTransactionData}}
-    div {{rawSignatureData}}
-    div {{rawSignedTransaction}}
+    h3 Invoice ID: {{invoice._id}}
+    b-field(label="Transaction data")
+      b-input(v-model="rawTransactionData" type="textarea" disabled)
+    b-field(label="Signature data")
+      b-input(v-model="rawSignatureData" type="textarea" disabled)
+    b-field(label="Completed raw transaction")
+      b-input(v-model="rawSignedTransaction" type="textarea")
+    b-button(type="is-primary" @click="sendRawTransaction") Broadcast transaction
 </template>
 
 <script>
-import {createTransaction} from "~/plugins/bitcoreFunctions"
 
 export default {
   name: "ModalBitcore",
-  props: ["invoiceId"],
+  props: ["invoice"],
   data() {
     return {
       rawTransactionData: null,
@@ -25,25 +28,17 @@ export default {
   },
   methods: {
     async fetchData() {
-      this.$axios.get(`/admin/invoices/${this.invoiceId}/multisig`).then(resp => {
-        let data = resp.data
-        try {
-          let {rawTransactionData} = createTransaction(
-            data.cosig_1_wif, data.cosig_2_pub, data.spendables, data.payables, data.fee, data.testnet
-          )
-          this.rawTransactionData = rawTransactionData;
-          this.rawSignatureData = rawSignatureData;
-        } catch (e) {
-          console.log(e.valueOf())
-          this.$buefy.toast.open({type: "is-danger", message: `${e}`})
-        }
+      this.$axios.get(`/admin/invoices/${this.invoice._id}/multisig`).then(resp => {
+        this.rawTransactionData = resp.data.rawTransactionData;
+        this.rawSignatureData = resp.data.rawSignatureData;
       }).catch(resp => {
         resp.response.data.map(i => this.$buefy.toast.open({type: "is-danger", message: `Error: ${i.message}`}))
       })
     },
     async sendRawTransaction() {
       let data = {transaction_hash: this.rawSignedTransaction}
-      this.$axios.post(`/admin/invoices/${this.invoiceId}/multisig`, data).then(resp => {
+      this.$axios.post(`/admin/invoices/${this.invoice._id}/multisig`, data).then(resp => {
+        console.log(resp.data)
         // TODO add updated invoice to store
       }).catch(resp => {
         resp.response.data.map(i => this.$buefy.toast.open({type: "is-danger", message: `Error: ${i.message}`}))

@@ -102,6 +102,5 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
             fee=fee,
         )
         result = await self.api_wrapper.push_raw_tx(tx)
-        result = result.get("tx")
         return BTCTransaction(**result) if result else None
 
