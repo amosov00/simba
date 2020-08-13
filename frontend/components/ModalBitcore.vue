@@ -38,8 +38,8 @@ export default {
     async sendRawTransaction() {
       let data = {transaction_hash: this.rawSignedTransaction}
       this.$axios.post(`/admin/invoices/${this.invoice._id}/multisig/`, data).then(resp => {
-        console.log(resp.data)
-        // TODO add updated invoice to store
+        this.$store.commit('invoices/addInvoice', resp.data)
+        this.$buefy.toast.open({type: "is-success", message: `Success!`})
       }).catch(resp => {
         resp.response.data.map(i => this.$buefy.toast.open({type: "is-danger", message: `Error: ${i.message}`}))
       })
