@@ -28,7 +28,7 @@ export default {
   },
   methods: {
     async fetchData() {
-      this.$axios.get(`/admin/invoices/${this.invoice._id}/multisig`).then(resp => {
+      this.$axios.get(`/admin/invoices/${this.invoice._id}/multisig/`).then(resp => {
         this.rawTransactionData = resp.data.rawTransactionData;
         this.rawSignatureData = resp.data.rawSignatureData;
       }).catch(resp => {
@@ -37,7 +37,7 @@ export default {
     },
     async sendRawTransaction() {
       let data = {transaction_hash: this.rawSignedTransaction}
-      this.$axios.post(`/admin/invoices/${this.invoice._id}/multisig`, data).then(resp => {
+      this.$axios.post(`/admin/invoices/${this.invoice._id}/multisig/`, data).then(resp => {
         console.log(resp.data)
         // TODO add updated invoice to store
       }).catch(resp => {
