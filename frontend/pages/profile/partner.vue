@@ -38,22 +38,19 @@
         template(slot="empty")
           div.content.has-text-grey.has-text-centered {{$t('wallet.txs_history_empty')}}
         template(slot-scope="props")
-          b-table-column(field="ref_email" label="Email") {{ props.row.email }}
-          b-table-column(field="transactionHash" label="TxHash" width="100").has-text-primary.overflow-reset
+          b-table-column(field="ref_email" label="Email" width="200") {{ props.row.email }}
+          b-table-column(field="transactionHash" label="TxHash").has-text-primary.overflow-reset
             b-tooltip(:label="props.row.transactionHash" type="is-black" position="is-bottom")
-              a(:href="'https://etherscan.io/tx/' + props.row.transactionHash" target="_blank").text-clamp {{ props.row.transactionHash }}
-
-          //- b-table-column(field="txHash" label="txHash")
-            b-tooltip(:label="props.row.transactionHash" type="is-black" position="is-bottom")
-              a(:href="'https://etherscan.io/tx/' + props.row.transactionHash" target="_blank") {{ props.row.transactionHash }}
+              a(:href="'https://etherscan.io/tx/' + props.row.transactionHash" target="_blank").text-clamp {{ truncateHash(props.row.transactionHash) }}
           b-table-column(field="referral_level" :label="$i18n.t('other.level')") {{ props.row.referral_level }}
-          b-table-column(field="Amount" label="Amount") {{ props.row.amount }}
-      div.level.mt-4
-        p.is-size-5.has-text-weight-bold.level-left Total
-        p.is-size-5.has-text-weight-bold.level-right {{txTotal}}
+          b-table-column(field="Amount" label="Amount") {{ divNum(props.row.amount, 18, true) }}
+      div.level.mt-2
+        p.is-size-5.has-text-weight-bold.level-left Total:
+        p.is-size-5.has-text-weight-bold.level-right {{ txTotal }}
 </template>
 
 <script>
+  import invoiceMixins from "~/mixins/invoiceMixins";
 
   import CopyToClipboard from "~/components/CopyToClipboard";
 
@@ -61,11 +58,14 @@
 
   import moment from 'moment'
 
+  import {Decimal} from 'decimal.js';
+
   export default {
     name: "profile-partner",
     layout: "profile",
     components: { CopyToClipboard, WalletTable },
     middleware: ["contract", "metamask"],
+    mixins: [invoiceMixins],
     computed: {
       codeUnavailable() {
         if(this.ref_code.includes('*')) {
@@ -79,9 +79,11 @@
         return this.$store.getters.user.user_eth_addresses[0].address
       },
       txTotal() {
-        return this.transactions.reduce((total, el) => {
-          return total + el.amount
+        let total = this.transactions.reduce((total, el) => {
+          return Decimal.add(total, el.amount).toJSON()
         }, 0)
+
+        return Decimal.div(total, (10**18)).toFixed(18);
       }
     },
     data: () => ({
@@ -90,6 +92,38 @@
       referrals: []
     }),
     methods: {
+      divNum(num, prec = 18, trunc) {
+
+        let newAmount = (+num / 10**18).toFixed(prec)
+
+        let stringAmount = newAmount.toString();
+
+        if(trunc) {
+          if(stringAmount.includes('.')) {
+            let mantissa = stringAmount.substring(stringAmount.indexOf('.')+1)
+
+            let toCut = 0;
+
+            for(let i = mantissa.length - 1; i !== 0; i--) {
+              if(mantissa[i] === '0') {
+                toCut++
+              } else {
+                break;
+              }
+            }
+
+            if(toCut > 0) {
+              let formated = stringAmount.substring(0, stringAmount.length - toCut);
+              return formated;
+            } else {
+              return stringAmount;
+            }
+          }
+        }
+
+        return newAmount;
+      },
+
       formatDate(date_str) {
         return moment(String(date_str)).format(("DD/MM/YYYY, h:mm:ss"))
       },

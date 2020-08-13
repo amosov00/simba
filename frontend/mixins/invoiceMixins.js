@@ -1,5 +1,14 @@
 export default {
   methods: {
+    truncateHash(hash, fromStart = 6, fromEnd = 12) {
+      if(!hash) {
+        return ''
+      } else if(typeof hash !== 'string') {
+        return ''
+      }
+
+      return `${hash.substring(0, fromStart)}...${hash.substring(hash.length - fromEnd)}`
+    },
     findEthTransactionByEvent(invoice, eventName) {
       return invoice.eth_txs.find((el) => {
         return el.event === eventName

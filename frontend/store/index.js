@@ -45,12 +45,12 @@ export const actions = {
 			.then(res => res.data["referrals"])
 			.catch(() => false);
   },
-  
+
 	async fetchTransactions() {
 		return await this.$axios
 			.get("/account/referrals/")
 			.then(res => res.data["transactions"])
-			.catch(() => false);
+			.catch(() => []);
 	},
 
 	async changeAddresses({}, data) {
