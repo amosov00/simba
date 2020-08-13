@@ -22,6 +22,7 @@ echo "########## Testing env variables ##########"
 ERROR="false"
 
 test -n "$ENV_BACKEND" || ERROR="ENV_BACKEND"
+test -n "$ENV_BACKEND_NODEJS" || ERROR="$ENV_BACKEND_NODEJS"
 test -n "$ENV_FRONTEND" || ERROR="ENV_FRONTEND"
 test -n "$ENV_DB" || ERROR="ENV_DB"
 test -n "$ENV_RABBITMQ" || ERROR="ENV_RABBITMQ"

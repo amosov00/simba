@@ -1,0 +1,9 @@
+FROM node:13.8-slim
+
+RUN mkdir /backend-nodejs/
+WORKDIR /backend-nodejs/
+
+COPY ./backend-nodejs/package.json /backend-nodejs/
+RUN yarn install
+
+CMD ["yarn","dev"]

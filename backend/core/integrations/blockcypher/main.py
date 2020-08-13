@@ -54,6 +54,7 @@ class BlockCypherAPIWrapper(BlockCypherBaseAPIWrapper):
         endpoint = "/txs/push"
         data = {"tx": tx}
         resp = await self.request(endpoint, request_type="POST", data=data, with_token=False)
+        resp = resp.get("tx")
         return BTCTransaction(**resp) if resp else None
 
     async def get_spendables(self, address: str):
