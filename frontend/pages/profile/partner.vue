@@ -11,7 +11,7 @@
             = ' '
             | {{$t('partner.how_to_get_code.p3')}}
           CopyToClipboard(:value_to_copy="ref_code").ml-2
-      div.column.has-text-right
+      div.column.has-text-right(v-if="this.$store.getters.user.user_eth_addresses.length > 0")
         div.is-size-5.has-text-weight-bold {{ $t('partner.your_reward_address')}}:
         div.is-flex.mt-3
           div.has-text-weight-medium() {{ rewardAddress }}
@@ -43,9 +43,9 @@
             b-tooltip(:label="props.row.transactionHash" type="is-black" position="is-bottom")
               a(:href="'https://etherscan.io/tx/' + props.row.transactionHash" target="_blank").text-clamp {{ truncateHash(props.row.transactionHash) }}
           b-table-column(field="referral_level" :label="$i18n.t('other.level')") {{ props.row.referral_level }}
-          b-table-column(field="Amount" label="Amount") {{ divNum(props.row.amount, 18, true) }}
+          b-table-column(field="Amount" :label="$i18n.t('other.amount')") {{ divNum(props.row.amount, 18, true) }}
       div.level.mt-2
-        p.is-size-5.has-text-weight-bold.level-left Total:
+        p.is-size-5.has-text-weight-bold.level-left {{ $i18n.t('other.total')}}
         p.is-size-5.has-text-weight-bold.level-right {{ txTotal }}
 </template>
 

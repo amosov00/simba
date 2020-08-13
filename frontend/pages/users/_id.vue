@@ -24,7 +24,8 @@
             div.active-addresses Активные адреса
             div(v-if="field.value.active.length === 0").mt-1 {{ $t('account_page.list_is_empty') }}
             div(v-for="(el, i) in field.value.active" :key="i" style="height: 36px").is-flex.align-items-center
-              div {{ el.address }}
+              div(v-if="key === 'user_eth_addresses' && i === 0").sst-address {{ el.address }}
+              div(v-else) {{ el.address }}
               CopyToClipboard(:value_to_copy="el.address").ml-1
             div(v-if="field.value.archived.length > 0").mt-3
               div.deleted-addresses {{ $t('account_page.deleted_addresses') }}:
@@ -208,6 +209,23 @@ export default {
 </script>
 
 <style lang="sass">
+.sst-address
+  &::after
+    margin-left: 5px
+    position: relative
+    top: -1px
+    vertical-align: middle
+    line-height: normal
+    display: inline-block
+    content: "SST"
+    letter-spacing: 1px
+    font-size: 9px
+    background-color: #000000
+    font-weight: 600
+    color: #ffffff
+    border-radius: 3px
+    padding: 3px 4px
+
 .active-addresses
   color: #0ACA62
 .deleted-addresses
