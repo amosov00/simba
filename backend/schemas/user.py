@@ -38,6 +38,7 @@ __all__ = [
     "UserBitcoinAddress",
     "UserBitcoinAddressDelete",
     "UserBitcoinAddressInput",
+    "UserWithReferrals"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -258,3 +259,16 @@ class UserReferralInfo(BaseModel):
     @validator("email")
     def hide_email(cls, v):
         return v.split("@")[0] + "@***.**"
+
+
+class UserReferralInfoAdmin(BaseModel):
+    email: str = Field(...)
+    first_name: Optional[str] = Field(default=None)
+    last_name: Optional[str] = Field(default=None)
+    referral_level: int = Field(...)
+    created_at: datetime = Field(...)
+    user_eth_addresses: list = Field(default=[])
+
+
+class UserWithReferrals(User):
+    referrals: List[UserReferralInfoAdmin] = Field(default=[])
