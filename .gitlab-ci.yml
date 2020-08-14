@@ -16,7 +16,7 @@ variables:
   rules: &rules_backend_nodejs
     - if: "$CI_COMMIT_REF_NAME == 'master' || $CI_COMMIT_REF_NAME == 'develop'"
       changes:
-        - "backend/**/*"
+        - "backend-nodejs/**/*"
         - "deployment/dockerfiles/*"
 
 .rules_frontend:
