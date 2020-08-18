@@ -1,3 +1,5 @@
+import {PORT, SENTRY_DSN, COMMIT} from "./config";
+
 const Sentry = require('@sentry/node');
 const express = require('express');
 
@@ -5,9 +7,9 @@ const multisigController = require("./controllers/api/multisig")
 
 const app = express();
 
-Sentry.init({dsn: process.env.SENTRY_DSN_NODEJS, release: process.env.COMMIT});
+Sentry.init({dsn: SENTRY_DSN, release: COMMIT});
 
-app.set('port', process.env.PORT || 8080);
+app.set('port', PORT);
 
 app.use(Sentry.Handlers.requestHandler());
 app.use(Sentry.Handlers.errorHandler());
