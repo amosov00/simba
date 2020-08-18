@@ -39,7 +39,7 @@
     },
 
     async created() {
-      this.min_confirms = process.env.NODE_ENV === 'develop' || 'development' ? 1 : 3
+      // this.min_confirms = process.env.NODE_ENV === 'develop' || 'development' ? 1 : 3
 
       let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id);
       this.received_payment_amount = res.simba_amount_proceeded
