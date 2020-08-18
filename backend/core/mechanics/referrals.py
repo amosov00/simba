@@ -11,6 +11,9 @@ __all__ = ["ReferralMechanics"]
 
 class ReferralMechanics:
     def __init__(self, user: User):
+        if isinstance(user, dict):
+            user = User(**user)
+
         self.user = user
         assert user is not None, "user must be set"
         self.referral_object: dict = dict()

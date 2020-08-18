@@ -16,14 +16,13 @@ class BTCxPub(BaseModel):
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: Optional[datetime] = Field(default=None)
 
-    @validator("xpub_preview", pre=True)
+    @validator("xpub_preview")
     def format_xpub_preview(cls, v, values):
-        if not values.get("xpub"):
-            return ""
+        if v or not values.get("xpub"):
+            return v
 
-        else:
-            prefix = values["xpub"].get_secret_value()[:4]
-            xpub = values["xpub"].get_secret_value()[-4:]
+        prefix = values["xpub"].get_secret_value()[:4]
+        xpub = values["xpub"].get_secret_value()[-4:]
 
         assert len(xpub) == 4 and len(prefix) == 4
 
