@@ -101,6 +101,5 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
             wifs=[self.BTC_HOT_WALLET_WIF, ],
             fee=fee,
         )
-        result = await self.api_wrapper.push_raw_tx(tx)
-        return BTCTransaction(**result) if result else None
+        return await self.api_wrapper.push_raw_tx(tx)
 
