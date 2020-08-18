@@ -40,8 +40,10 @@ class PycoinWrapper:
         chosen_xpub = random.choice(active_xpubs)
         is_active = chosen_xpub["is_active"] if chosen_xpub.get("is_active") is not None else True
         chosen_xpub = list(filter(lambda o: o.title == chosen_xpub.get("title"), BTC_COLD_WALLETS))
-        chosen_xpub.is_active = is_active
-        return chosen_xpub[0] if chosen_xpub else None
+        chosen_xpub = chosen_xpub[0] if chosen_xpub else None
+        if chosen_xpub:
+            chosen_xpub.is_active = is_active
+        return chosen_xpub
 
     @staticmethod
     async def _created_address_is_valid(address: str):
