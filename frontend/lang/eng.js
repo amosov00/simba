@@ -66,7 +66,7 @@ export default context => {
       choose_btc_wallet: {p1: 'Choose BTC wallet', p2: 'to get coins after redeem'},
       choose_eth_wallet: {p1: 'Choose ETH wallet', p2: 'to sell SIMBA'},
       choose_btc_wallet_error: 'Please choose a BTC wallet',
-      transaction_hash: 'Transaction hash',
+      transaction_hash: 'BTC payout',
       confirms: 'Confirmations',
       payment_confirmation_buy: 'As soon as network get 3 confirmations, SIMBA tokens will be issued to your ETH address.',
       payment_confirmation_sell: 'As soon as network get {min_confirms} confirmation(s), BTC will be sent to your address.',
