@@ -1,5 +1,3 @@
-import _ from "lodash";
-
 export const state = () => ({
   invoice_id: '',
   operation: 1,
@@ -13,10 +11,15 @@ export const state = () => ({
   tx_hash: '',
   tx_hash_redeem: '',
   simba_issued: 0,
+  eth_txs: [],
 });
 
 export const getters = {
-  tradeData: s => s
+  tradeData: s => s,
+  ethTxByEvent: s => event => {
+    let filtered = s.eth_txs.filter(i => i.event === event)
+    return filtered.length > 0 ? filtered[0] : null
+  },
 };
 
 export const mutations = {
