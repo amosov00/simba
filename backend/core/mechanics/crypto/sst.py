@@ -6,7 +6,7 @@ from sentry_sdk import capture_message, capture_exception
 
 from config import SST_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
 from core.integrations.ethereum import FunctionsContractWrapper
-from core.utils.email import MailGunEmail
+from core.utils.email import Email
 from database.crud import UserCRUD, ReferralCRUD, InvoiceCRUD
 from schemas import User, InvoiceInDB
 from .base import CryptoValidation, CryptoCurrencyRate
@@ -44,7 +44,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
         try:
             tx_hash = await self.api_wrapper.freeze_and_transfer(customer_address, amount, self.PERIOD)
         except ValueError as e:
-            await MailGunEmail().send_message_to_support(
+            await Email().send_message_to_support(
                 "sst_transfer",
                 invoice=self.invoice,
                 customer_address=customer_address,
