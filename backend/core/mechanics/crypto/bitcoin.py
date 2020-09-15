@@ -40,7 +40,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
             user_id: ObjectIdPydantic = None,
             save: bool = True
     ) -> Optional[BTCAddress]:
-        address_info = await self.api_wrapper.fetch_address_info(address)
+        address_info = await self.api_wrapper.fetch_address_info(address) if address else None
         if address_info:
             address_info.user_id = user_id
             address_info.invoice_id = invoice_id
@@ -119,7 +119,8 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
 
     @classmethod
     async def create_wallet_address(cls, invoice: InvoiceInDB, user: User):
-        return await PycoinWrapper(user=user, invoice=invoice).generate_new_address()
+        inst = await PycoinWrapper(user=user, invoice=invoice).from_active_xpub()
+        return await inst.generate_new_address()
 
     async def fetch_transaction(self, transaction_hash: str) -> BTCTransaction:
         return await self.api_wrapper.fetch_transaction_info(transaction_hash)
