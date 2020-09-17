@@ -7,14 +7,18 @@ from celery_app.celeryconfig import app
 from database.crud import InvoiceCRUD, EthereumTransactionCRUD, UserCRUD
 from schemas import SimbaContractEvents, EthereumTransactionInDB, InvoiceStatus, InvoiceType
 from core.integrations.ethereum import EventsContractWrapper
-from core.mechanics import InvoiceMechanics
+from core.mechanics.invoice import InvoiceMechanics
 from config import SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS
 
 __all__ = ["fetch_and_proceed_simba_contract"]
 
 
 @app.task(
-    name="fetch_and_proceed_simba_contract", bind=True, soft_time_limit=55, time_limit=300,
+    name="fetch_and_proceed_simba_contract",
+    bind=True,
+    retry_backoff=True,
+    autoretry_for=(Exception,),
+    retry_kwargs={"max_retries": 5},
 )
 async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
     """Синхронизация с Simba контрактом"""

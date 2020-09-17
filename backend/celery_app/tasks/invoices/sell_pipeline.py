@@ -15,7 +15,11 @@ __all__ = ["send_btc_to_proceeding_invoices"]
 
 
 @app.task(
-    name="send_btc_to_proceeding_invoices", bind=True, soft_time_limit=55, time_limit=300,
+    name="send_btc_to_proceeding_invoices",
+    bind=True,
+    retry_backoff=True,
+    autoretry_for=(Exception,),
+    retry_kwargs={"max_retries": 5},
 )
 async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
     """Крон для след. этапа пайплайна продажи (отсылка BTC)"""

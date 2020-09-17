@@ -15,7 +15,11 @@ INVOICE_TIMEOUT = timedelta(hours=2)
 
 
 @app.task(
-    name="rescue_stucked_invoices", bind=True, soft_time_limit=55, time_limit=300,
+    name="rescue_stucked_invoices",
+    bind=True,
+    retry_backoff=True,
+    autoretry_for=(Exception,),
+    retry_kwargs={"max_retries": 5},
 )
 async def rescue_stucked_invoices(self, *args, **kwargs):
     # TODO complete

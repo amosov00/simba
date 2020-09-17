@@ -9,7 +9,11 @@ __all__ = ["delete_unused_webhooks"]
 
 
 @app.task(
-    name="delete_unused_webhooks", bind=True, soft_time_limit=42, time_limit=300,
+    name="delete_unused_webhooks",
+    bind=True,
+    retry_backoff=True,
+    autoretry_for=(Exception,),
+    retry_kwargs={"max_retries": 5},
 )
 async def delete_unused_webhooks(self, *args, **kwargs):
     counter = 0
