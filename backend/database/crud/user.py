@@ -180,9 +180,9 @@ class UserCRUD(BaseMongoCRUD):
         if await cls.find_by_email(user.email):
             return None
 
-        await super().insert_one(
+        inserted_id = (await super().insert_one(
             payload={**user.dict(exclude=set(FIELDS_TO_EXCLUDE)), "created_at": datetime.now(), **kwargs}
-        )
+        )).inserted_id
 
         return {"success": True}
 

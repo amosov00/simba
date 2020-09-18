@@ -27,12 +27,12 @@ class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
         try:
             tx_hash = await self.api_wrapper.issue_coins(customer_address, simba_to_issue, btc_tx_hash)
         except ValueError as e:
-            await MailGunEmail().send_message_to_support(
-                "simba_issue",
-                invoice=invoice,
-                customer_address=customer_address,
-                amount=simba_to_issue
-            )
+            # await MailGunEmail().send_message_to_support(
+            #     "simba_issue",
+            #     invoice=invoice,
+            #     customer_address=customer_address,
+            #     amount=simba_to_issue
+            # )
             capture_exception(e)
             raise e
 
