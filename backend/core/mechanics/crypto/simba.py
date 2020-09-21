@@ -53,3 +53,6 @@ class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
             raise e
 
         return tx_hash.hex()
+
+    async def balance_of(self, address: str):
+        return await self.api_wrapper.balance_of(address)

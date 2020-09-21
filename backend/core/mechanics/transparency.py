@@ -1,11 +1,17 @@
 from typing import Literal
 
-from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
-from schemas import InvoiceStatus, InvoiceType
+from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD, MetaCRUD
+from schemas import InvoiceStatus, InvoiceType, MetaSlugs
 from config import BTC_COLD_WALLETS
 
 
 class TransparencyMechanics:
+
+    @classmethod
+    async def fetch_blacklisted_balance(cls) -> int:
+        inst = await MetaCRUD.find_by_slug(MetaSlugs.BLACKLISTED_BALANCE) or {}
+        return inst.get("payload", {}).get("balance", 0)
+
     @classmethod
     async def fetch_xpubs_balance(cls) -> dict:
         xpub_meta = await BTCAddressCRUD.aggregate(
@@ -26,6 +32,7 @@ class TransparencyMechanics:
     @classmethod
     async def fetch_common_info(cls) -> dict:
         response = {
+            "simba_blacklisted": await cls.fetch_blacklisted_balance(),
             "total_assets": 0,
             "total_recieved": 0,
             "total_paid_out": 0,
