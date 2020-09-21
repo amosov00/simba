@@ -15,8 +15,10 @@ class SimbaContractEvents:
     OnIssued = "OnIssued"
     OnRedeemed = "OnRedeemed"
     Transfer = "Transfer"
+    BlacklistedAdded = "BlacklistedAdded"
+    BlacklistedRemoved = "BlacklistedRemoved"
 
-    ALL = (OnIssued, OnRedeemed, Transfer)
+    ALL = (OnIssued, OnRedeemed, Transfer, BlacklistedAdded, BlacklistedRemoved)
 
 
 class SSTContractEvents:

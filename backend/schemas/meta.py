@@ -8,6 +8,7 @@ __all__ = ["Meta", "MetaInDB", "MetaSlugs", "MetaManualPayoutPayload"]
 class MetaSlugs:
     MANUAL_PAYOUT = "manual_payout"
     EMAIL_TO_SUPPORT_TIME = "email_to_support_time"
+    BLACKLISTED_BALANCE = "blacklisted_balance"
 
 
 class MetaManualPayoutPayload(BaseModel):

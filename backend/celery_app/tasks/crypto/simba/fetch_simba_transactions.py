@@ -105,6 +105,13 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
                 counter += 1
                 await InvoiceMechanics(invoice).proceed_new_transaction(transaction)
 
+        elif transaction.event in (SimbaContractEvents.BlacklistedAdded, SimbaContractEvents.BlacklistedRemoved):
+            transaction.skip = True
+            await EthereumTransactionCRUD.update_one(
+                {"_id": transaction.id}, {"skip": transaction.skip}
+            )
+            counter += 1
+
     if counter:
         logging.info(f"Proceeded new {counter} simba transactions")
     return True

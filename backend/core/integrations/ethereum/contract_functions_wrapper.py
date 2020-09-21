@@ -5,12 +5,10 @@ from hexbytes import HexBytes
 from sentry_sdk import capture_message
 from web3 import Web3
 
-from config import SIMBA_BUY_SELL_FEE
+from config import SIMBA_BUY_SELL_FEE, ETH_MAX_GAS
 from core.utils import gas_price_from_ethgasstation
 from schemas import EthereumContract
 from .base_wrapper import EthereumBaseContractWrapper
-
-GAS = 250000
 
 
 class FunctionsContractWrapper(EthereumBaseContractWrapper):
@@ -45,7 +43,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
 
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
             {
-                "gas": GAS,
+                "gas": ETH_MAX_GAS,
                 "gasPrice": await self.get_gas_price(),
                 "from": self.admin_address,
                 "nonce": self._get_nonce(),
@@ -60,7 +58,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
 
         tx = self.contract.functions.redeem(amount, comment).buildTransaction(
             {
-                "gas": GAS,
+                "gas": ETH_MAX_GAS,
                 "gasPrice": await self.get_gas_price(),
                 "from": self.admin_address,
                 "nonce": self._get_nonce(),
@@ -74,7 +72,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         customer_address = Web3.toChecksumAddress(customer_address)
         tx = self.contract.functions.freezeAndTransfer(customer_address, amount, period).buildTransaction(
             {
-                "gas": GAS,
+                "gas": ETH_MAX_GAS,
                 "gasPrice": await self.get_gas_price(),
                 "from": self.admin_address,
                 "nonce": self._get_nonce(),
@@ -82,3 +80,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         )
         signed_txn = self.w3.eth.account.signTransaction(tx, private_key=self.admin_privkey)
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+
+    async def balance_of(self, address: str):
+        address = Web3.toChecksumAddress(address)
+        return self.contract.functions.balanceOf(address).call()
