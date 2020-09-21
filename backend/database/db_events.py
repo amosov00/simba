@@ -4,11 +4,10 @@ from datetime import datetime
 
 import sentry_sdk
 
-from config import ENV, BTC_COLD_WALLETS, BTC_COLD_XPUB_SWISS
-from config import IS_PRODUCTION
-from database.crud import UserCRUD, BTCxPubCRUD, MetaCRUD
+from config import BTC_COLD_WALLETS
+from database.crud import BTCxPubCRUD, MetaCRUD
 from database.init import mongo
-from schemas import UserCreationNotSafe, Meta, MetaSlugs, MetaManualPayoutPayload
+from schemas import Meta, MetaSlugs, MetaManualPayoutPayload
 
 
 async def test_db_connection():
@@ -24,13 +23,11 @@ async def test_db_connection():
 
 
 async def prepopulate_xpubs():
-    if IS_PRODUCTION:
-        if not await BTCxPubCRUD.find_by_title(BTC_COLD_XPUB_SWISS.title):
-            await BTCxPubCRUD.insert_one(BTC_COLD_XPUB_SWISS.dict(exclude={"xpub"}))
-    else:
-        for wallet in BTC_COLD_WALLETS:
-            if not await BTCxPubCRUD.find_by_title(wallet.title):
-                await BTCxPubCRUD.insert_one(wallet.dict(exclude={"xpub"}))
+    for wallet in BTC_COLD_WALLETS:
+        if not wallet.xpub:
+            continue
+        if not await BTCxPubCRUD.find_by_title(wallet.title):
+            await BTCxPubCRUD.insert_one(wallet.dict(exclude={"xpub"}))
     return True
 
 
