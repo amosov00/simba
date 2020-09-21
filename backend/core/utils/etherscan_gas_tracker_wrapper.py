@@ -1,10 +1,10 @@
 import httpx
 from config import ETHERSCAN_API_TOKEN, ETH_MAX_GAS_PRICE_GWEI, GAS_TRACKER_URL
 
-__all__ = ["gas_price_from_ethgasstation"]
+__all__ = ["gasprice_from_etherscan"]
 
 
-async def gas_price_from_ethgasstation() -> int:
+async def gasprice_from_etherscan() -> int:
     async with httpx.AsyncClient() as client:
         try:
             result = (
@@ -17,7 +17,4 @@ async def gas_price_from_ethgasstation() -> int:
         except Exception:
             result = {}
 
-    gas_price = result.get("ProposeGasPrice", ETH_MAX_GAS_PRICE_GWEI)
-
-    # Filter dangerous gas price
-    return min(gas_price, ETH_MAX_GAS_PRICE_GWEI)
+    return int(result.get("ProposeGasPrice", 0))

@@ -6,7 +6,6 @@ from sentry_sdk import capture_message
 from web3 import Web3
 
 from config import SIMBA_BUY_SELL_FEE, ETH_MAX_GAS
-from core.utils import gas_price_from_ethgasstation
 from schemas import EthereumContract
 from .base_wrapper import EthereumBaseContractWrapper
 
@@ -20,11 +19,6 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
 
     def _get_nonce(self):
         return self.w3.eth.getTransactionCount(self.admin_address, "pending")
-
-    @staticmethod
-    async def get_gas_price():
-        actual_gas_price_gwei = await gas_price_from_ethgasstation()
-        return Web3.toWei(actual_gas_price_gwei, "gwei")
 
     def check_min_amount(self, amount: int, *, func_name: str = None, comment: str = None) -> bool:
         if amount < self.simba_fee:
@@ -44,7 +38,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         tx = self.contract.functions.issue(customer_address, amount, comment).buildTransaction(
             {
                 "gas": ETH_MAX_GAS,
-                "gasPrice": await self.get_gas_price(),
+                "gasPrice": await self.get_actual_gasprice(),
                 "from": self.admin_address,
                 "nonce": self._get_nonce(),
             }
@@ -59,7 +53,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         tx = self.contract.functions.redeem(amount, comment).buildTransaction(
             {
                 "gas": ETH_MAX_GAS,
-                "gasPrice": await self.get_gas_price(),
+                "gasPrice": await self.get_actual_gasprice(),
                 "from": self.admin_address,
                 "nonce": self._get_nonce(),
             }
@@ -73,7 +67,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         tx = self.contract.functions.freezeAndTransfer(customer_address, amount, period).buildTransaction(
             {
                 "gas": ETH_MAX_GAS,
-                "gasPrice": await self.get_gas_price(),
+                "gasPrice": await self.get_actual_gasprice(),
                 "from": self.admin_address,
                 "nonce": self._get_nonce(),
             }
