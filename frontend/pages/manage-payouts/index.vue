@@ -35,21 +35,23 @@
           b-table-column(field="btc_amount" label="BTC" sortable) {{ btcFormat(props.row.btc_amount) }}
           b-table-column(field="simba_amount" label="SIMBA" sortable width="100") {{ simbaFormat(props.row.simba_amount) }}
           b-table-column(field="actions" :label="$i18n.t('su_payouts_mm.actions')" width="180")
-            button.manual-btn(:disabled="props.row.status !== 'processing' || props.row.btc_tx_hashes.length > 0" @click="makeDecision('pay', props.row._id, props.row.target_btc_address, btcFormat(props.row.btc_amount))") {{ $t('su_payouts_mm.pay') }}
+            button.manual-btn(:disabled="props.row.status !== 'processing' || props.row.btc_tx_hashes.length > 0" @click="showModalBitcore(props.row)") {{ $t('su_payouts_mm.pay') }}
             button.manual-btn.manual-btn--red(:disabled="props.row.status !== 'processing'" @click="makeDecision('cancel', props.row._id, props.row.target_btc_address, btcFormat(props.row.btc_amount))") {{ $t('su_payouts_mm.cancel') }}
           b-table-column(field="target_btc_address" :label="$i18n.t('su_payouts_mm.target_address')" width="120")
             b-tooltip(:label="props.row.target_btc_address")
               a(:href="getBlockchainLink(props.row.target_btc_address, 'address', 'btc')" target="blank" rel="noopener noreferrer") {{ truncateHash(props.row.target_btc_address) }}
           b-table-column(field="status" :label="$i18n.t('su_invoices.status')" sortable) {{ $t(`exchange.statuses.${props.row.status}`) }}
 
+      b-modal(:active.sync="modalBitcore" has-modal-card)
+        ModalBitcore
+
+
 </template>
 
 <script>
   import formatDate from "~/mixins/formatDate";
   import formatCurrency from "~/mixins/formatCurrency";
-
-  import moment from 'moment'
-  import _ from 'lodash'
+  import ModalBitcore from "~/components/ModalBitcore";
 
   import invoiceMixins from "~/mixins/invoiceMixins";
 
@@ -57,8 +59,10 @@
     layout: "main",
     middleware: ["adminRequired"],
     mixins: [formatDate, formatCurrency, invoiceMixins],
+    components: {ModalBitcore},
 
     data: () => ({
+      modalBitcore: false,
       onlyWithProcessingStatus: false,
       invoices: [],
       invoicesToView: [],
@@ -91,6 +95,15 @@
     },
 
     methods: {
+      showModalBitcore(invoice) {
+        this.$buefy.modal.open({
+          parent: this,
+          component: ModalBitcore,
+          trapFocus: true,
+          props: { invoice: invoice }
+        });
+      },
+
       makeDecision(type, id, targetWallet, amount) {
 
         let message = `<div>ID: <strong>${id}</strong></div>` +

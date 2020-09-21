@@ -3,10 +3,11 @@
 set -e
 
 echo "########## Processing enviroment variables ##########"
-cp "$ENV_BACKEND"   .env.backend
-cp "$ENV_FRONTEND"  .env.frontend
-cp "$ENV_DB"        .env.db
-cp "$ENV_RABBITMQ"  .env.rabbitmq
+cp "$ENV_BACKEND"           .env.backend
+cp "$ENV_BACKEND_NODEJS"    .env.backend-nodejs
+cp "$ENV_FRONTEND"          .env.frontend
+cp "$ENV_DB"                .env.db
+cp "$ENV_RABBITMQ"          .env.rabbitmq
 
 
 echo "########## Pass additional enviroment variables ##########"

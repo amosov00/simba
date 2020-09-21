@@ -5,6 +5,7 @@
       div.xpub__block(v-for="(item, i) in xpub" :key="i" @click="update(item)")
         img(:src="require(`@/assets/images/${flagImages[item.title.toLowerCase()]}`)").xpub__image
         div.xpub__title {{ item.title }}
+        div.xpub__subtitle(v-if="item.xpub_preview") {{ item.xpub_preview }}
         div.xpub__status(:class="{'xpub__status--active': item.is_active}")
           |{{ item.is_active ? $i18n.t('xpub.status_active') : $i18n.t('xpub.status_inactive') }}
       b-loading(:active.sync="isLoading" :is-full-page="false")
@@ -100,4 +101,7 @@
   &__title
     font-size: 18px
     font-weight: 600
+  &__subtitle
+  font-size: 14px
+  font-weight: 400
 </style>

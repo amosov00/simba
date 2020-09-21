@@ -29,6 +29,7 @@ services:
       - ./backend:/backend
     depends_on:
       - db
+      - backend-nodejs
     expose:
       - 8010
     ports:
@@ -36,6 +37,18 @@ services:
     env_file:
       - .env
       - .env.backend
+
+  backend-nodejs:
+    container_name: simba-backend-nodejs-local
+    command: yarn dev
+    build:
+      context: ./
+      dockerfile: deployment/dockerfiles/Dockerfile.backend-nodejs.local
+    volumes:
+      - ./backend-nodejs:/backend-nodejs
+    env_file:
+      - .env
+      - .env.backend-nodejs
 
   celeryworker:
     container_name: simba-celeryworker-local

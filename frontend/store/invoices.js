@@ -11,6 +11,7 @@ export const getters = {
 };
 
 export const mutations = {
+  addInvoice: (state, invoice) => state.invoices = _.uniqBy([invoice, ...state.invoices], '_id'),
   setInvoices: (state, data) => (state.invoices = data)
 };
 

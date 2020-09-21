@@ -25,6 +25,7 @@ services:
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:master-latest
     depends_on:
       - db
+      - backend-nodejs
     expose:
       - 8010
     ports:
@@ -32,6 +33,15 @@ services:
     env_file:
       - .env
       - .env.backend
+
+  backend-nodejs:
+    container_name: simba-backend-nodejs-local
+    restart: unless-stopped
+    command: yarn start
+    image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend-nodejs:master-latest
+    env_file:
+      - .env
+      - .env.backend-nodejs
 
   celeryworker:
     container_name: simba-celeryworker

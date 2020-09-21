@@ -5,7 +5,7 @@
       =' — '
       span {{ user_data.email.value }}
     ValidationObserver(ref="validation_obs" tag="div" v-slot="{ invalid }")
-      div(v-for="(field, key) in user_data").is-flex.account-field
+      div(v-for="(field, key) in user_data" v-if="key !== 'referrals'").is-flex.account-field
         div.account-field__label {{ $t(`account_page.${key}`) }}:
         div.flex-1
           div(v-if="field.type === 'string'")
@@ -24,7 +24,8 @@
             div.active-addresses Активные адреса
             div(v-if="field.value.active.length === 0").mt-1 {{ $t('account_page.list_is_empty') }}
             div(v-for="(el, i) in field.value.active" :key="i" style="height: 36px").is-flex.align-items-center
-              div {{ el.address }}
+              div(v-if="key === 'user_eth_addresses' && i === 0").sst-address {{ el.address }}
+              div(v-else) {{ el.address }}
               CopyToClipboard(:value_to_copy="el.address").ml-1
             div(v-if="field.value.archived.length > 0").mt-3
               div.deleted-addresses {{ $t('account_page.deleted_addresses') }}:
@@ -36,6 +37,16 @@
               b-switch(v-model="editable_data[key]")
             div(v-else) {{ field.value ? $t('account_page.yes') : $t('account_page.no') }}
           div(v-else) {{$t('account_page.not_available')}}
+    div.has-text-weight-bold.is-size-5.mt-4 {{$t('partner.invited')}}
+    b-table(:data="user_data.referrals.value" focusable striped default-sort="created_at" default-sort-direction="desc" per-page="5" :paginated="Boolean(user_data.referrals.value.length)" pagination-simple).mt-3
+      template(slot="empty")
+        div.content.has-text-grey.has-text-centered {{$t('partner.refs_empty')}}
+      template(slot-scope="props")
+        b-table-column(field="created_at" :label="$i18n.t('other.reg_date')" sortable) {{ formatDate(props.row.created_at) }}
+        b-table-column(field="ref_email" label="Email") {{ props.row.email }}
+        b-table-column(field="name" :label="$i18n.t('other.name')") {{ props.row.first_name }} {{ props.row.last_name }}
+        b-table-column(field="referral_level" :label="$i18n.t('other.level')") {{ props.row.referral_level }}
+        b-table-column(field="user_eth_addresses" :label="$i18n.t('account_page.user_eth_addresses')") {{ props.row.user_eth_addresses.reduce((acc, val) => acc + "\n" + val.address, " ") }}
     div.has-text-centered.mt-4
       button(@click="save").btn {{$t('other.save')}}
 </template>
@@ -45,7 +56,8 @@ import formatDate from "~/mixins/formatDate";
 import CopyToClipboard from "~/components/CopyToClipboard";
 import _ from 'lodash'
 
-import { ValidationProvider } from 'vee-validate'
+import {ValidationProvider} from 'vee-validate'
+import moment from "moment";
 
 const editable = ['email', 'email_is_active', 'first_name',
   'last_name', 'is_active', 'is_staff', 'is_superuser', 'two_factor']
@@ -86,8 +98,8 @@ export default {
 
   watch: {
     editable_data: {
-      handler: function(val, oldVal){
-        if(JSON.stringify(val) !== JSON.stringify(this.editable_data_inital)) {
+      handler: function (val, oldVal) {
+        if (JSON.stringify(val) !== JSON.stringify(this.editable_data_inital)) {
           this.disabled_save = false
         } else {
           this.disabled_save = true
@@ -100,10 +112,13 @@ export default {
     report() {
       console.log(this.editable_data)
     },
+    formatDate(date_str) {
+      return moment(String(date_str)).format(("DD/MM/YYYY, h:mm:ss"))
+    },
     async save() {
-      if(await this.$refs.validation_obs.validate()) {
+      if (await this.$refs.validation_obs.validate()) {
         this.$axios.put(`/admin/users/${this.$nuxt.context.route.params.id}/`, this.editable_data).then(res => {
-          if(res.data) {
+          if (res.data) {
             this.$buefy.toast.open({message: this.$i18n.t('account_page.account_changed_success'), type: 'is-primary'})
           } else {
             this.$buefy.toast.open({message: this.$i18n.t('account_page.account_changed_error'), type: 'is-danger'})
@@ -132,8 +147,8 @@ export default {
     delete user_data['user_eth_addresses']
     delete user_data['user_btc_addresses']
 
-    if(!_.isEmpty(user_data)) {
-      for(const prop in user_data) {
+    if (!_.isEmpty(user_data)) {
+      for (const prop in user_data) {
 
         user_data[prop] = {
           value: user_data[prop],
@@ -146,22 +161,22 @@ export default {
 
         const value = user_data[prop]['value'];
 
-        if(typeof value === 'string') {
+        if (typeof value === 'string') {
           prop === 'created_at' ? user_data[prop]['type'] = 'date' : user_data[prop]['type'] = 'string'
-        } else if(Array.isArray(value)) {
+        } else if (Array.isArray(value)) {
           user_data[prop]['type'] = 'array'
-        } else if(typeof value === 'boolean') {
+        } else if (typeof value === 'boolean') {
           user_data[prop]['type'] = 'boolean'
         }
 
 
         // Is editable
-        if(editable.indexOf(prop) !== -1) {
+        if (editable.indexOf(prop) !== -1) {
           user_data[prop]['editable'] = true
         }
 
         // Pre-hide field
-        if(pre_hidden.indexOf(prop) !== -1) {
+        if (pre_hidden.indexOf(prop) !== -1) {
           user_data[prop]['pre_hidden'] = true
         }
       }
@@ -192,7 +207,7 @@ export default {
       }
 
       archived.forEach(el => {
-        if(el.signature) {
+        if (el.signature) {
           user_data['user_eth_addresses'].value.archived.push(el)
         } else {
           user_data['user_btc_addresses'].value.archived.push(el)
@@ -208,8 +223,26 @@ export default {
 </script>
 
 <style lang="sass">
+.sst-address
+  &::after
+    margin-left: 5px
+    position: relative
+    top: -1px
+    vertical-align: middle
+    line-height: normal
+    display: inline-block
+    content: "SST"
+    letter-spacing: 1px
+    font-size: 9px
+    background-color: #000000
+    font-weight: 600
+    color: #ffffff
+    border-radius: 3px
+    padding: 3px 4px
+
 .active-addresses
   color: #0ACA62
+
 .deleted-addresses
   color: #DC6161
 
@@ -217,14 +250,17 @@ export default {
   margin-left: -10px
   margin-right: -10px
   padding: 10px
+
   &__input
     border: 1px solid #cccccc
     border-radius: 2px
     width: 100%
     padding: 6px
+
   &__label
     width: 300px
     font-weight: bold
+
   &:nth-last-child(odd)
     background-color: #fcfcfc
 </style>
