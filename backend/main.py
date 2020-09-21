@@ -5,12 +5,15 @@ from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from api.routes import api_router
 from core.utils import CustomJSONResponse, exception_handlers
 from core.middleware import JWTAuthBackend
-from database.init import mongo_client, mongo_db
-from database.db_events import prepopulate_db, close_db_connection
+from database.init import mongo
+from database.db_events import test_db_connection, prepopulate_db, close_db_connection
 from config import *
 
 docs_config = (
-    {"redoc_url": "/api/docs/", "openapi_url": "/api/docs/openapi.json",}
+    {
+        "redoc_url": "/api/docs/",
+        "openapi_url": "/api/docs/openapi.json",
+    }
     if not IS_PRODUCTION
     else {}
 )
@@ -18,7 +21,7 @@ docs_config = (
 app = FastAPI(
     title="Simba",
     exception_handlers=exception_handlers,
-    on_startup=[prepopulate_db],
+    on_startup=[test_db_connection, prepopulate_db],
     on_shutdown=[close_db_connection],
     **docs_config,
 )
@@ -27,8 +30,7 @@ app = FastAPI(
 # Database
 ##########
 
-setattr(app, "mongo_client", mongo_client)
-setattr(app, "mongo_db", mongo_db)
+setattr(app, "mongo", mongo)
 
 #########
 # Routes

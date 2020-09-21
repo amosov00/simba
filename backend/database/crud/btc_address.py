@@ -11,9 +11,9 @@ class BTCAddressCRUD(BaseMongoCRUD):
         return await cls.find_one({"address": address})
 
     @classmethod
-    async def find_latest(cls, xpub_title: str):
+    async def find_latest(cls, xpub_title: str, path: str):
         return await cls.db[cls.collection].find_one(
-            {"cold_wallet_title": xpub_title},
+            {"cold_wallet_title": xpub_title, "path": {"$regex": path}},
             sort=[("created_at", pymongo.DESCENDING), ("_id", pymongo.DESCENDING)]
         )
 

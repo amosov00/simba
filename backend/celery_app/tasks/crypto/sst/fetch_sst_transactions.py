@@ -10,7 +10,11 @@ __all__ = ["fetch_and_proceed_sst_contract"]
 
 
 @app.task(
-    name="fetch_and_proceed_sst_contract", bind=True, soft_time_limit=42, time_limit=300,
+    name="fetch_and_proceed_sst_contract",
+    bind=True,
+    retry_backoff=True,
+    autoretry_for=(Exception,),
+    retry_kwargs={"max_retries": 5},
 )
 async def fetch_and_proceed_sst_contract(self, *args, **kwargs):
     """Синхронизация с SST контрактом"""

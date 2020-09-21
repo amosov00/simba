@@ -47,7 +47,6 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute="20", hour="*/3"),
         "args": ()
     },
-    # TODO slower later
     "fetch_and_proceed_sst_contract": {
         "task": "fetch_and_proceed_sst_contract",
         "schedule": crontab(minute="30", hour="*/1"),
@@ -55,7 +54,12 @@ app.conf.beat_schedule = {
     },
     "fetch_empty_btc_addresses_info": {
         "task": "fetch_empty_btc_addresses_info",
-        "schedule": crontab(minute="0", hour="*/12"),
+        "schedule": crontab(minute="0", hour="*/18"),
+        "args": (),
+    },
+    "update_btc_addresses_info": {
+        "task": "update_btc_addresses_info",
+        "schedule": crontab(minute="0", hour="2", day_of_month="*/1"),
         "args": (),
     },
 }

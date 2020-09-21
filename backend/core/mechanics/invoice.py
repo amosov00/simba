@@ -195,6 +195,9 @@ class InvoiceMechanics(CryptoValidation):
         asyncio.create_task(
             SSTWrapper(self.invoice).send_sst_to_referrals(user, self.invoice.btc_amount)
         )
+        asyncio.create_task(
+            BitcoinWrapper().fetch_address_and_save(self.invoice.target_btc_address)
+        )
         return True
 
     async def _proceed_new_btc_tx_buy(
