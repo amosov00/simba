@@ -37,7 +37,7 @@ async def update_blacklisted_balance(self, *args, **kwargs):
         if not address or tx_blacklist_removed:
             continue
 
-        total_balance += simba_instance.balance_of(address)
+        total_balance += await simba_instance.balance_of(address)
 
     meta_instance = Meta(
         slug=MetaSlugs.BLACKLISTED_BALANCE,

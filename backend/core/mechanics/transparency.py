@@ -6,7 +6,6 @@ from config import BTC_COLD_WALLETS
 
 
 class TransparencyMechanics:
-
     @classmethod
     async def fetch_blacklisted_balance(cls) -> int:
         inst = await MetaCRUD.find_by_slug(MetaSlugs.BLACKLISTED_BALANCE) or {}
