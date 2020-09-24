@@ -317,7 +317,7 @@ export default context => {
       eth_txs: "ETH transactions",
       btc_txs: "BTC transactions",
       not_available: "N/A",
-      not_paid: "Unpaid",
+      not_completed: "Uncompleted",
       empty: "Empty",
       sst_tx_hashes: 'SST transaction hashes',
       sst_tx_detailed: 'SST transactions (detailed)',

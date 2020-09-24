@@ -82,7 +82,7 @@ class InvoiceCRUD(BaseMongoCRUD):
             query.append({"invoice_type": int(invoice_type)})
 
         if invoice_status:
-            query.append({"status": invoice_type})
+            query.append({"status": invoice_status})
 
         query = {"$or": query} if query else {}
         return await super().find_many(query)

@@ -315,7 +315,7 @@ export default context => {
       eth_txs: "ETH транзакции",
       btc_txs: "BTC транзакции",
       not_available: "Н/Д",
-      not_paid: "Неоплаченные",
+      not_completed: "Незавершенные",
       empty: "Отсутствует(-ют)",
       sst_tx_hashes: 'Хеши SST транзакций',
       sst_tx_detailed: 'SST транзакции (подробно)',

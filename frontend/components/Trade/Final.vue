@@ -45,7 +45,7 @@
         return tx ? tx.transactionHash : "";
       },
       issueTxHash() {
-        let tx = this.$store.getters['exchange/ethTxByEvent']("OnRedeemed")
+        let tx = this.$store.getters['exchange/ethTxByEvent']("OnIssued")
         return tx ? tx.transactionHash : "";
       },
       isBuy() {

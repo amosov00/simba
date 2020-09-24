@@ -2,7 +2,7 @@
   div.main-content
     div.is-flex.is-justified-between.mb-3
       h1.is-size-4 {{$t('su_invoices.invoices')}}
-      button.btn(@click="fetchPaidInvoiced") {{ $t('su_invoices.not_paid') }}
+      button.btn(@click="fetchPaidInvoiced") {{ $t('su_invoices.not_completed') }}
     div.mb-3
       b-input(v-model="searchQuery" @input="onSearchInput" :placeholder="`${this.$i18n.t('other.search')}...`" icon="magnify")
     div(v-if="adminInvoices.length <= 0") {{ $t('other.search_empty_results') }}
