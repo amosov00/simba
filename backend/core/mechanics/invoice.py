@@ -181,8 +181,7 @@ class InvoiceMechanics(CryptoValidation):
         )
         transaction.simba_tokens_issued = True
         await BTCTransactionCRUD.update_or_insert({"hash": transaction.hash}, transaction.dict())
-        self.invoice.status = InvoiceStatus.COMPLETED
-        self.invoice.finised_at = datetime.now()
+        self.invoice.status = InvoiceStatus.PAID
         self.invoice.btc_amount_proceeded += incoming_btc
         # Subtract fee
         self.invoice.simba_amount_proceeded += incoming_btc - SIMBA_BUY_SELL_FEE
@@ -233,7 +232,6 @@ class InvoiceMechanics(CryptoValidation):
             transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
             self.invoice.status == InvoiceStatus.PROCESSING
         ]):
-
             self.invoice.status = InvoiceStatus.COMPLETED
             self.invoice.finised_at = datetime.now()
 
@@ -305,8 +303,13 @@ class InvoiceMechanics(CryptoValidation):
         transaction.invoice_id = self.invoice.id
         self.invoice.add_hash("eth", transaction.transactionHash)
 
+        if transaction.event == SimbaContractEvents.OnIssued and self.invoice.status == InvoiceStatus.PAID:
+            self.invoice.status = InvoiceStatus.COMPLETED
+            self.invoice.finised_at = datetime.now()
+
         await EthereumTransactionCRUD.update_one(
-            {"_id": transaction.id}, transaction.dict(exclude={"id"}, exclude_unset=True)
+            {"_id": transaction.id},
+            transaction.dict(exclude={"id"}, exclude_unset=True)
         )
         await self.update_invoice()
         return True

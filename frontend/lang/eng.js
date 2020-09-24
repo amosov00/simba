@@ -71,7 +71,8 @@ export default context => {
       payment_confirmation_buy: 'As soon as network get 3 confirmations, SIMBA tokens will be issued to your ETH address.',
       payment_confirmation_sell: 'As soon as network get {min_confirms} confirmation(s), BTC will be sent to your address.',
       statuses: {
-        completed: 'Paid',
+        completed: 'Completed',
+        paid: 'Paid',
         created: 'Created',
         waiting: 'Waiting',
         cancelled: 'Cancelled',
@@ -316,6 +317,7 @@ export default context => {
       eth_txs: "ETH transactions",
       btc_txs: "BTC transactions",
       not_available: "N/A",
+      not_paid: "Unpaid",
       empty: "Empty",
       sst_tx_hashes: 'SST transaction hashes',
       sst_tx_detailed: 'SST transactions (detailed)',

@@ -23,8 +23,10 @@ invoices_router = APIRouter()
 )
 async def admin_invoices_fetch_all(
         q: Optional[str] = Query(default=None, description="query for many fields"),
+        invoice_type: Optional[str] = Query(default=None, alias="type", description="invoice type"),
+        invoice_status: Optional[str] = Query(default=None, alias="status", description="invoice status"),
 ):
-    return await InvoiceCRUD.find_by_query(q)
+    return await InvoiceCRUD.find_by_query(q, invoice_type, invoice_status)
 
 
 @invoices_router.get(

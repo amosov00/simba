@@ -31,10 +31,11 @@ class InvoiceStatus:
     CREATED = "created"
     WAITING = "waiting"  # Waiting transaction from user
     PROCESSING = "processing"  # Waiting to generate SIMBA or send BTC
+    PAID = "paid"  # Paid but waiting confirmation
     COMPLETED = "completed"
     CANCELLED = "cancelled"
 
-    ALL = (CREATED, WAITING, PROCESSING, COMPLETED, CANCELLED)
+    ALL = (CREATED, WAITING, PROCESSING, PAID, COMPLETED, CANCELLED)
 
 
 class InvoiceType(IntEnum):

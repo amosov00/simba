@@ -67,4 +67,9 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute="0", hour="*/1"),
         "args": (),
     },
+    "rescue_stucked_invoices": {
+        "task": "rescue_stucked_invoices",
+        "schedule": crontab(minute="5", hour="*/1"),
+        "args": (),
+    }
 }

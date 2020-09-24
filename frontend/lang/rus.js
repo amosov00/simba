@@ -71,7 +71,8 @@ export default context => {
       payment_confirmation_buy: 'Как только сеть получит 3 подтверждения, токены SIMBA будут отправлены на ваш ETH адрес.',
       payment_confirmation_sell: 'Как только сеть получит {min_confirms} подтверждение(-я), BTC будут отправлены на ваш адрес.',
       statuses: {
-        completed: 'Оплачена',
+        completed: 'Завершена',
+        paid: 'Оплачена',
         created: 'Создана',
         waiting: 'В ожидании',
         cancelled: 'Отменена',
@@ -314,6 +315,7 @@ export default context => {
       eth_txs: "ETH транзакции",
       btc_txs: "BTC транзакции",
       not_available: "Н/Д",
+      not_paid: "Неоплаченные",
       empty: "Отсутствует(-ют)",
       sst_tx_hashes: 'Хеши SST транзакций',
       sst_tx_detailed: 'SST транзакции (подробно)',

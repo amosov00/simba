@@ -1,11 +1,11 @@
+from os.path import join
 from http import HTTPStatus
 from typing import Literal
 from urllib.parse import urlencode
-from os.path import join
 
+import httpx
 from fastapi import HTTPException
 from sentry_sdk import capture_exception, capture_message
-import httpx
 from tenacity import retry, stop_after_attempt, wait_fixed
 from jinja2 import Environment, select_autoescape, FileSystemLoader
 
@@ -50,6 +50,18 @@ class Email:
             "text": body
         }
         return msg
+
+    # @classmethod
+    # async def _is_allowed_to_send_to_support(cls, frequency_limit: int = 10) -> bool:
+    #     meta_email_time = await MetaCRUD.find_by_slug(MetaSlugs.EMAIL_TO_SUPPORT_TIME) or {}
+    #     now = datetime.now()
+    #     last_email_sent = meta_email_time.get("args", {}).get("sent_at", now)
+    #     return now - last_email_sent > timedelta(minutes=frequency_limit)
+    #
+    # @classmethod
+    # async def _update_email_to_support_time_meta(cls):
+    #     await MetaCRUD.update_by_slug(MetaSlugs.EMAIL_TO_SUPPORT_TIME, {"sent_at": datetime.now()})
+    #     return True
 
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(3))
     async def _send_message(self, msg: dict) -> None:
@@ -108,11 +120,13 @@ class Email:
 
     async def send_message_to_support(
             self,
-            error_type: Literal["simba_issue", "simba_redeem", "sst_transfer", "btc"],
+            error_type: Literal["simba_issue", "simba_redeem", "sst_transfer", "btc", "invoice_stucked"],
             **kwargs
     ) -> None:
         assert SIMBA_SUPPORT_EMAIL is not None
-        assert error_type in ("simba_issue", "simba_redeem", "sst_transfer", "btc")
+        assert error_type in ("simba_issue", "simba_redeem", "sst_transfer", "btc", "invoice_stucked")
+
+        subject = "Warning/Error from Simba"
 
         if error_type == "simba_issue" or error_type == "sst_transfer":
             invoice: InvoiceInDB = kwargs["invoice"]
@@ -139,13 +153,33 @@ class Email:
                    f"Satoshi amount to send {btc_amount_to_send}; " \
                    f"Total Satoshi amount to send {total_btc_amount_to_send}<br>" \
                    f"Invoices in queue: {invoices_in_queue}<br>"
+
+        elif error_type == "invoice_stucked":
+            invoice: InvoiceInDB = kwargs["invoice"]
+            body = f"<b>Warning:</b> invoice <br>" \
+                   f"Invoice ID: {str(invoice.id)}<br>" \
+                   f"Invoice Type: {invoice.invoice_type}<br>" \
+                   f"Invoice Status: {invoice.status}<br>" \
+                   f"Simba to sent: {invoice.simba_amount_proceeded} Satoshi<br>" \
+                   f"Invoice created at: {invoice.created_at}"
+
         else:
             body = "Unknown error"
 
         msg = self._create_message(
             SIMBA_SUPPORT_EMAIL,
-            subject="Warning/Error from Simba",
+            subject=subject,
             body=body,
         )
+
         await self._send_message(msg)
+        # circular import error
+        # if limit_sending and await self._is_allowed_to_send_to_support(10):
+        #     await self._send_message(msg)
+        #     await self._update_email_to_support_time_meta()
+        #
+        # elif not limit_sending:
+        #     await self._send_message(msg)
+        #     await self._update_email_to_support_time_meta()
+
         return None
