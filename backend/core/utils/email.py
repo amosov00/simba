@@ -156,7 +156,7 @@ class Email:
 
         elif error_type == "invoice_stucked":
             invoice: InvoiceInDB = kwargs["invoice"]
-            body = f"<b>Warning:</b> invoice <br>" \
+            body = f"<b>Warning:</b> Invoice may have problems with sending ETH <br>" \
                    f"Invoice ID: {str(invoice.id)}<br>" \
                    f"Invoice Type: {invoice.invoice_type}<br>" \
                    f"Invoice Status: {invoice.status}<br>" \
