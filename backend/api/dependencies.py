@@ -6,7 +6,7 @@ __all__ = ["get_db", "get_user", "user_is_superuser"]
 
 
 def get_db(request: Request):
-    return request.app.mongo_db
+    return request.app.mongo
 
 
 def get_user(request: Request):

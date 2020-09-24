@@ -55,10 +55,10 @@ class InvoiceCRUD(BaseMongoCRUD):
         return invoice
 
     @classmethod
-    async def find_by_query(cls, q: str) -> list:
-        if q:
-            query = []
+    async def find_by_query(cls, q: str, invoice_type: str = "", invoice_status: str = "") -> list:
+        query = []
 
+        if q:
             if len(q) == 24:
                 for f in ("_id", "user_id"):
                     try:
@@ -78,10 +78,13 @@ class InvoiceCRUD(BaseMongoCRUD):
                 except ValueError:
                     pass
 
-            query = {"$or": query}
-        else:
-            query = {}
+        if invoice_type:
+            query.append({"invoice_type": int(invoice_type)})
 
+        if invoice_status:
+            query.append({"status": invoice_status})
+
+        query = {"$or": query} if query else {}
         return await super().find_many(query)
 
     @classmethod

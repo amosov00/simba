@@ -1,6 +1,6 @@
-import asyncio, logging
 from typing import List
 
+import httpx
 from fastapi import APIRouter, Depends
 
 from api.dependencies import get_user
@@ -51,7 +51,14 @@ async def debug_get():
 
 @router.get("/")
 async def debug_get():
-    return True
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post("http://backend-nodejs:8080/api/multisig", data={})
+            resp = resp.json()
+        except Exception as e:
+            resp = str(e)
+
+    return resp
 
 
 @router.post("/")

@@ -9,16 +9,24 @@ from hexbytes import HexBytes
 from web3 import Web3
 from web3.datastructures import AttributeDict
 
-from config import INFURA_WS_URL, IS_PRODUCTION, TRANSACTION_MIN_CONFIRMATIONS
+from config import INFURA_WS_URL, ETH_MAX_GAS_PRICE_GWEI, TRANSACTION_MIN_CONFIRMATIONS
 from schemas import EthereumContract, EthereumTransaction
+from core.utils import gasprice_from_etherscan, gasprice_from_ethgasstation
 
 __all__ = ["EthereumBaseCommonWrapper", "EthereumBaseContractWrapper"]
 
 
 class EthereumBaseWrapper(ABC):
+    gasprice_wrapper = gasprice_from_etherscan
+
+    @classmethod
+    async def get_actual_gasprice(cls):
+        gasprice = await cls.gasprice_wrapper()
+        return Web3.toWei(min(int(gasprice), ETH_MAX_GAS_PRICE_GWEI), "gwei")
+
     @classmethod
     def init_web3_provider(
-        cls, provider_type: Literal["http", "ws"], provider_url: str, websocket_timeout: int = 60
+            cls, provider_type: Literal["http", "ws"], provider_url: str, websocket_timeout: int = 60
     ):
         if provider_type == "http":
             return Web3.HTTPProvider(provider_url)

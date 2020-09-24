@@ -59,7 +59,17 @@ app.conf.beat_schedule = {
     },
     "update_btc_addresses_info": {
         "task": "update_btc_addresses_info",
-        "schedule": crontab(minute="0", hour="2", day_of_month="*/1"),
+        "schedule": crontab(minute="0", hour="2"),
         "args": (),
     },
+    "update_blacklisted_balance": {
+        "task": "update_blacklisted_balance",
+        "schedule": crontab(minute="0", hour="*/1"),
+        "args": (),
+    },
+    "rescue_stucked_invoices": {
+        "task": "rescue_stucked_invoices",
+        "schedule": crontab(minute="5", hour="*/1"),
+        "args": (),
+    }
 }

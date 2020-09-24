@@ -12,6 +12,13 @@ variables:
         - "backend/**/*"
         - "deployment/dockerfiles/*"
 
+.rules_backend_nodejs:
+  rules: &rules_backend_nodejs
+    - if: "$CI_COMMIT_REF_NAME == 'master' || $CI_COMMIT_REF_NAME == 'develop'"
+      changes:
+        - "backend-nodejs/**/*"
+        - "deployment/dockerfiles/*"
+
 .rules_frontend:
   rules: &rules_frontend
     - if: "$CI_COMMIT_REF_NAME == 'master' || $CI_COMMIT_REF_NAME == 'develop'"
@@ -47,6 +54,16 @@ build-backend:
     - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CONTAINER_NAME:$CI_COMMIT_REF_SLUG-latest" . -f $DOCKERFILE_PATH --no-cache
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CONTAINER_NAME:$CI_COMMIT_REF_SLUG-latest"
   rules: *rules_backend
+
+build-backend-nodejs:
+  stage: build
+  variables:
+    CONTAINER_NAME: 'backend-nodejs'
+    DOCKERFILE_PATH: './deployment/dockerfiles/Dockerfile.backend-nodejs.common'
+  script:
+    - docker build --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CONTAINER_NAME:$CI_COMMIT_REF_SLUG-latest" . -f $DOCKERFILE_PATH --no-cache
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CONTAINER_NAME:$CI_COMMIT_REF_SLUG-latest"
+  rules: *rules_backend_nodejs
 
 
 build-frontend:

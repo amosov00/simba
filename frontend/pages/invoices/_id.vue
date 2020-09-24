@@ -13,6 +13,7 @@
               div(v-if="typeof item === 'object'") -
                 //--div(v-for="(value, key) in item") {{key}}: {{value}}
               div(v-else)
+                a(:href="getBlockchainLink(item, 'tx', 'eth')" target="_blank" rel="noreferrer noopener" v-if="key === 'sst_tx_hashes'") {{ item }}
                 a(:href="getBlockchainLink(item, 'tx', 'eth')" target="_blank" rel="noreferrer noopener" v-if="key === 'eth_tx_hashes'") {{ item }}
                 a(:href="getBlockchainLink(item, 'tx', 'btc')" target="_blank" rel="noreferrer noopener" v-if="key === 'btc_tx_hashes'") {{ item }}
           div(v-else) {{ $t(`su_invoices.empty`) }}

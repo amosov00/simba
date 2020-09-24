@@ -38,7 +38,11 @@ async def update_existing_btc_addresses():
 
 
 @app.task(
-    name="update_btc_addresses_info", bind=True, soft_time_limit=42, time_limit=300,
+    name="update_btc_addresses_info",
+    bind=True,
+    retry_backoff=True,
+    autoretry_for=(Exception,),
+    retry_kwargs={"max_retries": 5},
 )
 async def update_btc_addresses_info(self, *args, **kwargs):
     await update_existing_btc_addresses()

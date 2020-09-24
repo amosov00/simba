@@ -1,17 +1,22 @@
 import _ from "lodash";
+import moment from 'moment';
 
 import { ToastProgrammatic as Toast } from "buefy";
 
 export const state = () => ({
-  invoices: []
+  invoices: [],
+  adminInvoices: [],
 });
 
 export const getters = {
-  invoices: s => s.invoices
+  invoices: s => s.invoices,
+  adminInvoices: s => s.adminInvoices,
 };
 
 export const mutations = {
-  setInvoices: (state, data) => (state.invoices = data)
+  addInvoice: (state, invoice) => state.invoices = _.uniqBy([invoice, ...state.invoices], '_id'),
+  setInvoices: (state, data) => (state.invoices = data),
+  setAdminInvoices: (state, data) => (state.adminInvoices = data),
 };
 
 export const actions = {
@@ -95,10 +100,17 @@ export const actions = {
       .catch(() => {});
   },
 
-  async fetchAdminInvoices({}) {
+  async fetchAdminInvoices({commit}, params) {
     return await this.$axios
-      .get("/admin/invoices/")
-      .then(res => res.data)
+      .get("/admin/invoices/", {params: params})
+      .then(res => {
+        let data = res.data
+        data.forEach(el => {
+          el.created_at = moment(el.created_at).utc().valueOf()
+        })
+        commit('setAdminInvoices', data)
+        return data
+      })
       .catch(() => {});
   },
 

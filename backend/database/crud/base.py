@@ -5,13 +5,13 @@ from typing import Union
 from bson import ObjectId
 from fastapi import HTTPException
 
-from database import mongo_db
+from database import mongo
 
 __all__ = ["BaseMongoCRUD", "ObjectId"]
 
 
 class BaseMongoCRUD(ABC):
-    db = mongo_db
+    db = mongo.db
     collection = NotImplemented
 
     @classmethod

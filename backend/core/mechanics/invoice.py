@@ -6,11 +6,9 @@ from typing import Union, List, Optional
 from fastapi import HTTPException
 from sentry_sdk import capture_message
 
-from config import TRANSACTION_MIN_CONFIRMATIONS
 from core.mechanics import SimbaWrapper, SSTWrapper, BitcoinWrapper, BlockCypherWebhookHandler
 from core.mechanics.crypto.base import CryptoValidation
-from database.crud import BTCTransactionCRUD, InvoiceCRUD, EthereumTransactionCRUD
-from database.crud import UserCRUD
+from database.crud import BTCTransactionCRUD, InvoiceCRUD, EthereumTransactionCRUD, UserCRUD, MetaCRUD
 from schemas import (
     User,
     InvoiceInDB,
@@ -23,8 +21,18 @@ from schemas import (
     BTCTransactionInDB,
     SimbaContractEvents,
     BlockCypherWebhookEvents,
+    MetaSlugs,
 )
-from config import SIMBA_BUY_SELL_FEE, SIMBA_MINIMAL_BUY_AMOUNT
+from config import (
+    IS_PRODUCTION,
+    SIMBA_BUY_SELL_FEE,
+    SIMBA_MINIMAL_BUY_AMOUNT,
+    TRANSACTION_MIN_CONFIRMATIONS,
+    BTC_MULTISIG_WALLET_ADDRESS,
+    BTC_MULTISIG_COSIG_1_WIF,
+    BTC_MULTISIG_COSIG_2_PUB,
+    BTC_FEE,
+)
 
 
 class InvoiceMechanics(CryptoValidation):
@@ -44,6 +52,11 @@ class InvoiceMechanics(CryptoValidation):
             raise HTTPException(HTTPStatus.BAD_REQUEST, self.errors)
         else:
             return None
+
+    async def update_invoice(self):
+        return await InvoiceCRUD.update_one(
+            {"_id": self.invoice.id}, self.invoice.dict(exclude={"id"})
+        )
 
     def _validate_common(self):
         if not self.invoice.user_id:
@@ -95,6 +108,31 @@ class InvoiceMechanics(CryptoValidation):
 
         return True
 
+    async def _validate_for_multisig(self):
+        meta_manual_payout = await MetaCRUD.find_by_slug(MetaSlugs.MANUAL_PAYOUT)
+        if meta_manual_payout["payload"]["is_active"] is False:
+            self.errors.append("Payout mode is auto now")
+
+        return True
+
+    def _validate_transaction(self, tx: BTCTransaction):
+        if self.invoice.target_btc_address not in tx.addresses:
+            self.errors.append("Invalid target btc address")
+
+        output_value = self.get_incoming_btc_from_outputs(tx.outputs, self.invoice.target_btc_address)
+
+        if not output_value:
+            self.errors.append("BTC output is not found")
+
+        if self.invoice.invoice_type == InvoiceType.BUY and output_value != self.invoice.btc_amount_proceeded:
+            self.errors.append("Invalid btc amount")
+
+        if self.invoice.invoice_type == InvoiceType.SELL \
+                and output_value != self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE:
+            self.errors.append("Invalid btc amount")
+
+        return True
+
     def validate(self) -> bool:
         self._validate_common()
 
@@ -143,8 +181,7 @@ class InvoiceMechanics(CryptoValidation):
         )
         transaction.simba_tokens_issued = True
         await BTCTransactionCRUD.update_or_insert({"hash": transaction.hash}, transaction.dict())
-        self.invoice.status = InvoiceStatus.COMPLETED
-        self.invoice.finised_at = datetime.now()
+        self.invoice.status = InvoiceStatus.PAID
         self.invoice.btc_amount_proceeded += incoming_btc
         # Subtract fee
         self.invoice.simba_amount_proceeded += incoming_btc - SIMBA_BUY_SELL_FEE
@@ -156,6 +193,9 @@ class InvoiceMechanics(CryptoValidation):
         user = User(**user)
         asyncio.create_task(
             SSTWrapper(self.invoice).send_sst_to_referrals(user, self.invoice.btc_amount)
+        )
+        asyncio.create_task(
+            BitcoinWrapper().fetch_address_and_save(self.invoice.target_btc_address)
         )
         return True
 
@@ -192,7 +232,6 @@ class InvoiceMechanics(CryptoValidation):
             transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
             self.invoice.status == InvoiceStatus.PROCESSING
         ]):
-
             self.invoice.status = InvoiceStatus.COMPLETED
             self.invoice.finised_at = datetime.now()
 
@@ -264,8 +303,13 @@ class InvoiceMechanics(CryptoValidation):
         transaction.invoice_id = self.invoice.id
         self.invoice.add_hash("eth", transaction.transactionHash)
 
+        if transaction.event == SimbaContractEvents.OnIssued and self.invoice.status == InvoiceStatus.PAID:
+            self.invoice.status = InvoiceStatus.COMPLETED
+            self.invoice.finised_at = datetime.now()
+
         await EthereumTransactionCRUD.update_one(
-            {"_id": transaction.id}, transaction.dict(exclude={"id"}, exclude_unset=True)
+            {"_id": transaction.id},
+            transaction.dict(exclude={"id"}, exclude_unset=True)
         )
         await self.update_invoice()
         return True
@@ -316,7 +360,62 @@ class InvoiceMechanics(CryptoValidation):
         )
         return True
 
-    async def update_invoice(self):
-        return await InvoiceCRUD.update_one(
-            {"_id": self.invoice.id}, self.invoice.dict(exclude={"id"})
+    async def fetch_multisig_transaction_data(self):
+        """ Fetch data for cosigner 1 """
+        self.validate()
+        await self._validate_for_multisig()
+        self._raise_exception_if_exists()
+
+        multisig_wallet = await BitcoinWrapper().fetch_address_and_save(BTC_MULTISIG_WALLET_ADDRESS)
+
+        if multisig_wallet.unconfirmed_transactions_number != 0:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "wallet has outcoming transations")
+
+        if self.invoice.simba_amount_proceeded >= multisig_wallet.balance:
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "not enough balance to pay")
+
+        spendables = await BitcoinWrapper().api_wrapper.get_spendables(BTC_MULTISIG_WALLET_ADDRESS)
+        payables = [
+            (self.invoice.target_btc_address, self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE)
+        ]
+        return {
+            "cosig1Priv": BTC_MULTISIG_COSIG_1_WIF,
+            "cosig2Pub": BTC_MULTISIG_COSIG_2_PUB,
+            "spendables": spendables,
+            "payables": payables,
+            "fee": BTC_FEE,
+            "testnet": not IS_PRODUCTION,
+        }
+
+    async def proceed_multisig_transaction(self, transaction_hash: str) -> InvoiceInDB:
+        bitcoin_wrapper = BitcoinWrapper()
+        decoded_tx = await bitcoin_wrapper.api_wrapper.decode_tx(transaction_hash)
+
+        # validate decoded
+        self._validate_transaction(decoded_tx)
+        self._raise_exception_if_exists()
+
+        pushed_tx = await bitcoin_wrapper.api_wrapper.push_raw_tx(transaction_hash)
+
+        self.invoice.btc_amount_proceeded = self.get_incoming_btc_from_outputs(
+            pushed_tx.outputs, self.invoice.target_btc_address
         )
+        if not self.invoice.btc_amount_proceeded:
+            capture_message(f"Invalid btc amount data in TX {pushed_tx.hash}", level="error")
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Invalid btc amount data")
+
+        self.invoice.add_hash("btc", pushed_tx.hash)
+        pushed_tx.invoice_id = self.invoice.id
+
+        await BTCTransactionCRUD.insert_one(pushed_tx.dict())
+        await self.update_invoice()
+
+        asyncio.create_task(
+            BlockCypherWebhookHandler().create_webhook(
+                invoice=self.invoice,
+                event=BlockCypherWebhookEvents.TX_CONFIMATION,
+                transaction_hash=pushed_tx.hash,
+            )
+        )
+
+        return self.invoice

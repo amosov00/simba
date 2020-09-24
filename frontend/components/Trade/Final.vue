@@ -12,7 +12,7 @@
           a(:href="'https://etherscan.io/address/' + tradeData.target_eth" target="_blank").link {{ tradeData.target_eth }}
         div.mt-2 Simba token txHash:
           =' '
-          a(:href="'https://etherscan.io/tx/' + tradeData.tx_hash" target="_blank").link {{ tradeData.tx_hash }}
+          a(:href="'https://etherscan.io/tx/' + issueTxHash" target="_blank").link {{ issueTxHash }}
     div.mt-4(v-else)
       div.is-size-5
         span.has-text-weight-bold {{ convert(tradeData.simba_issued) }} BTC
@@ -25,14 +25,13 @@
           a(:href="'https://www.blockchain.com/btc/tx/' + tradeData.tx_hash" target="_blank").link {{ tradeData.tx_hash }}
         div.mt-2 {{$t('exchange.simba_redemption')}}:
           =' '
-          a(:href="'https://etherscan.io/tx/' + tradeData.tx_hash_redeem" target="_blank").link {{ tradeData.tx_hash_redeem }}
+          a(:href="'https://etherscan.io/tx/' + redeemTxHash" target="_blank").link {{ redeemTxHash }}
     div.mt-4
       a(href="/exchange/buysell?op=buy" v-if="isBuy").btn {{$t('exchange.buy_more')}}
       a(href="/exchange/buysell?op=sell" v-else).btn {{$t('exchange.sell_more')}}
 </template>
 
 <script>
-
   export default {
     name: 'trade-final',
     data: () => ({
@@ -40,6 +39,14 @@
     computed: {
       tradeData() {
         return this.$store.getters['exchange/tradeData'];
+      },
+      redeemTxHash() {
+        let tx = this.$store.getters['exchange/ethTxByEvent']("OnRedeemed")
+        return tx ? tx.transactionHash : "";
+      },
+      issueTxHash() {
+        let tx = this.$store.getters['exchange/ethTxByEvent']("OnIssued")
+        return tx ? tx.transactionHash : "";
       },
       isBuy() {
         return this.$store.getters['exchange/tradeData']['operation'] === 1

@@ -7,7 +7,7 @@ from sentry_sdk import capture_message, push_scope, capture_exception
 from celery_app.celeryconfig import app
 from config import BTC_HOT_WALLET_ADDRESS
 from core.mechanics import BitcoinWrapper, InvoiceMechanics
-from core.utils import MailGunEmail
+from core.utils import Email
 from database.crud import InvoiceCRUD, UserCRUD, MetaCRUD
 from schemas import InvoiceInDB, InvoiceStatus, InvoiceType, MetaSlugs, MetaInDB
 
@@ -15,7 +15,11 @@ __all__ = ["send_btc_to_proceeding_invoices"]
 
 
 @app.task(
-    name="send_btc_to_proceeding_invoices", bind=True, soft_time_limit=55, time_limit=300,
+    name="send_btc_to_proceeding_invoices",
+    bind=True,
+    retry_backoff=True,
+    autoretry_for=(Exception,),
+    retry_kwargs={"max_retries": 5},
 )
 async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
     """Крон для след. этапа пайплайна продажи (отсылка BTC)"""
@@ -53,7 +57,7 @@ async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
             total_btc_amount_to_send = sum([
                 i["simba_amount_proceeded"] for i in proceeding_invoices if i.get("simba_amount_proceeded")
             ])
-            await MailGunEmail().send_message_to_support(
+            await Email().send_message_to_support(
                 "btc",
                 hot_wallet_balance=hot_wallet_info.balance,
                 btc_amount_to_send=invoice.simba_amount_proceeded,

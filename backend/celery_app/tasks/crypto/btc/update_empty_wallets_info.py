@@ -10,7 +10,11 @@ __all__ = ["fetch_empty_btc_addresses_info"]
 
 
 @app.task(
-    name="fetch_empty_btc_addresses_info", bind=True, soft_time_limit=42, time_limit=300,
+    name="fetch_empty_btc_addresses_info",
+    bind=True,
+    retry_backoff=True,
+    autoretry_for=(Exception,),
+    retry_kwargs={"max_retries": 5},
 )
 async def fetch_empty_btc_addresses_info(self, *args, **kwargs):
     """Обновление данных кошельков BTC для статистики в transparency"""
