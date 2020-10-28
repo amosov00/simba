@@ -20,3 +20,10 @@ class EthereumTransactionCRUD(BaseMongoCRUD):
         return await super().update_one(
             query={"transactionHash": transaction_hash, "logIndex": log_index}, payload=payload, upsert=True,
         )
+
+    @classmethod
+    async def find_one_or_insert(cls, query: dict, payload: dict):
+        if not await super().find_one(query):
+            await super().insert_one(payload)
+
+        return True

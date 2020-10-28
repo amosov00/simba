@@ -71,5 +71,10 @@ app.conf.beat_schedule = {
         "task": "rescue_stucked_invoices",
         "schedule": crontab(minute="5", hour="*/1"),
         "args": (),
+    },
+    "double_check_contracts": {
+        "task": "double_check_contracts",
+        "schedule": crontab(hour="*/12"),
+        "args": (),
     }
 }

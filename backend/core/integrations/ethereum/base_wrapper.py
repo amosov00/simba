@@ -7,6 +7,7 @@ import ujson
 from bson import Decimal128
 from hexbytes import HexBytes
 from web3 import Web3
+from web3.contract import ContractEvent, LogFilter
 from web3.datastructures import AttributeDict
 
 from config import INFURA_WS_URL, ETH_MAX_GAS_PRICE_GWEI, TRANSACTION_MIN_CONFIRMATIONS
@@ -74,11 +75,35 @@ class EthereumBaseContractWrapper(EthereumBaseWrapper):
 
         self.contract = self.w3.eth.contract(address=self.contract_address, abi=self.abi)
 
-        self.contract_events = []
         self.blocks: List[EthereumTransaction] = []
         self.filters = []
-        self.last_block = None
+        self._last_block = None
+        self._contract_events = []
         self.min_confirmations = TRANSACTION_MIN_CONFIRMATIONS
 
     def fetch_transaction_by_hash(self, transaction_hash: Union[str, HexBytes]):
         return self.w3.eth.getBlock(transaction_hash, full_transactions=True)
+
+    @property
+    def last_block(self):
+        if not self._last_block:
+            self._last_block = self.contract.web3.eth.blockNumber
+        return self._last_block
+
+    @property
+    def contract_events(self):
+        if not self._contract_events:
+            self._contract_events = self._get_contract_events_titles()
+        return self._contract_events
+
+    def _get_contract_events_titles(self) -> list:
+        events = []
+        for key, val in self.contract.events.__dict__.items():
+            if key != "abi" and not key[0].startswith("_"):
+                events.append(key)
+
+        return events
+
+    def _get_contract_event_by_title(self, contract_title: str):
+        return self.contract.events[contract_title]
+
