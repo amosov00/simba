@@ -3,18 +3,22 @@ from typing import Literal
 from fastapi import APIRouter, Query
 
 from core.mechanics import TransparencyMechanics
-from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
-from schemas import TransparencyTransactionResponse, InvoiceStatus, InvoiceType
-from config import BTC_COLD_WALLETS
+from core.utils import CustomJSONResponse
+from schemas import TransparencyTransactionResponse
 
 __all__ = ["router"]
 
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("/btc/")
 async def transparency_totals():
-    return await TransparencyMechanics.fetch_common_info()
+    return await TransparencyMechanics.fetch_btc_common_info()
+
+
+@router.get("/simba/")
+async def transparency_totals():
+    return await TransparencyMechanics.fetch_simba_common_info()
 
 
 @router.get("/transactions/", response_model=TransparencyTransactionResponse)
