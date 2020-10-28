@@ -2,7 +2,7 @@ import json
 import ujson
 from typing import Any
 from datetime import datetime, date
-from bson import ObjectId
+from bson import ObjectId, Decimal128
 
 from starlette.responses import JSONResponse
 
@@ -15,6 +15,8 @@ class CustomEncoder(json.JSONEncoder):
             return str(o)
         elif isinstance(o, date) or isinstance(o, datetime):
             return o.ctime()
+        elif isinstance(o, Decimal128):
+            return int(o.to_decimal())
 
         return ujson.dumps(o)
 

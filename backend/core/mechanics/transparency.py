@@ -1,14 +1,15 @@
 from typing import Literal
 
-from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD, MetaCRUD
-from schemas import InvoiceStatus, InvoiceType, MetaSlugs
-from config import BTC_COLD_WALLETS
+from config import BTC_COLD_WALLETS, SIMBA_CONTRACT
+from core.integrations.ethereum.base_wrapper import EthereumBaseContractWrapper
+from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD, MetaCRUD, EthereumTransactionCRUD
+from schemas import InvoiceStatus, InvoiceType, MetaSlugs, SimbaContractEvents
 
 
 class TransparencyMechanics:
     @classmethod
     async def fetch_blacklisted_balance(cls) -> int:
-        inst = await MetaCRUD.find_by_slug(MetaSlugs.BLACKLISTED_BALANCE) or {}
+        inst = await MetaCRUD.find_by_slug(MetaSlugs.BLACKLISTED_BALANCE, raise_404=False) or {}
         return inst.get("payload", {}).get("balance", 0)
 
     @classmethod
@@ -29,9 +30,45 @@ class TransparencyMechanics:
         }
 
     @classmethod
-    async def fetch_common_info(cls) -> dict:
+    async def fetch_simba_common_info(cls) -> dict:
+        amounts = {
+            "quarantined": await cls.fetch_blacklisted_balance()
+        }
+        for i in await EthereumTransactionCRUD.aggregate([
+            {"$match": {
+                "contract": "SIMBA",
+                "event": {"$in": [SimbaContractEvents.OnIssued, SimbaContractEvents.OnRedeemed]}
+            }},
+            {"$group": {
+                "_id": "$event",
+                "value": {"$sum": "$args.value"},
+            }},
+        ]):
+            amounts[i["_id"]] = int(i["value"])
+
+        holders = await EthereumTransactionCRUD.aggregate([
+            {"$match": {
+                "contract": "SIMBA",
+                "event": SimbaContractEvents.Transfer
+            }},
+            {"$replaceRoot": {"newRoot": "$args"}},
+            {"$project": {"to": 1}},
+        ])
+        holders = len(set([i["to"] for i in holders])) - 3
+        total_supply = EthereumBaseContractWrapper(SIMBA_CONTRACT).contract.functions.totalSupply().call()
+        circulation = amounts[SimbaContractEvents.OnIssued] \
+                      - amounts[SimbaContractEvents.OnRedeemed] \
+                      - amounts["quarantined"]
+        return {
+            "holders": holders,
+            "totalAssets": total_supply,
+            "circulation": circulation,
+            **amounts
+        }
+
+    @classmethod
+    async def fetch_btc_common_info(cls) -> dict:
         response = {
-            "simba_blacklisted": await cls.fetch_blacklisted_balance(),
             "total_assets": 0,
             "total_recieved": 0,
             "total_paid_out": 0,
@@ -72,6 +109,9 @@ class TransparencyMechanics:
                 {"$match": {
                     "status": InvoiceStatus.COMPLETED,
                     "invoice_type": InvoiceType.BUY if tx_type == "received" else InvoiceType.SELL,
+                }},
+                {"$sort": {
+                    "created_at": -1
                 }},
                 {"$lookup": {
                     "from": BTCTransactionCRUD.collection,
