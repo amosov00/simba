@@ -14,7 +14,7 @@ __all__ = ["double_check_contracts"]
     autoretry_for=(Exception,),
     retry_kwargs={"max_retries": 5},
 )
-async def double_check_contracts():
+async def double_check_contracts(self, *args, **kwargs):
     """Синхронизация с Simba контрактом"""
     for i in (SIMBA_CONTRACT, SST_CONTRACT):
         await EventsContractWrapper(i).fetch_missing_blocks()
