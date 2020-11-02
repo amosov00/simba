@@ -13,8 +13,11 @@ async def gasprice_from_etherscan() -> int:
                     "action": "gasoracle",
                     "apikey": ETHERSCAN_API_TOKEN,
                 })
-            ).json().get("result", {})
+            ).json()
         except Exception:
             result = {}
 
-    return int(result.get("ProposeGasPrice", 0))
+    if result.get("status") == 0:
+        return 0
+
+    return int(result.get("result", {}).get("ProposeGasPrice", 0))
