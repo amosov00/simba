@@ -23,6 +23,10 @@ class EthereumBaseWrapper(ABC):
     @classmethod
     async def get_actual_gasprice(cls):
         gasprice = await cls.gasprice_wrapper()
+
+        if not gasprice:
+            gasprice = await gasprice_from_ethgasstation()
+
         return Web3.toWei(min(int(gasprice), ETH_MAX_GAS_PRICE_GWEI), "gwei")
 
     @classmethod
