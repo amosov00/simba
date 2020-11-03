@@ -22,16 +22,17 @@ class ReferralCRUD(BaseMongoCRUD):
 
         if not referral_obj:
             capture_message("Referral obj is not found")
+            return False
 
-        referral_obj = ReferralInDB(**referral_obj) if referral_obj else None
+        referral_obj = ReferralInDB(**referral_obj)
 
         return await super().insert_one(
             {
                 "user_id": user_id,
                 "ref1": referral_id,
-                "ref2": referral_obj.ref1 if referral_obj else None,
-                "ref3": referral_obj.ref2 if referral_obj else None,
-                "ref4": referral_obj.ref3 if referral_obj else None,
-                "ref5": referral_obj.ref4 if referral_obj else None,
+                "ref2": referral_obj.ref1,
+                "ref3": referral_obj.ref2,
+                "ref4": referral_obj.ref3,
+                "ref5": referral_obj.ref4,
             }
         )
