@@ -16,6 +16,9 @@ class Mongo:
     def db(self):
         return self._db
 
+    async def ping(self):
+        return await self.client.admin.command("ping")
+
     @property
     def client(self):
         return self._client
