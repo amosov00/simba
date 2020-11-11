@@ -55,7 +55,10 @@ class TransparencyMechanics:
             {"$project": {"to": 1}},
         ])
         holders = len(set([i["to"] for i in holders])) - 3
-        total_supply = EthereumBaseContractWrapper(SIMBA_CONTRACT).contract.functions.totalSupply().call()
+        try:
+            total_supply = EthereumBaseContractWrapper(SIMBA_CONTRACT).contract.functions.totalSupply().call()
+        except Exception:
+            total_supply = 0
         circulation = amounts[SimbaContractEvents.OnIssued] \
                       - amounts[SimbaContractEvents.OnRedeemed] \
                       - amounts["quarantined"]
