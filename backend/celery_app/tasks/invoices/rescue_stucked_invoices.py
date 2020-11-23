@@ -2,13 +2,11 @@ import logging
 from datetime import datetime, timedelta
 
 from celery_app.celeryconfig import app
+from core.mechanics.notifier import SupportNotifier
 from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
 from schemas import InvoiceExtended, InvoiceStatus
-from core.utils import Email
 
 __all__ = ["rescue_stucked_invoices"]
-
-INVOICE_TIMEOUT = timedelta(hours=2)
 
 
 @app.task(
@@ -24,7 +22,7 @@ async def rescue_stucked_invoices(self, *args, **kwargs):
         [
             {"$match": {
                 "status": {"$in": (InvoiceStatus.WAITING, InvoiceStatus.PROCESSING, InvoiceStatus.PAID)},
-                "created_at": {"$lte": datetime.now() - timedelta(hours=3)}
+                "created_at": {"$lte": datetime.now() - timedelta(hours=0)}
             }},
             {
                 "$lookup": {
@@ -47,14 +45,9 @@ async def rescue_stucked_invoices(self, *args, **kwargs):
 
     for invoice in invoices:
         invoice = InvoiceExtended(**invoice)
-
         if invoice.status == InvoiceStatus.PAID:
-            if invoice.eth_tx_hashes and not invoice.eth_txs:
-                await Email().send_message_to_support(
-                    "invoice_stucked",
-                    invoice=invoice
-                )
-                counter += 1
+            await SupportNotifier().invoice_stucked(invoice=invoice)
+            counter += 1
 
     if counter:
         logging.info(f"Invoices stucked: {counter}")

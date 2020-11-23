@@ -34,7 +34,7 @@ export default context => {
       exchange: "Обмен",
       about: "О нас",
       howtouse: "Как использовать",
-      transparency: "Прозначность",
+      transparency: "Прозрачность",
       wallet: "Кошелек",
       contacts: "Контакты"
     },
