@@ -1,5 +1,7 @@
 from typing import Literal
 
+from bson import Decimal128
+
 from config import BTC_COLD_WALLETS, SIMBA_CONTRACT
 from core.integrations.ethereum.base_wrapper import EthereumBaseContractWrapper
 from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD, MetaCRUD, EthereumTransactionCRUD
@@ -44,7 +46,10 @@ class TransparencyMechanics:
                 "value": {"$sum": "$args.value"},
             }},
         ]):
-            amounts[i["_id"]] = int(i["value"])
+            if isinstance(i["value"], Decimal128):
+                amounts[i["_id"]] = int(i["value"].to_decimal())
+            else:
+                amounts[i["_id"]] = int(i["value"])
 
         holders = await EthereumTransactionCRUD.aggregate([
             {"$match": {
@@ -54,7 +59,7 @@ class TransparencyMechanics:
             {"$replaceRoot": {"newRoot": "$args"}},
             {"$project": {"to": 1}},
         ])
-        holders = len(set([i["to"] for i in holders])) - 3
+        holders = len(set([i["to"] for i in holders]))
         try:
             total_supply = EthereumBaseContractWrapper(SIMBA_CONTRACT).contract.functions.totalSupply().call()
         except Exception:
