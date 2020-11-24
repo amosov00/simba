@@ -2,9 +2,9 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Query, Body, Path
 
+from core.mechanics.referrals import ReferralMechanics
 from core.utils import to_objectid
 from database.crud import UserCRUD, UserAddressesArchiveCRUD
-from core.mechanics.referrals import ReferralMechanics
 from schemas import (
     User,
     UserWithReferrals,
@@ -21,12 +21,12 @@ users_router = APIRouter()
 @users_router.get(
     "/",
     response_model=List[User],
-    response_model_include={"id", "email", "is_superuser", "is_active", "first_name", "last_name"}
+    response_model_include={"id", "email", "is_superuser", "is_active", "first_name", "last_name", "created_at"}
 )
 async def admin_users_fetch_all(
         q: Optional[str] = Query(default=None, description="query for many fields"),
 ):
-    return await UserCRUD.find_by_query(q)
+    return await UserCRUD.find_by_query(q, sort=[("created_at", -1)])
 
 
 @users_router.get(

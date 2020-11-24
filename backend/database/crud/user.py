@@ -1,17 +1,18 @@
 import asyncio
-from typing import Optional, Union
-from passlib import pwd
 from datetime import datetime, timedelta
 from http import HTTPStatus
+from typing import Optional, Union
 
 import pyotp
-from fastapi.exceptions import HTTPException
 from bson import ObjectId, errors
+from fastapi.exceptions import HTTPException
+from passlib import pwd
 
+from core.utils.email import Email
+from core.utils.jwt import decode_jwt_token, encode_jwt_token
 from database.crud.base import BaseMongoCRUD
 from database.crud.referral import ReferralCRUD
-from core.utils.jwt import decode_jwt_token, encode_jwt_token
-from core.utils.email import Email
+from schemas.base import ObjectIdPydantic
 from schemas.user import (
     User,
     UserCreationSafe,
@@ -25,7 +26,6 @@ from schemas.user import (
     User2faConfirm,
     User2faDelete
 )
-from schemas.base import ObjectIdPydantic
 
 __all__ = ["UserCRUD"]
 
@@ -40,7 +40,7 @@ class UserCRUD(BaseMongoCRUD):
         return await super().find_one(query={"email": email}) if email else None
 
     @classmethod
-    async def find_by_query(cls, q: str) -> list:
+    async def find_by_query(cls, q: str, **kwargs) -> list:
         if q:
             query = []
 
@@ -61,7 +61,7 @@ class UserCRUD(BaseMongoCRUD):
         else:
             query = {}
 
-        return await super().find_many(query)
+        return await super().find_many(query, **kwargs)
 
     @classmethod
     async def check_2fa(cls, user_id: Union[ObjectId, ObjectIdPydantic], pin_code: str) -> bool:
