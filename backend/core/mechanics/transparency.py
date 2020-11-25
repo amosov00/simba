@@ -40,7 +40,7 @@ class TransparencyMechanics:
             except Exception:
                 resp["totalAssets"] = 0
 
-        return obj
+        return resp
 
     @classmethod
     async def fetch_xpubs_balance(cls) -> dict:
@@ -62,7 +62,8 @@ class TransparencyMechanics:
     @classmethod
     async def fetch_simba_common_info(cls) -> dict:
         amounts = {
-            "quarantined": await cls.fetch_blacklisted_balance()
+            "quarantined": await cls.fetch_blacklisted_balance(),
+            "circulation": 0,
         }
         for i in await EthereumTransactionCRUD.aggregate([
             {"$match": {
@@ -79,11 +80,10 @@ class TransparencyMechanics:
             else:
                 amounts[i["_id"]] = int(i["value"])
 
-        circulation = \
+        amounts["circulation"] = \
             amounts[SimbaContractEvents.OnIssued] - amounts[SimbaContractEvents.OnRedeemed] - amounts["quarantined"]
 
         return {
-            "circulation": circulation,
             **amounts,
             **await cls.fetch_simba_meta()
         }
