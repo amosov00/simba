@@ -1,7 +1,7 @@
 from os import getenv, path
 
-from .common import IS_PRODUCTION, BASE_DIR
 from schemas import EthereumContract, BTCxPub
+from .common import IS_PRODUCTION, BASE_DIR
 
 BLOCKCYPHER_TOKEN = getenv("BLOCKCYPHER_TOKEN")
 BLOCKCYPHER_WALLET_TITLE = getenv("BLOCKCYPHER_WALLET_TITLE")
@@ -11,6 +11,7 @@ INFURA_WS_URL = getenv("INFURA_WS_URL")
 TRANSACTION_MIN_CONFIRMATIONS = 3 if IS_PRODUCTION else 1
 GASSTATION_API_TOKEN = getenv("GASSTATION_API_TOKEN")
 ETHERSCAN_API_TOKEN = getenv("ETHERSCAN_API_TOKEN")
+ETHPLORER_API_TOKEN = getenv("ETHPLORER_API_TOKEN")
 
 GASSTATION_URL = "https://ethgasstation.info/api/ethgasAPI.json"
 GAS_TRACKER_URL = "https://api.etherscan.io/api/"

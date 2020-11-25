@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Literal
 
 from bson import Decimal128
@@ -11,8 +12,35 @@ from schemas import InvoiceStatus, InvoiceType, MetaSlugs, SimbaContractEvents
 class TransparencyMechanics:
     @classmethod
     async def fetch_blacklisted_balance(cls) -> int:
-        inst = await MetaCRUD.find_by_slug(MetaSlugs.BLACKLISTED_BALANCE, raise_404=False) or {}
-        return inst.get("payload", {}).get("balance", 0)
+        obj = await MetaCRUD.find_by_slug(MetaSlugs.BLACKLISTED_BALANCE, raise_404=False) or {}
+        return obj.get("payload", {}).get("balance", 0)
+
+    @classmethod
+    async def fetch_simba_meta(cls) -> dict:
+        obj = await MetaCRUD.find_by_slug(MetaSlugs.SIMBA_META, raise_404=False) or {}
+        resp = {"holders": 0, "totalAssets": 0}
+
+        if obj and obj.get("payload") and obj["updated_at"] > datetime.now() - timedelta(hours=6):
+            resp["holders"] = obj["payload"].get("holdersCount")
+            resp["totalAssets"] = obj["payload"].get("totalAssets")
+
+        else:
+            holders = await EthereumTransactionCRUD.aggregate([
+                {"$match": {
+                    "contract": "SIMBA",
+                    "event": SimbaContractEvents.Transfer
+                }},
+                {"$replaceRoot": {"newRoot": "$args"}},
+                {"$project": {"to": 1}},
+            ])
+            resp["holders"] = len(set([i["to"] for i in holders]))
+            try:
+                resp["totalAssets"] = EthereumBaseContractWrapper(
+                    SIMBA_CONTRACT).contract.functions.totalSupply().call()
+            except Exception:
+                resp["totalAssets"] = 0
+
+        return obj
 
     @classmethod
     async def fetch_xpubs_balance(cls) -> dict:
@@ -51,27 +79,13 @@ class TransparencyMechanics:
             else:
                 amounts[i["_id"]] = int(i["value"])
 
-        holders = await EthereumTransactionCRUD.aggregate([
-            {"$match": {
-                "contract": "SIMBA",
-                "event": SimbaContractEvents.Transfer
-            }},
-            {"$replaceRoot": {"newRoot": "$args"}},
-            {"$project": {"to": 1}},
-        ])
-        holders = len(set([i["to"] for i in holders]))
-        try:
-            total_supply = EthereumBaseContractWrapper(SIMBA_CONTRACT).contract.functions.totalSupply().call()
-        except Exception:
-            total_supply = 0
-        circulation = amounts[SimbaContractEvents.OnIssued] \
-                      - amounts[SimbaContractEvents.OnRedeemed] \
-                      - amounts["quarantined"]
+        circulation = \
+            amounts[SimbaContractEvents.OnIssued] - amounts[SimbaContractEvents.OnRedeemed] - amounts["quarantined"]
+
         return {
-            "holders": holders,
-            "totalAssets": total_supply,
             "circulation": circulation,
-            **amounts
+            **amounts,
+            **await cls.fetch_simba_meta()
         }
 
     @classmethod

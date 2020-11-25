@@ -4,7 +4,7 @@ import httpx
 from fastapi import APIRouter, Depends
 
 from api.dependencies import get_user
-from celery_app.tasks import fetch_empty_btc_addresses_info
+from celery_app.tasks import rescue_stucked_invoices
 from database.crud import InvoiceCRUD, BlockCypherWebhookCRUD, ReferralCRUD
 from schemas import BlockCypherWebhookInDB, User, ReferralInDB, InvoiceInDB
 
@@ -15,8 +15,7 @@ router = APIRouter()
 
 @router.get("/cron/")
 async def debug_get():
-    await fetch_empty_btc_addresses_info()
-    return True
+    return await rescue_stucked_invoices(None)
 
 
 @router.get("/invoices/", response_model=List[InvoiceInDB])
