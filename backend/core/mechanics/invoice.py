@@ -6,12 +6,23 @@ from typing import Union, List, Optional
 from fastapi import HTTPException
 from sentry_sdk import capture_message
 
+from config import (
+    IS_PRODUCTION,
+    SIMBA_BUY_SELL_FEE,
+    SIMBA_MINIMAL_BUY_AMOUNT,
+    TRANSACTION_MIN_CONFIRMATIONS,
+    BTC_MULTISIG_WALLET_ADDRESS,
+    BTC_MULTISIG_COSIG_1_WIF,
+    BTC_MULTISIG_COSIG_2_PUB,
+    BTC_FEE,
+)
 from core.mechanics import SimbaWrapper, SSTWrapper, BitcoinWrapper, BlockCypherWebhookHandler
 from core.mechanics.crypto.base import CryptoValidation
 from database.crud import BTCTransactionCRUD, InvoiceCRUD, EthereumTransactionCRUD, UserCRUD, MetaCRUD
 from schemas import (
     User,
     InvoiceInDB,
+    InvoiceExtended,
     InvoiceType,
     InvoiceStatus,
     EthereumTransaction,
@@ -23,20 +34,10 @@ from schemas import (
     BlockCypherWebhookEvents,
     MetaSlugs,
 )
-from config import (
-    IS_PRODUCTION,
-    SIMBA_BUY_SELL_FEE,
-    SIMBA_MINIMAL_BUY_AMOUNT,
-    TRANSACTION_MIN_CONFIRMATIONS,
-    BTC_MULTISIG_WALLET_ADDRESS,
-    BTC_MULTISIG_COSIG_1_WIF,
-    BTC_MULTISIG_COSIG_2_PUB,
-    BTC_FEE,
-)
 
 
 class InvoiceMechanics(CryptoValidation):
-    def __init__(self, invoice: Union[dict, InvoiceInDB], user: Union[dict, User] = None):
+    def __init__(self, invoice: Union[dict, InvoiceInDB, InvoiceExtended], user: Union[dict, User] = None):
         if isinstance(invoice, dict):
             invoice = InvoiceInDB(**invoice)
 
@@ -46,6 +47,8 @@ class InvoiceMechanics(CryptoValidation):
         self.invoice = invoice
         self.user = user
         self.errors = []
+
+        assert invoice.id, "invoice id is missing"
 
     def _raise_exception_if_exists(self):
         if self.errors:

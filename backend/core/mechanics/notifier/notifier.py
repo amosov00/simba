@@ -10,11 +10,16 @@ __all__ = ["SupportNotifier"]
 
 
 class NotifierHelper:
-    @classmethod
-    async def _is_allowed_to_send_to_support(cls, slug: str, frequency_limit: int = SUPPORT_FREQUENCY_LIMIT) -> bool:
+    def __init__(self, skip_timeout: bool = False):
+        self.skip_timeout = skip_timeout
+
+    async def _is_allowed_to_send_to_support(self, slug: str, frequency_limit: int = SUPPORT_FREQUENCY_LIMIT) -> bool:
+        if self.skip_timeout:
+            return True
+
         meta_email_time = await MetaCRUD.find_by_slug(slug, False) or {}
         if not meta_email_time:
-            await cls._create_sent_at(slug)
+            await self._create_sent_at(slug)
         now = datetime.now()
         last_email_sent = meta_email_time.get("payload", {}).get("sent_at", now)
         return now - last_email_sent > timedelta(minutes=frequency_limit)

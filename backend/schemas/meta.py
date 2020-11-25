@@ -9,6 +9,7 @@ class MetaSlugs:
     MANUAL_PAYOUT = "manual_payout"
     EMAIL_TO_SUPPORT_TIME = "email_to_support_time"
     BLACKLISTED_BALANCE = "blacklisted_balance"
+    SIMBA_META = "simba_meta"
     EMAIL_SUPPORT_HOT_WALLET_BALANCE_LACK = "email_support_hot_wallet_balance_lack"
     EMAIL_SUPPORT_INVOICE_STUCK = "email_support_invoice_stuck"
 

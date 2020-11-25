@@ -1,8 +1,7 @@
-from celery import Celery
-from celery.schedules import crontab
-
 import celery_decorator_taskcls
 import celery_pool_asyncio  # noqa
+from celery import Celery
+from celery.schedules import crontab
 
 celery_pool_asyncio.__package__  # noqa
 
@@ -35,6 +34,11 @@ app.conf.beat_schedule = {
     "fetch_and_proceed_simba_contract": {
         "task": "fetch_and_proceed_simba_contract",
         "schedule": crontab(minute="*/1"),
+        "args": (),
+    },
+    "fetch_simba_meta": {
+        "task": "fetch_simba_meta",
+        "schedule": crontab(hour="*/1"),
         "args": (),
     },
     "send_btc_to_proceeding_invoices": {
