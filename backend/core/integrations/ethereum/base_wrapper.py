@@ -52,7 +52,11 @@ class EthereumBaseWrapper(ABC):
 
         elif isinstance(obj, int) and getsizeof(obj) >= 32:
             # fix for OverflowError: MongoDB can only handle up to 8-byte ints
-            obj = Decimal128(Decimal(obj))
+            try:
+                obj = Decimal128(Decimal(obj))
+            except Exception:
+                # TODO bypass error with big int (decimal.Inexact: [<class 'decimal.Inexact'>])
+                obj = str(obj)
 
         return obj
 
