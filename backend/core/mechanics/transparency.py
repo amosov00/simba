@@ -22,7 +22,7 @@ class TransparencyMechanics:
 
         if obj and obj.get("payload") and obj["updated_at"] > datetime.now() - timedelta(hours=6):
             resp["holders"] = obj["payload"].get("holdersCount")
-            resp["totalAssets"] = obj["payload"].get("totalAssets")
+            resp["totalAssets"] = obj["payload"].get("totalSupply")
 
         else:
             holders = await EthereumTransactionCRUD.aggregate([
