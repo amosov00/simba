@@ -81,7 +81,7 @@ class TransparencyMechanics:
             else:
                 amounts[i["_id"]] = int(i["value"])
 
-        amounts["circulation"] = amounts["totalAssets"] - amounts["quarantined"]
+        amounts["circulation"] = int(amounts["totalAssets"]) - int(amounts["quarantined"])
         return amounts
 
     @classmethod
