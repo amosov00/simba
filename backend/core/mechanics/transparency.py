@@ -35,8 +35,8 @@ class TransparencyMechanics:
             ])
             resp["holders"] = len(set([i["to"] for i in holders]))
             try:
-                resp["totalAssets"] = EthereumBaseContractWrapper(
-                    SIMBA_CONTRACT).contract.functions.totalSupply().call()
+                resp["totalAssets"] = \
+                    EthereumBaseContractWrapper(SIMBA_CONTRACT).contract.functions.totalSupply().call()
             except Exception:
                 resp["totalAssets"] = 0
 
@@ -64,6 +64,7 @@ class TransparencyMechanics:
         amounts = {
             "quarantined": await cls.fetch_blacklisted_balance(),
             "circulation": 0,
+            **await cls.fetch_simba_meta()
         }
         for i in await EthereumTransactionCRUD.aggregate([
             {"$match": {
@@ -80,13 +81,8 @@ class TransparencyMechanics:
             else:
                 amounts[i["_id"]] = int(i["value"])
 
-        amounts["circulation"] = \
-            amounts[SimbaContractEvents.OnIssued] - amounts[SimbaContractEvents.OnRedeemed] - amounts["quarantined"]
-
-        return {
-            **amounts,
-            **await cls.fetch_simba_meta()
-        }
+        amounts["circulation"] = amounts["totalAssets"] - amounts["quarantined"]
+        return amounts
 
     @classmethod
     async def fetch_btc_common_info(cls) -> dict:

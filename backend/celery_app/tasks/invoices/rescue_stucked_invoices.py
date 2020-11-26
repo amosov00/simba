@@ -2,10 +2,11 @@ import logging
 from datetime import datetime, timedelta
 
 from celery_app.celeryconfig import app
+from config import TRANSACTION_MIN_CONFIRMATIONS
 from core.mechanics import InvoiceMechanics, BitcoinWrapper
 from core.mechanics.notifier import SupportNotifier
 from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
-from schemas import InvoiceExtended, InvoiceStatus
+from schemas import InvoiceExtended, InvoiceStatus, BTCTransactionInDB
 
 __all__ = ["rescue_stucked_invoices"]
 
@@ -53,6 +54,13 @@ async def rescue_stucked_invoices(self, *args, **kwargs):
                         address_info.transactions_refs[0].transactions_hash
                     )
                     await InvoiceMechanics(invoice).proceed_new_transaction(transaction)
+            elif len(invoice.btc_txs) == 1:
+                transaction = BTCTransactionInDB(**invoice.btc_txs[0])
+
+                if transaction.confirmations < TRANSACTION_MIN_CONFIRMATIONS:
+                    transaction = await BitcoinWrapper().fetch_transaction(transaction.hash)
+
+                await InvoiceMechanics(invoice).proceed_new_transaction(transaction)
 
             elif invoice.created_at < datetime.now() - timedelta(hours=2):
                 counter += 1
