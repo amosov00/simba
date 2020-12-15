@@ -33,7 +33,9 @@
                   b-input(type="password" size="is-small" :placeholder="$i18n.t('auth.repeat_password').toLocaleLowerCase()" v-model="register_form.repeat_password")
                   span.validaton-error {{ errors[0] }}
             b-field
-              b-input(native-type="text" size="is-small" :placeholder="$i18n.t('auth.partner_id').toLocaleLowerCase()" v-model="register_form.referral_id")
+              ValidationProvider(rules="required" vid="confirmation" v-slot="{ errors }" :name="$i18n.t('auth.partner_id').toLocaleLowerCase()")
+                b-input(native-type="text" size="is-small" :placeholder="$i18n.t('auth.partner_id').toLocaleLowerCase()" v-model="register_form.referral_id")
+                span.validaton-error {{ errors[0] }}
             b-field.terms
               ValidationProvider(:rules="{ required: { allowFalse: false } }" v-slot="{ errors }" :name="$i18n.t('auth.terms_of_agreement')" tag="div")
                 b-checkbox(v-model="terms_and_conditions")
@@ -46,7 +48,7 @@
 </template>
 
 <script>
-import { ValidationProvider, ValidationObserver } from "vee-validate";
+import {ValidationObserver, ValidationProvider} from "vee-validate";
 
 export default {
   name: "register",
@@ -82,7 +84,7 @@ export default {
       this.loading = true;
       let resp = await this.$store.dispatch("signUp", this.register_form);
       if (resp) {
-        this.$nuxt.$router.replace({ path: "/" });
+        await this.$router.replace({ path: "/" });
       }
       this.loading = false;
     }

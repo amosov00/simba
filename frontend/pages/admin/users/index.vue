@@ -7,7 +7,7 @@
         b-table(v-if="usersToView.length > 0" :data="usersToView" paginated per-page="20" searchable).users-table
             template(slot-scope="props")
                 b-table-column(field="_id" label="ID" width="50" sortable)
-                    nuxt-link(:to="`/users/${props.row._id}`") {{ props.row._id }}
+                    nuxt-link(:to="`/admin/users/${props.row._id}`") {{ props.row._id }}
                 b-table-column(field="first_name" :label="$i18n.t('account_page.first_name')" width="50" sortable) {{ props.row.first_name }}
                 b-table-column(field="last_name" :label="$i18n.t('account_page.last_name')" width="50" sortable) {{ props.row.last_name }}
                 b-table-column(field="email" label="Email" width="50" sortable) {{ props.row.email }}

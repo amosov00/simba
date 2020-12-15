@@ -10,9 +10,11 @@
             template(slot-scope="props")
                 b-table-column(field="created_at" :label="$i18n.t('su_invoices.created_at')" width="150" sortable) {{ timestampFromUtc(props.row.created_at) }}
                 b-table-column(field="_id" label="ID" width="50" sortable)
-                    n-link(:to="`/invoices/${props.row._id}`") {{ props.row._id }}
+                    n-link(:to="`/admin/invoices/${props.row._id}`") {{ props.row._id }}
                 b-table-column(field="user_id" :label="$i18n.t('su_invoices.user_id')" width="50" sortable)
-                    n-link(:to="`/users/${props.row.user_id}`") {{ (props.row.user_id) }}
+                    n-link(:to="`/admin/users/${props.row.user_id}`") {{ (props.row.user_id) }}
+                b-table-column(field="status" :label="$i18n.t('su_invoices.invoice_type')"  width="100" sortable)
+                    span {{ $t(`su_invoices.invoice_type_${props.row.invoice_type}`) }}
                 b-table-column(field="status" :label="$i18n.t('su_invoices.status')"  width="100" sortable)
                     span(:style="{color: statusToColor(props.row.status)}") {{ $t(`exchange.statuses.${props.row.status}`) }}
                 b-table-column(field="btc_amount" label="BTC"  width="50" sortable) {{ btcFormat(props.row.btc_amount) }}

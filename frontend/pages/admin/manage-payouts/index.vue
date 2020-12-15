@@ -18,7 +18,7 @@
           b-table-column(field="created_at" :label="$i18n.t('su_payouts_mm.date')" width="140" sortable)
             span.is-size-7 {{ timestampFromUtc(props.row.created_at) }}
           b-table-column(field="_id" label="ID" sortable)
-            n-link(:to="`/invoices/${props.row._id}`") {{ truncateHash(props.row._id, 4, 6) }}
+            n-link(:to="`/admin/invoices/${props.row._id}`") {{ truncateHash(props.row._id, 4, 6) }}
           b-table-column(field="tx_hashes" :label="$i18n.t('su_payouts_mm.transactions')" width="200")
             div
               div(v-for="(hash, i) in props.row.eth_tx_hashes" :key="i" style="white-space: nowrap")
@@ -49,13 +49,13 @@
 </template>
 
 <script>
-  import formatDate from "~/mixins/formatDate";
-  import formatCurrency from "~/mixins/formatCurrency";
-  import ModalBitcore from "~/components/ModalBitcore";
+import formatDate from "~/mixins/formatDate";
+import formatCurrency from "~/mixins/formatCurrency";
+import ModalBitcore from "~/components/ModalBitcore";
 
-  import invoiceMixins from "~/mixins/invoiceMixins";
+import invoiceMixins from "~/mixins/invoiceMixins";
 
-  export default {
+export default {
     layout: "main",
     middleware: ["adminRequired"],
     mixins: [formatDate, formatCurrency, invoiceMixins],
