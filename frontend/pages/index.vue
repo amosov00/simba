@@ -46,7 +46,6 @@ export default {
         this.email,
         this.password
       );
-
       if(resp !== true) {
         if(resp.response.status >= 400) {
           let resp_msg = resp.response.data[0].message

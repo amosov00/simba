@@ -2,7 +2,7 @@
   footer.the-footer
     div.the-footer__wrapper
       div.the-footer__icons-list
-        a(:href="$i18n.t(`socials.${soc.id}`)" v-for="soc in socials" target="_blank" rel="noopener noreferrer").the-footer__soc-link
+        a(:href="$i18n.t(`${soc.id}`)" v-for="soc in socials" target="_blank" rel="noopener noreferrer").the-footer__soc-link
           InlineSvg(:src="require(`~/assets/images/socials/${soc.icon}`)").the-footer__icon
       div.the-footer__copyright © 2019–2020 SIMBA
       div.mt-1.is-flex.align-items-center
@@ -23,7 +23,7 @@
 
     data: () => ({
       socials: [
-        { id: 'facebook', icon: 'facebook.svg' },
+        { id: 'https://www.facebook.com/Simba-Storage-110167394048375', icon: 'facebook.svg' },
         { id: 'bitcoin', icon: 'bitcoin.svg' },
         { id: 'instagram', icon: 'instagram.svg' },
         { id: 'medium', icon: 'medium.svg' },
