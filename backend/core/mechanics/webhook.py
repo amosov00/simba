@@ -36,11 +36,11 @@ class BlockCypherWebhookHandler:
         return bool(await BlockCypherWebhookCRUD.find_one({"$or": or_query}))
 
     async def create_webhook(
-            self,
-            invoice: InvoiceInDB,
-            event: Literal[BlockCypherWebhookEvents.ALL],  # noqa
-            wallet_address: str = None,
-            transaction_hash: str = None,
+        self,
+        invoice: InvoiceInDB,
+        event: Literal[BlockCypherWebhookEvents.ALL],  # noqa
+        wallet_address: str = None,
+        transaction_hash: str = None,
     ):
         if await self._check_if_webhook_exists(wallet_address, transaction_hash):
             with push_scope() as scope:

@@ -21,15 +21,17 @@ __all__ = ["fetch_and_proceed_simba_contract"]
     retry_kwargs={"max_retries": 5},
 )
 async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
-    """Синхронизация с Simba контрактом"""
+    """Синхронизация с Simba контрактом."""
     await EventsContractWrapper(SIMBA_CONTRACT).fetch_blocks_and_save()
     counter = 0
-    transactions = await EthereumTransactionCRUD.find({
-        "contract": SIMBA_CONTRACT.title,
-        "event": {"$in": SimbaContractEvents.ALL},
-        "invoice_id": None,
-        "skip": {"$ne": True},
-    })
+    transactions = await EthereumTransactionCRUD.find(
+        {
+            "contract": SIMBA_CONTRACT.title,
+            "event": {"$in": SimbaContractEvents.ALL},
+            "invoice_id": None,
+            "skip": {"$ne": True},
+        }
+    )
 
     logging.info(f"Simba TX to proceed: {len(transactions)}")
 
@@ -41,31 +43,30 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
             sender_hash = transaction.args.get("from")
             receiver_hash = transaction.args.get("to")
 
-            if all([
-                transaction.event == SimbaContractEvents.Transfer,
-                settings.crypto.simba_admin_address.lower() != receiver_hash.lower(),
-                settings.crypto.simba_admin_address.lower() != sender_hash.lower()
-            ]):
+            if all(
+                [
+                    transaction.event == SimbaContractEvents.Transfer,
+                    settings.crypto.simba_admin_address.lower() != receiver_hash.lower(),
+                    settings.crypto.simba_admin_address.lower() != sender_hash.lower(),
+                ]
+            ):
                 # Mark transaction as service
                 transaction.skip = True
-                await EthereumTransactionCRUD.update_one(
-                    {"_id": transaction.id}, transaction.dict(exclude={"id"})
-                )
+                await EthereumTransactionCRUD.update_one({"_id": transaction.id}, transaction.dict(exclude={"id"}))
                 continue
 
             invoice = await InvoiceCRUD.find_one(
-                {"$or": [
-                    {
-                        "status": InvoiceStatus.WAITING,
-                        "invoice_type": InvoiceType.SELL,
-                        "target_eth_address": {"$regex": sender_hash, "$options": "i"},
-                        "created_at": {"$lte": transaction.fetched_at},
-                    },
-                    {
-                        "invoice_type": InvoiceType.SELL,
-                        "eth_tx_hashes": transaction.transactionHash
-                    }
-                ]}
+                {
+                    "$or": [
+                        {
+                            "status": InvoiceStatus.WAITING,
+                            "invoice_type": InvoiceType.SELL,
+                            "target_eth_address": {"$regex": sender_hash, "$options": "i"},
+                            "created_at": {"$lte": transaction.fetched_at},
+                        },
+                        {"invoice_type": InvoiceType.SELL, "eth_tx_hashes": transaction.transactionHash},
+                    ]
+                }
             )
 
             if invoice:
@@ -81,24 +82,24 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
 
             tx_datetime = datetime.fromtimestamp(timestamp)
             btc_tx_hash = transaction.args.get("comment")
-            invoice_type = (
-                InvoiceType.BUY if transaction.event == SimbaContractEvents.OnIssued else InvoiceType.SELL
-            )
+            invoice_type = InvoiceType.BUY if transaction.event == SimbaContractEvents.OnIssued else InvoiceType.SELL
 
             invoice = await InvoiceCRUD.find_one(
-                {"$or": [
-                    {
-                        "status": InvoiceStatus.COMPLETED,
-                        "invoice_type": invoice_type,
-                        "target_eth_address": {"$regex": customer_address, "$options": "i"},
-                        "created_at": {"$lte": tx_datetime},
-                        "btc_tx_hashes": btc_tx_hash,
-                    },
-                    {
-                        "invoice_type": invoice_type,
-                        "eth_tx_hashes": transaction.transactionHash,
-                    }
-                ]}
+                {
+                    "$or": [
+                        {
+                            "status": InvoiceStatus.COMPLETED,
+                            "invoice_type": invoice_type,
+                            "target_eth_address": {"$regex": customer_address, "$options": "i"},
+                            "created_at": {"$lte": tx_datetime},
+                            "btc_tx_hashes": btc_tx_hash,
+                        },
+                        {
+                            "invoice_type": invoice_type,
+                            "eth_tx_hashes": transaction.transactionHash,
+                        },
+                    ]
+                }
             )
 
             if invoice:
@@ -107,9 +108,7 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
 
         elif transaction.event in (SimbaContractEvents.BlacklistedAdded, SimbaContractEvents.BlacklistedRemoved):
             transaction.skip = True
-            await EthereumTransactionCRUD.update_one(
-                {"_id": transaction.id}, {"skip": transaction.skip}
-            )
+            await EthereumTransactionCRUD.update_one({"_id": transaction.id}, {"skip": transaction.skip})
             counter += 1
 
     if counter:

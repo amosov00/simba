@@ -7,7 +7,6 @@ from config import *
 from core.middleware import JWTAuthBackend
 from core.utils import CustomJSONResponse, exception_handlers
 from database.db_events import test_db_connection, prepopulate_db, close_db_connection
-from database.init import mongo
 
 docs_config = (
     {
@@ -30,7 +29,7 @@ app = FastAPI(
 # Database
 ##########
 
-setattr(app, "mongo", mongo)
+# setattr(app, "mongo", mongo)
 
 #########
 # Routes

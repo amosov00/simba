@@ -29,9 +29,7 @@ class EthereumBaseWrapper(ABC):
         return Web3.toWei(min(int(gasprice), ETH_MAX_GAS_PRICE_GWEI), "gwei")
 
     @classmethod
-    def init_web3_provider(
-        cls, provider_type: Literal["http", "ws"], provider_url: str, websocket_timeout: int = 60
-    ):
+    def init_web3_provider(cls, provider_type: Literal["http", "ws"], provider_url: str, websocket_timeout: int = 60):
         if provider_type == "http":
             return Web3.HTTPProvider(provider_url)
         elif provider_type == "ws":
@@ -68,8 +66,7 @@ class EthereumBaseCommonWrapper(EthereumBaseWrapper):
 
 class EthereumBaseContractWrapper(EthereumBaseWrapper):
     def __init__(self, contract: EthereumContract):
-        _abi = []
-        _bin = None
+        pass
         # Temp fix cause of Infura maintenance
         self.w3 = Web3(self.init_web3_provider("ws", contract.provider_ws_link))
         # self.w3 = Web3(self.init_web3_provider("http", contract.provider_http_link))
@@ -105,7 +102,7 @@ class EthereumBaseContractWrapper(EthereumBaseWrapper):
 
     def _get_contract_events_titles(self) -> list:
         events = []
-        for key, val in self.contract.events.__dict__.items():
+        for key, _ in self.contract.events.__dict__.items():
             if key != "abi" and not key[0].startswith("_"):
                 events.append(key)
 

@@ -32,10 +32,12 @@ class PycoinWrapper:
 
     @staticmethod
     async def _created_address_is_valid(address: str):
-        return not any([
-            bool(await InvoiceCRUD.find_one({"target_btc_address": address})),
-            bool(await BTCAddressCRUD.find_one({"address": address}))
-        ])
+        return not any(
+            [
+                bool(await InvoiceCRUD.find_one({"target_btc_address": address})),
+                bool(await BTCAddressCRUD.find_one({"address": address})),
+            ]
+        )
 
     @classmethod
     async def from_active_xpub(cls, **kwargs) -> "PycoinWrapper":

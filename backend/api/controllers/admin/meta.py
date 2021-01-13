@@ -5,9 +5,7 @@ from fastapi import APIRouter, Body, Path, HTTPException
 
 from config import settings
 from database.crud import MetaCRUD
-from schemas import (
-    MetaInDB
-)
+from schemas import MetaInDB
 
 __all__ = ["meta_router"]
 
@@ -27,19 +25,13 @@ async def admin_meta_fetch_all():
     response_model=MetaInDB,
 )
 async def admin_meta_fetch_by_slug(
-        meta_slug: str = Path(...),
+    meta_slug: str = Path(...),
 ):
     return await MetaCRUD.find_by_slug(meta_slug)
 
 
-@meta_router.put(
-    "/{meta_slug}/",
-    response_model=MetaInDB
-)
-async def admin_meta_update(
-        meta_slug: str = Path(...),
-        payload: dict = Body(...)
-):
+@meta_router.put("/{meta_slug}/", response_model=MetaInDB)
+async def admin_meta_update(meta_slug: str = Path(...), payload: dict = Body(...)):
     res = await MetaCRUD.find_by_slug(meta_slug)
 
     if res["payload"].keys() != payload.keys():

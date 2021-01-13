@@ -16,9 +16,7 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
     def __init__(self):
         self.api_token = settings.crypto.blockcypher_token
         self.api_url = (
-            "https://api.blockcypher.com/v1/btc/main"
-            if IS_PRODUCTION
-            else "https://api.blockcypher.com/v1/btc/test3"
+            "https://api.blockcypher.com/v1/btc/main" if IS_PRODUCTION else "https://api.blockcypher.com/v1/btc/test3"
         )
 
         self.blockcypher_wallet_name = settings.crypto.blockcypher_wallet_title
@@ -56,7 +54,7 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
         if resp.is_error:
             capture_message(
                 f"Invalid request to BlockCypher; status: {resp.status_code}; url: {url}; error {resp.text}",
-                level="info"
+                level="info",
             )
             raise HTTPException(HTTPStatus.BAD_REQUEST, resp.text)
 

@@ -38,12 +38,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         return await self.api_wrapper.fetch_transaction_info(transaction_hash)
 
     async def fetch_address_and_save(
-            self,
-            address: str,
-            *,
-            invoice_id: ObjectIdPydantic = None,
-            user_id: ObjectIdPydantic = None,
-            save: bool = True
+        self, address: str, *, invoice_id: ObjectIdPydantic = None, user_id: ObjectIdPydantic = None, save: bool = True
     ) -> Optional[BTCAddress]:
         address_info = await self.api_wrapper.fetch_address_info(address) if address else None
         if address_info:
@@ -58,10 +53,10 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         return address_info
 
     def proceed_payables(
-            self, destination_address: str, amount: int, address_from: str, fee: Optional[int] = None
+        self, destination_address: str, amount: int, address_from: str, fee: Optional[int] = None
     ) -> List[Tuple[str, int]]:
-        """
-        Струкрура payable (address, satoshi)
+        """Струкрура payable (address, satoshi)
+
         destination_payables - Payable клиентского кошелька
         difference_payables - Разница, которую нужно отправить на сервисный кошелек
         address from - адрес отправляющего кошелька
@@ -74,7 +69,10 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         return [destination_payable, difference_payable]
 
     async def create_and_sign_transaction(
-            self, address: str, amount: int, fee: Optional[int] = None,
+        self,
+        address: str,
+        amount: int,
+        fee: Optional[int] = None,
     ) -> BTCTransaction:
         """
         Payables передавать в форме [(<address_hash>, <btc_amount>), ], btc_amount - in satoshi
@@ -82,9 +80,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         Wif передавать в формате [<wif>, ]
         """
         fee = fee or BTC_FEE
-        self.hot_wallet_balance = await self.api_wrapper.current_balance(
-            settings.crypto.btc_hot_wallet_address
-        )
+        self.hot_wallet_balance = await self.api_wrapper.current_balance(settings.crypto.btc_hot_wallet_address)
         spendables = await self.api_wrapper.get_spendables(settings.crypto.btc_hot_wallet_address)
         payables = self.proceed_payables(address, amount, settings.crypto.btc_hot_wallet_address, fee)
 
@@ -98,8 +94,9 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
             self.api_wrapper.network,
             spendables=spendables,
             payables=payables,
-            wifs=[settings.crypto.btc_hot_wallet_wif, ],
+            wifs=[
+                settings.crypto.btc_hot_wallet_wif,
+            ],
             fee=fee,
         )
         return await self.api_wrapper.push_raw_tx(tx)
-

@@ -4,14 +4,7 @@ import sentry_sdk
 from pydantic import BaseModel, Field
 
 from schemas import EthereumContract, BTCxPub
-from .config_parts import (
-    CommonSettings,
-    DBSettings,
-    CryptoSettings,
-    SentrySettings,
-    EmailSettings,
-    CelerySettings
-)
+from .config_parts import CommonSettings, DBSettings, CryptoSettings, SentrySettings, EmailSettings, CelerySettings
 from .configurator import configurator, IS_LOCAL, IS_PRODUCTION, BASE_DIR
 
 

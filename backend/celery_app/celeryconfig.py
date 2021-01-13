@@ -11,7 +11,10 @@ __all__ = ["app"]
 
 celery_decorator_taskcls.patch_celery()
 
-app = Celery(main="celery_main", broker=settings.celery.celery_broker_url, )
+app = Celery(
+    main="celery_main",
+    broker=settings.celery.celery_broker_url,
+)
 
 app.conf.update(
     task_serializer="json",
@@ -19,7 +22,9 @@ app.conf.update(
     result_serializer="json",
     timezone="Europe/Moscow",
     enable_utc=True,
-    imports=["celery_app.tasks", ],
+    imports=[
+        "celery_app.tasks",
+    ],
 )
 
 app.conf.beat_schedule = {
@@ -46,7 +51,7 @@ app.conf.beat_schedule = {
     "delete_unused_webhooks": {
         "task": "delete_unused_webhooks",
         "schedule": crontab(minute="20", hour="*/3"),
-        "args": ()
+        "args": (),
     },
     "fetch_and_proceed_sst_contract": {
         "task": "fetch_and_proceed_sst_contract",
@@ -77,5 +82,5 @@ app.conf.beat_schedule = {
         "task": "double_check_contracts",
         "schedule": crontab(hour="*/12"),
         "args": (),
-    }
+    },
 }

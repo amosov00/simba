@@ -22,9 +22,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
 
     def __init__(self, invoice: InvoiceInDB):
         self.api_wrapper = FunctionsContractWrapper(
-            SST_CONTRACT,
-            settings.crypto.simba_admin_address,
-            settings.crypto.simba_admin_private_key
+            SST_CONTRACT, settings.crypto.simba_admin_address, settings.crypto.simba_admin_private_key
         )
         self.invoice = invoice
         assert invoice is not None
@@ -49,10 +47,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
             tx_hash = await self.api_wrapper.freeze_and_transfer(customer_address, amount, self.PERIOD)
         except ValueError as e:
             await Email().send_message_to_support(
-                "sst_transfer",
-                invoice=self.invoice,
-                customer_address=customer_address,
-                amount=amount
+                "sst_transfer", invoice=self.invoice, customer_address=customer_address, amount=amount
             )
             capture_exception(e)
             return None
@@ -89,7 +84,5 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
 
         if list(tx_hashes):
             tx_hashes = list({*self.invoice.sst_tx_hashes, *tx_hashes})
-            await InvoiceCRUD.update_one(
-                {"_id": self.invoice.id}, {"sst_tx_hashes": tx_hashes}
-            )
+            await InvoiceCRUD.update_one({"_id": self.invoice.id}, {"sst_tx_hashes": tx_hashes})
         return True

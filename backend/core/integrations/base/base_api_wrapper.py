@@ -31,10 +31,7 @@ class BaseApiWrapper:
                 resp = await client.get(url, params=params)
 
         if resp.is_error:
-            capture_message(
-                f"Invalid request; status: {resp.status_code}; url: {url}; error {resp.text}",
-                level="info"
-            )
+            capture_message(f"Invalid request; status: {resp.status_code}; url: {url}; error {resp.text}", level="info")
             raise HTTPException(HTTPStatus.BAD_REQUEST, resp.text)
 
         elif resp.text:

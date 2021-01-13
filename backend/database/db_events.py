@@ -33,22 +33,19 @@ async def prepopulate_xpubs():
 
 async def prepopulate_meta():
     if not await MetaCRUD.find_by_slug(MetaSlugs.MANUAL_PAYOUT, raise_404=False):
-        await MetaCRUD.insert_one(Meta(
-            slug=MetaSlugs.MANUAL_PAYOUT,
-            payload=MetaManualPayoutPayload(is_active=False).dict()
-        ).dict())
+        await MetaCRUD.insert_one(
+            Meta(slug=MetaSlugs.MANUAL_PAYOUT, payload=MetaManualPayoutPayload(is_active=False).dict()).dict()
+        )
 
     if not await MetaCRUD.find_by_slug(MetaSlugs.EMAIL_SUPPORT_HOT_WALLET_BALANCE_LACK, raise_404=False):
-        await MetaCRUD.insert_one(Meta(
-            slug=MetaSlugs.EMAIL_TO_SUPPORT_TIME,
-            payload={"sent_at": datetime.now()}
-        ).dict())
+        await MetaCRUD.insert_one(
+            Meta(slug=MetaSlugs.EMAIL_TO_SUPPORT_TIME, payload={"sent_at": datetime.now()}).dict()
+        )
 
     if not await MetaCRUD.find_by_slug(MetaSlugs.EMAIL_SUPPORT_INVOICE_STUCK, raise_404=False):
-        await MetaCRUD.insert_one(Meta(
-            slug=MetaSlugs.EMAIL_TO_SUPPORT_TIME,
-            payload={"sent_at": datetime.now()}
-        ).dict())
+        await MetaCRUD.insert_one(
+            Meta(slug=MetaSlugs.EMAIL_TO_SUPPORT_TIME, payload={"sent_at": datetime.now()}).dict()
+        )
     return True
 
 
@@ -69,7 +66,7 @@ async def prepopulate_db():
         sentry_sdk.capture_exception(e)
         sys.exit(1)
 
-    logging.info(f"Successfully prepopulated db")
+    logging.info("Successfully prepopulated db")
     return True
 
 

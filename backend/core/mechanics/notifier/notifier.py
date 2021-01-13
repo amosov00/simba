@@ -31,10 +31,7 @@ class NotifierHelper:
 
     @classmethod
     async def _create_sent_at(cls, slug):
-        await MetaCRUD.insert_one(Meta(
-            slug=slug,
-            payload={"sent_at": datetime.now()}
-        ).dict())
+        await MetaCRUD.insert_one(Meta(slug=slug, payload={"sent_at": datetime.now()}).dict())
         return True
 
 

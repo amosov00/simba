@@ -24,12 +24,12 @@ class BlockCypherAPIWrapper(BlockCypherBaseAPIWrapper):
         return BTCTransaction(**res) if res else None
 
     async def create_transaction(self, data: dict) -> dict:
-        endpoint = f"/txs/new/"
+        endpoint = "/txs/new/"
         res = await self.request(endpoint, request_type="POST", data=data)
         return res
 
     async def send_transaction(self, data: dict):
-        endpoint = f"/txs/send/"
+        endpoint = "/txs/send/"
         res = await self.request(endpoint, request_type="POST", data=data, with_token=True)
         return res
 

@@ -9,11 +9,14 @@ async def gasprice_from_etherscan() -> int:
     async with httpx.AsyncClient() as client:
         try:
             result = (
-                await client.get(GASTRACKER_URL, params={
-                    "module": "gastracker",
-                    "action": "gasoracle",
-                    "apikey": settings.crypto.etherscan_api_token,
-                })
+                await client.get(
+                    GASTRACKER_URL,
+                    params={
+                        "module": "gastracker",
+                        "action": "gasoracle",
+                        "apikey": settings.crypto.etherscan_api_token,
+                    },
+                )
             ).json()
         except Exception:
             result = {}

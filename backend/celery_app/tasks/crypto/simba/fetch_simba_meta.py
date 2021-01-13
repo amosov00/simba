@@ -18,8 +18,8 @@ __all__ = ["fetch_simba_meta"]
 async def fetch_simba_meta(self, *args, **kwargs):
     payload = await EthplorerWrapper().fetch_simba_metadata()
     if payload:
-        logging.info(f"Updated simba meta")
+        logging.info("Updated simba meta")
         await MetaCRUD.update_by_slug(MetaSlugs.SIMBA_META, payload, upsert=True)
     else:
-        logging.info(f"Skipped updating meta")
+        logging.info("Skipped updating meta")
     return True

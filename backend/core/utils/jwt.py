@@ -19,9 +19,9 @@ def encode_jwt_token(data: dict, expire_delta: timedelta = None):
         expire = None
 
     to_encode.update({"exp": expire})
-    return jwt.encode(
-        to_encode, settings.common.secret, algorithm=ALGORITHM, json_encoder=CustomEncoder
-    ).decode("UTF-8")
+    return jwt.encode(to_encode, settings.common.secret, algorithm=ALGORITHM, json_encoder=CustomEncoder).decode(
+        "UTF-8"
+    )
 
 
 def decode_jwt_token(token: str):
