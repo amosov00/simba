@@ -3,7 +3,7 @@ import asyncio
 from sentry_sdk import capture_exception
 
 from celery_app.celeryconfig import app
-from config import BTC_HOT_WALLET_ADDRESS
+from config import settings
 from core.mechanics import BitcoinWrapper, InvoiceMechanics
 from core.mechanics.notifier import SupportNotifier
 from database.crud import InvoiceCRUD, UserCRUD, MetaCRUD
@@ -27,7 +27,7 @@ async def send_btc_to_proceeding_invoices(self, *args, **kwargs):
         return True
 
     btc_wrapper = BitcoinWrapper()
-    hot_wallet_info = await btc_wrapper.fetch_address_and_save(BTC_HOT_WALLET_ADDRESS)
+    hot_wallet_info = await btc_wrapper.fetch_address_and_save(settings.crypto.btc_hot_wallet_address)
 
     proceeding_invoices = await InvoiceCRUD.find_many({
         "invoice_type": InvoiceType.SELL,

@@ -1,7 +1,7 @@
 import logging
 
 from celery_app.celeryconfig import app
-from config import SST_CONTRACT, SST_ADMIN_ADDRESS
+from config import SST_CONTRACT, settings
 from core.integrations.ethereum import EventsContractWrapper
 from database.crud import EthereumTransactionCRUD, UserCRUD, InvoiceCRUD
 from schemas import SSTContractEvents
@@ -25,7 +25,7 @@ async def fetch_and_proceed_sst_contract(self, *args, **kwargs):
             "$and": [
                 {"contract": SST_CONTRACT.title},
                 {"event": SSTContractEvents.Transfer},
-                {"args.from": {"$regex": SST_ADMIN_ADDRESS, "$options": "i"}},
+                {"args.from": {"$regex": settings.crypto.simba_admin_address, "$options": "i"}},
                 {"$or": [
                     {"user_id": None},
                     {"invoice_id": None}

@@ -36,7 +36,8 @@ class TransparencyMechanics:
             resp["holders"] = len(set([i["to"] for i in holders]))
             try:
                 resp["totalAssets"] = EthereumBaseContractWrapper(
-                    SIMBA_CONTRACT).contract.functions.totalSupply().call()
+                    SIMBA_CONTRACT
+                ).contract.functions.totalSupply().call()
             except Exception:
                 resp["totalAssets"] = 0
 

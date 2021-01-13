@@ -11,10 +11,8 @@ from config import (
     SIMBA_BUY_SELL_FEE,
     SIMBA_MINIMAL_BUY_AMOUNT,
     TRANSACTION_MIN_CONFIRMATIONS,
-    BTC_MULTISIG_WALLET_ADDRESS,
-    BTC_MULTISIG_COSIG_1_WIF,
-    BTC_MULTISIG_COSIG_2_PUB,
     BTC_FEE,
+    settings
 )
 from core.mechanics import SimbaWrapper, SSTWrapper, BitcoinWrapper, BlockCypherWebhookHandler
 from core.mechanics.crypto.base import CryptoValidation
@@ -369,7 +367,7 @@ class InvoiceMechanics(CryptoValidation):
         await self._validate_for_multisig()
         self._raise_exception_if_exists()
 
-        multisig_wallet = await BitcoinWrapper().fetch_address_and_save(BTC_MULTISIG_WALLET_ADDRESS)
+        multisig_wallet = await BitcoinWrapper().fetch_address_and_save(settings.crypto.btc_multisig_wallet_address)
 
         if multisig_wallet.unconfirmed_transactions_number != 0:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "wallet has outcoming transations")
@@ -377,13 +375,13 @@ class InvoiceMechanics(CryptoValidation):
         if self.invoice.simba_amount_proceeded >= multisig_wallet.balance:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "not enough balance to pay")
 
-        spendables = await BitcoinWrapper().api_wrapper.get_spendables(BTC_MULTISIG_WALLET_ADDRESS)
+        spendables = await BitcoinWrapper().api_wrapper.get_spendables(settings.crypto.btc_multisig_wallet_address)
         payables = [
             (self.invoice.target_btc_address, self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE)
         ]
         return {
-            "cosig1Priv": BTC_MULTISIG_COSIG_1_WIF,
-            "cosig2Pub": BTC_MULTISIG_COSIG_2_PUB,
+            "cosig1Priv": settings.crypto.btc_multisig_cosig_1_wif,
+            "cosig2Pub": settings.crypto.btc_multisig_cosig_2_pub,
             "spendables": spendables,
             "payables": payables,
             "fee": BTC_FEE,

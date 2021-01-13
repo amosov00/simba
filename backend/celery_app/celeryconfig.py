@@ -5,16 +5,13 @@ from celery.schedules import crontab
 
 celery_pool_asyncio.__package__  # noqa
 
-from config import *
+from config import settings
 
 __all__ = ["app"]
 
 celery_decorator_taskcls.patch_celery()
 
-CELERY_MONGO_DATABASE_URL = f"{MONGO_DATABASE_URL}{CELERY_DATABASE_NAME}"
-
-# TODO deal with backend
-app = Celery(main="celery_main", broker=CELERY_BROKER_URL, )  # backend=CELERY_MONGO_DATABASE_URL
+app = Celery(main="celery_main", broker=settings.celery.celery_broker_url, )
 
 app.conf.update(
     task_serializer="json",

@@ -1,13 +1,14 @@
-import random, http
-from typing import Optional
+import http
+import random
 from datetime import datetime
+from typing import Optional
 
-from sentry_sdk import capture_message
 from fastapi import HTTPException
+from sentry_sdk import capture_message
 
-from config import IS_PRODUCTION, BTC_COLD_WALLETS, BTC_COLD_XPUB_SWISS
+from config import IS_PRODUCTION, BTC_COLD_WALLETS
 from database.crud import BTCAddressCRUD, InvoiceCRUD, BTCxPubCRUD
-from schemas import BTCAddress, User, InvoiceInDB, BTCxPub, BTCxPubInDB
+from schemas import BTCAddress, User, InvoiceInDB, BTCxPub
 
 if IS_PRODUCTION:
     from pycoin.symbols.btc import network

@@ -4,11 +4,11 @@ from datetime import datetime
 from bson import Decimal128
 
 from celery_app.celeryconfig import app
-from database.crud import InvoiceCRUD, EthereumTransactionCRUD, UserCRUD
-from schemas import SimbaContractEvents, EthereumTransactionInDB, InvoiceStatus, InvoiceType
+from config import SIMBA_CONTRACT, settings
 from core.integrations.ethereum import EventsContractWrapper
 from core.mechanics.invoice import InvoiceMechanics
-from config import SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS
+from database.crud import InvoiceCRUD, EthereumTransactionCRUD, UserCRUD
+from schemas import SimbaContractEvents, EthereumTransactionInDB, InvoiceStatus, InvoiceType
 
 __all__ = ["fetch_and_proceed_simba_contract"]
 
@@ -43,8 +43,8 @@ async def fetch_and_proceed_simba_contract(self, *args, **kwargs):
 
             if all([
                 transaction.event == SimbaContractEvents.Transfer,
-                SIMBA_ADMIN_ADDRESS.lower() != receiver_hash.lower(),
-                SIMBA_ADMIN_ADDRESS.lower() != sender_hash.lower()
+                settings.crypto.simba_admin_address.lower() != receiver_hash.lower(),
+                settings.crypto.simba_admin_address.lower() != sender_hash.lower()
             ]):
                 # Mark transaction as service
                 transaction.skip = True

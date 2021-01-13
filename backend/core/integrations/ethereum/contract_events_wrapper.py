@@ -1,10 +1,9 @@
 import asyncio
-import logging
 from datetime import datetime
 from typing import Optional, Union, List
 
 from sentry_sdk import capture_exception
-from web3.contract import ContractEvent, LogFilter
+from web3.contract import LogFilter
 from websockets import ConnectionClosedError
 
 from database.crud import EthereumTransactionCRUD

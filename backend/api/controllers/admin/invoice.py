@@ -1,16 +1,15 @@
-from typing import List, Literal, Optional
 from http import HTTPStatus
+from typing import List, Optional
 
 from fastapi import APIRouter, Path, Query, Response, HTTPException, Body
 from sentry_sdk import capture_exception
 
+from config import settings
+from core.integrations import SimbaNodeJSWrapper
+from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler, ReferralMechanics
+from core.utils import to_objectid
 from database.crud import UserCRUD, InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD, MetaCRUD
 from schemas import InvoiceInDB, InvoiceExtended, InvoiceStatus, InvoiceType, MetaSlugs, ReferralTransactionUserID
-from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler, ReferralMechanics
-from core.integrations import SimbaNodeJSWrapper
-from core.utils import to_objectid
-
-from config import BTC_HOT_WALLET_ADDRESS
 
 __all__ = ["invoices_router"]
 
@@ -83,7 +82,7 @@ async def admin_invoice_pay(invoice_id: str = Path(...)):
     if invoice.invoice_type != InvoiceType.SELL or invoice.status != InvoiceStatus.PROCESSING:
         raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid invoice to pay")
 
-    hot_wallet_info = await BitcoinWrapper().fetch_address_and_save(BTC_HOT_WALLET_ADDRESS)
+    hot_wallet_info = await BitcoinWrapper().fetch_address_and_save(settings.crypto.btc_hot_wallet_address)
 
     if hot_wallet_info.unconfirmed_transactions_number != 0:
         raise HTTPException(HTTPStatus.BAD_REQUEST, "wallet has outcoming transations")

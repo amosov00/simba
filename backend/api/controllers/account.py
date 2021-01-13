@@ -5,7 +5,7 @@ from urllib.parse import urlencode, urljoin
 from fastapi import APIRouter, HTTPException, Depends, Body, Path
 
 from api.dependencies import get_user
-from config import HOST_URL, SST_CONTRACT
+from config import settings, SST_CONTRACT
 from core.mechanics.referrals import ReferralMechanics
 from database.crud import UserCRUD, EthereumTransactionCRUD, UserAddressesArchiveCRUD
 from schemas import (
@@ -82,7 +82,7 @@ async def account_recover(data: UserRecoverLink = Body(...)):
 async def account_get_referral_link(user: User = Depends(get_user)):
     params = {"referral_id": user.id}
     url = (
-            urljoin(HOST_URL, "register")
+            urljoin(settings.common.host_url, "register")
             + "?"
             + (urlencode(params) if user.user_eth_addresses != [] else "referral_id=*************")
     )

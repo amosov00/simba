@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Body, Path
 from sentry_sdk import capture_message
 
 from api.dependencies import get_user
-from config import SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS
+from config import SIMBA_CONTRACT, settings
 from core.mechanics import InvoiceMechanics
 from database.crud import BlockCypherWebhookCRUD, InvoiceCRUD
 from schemas import EthereumContract, BTCTransaction
@@ -40,7 +40,7 @@ async def meta_contract_fetch():
     },
 )
 async def meta_simba_admin_address():
-    return {"address": SIMBA_ADMIN_ADDRESS}
+    return {"address": settings.crypto.simba_admin_address}
 
 
 @router.post("/{webhook_path}/", include_in_schema=False)

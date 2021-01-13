@@ -4,7 +4,7 @@ from typing import Optional
 from bson import ObjectId
 from sentry_sdk import capture_message, capture_exception
 
-from config import SST_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
+from config import SST_CONTRACT, settings
 from core.integrations.ethereum import FunctionsContractWrapper
 from core.utils.email import Email
 from database.crud import UserCRUD, ReferralCRUD, InvoiceCRUD
@@ -21,7 +21,11 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
     PERIOD: int = 2500000
 
     def __init__(self, invoice: InvoiceInDB):
-        self.api_wrapper = FunctionsContractWrapper(SST_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY)
+        self.api_wrapper = FunctionsContractWrapper(
+            SST_CONTRACT,
+            settings.crypto.simba_admin_address,
+            settings.crypto.simba_admin_private_key
+        )
         self.invoice = invoice
         assert invoice is not None
 

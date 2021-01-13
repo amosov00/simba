@@ -1,17 +1,18 @@
 from sentry_sdk import capture_exception
 
-from .base import CryptoValidation, CryptoCurrencyRate
+from config import SIMBA_CONTRACT, settings
 from core.integrations.ethereum import FunctionsContractWrapper
 from core.utils.email import Email
 from schemas import InvoiceInDB
-
-from config import SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
+from .base import CryptoValidation, CryptoCurrencyRate
 
 
 class SimbaWrapper(CryptoValidation, CryptoCurrencyRate):
     def __init__(self):
         self.api_wrapper = FunctionsContractWrapper(
-            SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
+            SIMBA_CONTRACT,
+            settings.crypto.simba_admin_address,
+            settings.crypto.simba_admin_private_key
         )
 
     async def issue_tokens(

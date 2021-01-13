@@ -7,12 +7,11 @@ import ujson
 from bson import Decimal128
 from hexbytes import HexBytes
 from web3 import Web3
-from web3.contract import ContractEvent, LogFilter
 from web3.datastructures import AttributeDict
 
-from config import INFURA_WS_URL, ETH_MAX_GAS_PRICE_GWEI, TRANSACTION_MIN_CONFIRMATIONS
-from schemas import EthereumContract, EthereumTransaction
+from config import ETH_MAX_GAS_PRICE_GWEI, TRANSACTION_MIN_CONFIRMATIONS, settings
 from core.utils import gasprice_from_etherscan, gasprice_from_ethgasstation
+from schemas import EthereumContract, EthereumTransaction
 
 __all__ = ["EthereumBaseCommonWrapper", "EthereumBaseContractWrapper"]
 
@@ -31,7 +30,7 @@ class EthereumBaseWrapper(ABC):
 
     @classmethod
     def init_web3_provider(
-            cls, provider_type: Literal["http", "ws"], provider_url: str, websocket_timeout: int = 60
+        cls, provider_type: Literal["http", "ws"], provider_url: str, websocket_timeout: int = 60
     ):
         if provider_type == "http":
             return Web3.HTTPProvider(provider_url)
@@ -63,7 +62,7 @@ class EthereumBaseWrapper(ABC):
 
 class EthereumBaseCommonWrapper(EthereumBaseWrapper):
     def __init__(self):
-        self.w3 = Web3(self.init_web3_provider("ws", INFURA_WS_URL))
+        self.w3 = Web3(self.init_web3_provider("ws", settings.crypto.infura_ws_url))
         self.blocks: List[EthereumTransaction] = []
 
 
@@ -114,4 +113,3 @@ class EthereumBaseContractWrapper(EthereumBaseWrapper):
 
     def _get_contract_event_by_title(self, contract_title: str):
         return self.contract.events[contract_title]
-

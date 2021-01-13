@@ -1,21 +1,21 @@
 import asyncio
 from http import HTTPStatus
-from urllib.parse import urljoin
 from typing import Literal
+from urllib.parse import urljoin
 
-from passlib import pwd
 from fastapi import HTTPException
+from passlib import pwd
 from sentry_sdk import capture_message, push_scope
 
+from config import settings, TRANSACTION_MIN_CONFIRMATIONS
+from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
+from database.crud import BlockCypherWebhookCRUD
 from schemas import (
     InvoiceInDB,
     BlockCypherWebhookCreate,
     BlockCypherWebhookEvents,
     BlockCypherWebhookInDB,
 )
-from database.crud import BlockCypherWebhookCRUD
-from core.integrations.blockcypher import BlockCypherWebhookAPIWrapper
-from config import HOST_URL, TRANSACTION_MIN_CONFIRMATIONS
 
 __all__ = ["BlockCypherWebhookHandler"]
 
@@ -26,7 +26,7 @@ class BlockCypherWebhookHandler:
 
     @staticmethod
     def _generate_webhook_url(path: str) -> str:
-        return urljoin(HOST_URL, f"/api/meta/{path}/")
+        return urljoin(settings.common.host_url, f"/api/meta/{path}/")
 
     @staticmethod
     async def _check_if_webhook_exists(wallet_address: str, transaction_hash: str):

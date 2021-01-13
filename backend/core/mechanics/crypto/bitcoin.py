@@ -5,18 +5,15 @@ from fastapi import HTTPException
 from pycoin.coins.tx_utils import create_signed_tx
 from sentry_sdk import capture_message
 
+from config import BTC_FEE, settings
 from core.integrations.blockcypher import BlockCypherAPIWrapper
 from core.integrations.pycoin_wrapper import PycoinWrapper
-from database.crud import BTCAddressCRUD, BTCTransactionCRUD, InvoiceCRUD
-from schemas import User, InvoiceInDB, InvoiceStatus, BTCTransaction, BTCAddress, ObjectIdPydantic
+from database.crud import BTCAddressCRUD
+from schemas import User, InvoiceInDB, BTCTransaction, BTCAddress, ObjectIdPydantic
 from .base import CryptoValidation, ParseCryptoTransaction
-from config import BTC_HOT_WALLET_ADDRESS, BTC_HOT_WALLET_WIF, BTC_FEE
 
 
 class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
-    BTC_HOT_WALLET_WIF = BTC_HOT_WALLET_WIF
-    BTC_HOT_WALLET_ADDRESS = BTC_HOT_WALLET_ADDRESS
-
     def __init__(self):
         self.api_wrapper = BlockCypherAPIWrapper()
         self.hot_wallet_balance = 0
@@ -85,9 +82,11 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         Wif передавать в формате [<wif>, ]
         """
         fee = fee or BTC_FEE
-        self.hot_wallet_balance = await self.api_wrapper.current_balance(self.BTC_HOT_WALLET_ADDRESS)
-        spendables = await self.api_wrapper.get_spendables(self.BTC_HOT_WALLET_ADDRESS)
-        payables = self.proceed_payables(address, amount, self.BTC_HOT_WALLET_ADDRESS, fee)
+        self.hot_wallet_balance = await self.api_wrapper.current_balance(
+            settings.crypto.btc_hot_wallet_address
+        )
+        spendables = await self.api_wrapper.get_spendables(settings.crypto.btc_hot_wallet_address)
+        payables = self.proceed_payables(address, amount, settings.crypto.btc_hot_wallet_address, fee)
 
         self._validate_payables(payables)
 
@@ -99,7 +98,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
             self.api_wrapper.network,
             spendables=spendables,
             payables=payables,
-            wifs=[self.BTC_HOT_WALLET_WIF, ],
+            wifs=[settings.crypto.btc_hot_wallet_wif, ],
             fee=fee,
         )
         return await self.api_wrapper.push_raw_tx(tx)

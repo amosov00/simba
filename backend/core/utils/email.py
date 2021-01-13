@@ -10,10 +10,7 @@ from jinja2 import Environment, select_autoescape, FileSystemLoader
 from sentry_sdk import capture_exception, capture_message
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-from config import (
-    BASE_DIR, EMAIL_LOGIN, HOST_URL, SUPPORT_EMAIL,
-    MAILGUN_API_KEY, MAILGUN_DOMAIN_NAME, MAILGUN_MESSAGE_LINK,
-)
+from config import BASE_DIR, settings
 from schemas import InvoiceInDB
 
 __all__ = ["Email"]
@@ -21,11 +18,11 @@ __all__ = ["Email"]
 
 class Email:
     def __init__(self):
-        self.api_key = MAILGUN_API_KEY
-        self.domain = MAILGUN_DOMAIN_NAME
-        self.send_message_link = MAILGUN_MESSAGE_LINK
-        self.email_from = EMAIL_LOGIN
-        self.support_mail = SUPPORT_EMAIL
+        self.api_key = settings.email.mailgun_api_key
+        self.domain = settings.email.mailgun_domain_name
+        self.send_message_link = settings.email.mailgun_message_link
+        self.email_from = settings.email.email_login
+        self.support_mail = settings.common.support_email
         self.template_env = Environment(
             loader=FileSystemLoader(join(BASE_DIR, "templates")),
             autoescape=select_autoescape(['html'])
@@ -35,10 +32,10 @@ class Email:
     def _get_link(code: str, email: str, method: str) -> str:
         if method == "verification":
             params = {f"{method}_code": code, "email": email}
-            return urljoin(HOST_URL, "activate?" + urlencode(params))
+            return urljoin(settings.common.host_url, "activate?" + urlencode(params))
         if method == "recover":
             params = {f"{method}_code": code}
-            return urljoin(HOST_URL, "recover?" + urlencode(params))
+            return urljoin(settings.common.host_url, "recover?" + urlencode(params))
 
     def _render_template(self, template_filename: str, **kwargs):
         return self.template_env.get_template(f"{template_filename}.html").render(**kwargs)
@@ -133,7 +130,7 @@ class Email:
         else:
             body = "Unknown error"
 
-        msg = self.create_message(SUPPORT_EMAIL, subject=subject, body=body)
+        msg = self.create_message(settings.common.support_email, subject=subject, body=body)
 
         await self._send_message(msg)
         return None
