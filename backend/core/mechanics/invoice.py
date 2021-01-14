@@ -11,10 +11,8 @@ from config import (
     SIMBA_BUY_SELL_FEE,
     SIMBA_MINIMAL_BUY_AMOUNT,
     TRANSACTION_MIN_CONFIRMATIONS,
-    BTC_MULTISIG_WALLET_ADDRESS,
-    BTC_MULTISIG_COSIG_1_WIF,
-    BTC_MULTISIG_COSIG_2_PUB,
     BTC_FEE,
+    settings,
 )
 from core.mechanics import SimbaWrapper, SSTWrapper, BitcoinWrapper, BlockCypherWebhookHandler
 from core.mechanics.crypto.base import CryptoValidation
@@ -57,9 +55,7 @@ class InvoiceMechanics(CryptoValidation):
             return None
 
     async def update_invoice(self):
-        return await InvoiceCRUD.update_one(
-            {"_id": self.invoice.id}, self.invoice.dict(exclude={"id"})
-        )
+        return await InvoiceCRUD.update_one({"_id": self.invoice.id}, self.invoice.dict(exclude={"id"}))
 
     def _validate_common(self):
         if not self.invoice.user_id:
@@ -77,7 +73,7 @@ class InvoiceMechanics(CryptoValidation):
 
     def _validate_for_buy(self):
         if not self.validate_currency_rate(
-                self.invoice.invoice_type, self.invoice.btc_amount, self.invoice.simba_amount
+            self.invoice.invoice_type, self.invoice.btc_amount, self.invoice.simba_amount
         ):
             self.errors.append("invalid rate")
         if self.user:
@@ -87,7 +83,7 @@ class InvoiceMechanics(CryptoValidation):
 
     def _validate_for_sell(self):
         if not self.validate_currency_rate(
-                self.invoice.invoice_type, self.invoice.btc_amount, self.invoice.simba_amount
+            self.invoice.invoice_type, self.invoice.btc_amount, self.invoice.simba_amount
         ):
             self.errors.append("invalid rate")
         if self.user:
@@ -130,8 +126,10 @@ class InvoiceMechanics(CryptoValidation):
         if self.invoice.invoice_type == InvoiceType.BUY and output_value != self.invoice.btc_amount_proceeded:
             self.errors.append("Invalid btc amount")
 
-        if self.invoice.invoice_type == InvoiceType.SELL \
-                and output_value != self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE:
+        if (
+            self.invoice.invoice_type == InvoiceType.SELL
+            and output_value != self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE
+        ):
             self.errors.append("Invalid btc amount")
 
         return True
@@ -151,7 +149,7 @@ class InvoiceMechanics(CryptoValidation):
 
     @classmethod
     def get_incoming_btc_from_outputs(
-            cls, outputs: List[BTCTransactionOutputs], target_btc_address: str
+        cls, outputs: List[BTCTransactionOutputs], target_btc_address: str
     ) -> Optional[int]:
         incoming_btc = None
 
@@ -173,14 +171,16 @@ class InvoiceMechanics(CryptoValidation):
         return value
 
     async def _issue_simba_tokens_and_save(
-            self, transaction: BTCTransaction, incoming_btc: int,
+        self,
+        transaction: BTCTransaction,
+        incoming_btc: int,
     ):
         self._raise_exception_if_exists()
         eth_tx_hash = await SimbaWrapper().issue_tokens(
             customer_address=self.invoice.target_eth_address,
             incoming_btc=incoming_btc,
             btc_tx_hash=transaction.hash,
-            invoice=self.invoice
+            invoice=self.invoice,
         )
         transaction.simba_tokens_issued = True
         await BTCTransactionCRUD.update_or_insert({"hash": transaction.hash}, transaction.dict())
@@ -194,32 +194,26 @@ class InvoiceMechanics(CryptoValidation):
         await self.update_invoice()
         user = await UserCRUD.find_by_id(self.invoice.user_id)
         user = User(**user)
-        asyncio.create_task(
-            SSTWrapper(self.invoice).send_sst_to_referrals(user, self.invoice.btc_amount)
-        )
-        asyncio.create_task(
-            BitcoinWrapper().fetch_address_and_save(self.invoice.target_btc_address)
-        )
+        asyncio.create_task(SSTWrapper(self.invoice).send_sst_to_referrals(user, self.invoice.btc_amount))
+        asyncio.create_task(BitcoinWrapper().fetch_address_and_save(self.invoice.target_btc_address))
         return True
 
-    async def _proceed_new_btc_tx_buy(
-            self, new_transaction: BTCTransaction, transaction_in_db: BTCTransactionInDB
-    ):
-        """Part of buy pipeline"""
-        incoming_btc = self.get_incoming_btc_from_outputs(
-            new_transaction.outputs, self.invoice.target_btc_address
-        )
+    async def _proceed_new_btc_tx_buy(self, new_transaction: BTCTransaction, transaction_in_db: BTCTransactionInDB):
+        """Part of buy pipeline."""
+        incoming_btc = self.get_incoming_btc_from_outputs(new_transaction.outputs, self.invoice.target_btc_address)
 
         if not incoming_btc:
             capture_message("Failed to parse btc amount from transaction", level="error")
             self.errors.append("Failed to parse btc amount from transaction")
             self._raise_exception_if_exists()
 
-        if all([
-            new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS,
-            transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
-            self.invoice.status == InvoiceStatus.WAITING
-        ]):
+        if all(
+            [
+                new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS,
+                transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
+                self.invoice.status == InvoiceStatus.WAITING,
+            ]
+        ):
             return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
 
         else:
@@ -228,13 +222,15 @@ class InvoiceMechanics(CryptoValidation):
             )
 
     async def _proceed_new_btc_tx_sell(self, new_transaction: BTCTransaction, transaction_in_db: BTCTransactionInDB):
-        """Part of sell pipeline"""
-        if all([
-            bool(new_transaction.block_height),
-            new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS,
-            transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
-            self.invoice.status == InvoiceStatus.PROCESSING
-        ]):
+        """Part of sell pipeline."""
+        if all(
+            [
+                bool(new_transaction.block_height),
+                new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS,
+                transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
+                self.invoice.status == InvoiceStatus.PROCESSING,
+            ]
+        ):
             self.invoice.status = InvoiceStatus.COMPLETED
             self.invoice.finised_at = datetime.now()
 
@@ -242,9 +238,7 @@ class InvoiceMechanics(CryptoValidation):
             btc_outcoming_without_fee = self.invoice.btc_amount_proceeded + SIMBA_BUY_SELL_FEE
 
             eth_tx_hash = await SimbaWrapper().redeem_tokens(
-                btc_outcoming_without_fee,
-                new_transaction.hash,
-                invoice=self.invoice
+                btc_outcoming_without_fee, new_transaction.hash, invoice=self.invoice
             )
             self.invoice.add_hash("eth", eth_tx_hash)
 
@@ -277,7 +271,7 @@ class InvoiceMechanics(CryptoValidation):
         return True
 
     async def _proceed_new_eth_tx_transfer(self, transaction: EthereumTransactionInDB):
-        """Part of sell pipeline"""
+        """Part of sell pipeline."""
         incoming_eth = self.get_incoming_simba(transaction)
 
         if not incoming_eth:
@@ -302,7 +296,8 @@ class InvoiceMechanics(CryptoValidation):
         return True
 
     async def _proceed_new_eth_tx_issue_redeem(self, transaction: EthereumTransactionInDB):
-        """Part of buy and sell pipeline, just for adding extra info in invoice"""
+        """Part of buy and sell pipeline, just for adding extra info in
+        invoice."""
         transaction.invoice_id = self.invoice.id
         self.invoice.add_hash("eth", transaction.transactionHash)
 
@@ -311,8 +306,7 @@ class InvoiceMechanics(CryptoValidation):
             self.invoice.finised_at = datetime.now()
 
         await EthereumTransactionCRUD.update_one(
-            {"_id": transaction.id},
-            transaction.dict(exclude={"id"}, exclude_unset=True)
+            {"_id": transaction.id}, transaction.dict(exclude={"id"}, exclude_unset=True)
         )
         await self.update_invoice()
         return True
@@ -327,7 +321,7 @@ class InvoiceMechanics(CryptoValidation):
         return True
 
     async def proceed_new_transaction(
-            self, transaction: Union[BTCTransaction, EthereumTransaction], **kwargs
+        self, transaction: Union[BTCTransaction, EthereumTransaction], **kwargs
     ) -> Union[bool, str]:
         if isinstance(transaction, (BTCTransaction, BTCTransactionInDB)):
             return await self.proceed_new_btc_transaction(transaction)
@@ -364,12 +358,12 @@ class InvoiceMechanics(CryptoValidation):
         return True
 
     async def fetch_multisig_transaction_data(self):
-        """ Fetch data for cosigner 1 """
+        """Fetch data for cosigner 1."""
         self.validate()
         await self._validate_for_multisig()
         self._raise_exception_if_exists()
 
-        multisig_wallet = await BitcoinWrapper().fetch_address_and_save(BTC_MULTISIG_WALLET_ADDRESS)
+        multisig_wallet = await BitcoinWrapper().fetch_address_and_save(settings.crypto.btc_multisig_wallet_address)
 
         if multisig_wallet.unconfirmed_transactions_number != 0:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "wallet has outcoming transations")
@@ -377,13 +371,11 @@ class InvoiceMechanics(CryptoValidation):
         if self.invoice.simba_amount_proceeded >= multisig_wallet.balance:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "not enough balance to pay")
 
-        spendables = await BitcoinWrapper().api_wrapper.get_spendables(BTC_MULTISIG_WALLET_ADDRESS)
-        payables = [
-            (self.invoice.target_btc_address, self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE)
-        ]
+        spendables = await BitcoinWrapper().api_wrapper.get_spendables(settings.crypto.btc_multisig_wallet_address)
+        payables = [(self.invoice.target_btc_address, self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE)]
         return {
-            "cosig1Priv": BTC_MULTISIG_COSIG_1_WIF,
-            "cosig2Pub": BTC_MULTISIG_COSIG_2_PUB,
+            "cosig1Priv": settings.crypto.btc_multisig_cosig_1_wif,
+            "cosig2Pub": settings.crypto.btc_multisig_cosig_2_pub,
             "spendables": spendables,
             "payables": payables,
             "fee": BTC_FEE,

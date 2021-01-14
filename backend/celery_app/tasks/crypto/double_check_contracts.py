@@ -1,8 +1,8 @@
 import logging
 
 from celery_app.celeryconfig import app
-from core.integrations.ethereum import EventsContractWrapper
 from config import SIMBA_CONTRACT, SST_CONTRACT
+from core.integrations.ethereum import EventsContractWrapper
 
 __all__ = ["double_check_contracts"]
 
@@ -15,8 +15,8 @@ __all__ = ["double_check_contracts"]
     retry_kwargs={"max_retries": 5},
 )
 async def double_check_contracts(self, *args, **kwargs):
-    """Синхронизация с Simba контрактом"""
+    """Синхронизация с Simba контрактом."""
     for i in (SIMBA_CONTRACT, SST_CONTRACT):
         await EventsContractWrapper(i).fetch_missing_blocks()
-    logging.info(f"Checked for missed transactions")
+    logging.info("Checked for missed transactions")
     return True

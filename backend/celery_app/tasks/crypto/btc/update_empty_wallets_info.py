@@ -2,9 +2,9 @@ import asyncio
 import logging
 
 from celery_app.celeryconfig import app
+from core.mechanics import BitcoinWrapper
 from database.crud import BTCAddressCRUD, InvoiceCRUD
 from schemas import BTCAddressInDB, InvoiceStatus
-from core.mechanics import BitcoinWrapper
 
 __all__ = ["fetch_empty_btc_addresses_info"]
 
@@ -17,7 +17,7 @@ __all__ = ["fetch_empty_btc_addresses_info"]
     retry_kwargs={"max_retries": 5},
 )
 async def fetch_empty_btc_addresses_info(self, *args, **kwargs):
-    """Обновление данных кошельков BTC для статистики в transparency"""
+    """Обновление данных кошельков BTC для статистики в transparency."""
     counter = 0
     btc_addresses = await BTCAddressCRUD.find_many({"transactions_number": 0, "fetch_address": {"$ne": False}})
 
@@ -38,20 +38,20 @@ async def fetch_empty_btc_addresses_info(self, *args, **kwargs):
             new_btc_address_data.fetch_address = False
 
             await BTCAddressCRUD.update_one(
-                {"_id": old_btc_address_data.id},
-                new_btc_address_data.dict(exclude_defaults=True, exclude_unset=True)
+                {"_id": old_btc_address_data.id}, new_btc_address_data.dict(exclude_defaults=True, exclude_unset=True)
             )
             counter += 1
         else:
             linked_invoice = await InvoiceCRUD.find_one({"_id": old_btc_address_data.invoice_id})
 
-            if new_btc_address_data.transactions_number == 0 and \
-                    (linked_invoice and linked_invoice.get("status") == InvoiceStatus.CANCELLED):
+            if new_btc_address_data.transactions_number == 0 and (
+                linked_invoice and linked_invoice.get("status") == InvoiceStatus.CANCELLED
+            ):
 
                 new_btc_address_data.fetch_address = False
                 await BTCAddressCRUD.update_one(
                     {"_id": old_btc_address_data.id},
-                    new_btc_address_data.dict(exclude_defaults=True, exclude_unset=True)
+                    new_btc_address_data.dict(exclude_defaults=True, exclude_unset=True),
                 )
 
         # Wait to bypass blockcypher limitation

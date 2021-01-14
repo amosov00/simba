@@ -21,9 +21,11 @@ async def rescue_stucked_invoices(self, *args, **kwargs):
     counter = 0
     invoices = await InvoiceCRUD.aggregate(
         [
-            {"$match": {
-                "status": {"$in": (InvoiceStatus.WAITING, InvoiceStatus.PROCESSING, InvoiceStatus.PAID)},
-            }},
+            {
+                "$match": {
+                    "status": {"$in": (InvoiceStatus.WAITING, InvoiceStatus.PROCESSING, InvoiceStatus.PAID)},
+                }
+            },
             {
                 "$lookup": {
                     "from": BTCTransactionCRUD.collection,

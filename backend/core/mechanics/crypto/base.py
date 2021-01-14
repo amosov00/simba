@@ -1,11 +1,11 @@
 from abc import ABC
-from typing import Literal
 from http import HTTPStatus
+from typing import Literal
 
 from fastapi import HTTPException
 
-from schemas import InvoiceType, BTCTransaction
 from config import SIMBA_BUY_SELL_FEE, SIMBA_MINIMAL_BUY_AMOUNT
+from schemas import InvoiceType, BTCTransaction
 
 __all__ = ["CryptoValidation", "ParseCryptoTransaction", "CryptoCurrencyRate"]
 
@@ -28,7 +28,7 @@ class CryptoCurrencyRate(ABC):
 
     @classmethod
     def simba_to_sst(cls, simba_tokens: int) -> int:
-        return round(simba_tokens / cls.SIMBA_IN_SST) * 10**18
+        return round(simba_tokens / cls.SIMBA_IN_SST) * 10 ** 18
 
 
 class ParseCryptoTransaction:
@@ -58,10 +58,7 @@ class CryptoValidation(ABC):
 
     @classmethod
     def validate_currency_rate(
-            cls,
-            invoice_type: Literal[InvoiceType.SELL, InvoiceType.BUY],
-            btc: int,
-            simba: int
+        cls, invoice_type: Literal[InvoiceType.SELL, InvoiceType.BUY], btc: int, simba: int
     ) -> bool:
         if not all([isinstance(btc, int), isinstance(simba, int)]):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid btc or simba amount")

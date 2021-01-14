@@ -27,6 +27,7 @@ services:
       dockerfile: deployment/dockerfiles/Dockerfile.backend.local
     volumes:
       - ./backend:/backend
+      - ./.env.json:/.env.json
     depends_on:
       - db
       - backend-nodejs
@@ -58,6 +59,7 @@ services:
       dockerfile: deployment/dockerfiles/Dockerfile.backend.local
     volumes:
       - ./backend:/backend
+      - ./.env.json:/.env.json
     depends_on:
       - db
       - rabbitmq
@@ -73,6 +75,7 @@ services:
       dockerfile: deployment/dockerfiles/Dockerfile.backend.local
     volumes:
       - ./backend:/backend
+      - ./.env.json:/.env.json
     depends_on:
       - db
       - rabbitmq

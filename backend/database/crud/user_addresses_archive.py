@@ -1,6 +1,6 @@
 from .base import BaseMongoCRUD
 
-__all__ = ['UserAddressesArchiveCRUD']
+__all__ = ["UserAddressesArchiveCRUD"]
 
 
 class UserAddressesArchiveCRUD(BaseMongoCRUD):

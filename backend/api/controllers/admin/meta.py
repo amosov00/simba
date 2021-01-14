@@ -1,13 +1,11 @@
-from typing import List
 from http import HTTPStatus
+from typing import List
 
 from fastapi import APIRouter, Body, Path, HTTPException
 
+from config import settings
 from database.crud import MetaCRUD
-from schemas import (
-    MetaInDB
-)
-from config import BTC_MULTISIG_WALLET_ADDRESS
+from schemas import MetaInDB
 
 __all__ = ["meta_router"]
 
@@ -27,25 +25,19 @@ async def admin_meta_fetch_all():
     response_model=MetaInDB,
 )
 async def admin_meta_fetch_by_slug(
-        meta_slug: str = Path(...),
+    meta_slug: str = Path(...),
 ):
     return await MetaCRUD.find_by_slug(meta_slug)
 
 
-@meta_router.put(
-    "/{meta_slug}/",
-    response_model=MetaInDB
-)
-async def admin_meta_update(
-        meta_slug: str = Path(...),
-        payload: dict = Body(...)
-):
+@meta_router.put("/{meta_slug}/", response_model=MetaInDB)
+async def admin_meta_update(meta_slug: str = Path(...), payload: dict = Body(...)):
     res = await MetaCRUD.find_by_slug(meta_slug)
 
     if res["payload"].keys() != payload.keys():
         raise HTTPException(HTTPStatus.BAD_REQUEST, "invalid meta structure")
 
-    if meta_slug == "manual_payout" and not BTC_MULTISIG_WALLET_ADDRESS:
+    if meta_slug == "manual_payout" and not settings.crypto.btc_multisig_wallet_address:
         raise HTTPException(HTTPStatus.BAD_REQUEST, "multisig address not found")
 
     res["payload"] = payload

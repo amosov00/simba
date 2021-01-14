@@ -1,6 +1,6 @@
-from celery_app.celeryconfig import app
-
 import logging
+
+from celery_app.celeryconfig import app
 
 __all__ = ["debug_task_1"]
 
@@ -13,5 +13,5 @@ __all__ = ["debug_task_1"]
     retry_kwargs={"max_retries": 5},
 )
 async def debug_task_1(self, *args, **kwargs):
-    logging.info(f"Hello there debug_task_1")
+    logging.info("Hello there debug_task_1")
     return True

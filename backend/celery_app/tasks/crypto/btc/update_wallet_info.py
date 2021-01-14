@@ -1,5 +1,3 @@
-import logging
-
 from celery_app.celeryconfig import app
 
 __all__ = ["update_single_btc_address_info"]

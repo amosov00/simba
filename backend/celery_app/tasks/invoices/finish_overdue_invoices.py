@@ -22,7 +22,8 @@ INVOICE_TIMEOUT = timedelta(hours=2)
     retry_kwargs={"max_retries": 5},
 )
 async def finish_overdue_invoices(self, *args, **kwargs):
-    """Крон для завершения счетов, которые неактивны > 2 часов и у которых нет транзакций"""
+    """Крон для завершения счетов, которые неактивны > 2 часов и у которых нет
+    транзакций."""
     invoices = await InvoiceCRUD.aggregate(
         [
             {"$match": {"status": {"$in": (InvoiceStatus.CREATED, InvoiceStatus.WAITING)}}},
@@ -53,11 +54,11 @@ async def finish_overdue_invoices(self, *args, **kwargs):
             continue
 
         if all(
-                [
-                    invoice.created_at + INVOICE_TIMEOUT < datetime.now(),
-                    not bool(invoice.eth_txs),
-                    not bool(invoice.btc_txs),
-                ]
+            [
+                invoice.created_at + INVOICE_TIMEOUT < datetime.now(),
+                not bool(invoice.eth_txs),
+                not bool(invoice.btc_txs),
+            ]
         ):
             await InvoiceCRUD.update_one({"_id": invoice.id}, {"status": InvoiceStatus.CANCELLED})
             # Delete connected webhook
