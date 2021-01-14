@@ -6,7 +6,7 @@ authors = ["elastoo"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-fastapi = "^0.63.0"
+fastapi = "0.58.0"
 motor = "^2.3.0"
 passlib = "^1.7.4"
 pycoin = "^0.90.20201031"
@@ -15,7 +15,7 @@ PyJWT = "^2.0.0"
 pyotp = "^2.4.1"
 sentry-sdk = "^0.19.5"
 ujson = "^4.0.1"
-uvicorn = "^0.13.3"
+uvicorn = "0.11.8"
 uvloop = "^0.14.0"
 web3 = "^5.14.0"
 blockcypher = "^1.0.90"
@@ -28,6 +28,7 @@ celery = "4.4.5"
 celery-decorator-taskcls = "0.1.4"
 celery-pool-asyncio = "0.2.0"
 bcrypt = "^3.2.0"
+websockets = "^8.1"
 
 [tool.poetry.dev-dependencies]
 
