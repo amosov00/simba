@@ -30,7 +30,7 @@ services:
       - ./.env.json:/.env.json
     depends_on:
       - db
-      - backend-nodejs
+#      - backend-nodejs
     expose:
       - 8010
     ports:

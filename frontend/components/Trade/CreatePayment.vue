@@ -25,7 +25,7 @@
           span.validaton-error {{ errors[0] }}
     div(v-if="!error")
       div(v-if="isBuy").mt-4.has-text-grey-light {{$t('exchange.applied_fee')}} {{ fee }} BTC {{$t('exchange.fee_in_simba')}}
-      div(v-else).mt-4.has-text-grey-light {{$t('exchange.applied_fee')}} ≈ {{ (+fee * 100000000) }} SIMBA
+      div(v-else).mt-4.has-text-grey-light {{$t('exchange.applied_fee')}} = {{ (+fee * 100000000) }} SIMBA
     div(v-if="error").error.has-text-danger.mt-4 {{ $t('exchange.amount_err') }} 200,000 SIMBA
 </template>
 
@@ -56,7 +56,7 @@
     }),
 
     created() {
-      this.fee = 0.0005
+      this.fee = 0.00055
 
       if(!this.isBuy) {
         this.btc = 0.0015

@@ -3,8 +3,8 @@
         h1.title.is-size-4 {{$t('su_users.users')}}
         div.mb-3
             b-input(v-model="searchQuery" @input="onSearchInput" :placeholder="`${this.$i18n.t('other.search')}...`" icon="magnify")
-        div(v-if="usersToView.length <= 0") {{ $t('other.search_empty_results') }}
-        b-table(v-if="usersToView.length > 0" :data="usersToView" paginated per-page="20" searchable).users-table
+        div(v-if="users.length <= 0") {{ $t('other.search_empty_results') }}
+        b-table(v-if="users.length > 0" :data="users" paginated per-page="20" searchable).users-table
             template(slot-scope="props")
                 b-table-column(field="_id" label="ID" width="50" sortable)
                     nuxt-link(:to="`/admin/users/${props.row._id}`") {{ props.row._id }}
@@ -24,8 +24,7 @@ export default {
     layout: "main",
     middleware: ["adminRequired"],
     data: () => ({
-        usersCache: [],
-        usersToView: [],
+        users: [],
         searchQuery: '',
     }),
 
@@ -33,29 +32,15 @@ export default {
         toDatetime(utc) {
             return moment.utc(utc).format("HH:mm DD-MM-YY")
         },
-        onSearchInput: _.debounce(function () {
-            let properSearchQuery = this.searchQuery.toLowerCase().trim()
-
-            if (properSearchQuery !== '' || properSearchQuery.length <= 0) {
-                this.usersToView = this.usersCache.filter(el => {
-                    for (let key in el) {
-                        if (String(el[key]).toLowerCase().includes(properSearchQuery)) {
-                            return true
-                        }
-                    }
-                    return false
-                })
-            } else {
-                this.usersToView = this.usersCache
-            }
+        onSearchInput: _.debounce(async function () {
+            let query = this.searchQuery.toLowerCase().trim()
+            this.users = await this.$store.dispatch("fetchUsers", query)
         }, 500)
     },
 
     async asyncData({store}) {
-        const res = await store.dispatch("fetchUsers")
         return {
-            usersCache: res,
-            usersToView: res
+            users: await store.dispatch("fetchUsers")
         }
     }
 };

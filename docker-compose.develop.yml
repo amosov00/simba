@@ -24,7 +24,6 @@ services:
     command: uvicorn main:app --host 0.0.0.0 --port 8010 --loop 'uvloop' --lifespan on --proxy-headers
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:develop-latest
     depends_on:
-      - db
       - backend-nodejs
     expose:
       - 8010
@@ -71,17 +70,6 @@ services:
     env_file:
       - .env
       - .env.backend
-
-  db:
-    container_name: simba-mongodb
-    restart: unless-stopped
-    image: mongo:4.2-bionic
-    command: mongod --port 27022 --auth
-    ports:
-      - 27022:27022
-    env_file:
-      - .env
-      - .env.db
 
   rabbitmq:
     container_name: simba-rabbitmq-local

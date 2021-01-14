@@ -131,32 +131,46 @@ class TransparencyMechanics:
         return response
 
     @classmethod
-    async def fetch_transactions(cls, tx_type: Literal["received", "paidout"]) -> dict:
+    async def fetch_transactions(cls, tx_type: Literal["received", "paidout", "all"]) -> dict:
         response = {"total": 0, "transactions": []}
-        invoices = await InvoiceCRUD.aggregate(
-            [
-                {
-                    "$match": {
-                        "status": InvoiceStatus.COMPLETED,
-                        "invoice_type": InvoiceType.BUY if tx_type == "received" else InvoiceType.SELL,
-                    }
-                },
-                {"$sort": {"created_at": -1}},
-                {
-                    "$lookup": {
-                        "from": BTCTransactionCRUD.collection,
-                        "localField": "_id",
-                        "foreignField": "invoice_id",
-                        "as": "btc_txs",
-                    }
-                },
-            ]
-        )
+
+        pipeline = [
+            {
+                "$match": {
+                    "status": InvoiceStatus.COMPLETED,
+                }
+            },
+            {"$sort": {"created_at": -1}},
+            {
+                "$lookup": {
+                    "from": BTCTransactionCRUD.collection,
+                    "localField": "_id",
+                    "foreignField": "invoice_id",
+                    "as": "btc_txs",
+                }
+            },
+        ]
+
+        if tx_type == "received":
+            pipeline[0]["$match"]["invoice_type"] = InvoiceType.BUY
+        elif tx_type == "paidout":
+            pipeline[0]["$match"]["invoice_type"] = InvoiceType.SELL
+
+        invoices = await InvoiceCRUD.aggregate(pipeline)
+
         for invoice in invoices:
             for btc_tx in invoice["btc_txs"]:
-                response["total"] += invoice["btc_amount_proceeded"]
+                if tx_type == "all":
+                    if invoice["invoice_type"] == InvoiceType.SELL:
+                        amount = invoice["btc_amount_proceeded"] * -1
+                    else:
+                        amount = invoice["btc_amount_proceeded"]
+                else:
+                    amount = invoice["btc_amount_proceeded"]
+
+                response["total"] += amount
                 response["transactions"].append(
-                    {"hash": btc_tx["hash"], "received": btc_tx["received"], "amount": invoice["btc_amount_proceeded"]}
+                    {"hash": btc_tx["hash"], "received": btc_tx["received"], "amount": amount}
                 )
 
         return response

@@ -22,6 +22,6 @@ async def transparency_totals_simba():
 
 @router.get("/transactions/", response_model=TransparencyTransactionResponse)
 async def transparency_transactions(
-    tx_type: Literal["received", "paidout"] = Query(..., alias="type"),
+    tx_type: Literal["received", "paidout", "all"] = Query(..., alias="type"),
 ):
     return await TransparencyMechanics.fetch_transactions(tx_type)

@@ -285,8 +285,12 @@ export const actions = {
 			});
 	},
 
-	async fetchUsers() {
-		return await this.$axios.get(`/admin/users/`).then(res => {
+	async fetchUsers({}, query) {
+		return await this.$axios.get(`/admin/users/`, query ? {
+		  params: {
+		    q: query
+      }
+    } : {}).then(res => {
 			return res.data
 		}).catch(() => {});
 	},
