@@ -42,38 +42,24 @@ services:
       - .env
       - .env.backend-nodejs
 
-  celeryworker:
-    container_name: simba-celeryworker-local
-    restart: unless-stopped
-    command: sh -c "sleep 50 && celery worker -A celery_app -P celery_pool_asyncio:TaskPool --loglevel=INFO"
+  faust-worker:
+    container_name: simba-faust-worker
+    restart: always
+    command: sh -c "faust -A workers.agents worker -l info"
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:develop-latest
-    volumes:
-      - ./backend:/backend
-    depends_on:
-      - rabbitmq
-    env_file:
-      - .env
-      - .env.backend
-
-  celerybeat:
-    container_name: simba-celerybeat-local
-    restart: unless-stopped
-    command: sh -c "sleep 60 && celery beat -A celery_app --scheduler celery_pool_asyncio:PersistentScheduler --loglevel=INFO"
-    image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:develop-latest
-    volumes:
-      - ./backend:/backend
-    depends_on:
-      - rabbitmq
-      - celeryworker
-    env_file:
-      - .env
-      - .env.backend
-
-  rabbitmq:
-    container_name: simba-rabbitmq-local
-    restart: unless-stopped
-    image: rabbitmq:3.8.4-alpine
     ports:
-      - 5672:5672
+      - 7800-7850:6066
     env_file:
-      - .env.rabbitmq
+      - .env
+      - .env.backend
+
+  faust-cron:
+    container_name: simba-faust-cron
+    restart: always
+    command: sh -c "faust -A workers.crons worker -l info"
+    image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:develop-latest
+    ports:
+      - 6066:6066
+    env_file:
+      - .env
+      - .env.backend
