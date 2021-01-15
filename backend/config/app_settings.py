@@ -1,10 +1,19 @@
+from datetime import timedelta
 from os import path
 
 import sentry_sdk
 from pydantic import BaseModel, Field
 
 from schemas import EthereumContract, BTCxPub
-from .config_parts import CommonSettings, DBSettings, CryptoSettings, SentrySettings, EmailSettings, CelerySettings
+from .config_parts import (
+    CommonSettings,
+    DBSettings,
+    CryptoSettings,
+    SentrySettings,
+    EmailSettings,
+    CelerySettings,
+    KafkaSettings,
+)
 from .configurator import configurator, IS_LOCAL, IS_PRODUCTION, BASE_DIR
 
 
@@ -15,6 +24,7 @@ class AppSettings(BaseModel):
     crypto: CryptoSettings = Field(default_factory=CryptoSettings)
     email: EmailSettings = Field(default_factory=EmailSettings)
     celery: CelerySettings = Field(default_factory=CelerySettings)
+    kafka: KafkaSettings = Field(default_factory=KafkaSettings)
 
 
 settings = AppSettings()
@@ -95,3 +105,9 @@ BTC_COLD_WALLETS = (BTC_COLD_XPUB_UAE, BTC_COLD_XPUB_LIECH, BTC_COLD_XPUB_NEWZEL
 ############################
 
 SUPPORT_FREQUENCY_LIMIT = 10
+
+############################
+# INVOICE
+############################
+
+INVOICE_TIMEOUT = timedelta(hours=2)

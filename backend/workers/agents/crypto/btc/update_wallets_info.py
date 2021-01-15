@@ -1,15 +1,19 @@
 import asyncio
 import logging
-
-from celery_app.celeryconfig import app
-from database.crud import BTCAddressCRUD
-from schemas import BTCxPub
-from core.mechanics import BitcoinWrapper
-from core.integrations import PycoinWrapper
+from datetime import timedelta
 
 from config import BTC_COLD_WALLETS
+from core.integrations import PycoinWrapper
+from core.mechanics import BitcoinWrapper
+from database.crud import BTCAddressCRUD
+from schemas import BTCxPub
+from workers.agents import app
 
-__all__ = ["update_btc_addresses_info"]
+__all__ = ["update_btc_addresses_info_job"]
+
+update_btc_addresses_info_topic = app.topic(
+    "update_btc_addresses_info", internal=True, retention=timedelta(minutes=10), partitions=1
+)
 
 
 async def update_xpub_change_addresses(wallet: BTCxPub):
@@ -37,20 +41,15 @@ async def update_existing_btc_addresses():
     return
 
 
-@app.task(
-    name="update_btc_addresses_info",
-    bind=True,
-    retry_backoff=True,
-    autoretry_for=(Exception,),
-    retry_kwargs={"max_retries": 5},
-)
-async def update_btc_addresses_info(self, *args, **kwargs):
-    await update_existing_btc_addresses()
+@app.agent(update_btc_addresses_info_topic, concurrency=1)
+async def update_btc_addresses_info_job(stream):
+    async for _ in stream:
+        await update_existing_btc_addresses()
 
-    for wallet in BTC_COLD_WALLETS:
-        if not wallet.xpub:
-            continue
-        await update_xpub_change_addresses(wallet)
-        logging.info(f"Fetched change addresses for {wallet.title}")
+        for wallet in BTC_COLD_WALLETS:
+            if not wallet.xpub:
+                continue
+            await update_xpub_change_addresses(wallet)
+            logging.info(f"Fetched change addresses for {wallet.title}")
 
     return True
