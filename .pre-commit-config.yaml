@@ -58,4 +58,4 @@ repos:
     rev: 'c871dc1d6045f72871441395ee288c4d706fb9ca'
     hooks:
       - id: xenon
-        args: [ "--max-average=A", "--max-modules=C", "--max-absolute=C" ]
+        args: [ "--max-average=B", "--max-modules=C", "--max-absolute=C" ]
