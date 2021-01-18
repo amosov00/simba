@@ -18,7 +18,6 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
         self.api_url = (
             "https://api.blockcypher.com/v1/btc/main" if IS_PRODUCTION else "https://api.blockcypher.com/v1/btc/test3"
         )
-
         self.blockcypher_wallet_name = settings.crypto.blockcypher_wallet_title
         self.netcode = "BTC" if IS_PRODUCTION else "XTN"
         self.network = btc.network if IS_PRODUCTION else tbtx.network

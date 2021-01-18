@@ -11,6 +11,10 @@ class BTCAddressCRUD(BaseMongoCRUD):
         return await cls.find_one({"address": address})
 
     @classmethod
+    async def find_by_path(cls, path: str = "m/(0|1)/"):
+        return await cls.find_many({"path": {"$regex": path}})
+
+    @classmethod
     async def find_latest(cls, xpub_title: str, path: str):
         return await cls.db[cls.collection].find_one(
             {"cold_wallet_title": xpub_title, "path": {"$regex": path}},

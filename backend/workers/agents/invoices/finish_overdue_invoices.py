@@ -7,7 +7,7 @@ from sentry_sdk import capture_exception
 from config import INVOICE_TIMEOUT
 from core.mechanics import BlockCypherWebhookHandler
 from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
-from schemas import InvoiceExtended, InvoiceStatus
+from schemas import InvoiceExtended, InvoiceStatus, InvoiceType
 from workers.agents import app
 
 __all__ = ["finish_overdue_invoices_job"]
@@ -15,6 +15,30 @@ __all__ = ["finish_overdue_invoices_job"]
 finish_overdue_invoices_topic = app.topic(
     "finish_overdue_invoices", internal=True, retention=timedelta(minutes=10), partitions=1
 )
+
+
+def is_btc_txs_valide(invoice) -> bool:
+    if not invoice.btc_txs:
+        return False
+
+    for tx in invoice.btc_txs:
+        if invoice.invoice_type == InvoiceType.SELL:
+            target_btc_in_output = False
+
+            for output in tx["outputs"]:
+                if invoice.target_btc_address in output["addresses"]:
+                    target_btc_in_output = True
+
+            return target_btc_in_output
+
+        elif invoice.invoice_type == InvoiceType.BUY:
+            pass
+
+    return bool(invoice.btc_txs)
+
+
+def is_eth_txs_valide(invoice: InvoiceExtended) -> bool:
+    return bool(invoice.eth_txs)
 
 
 @app.agent(finish_overdue_invoices_topic, concurrency=1)
@@ -54,8 +78,8 @@ async def finish_overdue_invoices_job(stream):
             if all(
                 [
                     invoice.created_at + INVOICE_TIMEOUT < datetime.now(),
-                    not bool(invoice.eth_txs),
-                    not bool(invoice.btc_txs),
+                    not is_eth_txs_valide(invoice),
+                    not is_btc_txs_valide(invoice),
                 ]
             ):
                 await InvoiceCRUD.update_one({"_id": invoice.id}, {"status": InvoiceStatus.CANCELLED})
