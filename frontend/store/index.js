@@ -284,20 +284,4 @@ export const actions = {
 				});
 			});
 	},
-
-	async fetchUsers({}, query) {
-		return await this.$axios.get(`/admin/users/`, query ? {
-		  params: {
-		    q: query
-      }
-    } : {}).then(res => {
-			return res.data
-		}).catch(() => {});
-	},
-
-	async fetchUserById({}, id) {
-		return await this.$axios.get(`/admin/users/${id}/`).then(res => {
-			return res.data
-		}).catch(() => {});
-	}
 };
