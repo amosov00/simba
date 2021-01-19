@@ -1,6 +1,6 @@
-from typing import List, Optional
+from typing import List, Optional, Literal
 
-from fastapi import APIRouter, Query, Body, Path
+from fastapi import APIRouter, Query, Body, Path, responses
 
 from core.mechanics.referrals import ReferralMechanics
 from core.utils import to_objectid
@@ -12,6 +12,7 @@ from schemas import (
     UserAddressesArchive,
     USER_MODEL_INCLUDE_FIELDS,
 )
+from core.mechanics import UsersToExcel
 
 __all__ = ["users_router"]
 
@@ -25,8 +26,17 @@ users_router = APIRouter()
 )
 async def admin_users_fetch_all(
     q: Optional[str] = Query(default=None, description="query for many fields"),
+    response_format: Literal["json", "excel"] = Query(default="json", description="return format", alias="format"),
 ):
-    return await UserCRUD.find_by_query(q, sort=[("created_at", -1)])
+    users = await UserCRUD.find_by_query(q, sort=[("created_at", -1)])
+
+    if response_format == "excel":
+        return responses.Response(
+            UsersToExcel(users).proceed(),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+    return users
 
 
 @users_router.get(
