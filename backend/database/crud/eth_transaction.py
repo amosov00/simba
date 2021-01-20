@@ -18,7 +18,9 @@ class EthereumTransactionCRUD(BaseMongoCRUD):
     @classmethod
     async def update_or_create(cls, transaction_hash: str, log_index: int, payload: dict):
         return await super().update_one(
-            query={"transactionHash": transaction_hash, "logIndex": log_index}, payload=payload, upsert=True,
+            query={"transactionHash": transaction_hash, "logIndex": log_index},
+            payload=payload,
+            upsert=True,
         )
 
     @classmethod

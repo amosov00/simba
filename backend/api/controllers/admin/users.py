@@ -1,6 +1,6 @@
-from typing import List, Optional
+from typing import List, Optional, Literal
 
-from fastapi import APIRouter, Query, Body, Path
+from fastapi import APIRouter, Query, Body, Path, responses
 
 from core.mechanics.referrals import ReferralMechanics
 from core.utils import to_objectid
@@ -12,6 +12,7 @@ from schemas import (
     UserAddressesArchive,
     USER_MODEL_INCLUDE_FIELDS,
 )
+from core.mechanics import UsersToExcel
 
 __all__ = ["users_router"]
 
@@ -21,12 +22,21 @@ users_router = APIRouter()
 @users_router.get(
     "/",
     response_model=List[User],
-    response_model_include={"id", "email", "is_superuser", "is_active", "first_name", "last_name", "created_at"}
+    response_model_include={"id", "email", "is_superuser", "is_active", "first_name", "last_name", "created_at"},
 )
 async def admin_users_fetch_all(
-        q: Optional[str] = Query(default=None, description="query for many fields"),
+    q: Optional[str] = Query(default=None, description="query for many fields"),
+    response_format: Literal["json", "excel"] = Query(default="json", description="return format", alias="format"),
 ):
-    return await UserCRUD.find_by_query(q, sort=[("created_at", -1)])
+    users = await UserCRUD.find_by_query(q, sort=[("created_at", -1)])
+
+    if response_format == "excel":
+        return responses.Response(
+            UsersToExcel(users).proceed(),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+    return users
 
 
 @users_router.get(
@@ -43,18 +53,12 @@ async def admin_users_fetch_one(user_id: str = Path(...)):
 @users_router.put(
     "/{user_id}/",
 )
-async def admin_users_update(
-        user_id: str = Path(...),
-        payload: UserUpdateNotSafe = Body(...)
-):
+async def admin_users_update(user_id: str = Path(...), payload: UserUpdateNotSafe = Body(...)):
     return await UserCRUD.update_not_safe(user_id, payload)
 
 
-@users_router.get(
-    "/{user_id}/archived_addresses/",
-    response_model=List[UserAddressesArchive]
-)
+@users_router.get("/{user_id}/archived_addresses/", response_model=List[UserAddressesArchive])
 async def admin_users_fetch_archived_addresses(
-        user_id: str = Path(...),
+    user_id: str = Path(...),
 ):
     return await UserAddressesArchiveCRUD.find_many({"user_id": to_objectid(user_id)}, sort=[("deleted_at", -1)])

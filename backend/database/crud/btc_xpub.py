@@ -3,10 +3,10 @@ from http import HTTPStatus
 
 from fastapi import HTTPException
 
-from .base import BaseMongoCRUD
 from schemas import BTCxPubUpdate
+from .base import BaseMongoCRUD
 
-__all__ = ['BTCxPubCRUD']
+__all__ = ["BTCxPubCRUD"]
 
 
 class BTCxPubCRUD(BaseMongoCRUD):
@@ -27,12 +27,8 @@ class BTCxPubCRUD(BaseMongoCRUD):
         if len(await cls.find_active()) <= 1 and payload.is_active is False:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "at least 1 xpub must be active")
 
-        modified_count = (await super().update_one(
-            {"_id": xpub_in_db["_id"]},
-            {
-                **payload.dict(),
-                "updated_at": datetime.now()
-            }
-        )).modified_count
+        modified_count = (
+            await super().update_one({"_id": xpub_in_db["_id"]}, {**payload.dict(), "updated_at": datetime.now()})
+        ).modified_count
 
         return bool(modified_count)
