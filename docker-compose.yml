@@ -27,10 +27,9 @@ services:
       dockerfile: deployment/dockerfiles/Dockerfile.backend.local
     volumes:
       - ./backend:/backend
-      - ./.env.json:/.env.json
     depends_on:
       - db
-#      - backend-nodejs
+      - backend-nodejs
     expose:
       - 8010
     ports:
@@ -51,6 +50,36 @@ services:
       - .env
       - .env.backend-nodejs
 
+  celeryworker:
+    container_name: simba-celeryworker-local
+    command: sh -c "sleep 30 && celery worker -A celery_app -P celery_pool_asyncio:TaskPool --loglevel=INFO"
+    build:
+      context: ./
+      dockerfile: deployment/dockerfiles/Dockerfile.backend.local
+    volumes:
+      - ./backend:/backend
+    depends_on:
+      - db
+      - rabbitmq
+    env_file:
+      - .env
+      - .env.backend
+
+  celerybeat:
+    container_name: simba-celerybeat-local
+    command: sh -c "sleep 40 && celery beat -A celery_app --scheduler celery_pool_asyncio:PersistentScheduler --loglevel=INFO"
+    build:
+      context: ./
+      dockerfile: deployment/dockerfiles/Dockerfile.backend.local
+    volumes:
+      - ./backend:/backend
+    depends_on:
+      - db
+      - rabbitmq
+      - celeryworker
+    env_file:
+      - .env
+      - .env.backend
 
   db:
     container_name: simba-mongodb-local
@@ -60,3 +89,11 @@ services:
       - 27017:27017
     env_file:
       - .env.db
+
+  rabbitmq:
+    container_name: simba-rabbitmq-local
+    image: rabbitmq:3.8.4-alpine
+    ports:
+      - 5672:5672
+    env_file:
+      - .env.rabbitmq

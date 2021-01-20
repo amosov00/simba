@@ -5,7 +5,7 @@ from fastapi import HTTPException
 
 from .base import BaseMongoCRUD
 
-__all__ = ["MetaCRUD"]
+__all__ = ['MetaCRUD']
 
 
 class MetaCRUD(BaseMongoCRUD):
@@ -23,7 +23,9 @@ class MetaCRUD(BaseMongoCRUD):
     @classmethod
     async def update_by_slug(cls, slug: str, payload: dict, **kwargs):
         return await super().update_one(
-            {"slug": slug}, {"slug": slug, "updated_at": datetime.now(), "payload": payload}, **kwargs
+            {"slug": slug},
+            {"slug": slug, "updated_at": datetime.now(), "payload": payload},
+            **kwargs
         )
 
     @classmethod

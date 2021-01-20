@@ -16,7 +16,7 @@ scp .env.backend          "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
 scp .env.backend-nodejs   "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
 scp .env.frontend         "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
 scp .env.db               "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
-scp .env.kafka            "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
+scp .env.rabbitmq         "$SSH_USER"@"$SSH_HOST":"$PROJECT_DIR"
 
 echo "########## Pull images from Gitlab Container Registry ##########"
 ssh "$SSH_USER"@"$SSH_HOST" "docker login -u '$CI_REGISTRY_USER' -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"

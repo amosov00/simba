@@ -1,5 +1,5 @@
-import argparse
 import asyncio
+import argparse
 
 from database.crud import UserCRUD
 from schemas.user import UserCreationNotSafe
@@ -28,9 +28,15 @@ def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(help="commands", dest="command")
 
-    parser_createsuperuser = subparsers.add_parser("createsuperuser", help="Create superuser")
-    parser_createsuperuser.add_argument("--email", help="User email", dest="email", required=False)
-    parser_createsuperuser.add_argument("--password", help="User password", dest="password", required=False)
+    parser_createsuperuser = subparsers.add_parser(
+        "createsuperuser", help="Create superuser"
+    )
+    parser_createsuperuser.add_argument(
+        "--email", help="User email", dest="email", required=False
+    )
+    parser_createsuperuser.add_argument(
+        "--password", help="User password", dest="password", required=False
+    )
 
     kwargs = vars(parser.parse_args())
     command = kwargs.pop("command")

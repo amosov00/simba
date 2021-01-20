@@ -2,8 +2,8 @@ from typing import List, Optional
 
 from bson import ObjectId
 
-from config import SST_CONTRACT
 from database.crud import UserCRUD, ReferralCRUD, EthereumTransactionCRUD, InvoiceCRUD
+from config import SST_CONTRACT
 from schemas import User, InvoiceInDB, EthereumTransactionInDB, ReferralTransactionEmail
 
 __all__ = ["ReferralMechanics"]
@@ -16,7 +16,7 @@ class ReferralMechanics:
 
         self.user = user
         assert user is not None, "user must be set"
-        self.referral_object: dict = {}
+        self.referral_object: dict = dict()
         self.referrals: List[dict] = []
         self.referrals_transactions: List[dict] = []
 
@@ -47,37 +47,29 @@ class ReferralMechanics:
             for user in self.referrals:
                 if tx.user_id:
                     if tx.user_id == user["_id"]:
-                        parsed_txs.append(
-                            {
-                                "transactionHash": tx.transactionHash,
-                                "amount": sst_transfered,
-                                "level": user.get("level"),
-                                "user_id": tx.user_id,
-                            }
-                        )
+                        parsed_txs.append({
+                            "transactionHash": tx.transactionHash,
+                            "amount": sst_transfered,
+                            "level": user.get("level"),
+                            "user_id": tx.user_id
+                        })
                 else:
                     eth_wallet_hashes = [i.get("address") for i in user["user_eth_addresses"]]
                     if receiver_wallet_hash in eth_wallet_hashes:
-                        parsed_txs.append(
-                            {
-                                "transactionHash": tx.transactionHash,
-                                "amount": sst_transfered,
-                                "level": user.get("level"),
-                                "user_id": user.get("_id"),
-                            }
-                        )
+                        parsed_txs.append({
+                            "transactionHash": tx.transactionHash,
+                            "amount": sst_transfered,
+                            "level": user.get("level"),
+                            "user_id": user.get("_id")
+                        })
 
         return parsed_txs
 
     @classmethod
     async def fetch_ref_txs_info_from_invoice(cls, invoice: InvoiceInDB) -> list:
-        full_sst_txs = (
-            await EthereumTransactionCRUD.find_many(
-                {"contract": SST_CONTRACT.title, "transactionHash": {"$in": invoice.sst_tx_hashes}}
-            )
-            if invoice.sst_tx_hashes
-            else None
-        )
+        full_sst_txs = await EthereumTransactionCRUD.find_many({
+            "contract": SST_CONTRACT.title, "transactionHash": {"$in": invoice.sst_tx_hashes}
+        }) if invoice.sst_tx_hashes else None
 
         if not full_sst_txs:
             return []
@@ -107,25 +99,25 @@ class ReferralMechanics:
         return self.referrals
 
     async def fetch_referrals_top_to_bottom(self) -> list:
-        """Поиск приглашенных рефералов сверху вниз по вершинам."""
+        """
+        Поиск приглашенных рефералов сверху вниз по вершинам
+        """
         for ref_level in range(1, 6):
             ref_objects = await ReferralCRUD.find_many({f"ref{ref_level}": self.user.id})
             users_ids = [i["user_id"] for i in ref_objects]
 
             if users_ids:
                 users = await UserCRUD.aggregate(
-                    [
-                        {"$match": {"_id": {"$in": users_ids}}},
-                        {"$addFields": {"referral_level": ref_level}},
-                    ]
+                    [{"$match": {"_id": {"$in": users_ids}}}, {"$addFields": {"referral_level": ref_level}}, ]
                 )
                 self.referrals.extend(users)
 
         return self.referrals
 
     async def fetch_sst_tx_info_for_user(self, transactions: List[dict]) -> list:
-        """Поиск информации (уровень, сумма и почта связанного юзера) по SST
-        транзакциям."""
+        """
+        Поиск информации (уровень, сумма и почта связанного юзера) по SST транзакциям
+        """
         resp = []
 
         for transaction in transactions:
@@ -134,7 +126,12 @@ class ReferralMechanics:
             invoice = await InvoiceCRUD.find_by_id(transaction.invoice_id)
 
             if not invoice:
-                resp.append(ReferralTransactionEmail(transactionHash=transaction.transactionHash, amount=amount))
+                resp.append(
+                    ReferralTransactionEmail(
+                        transactionHash=transaction.transactionHash,
+                        amount=amount
+                    )
+                )
                 continue
 
             connected_user = await UserCRUD.find_by_id(invoice["user_id"])
@@ -147,7 +144,7 @@ class ReferralMechanics:
                     transactionHash=transaction.transactionHash,
                     amount=amount,
                     email=connected_user.get("email"),
-                    level=level,
+                    level=level
                 )
             )
 

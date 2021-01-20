@@ -24,7 +24,7 @@ from schemas.user import (
     UserRecover,
     UserRecoverLink,
     User2faConfirm,
-    User2faDelete,
+    User2faDelete
 )
 
 __all__ = ["UserCRUD"]
@@ -134,8 +134,7 @@ class UserCRUD(BaseMongoCRUD):
     async def create_safe(cls, user: UserCreationSafe, **kwargs) -> dict:
         if await cls.find_by_email(user.email):
             raise HTTPException(
-                HTTPStatus.BAD_REQUEST,
-                "User with this email is already exists",
+                HTTPStatus.BAD_REQUEST, "User with this email is already exists",
             )
 
         referral_user = await cls.find_by_id(user.referral_id)
@@ -167,13 +166,11 @@ class UserCRUD(BaseMongoCRUD):
     async def update_safe(cls, user: User, payload: UserUpdateSafe) -> bool:
         if payload.email and await cls.find_by_email(payload.email):
             raise HTTPException(
-                HTTPStatus.BAD_REQUEST,
-                "User with this email is already exists",
+                HTTPStatus.BAD_REQUEST, "User with this email is already exists",
             )
 
         await cls.update_one(
-            query={"_id": user.id},
-            payload=payload.dict(exclude=set(FIELDS_TO_EXCLUDE), exclude_unset=True),
+            query={"_id": user.id}, payload=payload.dict(exclude=set(FIELDS_TO_EXCLUDE), exclude_unset=True),
         )
 
         return True
@@ -183,9 +180,9 @@ class UserCRUD(BaseMongoCRUD):
         if await cls.find_by_email(user.email):
             return None
 
-        await super().insert_one(
+        inserted_id = (await super().insert_one(
             payload={**user.dict(exclude=set(FIELDS_TO_EXCLUDE)), "created_at": datetime.now(), **kwargs}
-        )
+        )).inserted_id
 
         return {"success": True}
 
@@ -205,7 +202,10 @@ class UserCRUD(BaseMongoCRUD):
             exclude_defaults=True,
         )
 
-        return bool((await cls.update_one(query={"_id": user["_id"]}, payload=payload)).modified_count)
+        return bool((await cls.update_one(
+            query={"_id": user["_id"]},
+            payload=payload
+        )).modified_count)
 
     @classmethod
     async def change_password(cls, user: User, payload: UserChangePassword) -> bool:
@@ -245,7 +245,9 @@ class UserCRUD(BaseMongoCRUD):
         if "recover_code" not in user or user["recover_code"] != payload.recover_code:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect code")
 
-        await cls.update_one(query={"_id": user["_id"]}, payload={"password": payload.password, "recover_code": None})
+        await cls.update_one(
+            query={"_id": user["_id"]}, payload={"password": payload.password, "recover_code": None}
+        )
 
         return True
 
