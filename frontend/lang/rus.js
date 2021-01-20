@@ -326,7 +326,9 @@ export default context => {
         amount: 'Вознаграждение',
         user_id: 'ID пользователя',
         level: 'Уровень'
-      }
+      },
+      invoice_type_1: "Покупка",
+      invoice_type_2: "Продажа"
     },
     xpub: {
       confirm_your_action: 'Подтвердите ваше действие',

@@ -1,4 +1,4 @@
-from typing import Optional, List, Union
+from typing import List, Optional
 
 from pydantic import Field, validator
 
@@ -35,7 +35,7 @@ class ReferralTransactionEmail(BaseModel):
     level: int = Field(default=None)
 
     @validator("email")
-    def hide_email(cls, v):
+    def hide_email(cls, v):  # noqa
         if v:
             v = "@".join([v.split("@")[0], "***.***"])
         return v

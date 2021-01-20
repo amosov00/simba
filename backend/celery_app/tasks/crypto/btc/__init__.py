@@ -1,2 +1,0 @@
-from .update_empty_wallets_info import fetch_empty_btc_addresses_info
-from .update_wallets_info import update_btc_addresses_info

@@ -4,7 +4,7 @@ from typing import Optional
 from bson import ObjectId
 from sentry_sdk import capture_message, capture_exception
 
-from config import SST_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY
+from config import SST_CONTRACT, settings
 from core.integrations.ethereum import FunctionsContractWrapper
 from core.utils.email import Email
 from database.crud import UserCRUD, ReferralCRUD, InvoiceCRUD
@@ -21,7 +21,9 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
     PERIOD: int = 2500000
 
     def __init__(self, invoice: InvoiceInDB):
-        self.api_wrapper = FunctionsContractWrapper(SST_CONTRACT, SIMBA_ADMIN_ADDRESS, SIMBA_ADMIN_PRIVATE_KEY)
+        self.api_wrapper = FunctionsContractWrapper(
+            SST_CONTRACT, settings.crypto.simba_admin_address, settings.crypto.simba_admin_private_key
+        )
         self.invoice = invoice
         assert invoice is not None
 
@@ -45,10 +47,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
             tx_hash = await self.api_wrapper.freeze_and_transfer(customer_address, amount, self.PERIOD)
         except ValueError as e:
             await Email().send_message_to_support(
-                "sst_transfer",
-                invoice=self.invoice,
-                customer_address=customer_address,
-                amount=amount
+                "sst_transfer", invoice=self.invoice, customer_address=customer_address, amount=amount
             )
             capture_exception(e)
             return None
@@ -85,7 +84,5 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
 
         if list(tx_hashes):
             tx_hashes = list({*self.invoice.sst_tx_hashes, *tx_hashes})
-            await InvoiceCRUD.update_one(
-                {"_id": self.invoice.id}, {"sst_tx_hashes": tx_hashes}
-            )
+            await InvoiceCRUD.update_one({"_id": self.invoice.id}, {"sst_tx_hashes": tx_hashes})
         return True

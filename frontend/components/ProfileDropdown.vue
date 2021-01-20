@@ -10,18 +10,18 @@
         n-link(to="/profile/data/").profile-dropdown__link {{$t('dropdown.personal_data')}}
         n-link(to="/profile/partner/").profile-dropdown__link {{$t('dropdown.partner_program')}}
         n-link(to="/profile/2fa/").profile-dropdown__link {{$t('dropdown.security')}}
-        n-link(to="/invoices" v-if="user.is_superuser").profile-dropdown__link.su-link {{$t('su_invoices.invoices')}}
-        n-link(to="/manage-payouts" v-if="user.is_superuser").profile-dropdown__link.su-link {{ $t('su_payouts_mm.manage_payouts.short')}}
-        n-link(to="/users" v-if="user.is_superuser").profile-dropdown__link.su-link {{$t('su_users.users')}}
-        n-link(to="/xpub" v-if="user.is_superuser").profile-dropdown__link.su-link xPub
+        n-link(to="/admin/invoices" v-if="user.is_superuser").profile-dropdown__link.su-link {{$t('su_invoices.invoices')}}
+        n-link(to="/admin/manage-payouts" v-if="user.is_superuser").profile-dropdown__link.su-link {{ $t('su_payouts_mm.manage_payouts.short')}}
+        n-link(to="/admin/users" v-if="user.is_superuser").profile-dropdown__link.su-link {{$t('su_users.users')}}
+        n-link(to="/admin/xpub" v-if="user.is_superuser").profile-dropdown__link.su-link xPub
       div.profile-dropdown__footer
         a(href="#" @click="logout").profile-dropdown__logout {{$t('dropdown.logout')}}
 </template>
 
 <script>
-  import InlineSvg from 'vue-inline-svg'
+import InlineSvg from 'vue-inline-svg'
 
-  export default {
+export default {
     name: 'ProfileDropdown',
     props: {
       name: String
