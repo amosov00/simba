@@ -1,7 +1,22 @@
 import Vue from 'vue';
-import { extend } from 'vee-validate';
-import { required, email, min, confirmed, max, regex, alpha_num, alpha, alpha_spaces, digits } from 'vee-validate/dist/rules';
-import { setInteractionMode, ValidationObserver, ValidationProvider, } from 'vee-validate';
+import {
+  extend,
+  setInteractionMode,
+  ValidationObserver,
+  ValidationProvider
+} from 'vee-validate';
+import {
+  alpha,
+  alpha_num,
+  alpha_spaces,
+  confirmed,
+  digits,
+  email,
+  max,
+  min,
+  regex,
+  required
+} from 'vee-validate/dist/rules';
 
 Vue.component('ValidationObserver', ValidationObserver)
 Vue.component('ValidationProvider', ValidationProvider)
@@ -19,4 +34,3 @@ extend('alpha_spaces', alpha_spaces);
 extend('required', required);
 extend('confirmed', confirmed);
 extend('digits', digits);
-

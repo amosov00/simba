@@ -1,13 +1,12 @@
 from fastapi import FastAPI
-from starlette.middleware import cors, authentication
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+from starlette.middleware import cors, authentication
 
 from api.routes import api_router
-from core.utils import CustomJSONResponse, exception_handlers
-from core.middleware import JWTAuthBackend
-from database.init import mongo
-from database.db_events import test_db_connection, prepopulate_db, close_db_connection
 from config import *
+from core.middleware import JWTAuthBackend
+from core.utils import CustomJSONResponse, exception_handlers
+from database.db_events import test_db_connection, prepopulate_db, close_db_connection
 
 docs_config = (
     {
@@ -30,7 +29,7 @@ app = FastAPI(
 # Database
 ##########
 
-setattr(app, "mongo", mongo)
+# setattr(app, "mongo", mongo)
 
 #########
 # Routes
@@ -44,7 +43,7 @@ app.include_router(api_router, prefix="/api", default_response_class=CustomJSONR
 
 app.add_middleware(
     cors.CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

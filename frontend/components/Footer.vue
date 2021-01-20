@@ -4,7 +4,7 @@
       div.the-footer__icons-list
         a(:href="$i18n.t(`socials.${soc.id}`)" v-for="soc in socials" target="_blank" rel="noopener noreferrer").the-footer__soc-link
           InlineSvg(:src="require(`~/assets/images/socials/${soc.icon}`)").the-footer__icon
-      div.the-footer__copyright © 2019–2020 SIMBA
+      div.the-footer__copyright © 2019–2021 SIMBA
       div.mt-1.is-flex.align-items-center
         a(href="https://simba.storage/terms-of-use.pdf" target="_blank" rel="noopener noreferrer").the-footer__link {{ $t('footer.tos') }}
         a(href="https://simba.storage/privacy-policy.pdf" target="_blank" rel="noopener noreferrer").the-footer__link {{ $t('footer.privacy') }}

@@ -1,5 +1,5 @@
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
 from pydantic import SecretStr, validator
 
@@ -17,7 +17,7 @@ class BTCxPub(BaseModel):
     updated_at: Optional[datetime] = Field(default=None)
 
     @validator("xpub_preview")
-    def format_xpub_preview(cls, v, values):
+    def format_xpub_preview(cls, v, values):  # noqa
         if v or not values.get("xpub"):
             return v
 
