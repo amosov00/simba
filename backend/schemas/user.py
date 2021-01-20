@@ -1,9 +1,9 @@
-from datetime import datetime
 from typing import Optional, List, Literal
+from datetime import datetime
 
-from passlib import pwd
-from passlib.context import CryptContext
 from pydantic import Field, validator
+from passlib.context import CryptContext
+from passlib import pwd
 
 from schemas.base import (
     BaseModel,
@@ -38,7 +38,7 @@ __all__ = [
     "UserBitcoinAddress",
     "UserBitcoinAddressDelete",
     "UserBitcoinAddressInput",
-    "UserWithReferrals",
+    "UserWithReferrals"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -100,7 +100,9 @@ class User(BaseModel):
 
     email: str = Field(...)
     email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
-    verification_code: Optional[str] = Field(default_factory=pwd.genword, description="Code which will send to email")
+    verification_code: Optional[str] = Field(
+        default_factory=pwd.genword, description="Code which will send to email"
+    )
     recover_code: Optional[str] = Field(default=None, description="JWT token for password recover")
     secret_2fa: Optional[str] = Field(default=None, description="Code for 2fa generation")
     two_factor: Optional[bool] = Field(defaul=False, description="On/off 2fa")
@@ -208,7 +210,9 @@ class UserCreationNotSafe(BaseModel):
     first_name: Optional[str] = Field(default=None)
     last_name: Optional[str] = Field(default=None)
     email_is_active: Optional[bool] = Field(default=False, description="Email is validated")
-    verification_code: Optional[str] = Field(default_factory=pwd.genword, description="Code which will send to email")
+    verification_code: Optional[str] = Field(
+        default_factory=pwd.genword, description="Code which will send to email"
+    )
     is_active: Optional[bool] = Field(default=True, description="User is active")
     is_manager: Optional[bool] = Field(default=False, description="Manager role")
     is_superuser: Optional[bool] = Field(default=False, description="Superuser role")
@@ -253,7 +257,7 @@ class UserReferralInfo(BaseModel):
     created_at: datetime = Field(...)
 
     @validator("email")
-    def hide_email(cls, v):  # noqa
+    def hide_email(cls, v):
         return v.split("@")[0] + "@***.**"
 
 

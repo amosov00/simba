@@ -1,6 +1,6 @@
 from motor import motor_asyncio
 
-from config import settings
+from config import MONGO_DATABASE_URL, MONGO_DATABASE_NAME
 
 __all__ = ["mongo"]
 
@@ -8,13 +8,16 @@ __all__ = ["mongo"]
 class Mongo:
     def __init__(self):
         self._client = motor_asyncio.AsyncIOMotorClient(
-            settings.db.uri, authSource=settings.db.auth_source, connect=True
+            MONGO_DATABASE_URL, connect=True
         )
-        self._db = self._client[settings.db.name]
+        self._db = self._client[MONGO_DATABASE_NAME]
 
     @property
     def db(self):
         return self._db
+
+    async def ping(self):
+        return await self.client.admin.command("ping")
 
     @property
     def client(self):

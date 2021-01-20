@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Body, Path
 from sentry_sdk import capture_message
 
 from api.dependencies import get_user
-from config import SIMBA_CONTRACT, settings
+from config import SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS
 from core.mechanics import InvoiceMechanics
 from database.crud import BlockCypherWebhookCRUD, InvoiceCRUD
 from schemas import EthereumContract, BTCTransaction
@@ -15,9 +15,7 @@ router = APIRouter()
 
 @router.get(
     "/eth/contract/",
-    dependencies=[
-        Depends(get_user),
-    ],
+    dependencies=[Depends(get_user), ],
     response_model=EthereumContract,
     response_model_exclude={"abi_filepath"},
 )
@@ -42,13 +40,12 @@ async def meta_contract_fetch():
     },
 )
 async def meta_simba_admin_address():
-    return {"address": settings.crypto.simba_admin_address}
+    return {"address": SIMBA_ADMIN_ADDRESS}
 
 
 @router.post("/{webhook_path}/", include_in_schema=False)
 async def meta_webhook_handler(
-    webhook_path: str = Path(...),
-    transaction: dict = Body(...),
+        webhook_path: str = Path(...), transaction: dict = Body(...),
 ):
     webhook_obj = await BlockCypherWebhookCRUD.find_one({"url_path": webhook_path})
     invoice = await InvoiceCRUD.find_one({"_id": webhook_obj["invoice_id"]}) if webhook_obj else None

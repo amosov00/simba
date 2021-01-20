@@ -43,39 +43,34 @@ services:
       - .env
       - .env.backend-nodejs
 
-  faust-worker:
-    container_name: simba-faust-worker
-    restart: always
-    command: sh -c "sleep 40 && faust -A workers.agents worker --without-web -l info"
+  celeryworker:
+    container_name: simba-celeryworker
+    restart: unless-stopped
+    command: sh -c "sleep 70 && celery worker -A celery_app -P celery_pool_asyncio:TaskPool --loglevel=INFO"
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:master-latest
+    volumes:
+      - ./backend:/backend
     depends_on:
-      - kafka-service
+      - db
+      - rabbitmq
     env_file:
       - .env
       - .env.backend
 
-  faust-cron:
-    container_name: simba-faust-cron
-    restart: always
-    command: sh -c "sleep 40 && faust -A workers.crons worker --without-web -l info"
+  celerybeat:
+    container_name: simba-celerybeat
+    restart: unless-stopped
+    command: sh -c "sleep 80 && celery beat -A celery_app --scheduler celery_pool_asyncio:PersistentScheduler --loglevel=INFO"
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/backend:master-latest
+    volumes:
+      - ./backend:/backend
     depends_on:
-      - kafka-service
+      - db
+      - rabbitmq
+      - celeryworker
     env_file:
       - .env
       - .env.backend
-
-  kafka-service:
-    image: wurstmeister/kafka
-    restart: always
-    depends_on:
-      - zookeeper
-    env_file:
-      - .env.kafka
-
-  zookeeper:
-    restart: always
-    image: wurstmeister/zookeeper
 
   db:
     container_name: simba-mongodb
@@ -85,3 +80,11 @@ services:
     env_file:
       - .env
       - .env.db
+
+  rabbitmq:
+    container_name: simba-rabbitmq-local
+    restart: unless-stopped
+    image: rabbitmq:3.8.4-alpine
+    env_file:
+      - .env
+      - .env.rabbitmq

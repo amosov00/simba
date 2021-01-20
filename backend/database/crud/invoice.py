@@ -1,8 +1,8 @@
 from http import HTTPStatus
 from typing import Literal, Union
 
-from bson import ObjectId, errors
 from fastapi.exceptions import HTTPException
+from bson import ObjectId, errors
 
 from schemas import (
     Invoice,
@@ -22,9 +22,9 @@ class InvoiceCRUD(BaseMongoCRUD):
 
     @classmethod
     async def find_invoices_by_type_and_status(
-        cls,
-        invoice_type: Literal[InvoiceType.BUY, InvoiceType.SELL],  # noqa
-        status: Literal[InvoiceStatus.ALL],  # noqa
+            cls,
+            invoice_type: Literal[InvoiceType.BUY, InvoiceType.SELL],  # noqa
+            status: Literal[InvoiceStatus.ALL],  # noqa
     ):
         return await super().find_many({"status": status, "invoice_type": invoice_type})
 
@@ -34,25 +34,18 @@ class InvoiceCRUD(BaseMongoCRUD):
 
     @classmethod
     async def find_invoice_by_id(
-        cls,
-        invoice_id: Union[str, ObjectId],
-        user_id: Union[ObjectId, ObjectIdPydantic],
+            cls, invoice_id: Union[str, ObjectId], user_id: Union[ObjectId, ObjectIdPydantic],
     ):
         return await super().find_one({"_id": ObjectId(invoice_id), "user_id": user_id})
 
     @classmethod
     async def find_invoice_safely(
-        cls,
-        invoice_id: str,
-        user_id: Union[ObjectId, ObjectIdPydantic],
-        filtering_statuses: tuple = (InvoiceStatus.CREATED,),
+            cls,
+            invoice_id: str,
+            user_id: Union[ObjectId, ObjectIdPydantic],
+            filtering_statuses: tuple = (InvoiceStatus.CREATED,),
     ):
-        invoice = await super().find_one(
-            {
-                "_id": ObjectId(invoice_id),
-                "user_id": user_id,
-            }
-        )
+        invoice = await super().find_one({"_id": ObjectId(invoice_id), "user_id": user_id, })
         if not invoice:
             raise HTTPException(HTTPStatus.NOT_FOUND, "Invoice not found")
 
@@ -101,7 +94,7 @@ class InvoiceCRUD(BaseMongoCRUD):
 
     @classmethod
     async def update_invoice(
-        cls, invoice_id: str, user: User, payload: InvoiceUpdate, filtering_statuses: tuple = None
+            cls, invoice_id: str, user: User, payload: InvoiceUpdate, filtering_statuses: tuple = None
     ):
         if not payload.dict(exclude_unset=True):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "Payload is required")
@@ -114,28 +107,22 @@ class InvoiceCRUD(BaseMongoCRUD):
             payload = payload.dict(exclude_none=True)
 
         modified_count = (
-            await cls.update_one(
-                query={"user_id": user.id, "_id": invoice["_id"]},
-                payload=payload,
-            )
+            await cls.update_one(query={"user_id": user.id, "_id": invoice["_id"]}, payload=payload, )
         ).modified_count
         return bool(modified_count)
 
     @classmethod
     async def update_invoice_not_safe(
-        cls,
-        invoice_id: Union[ObjectId, ObjectIdPydantic],
-        user_id: Union[ObjectId, ObjectIdPydantic],
-        payload: dict,
+            cls,
+            invoice_id: Union[ObjectId, ObjectIdPydantic],
+            user_id: Union[ObjectId, ObjectIdPydantic],
+            payload: dict,
     ) -> bool:
         return await super().update_one({"_id": invoice_id, "user_id": user_id}, payload)
 
     @classmethod
     async def need_to_update(
-        cls,
-        invoice_id: Union[ObjectId, ObjectIdPydantic],
-        user: User,
-        payload: InvoiceUpdate,
+            cls, invoice_id: Union[ObjectId, ObjectIdPydantic], user: User, payload: InvoiceUpdate,
     ):
         invoice = await cls.find_by_id(ObjectId(invoice_id))
         if invoice is None:

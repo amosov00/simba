@@ -284,4 +284,16 @@ export const actions = {
 				});
 			});
 	},
+
+	async fetchUsers() {
+		return await this.$axios.get(`/admin/users/`).then(res => {
+			return res.data
+		}).catch(() => {});
+	},
+
+	async fetchUserById({}, id) {
+		return await this.$axios.get(`/admin/users/${id}/`).then(res => {
+			return res.data
+		}).catch(() => {});
+	}
 };

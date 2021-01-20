@@ -2,7 +2,7 @@
 
 ## Запуск для локальной разработки
 
-### Frontend
+### Frontend 
 
 #### Вариант 1. Запуск без докера
 
@@ -18,7 +18,7 @@
 
 ### Backend && Fullstack
 
-* Скопировать из ```./deployment/enviroment/``` файлы конфигурации в корневую папку, назвать их как ```.env.{name}```,
+* Скопировать из ```./deployment/enviroment/``` файлы конфигурации в корневую папку, назвать их как ```.env.{name}```, 
 где {name} = frontend || backend || db
 * ```docker-compose build``` для первоначальной сборки контейнеров (если нужен только backend, то ```docker-compose build backend```)
 * ```docker-compose up``` для запуска полного проекта, ```docker-compose run --rm --service-ports backend``` только для backend

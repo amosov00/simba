@@ -328,9 +328,7 @@ export default context => {
         amount: 'Reward',
         user_id: 'User ID',
         level: 'Level'
-      },
-      invoice_type_1: "Buy",
-      invoice_type_2: "Sell"
+      }
     },
     xpub: {
       confirm_your_action: 'Confirm your action',

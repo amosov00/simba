@@ -1,24 +1,28 @@
-from http import HTTPStatus
 from typing import Literal, Union
+import logging
 from urllib.parse import urlencode, urljoin
+from http import HTTPStatus
 
 import httpx
 from fastapi import HTTPException
+from sentry_sdk import capture_message
 from pycoin.services.blockcypher import BlockcypherProvider
 from pycoin.symbols import btc, tbtx
-from sentry_sdk import capture_message
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-from config import IS_PRODUCTION, settings
+from config import IS_PRODUCTION, BLOCKCYPHER_TOKEN, BLOCKCYPHER_WALLET_TITLE
 
 
 class BlockCypherBaseAPIWrapper(BlockcypherProvider):
     def __init__(self):
-        self.api_token = settings.crypto.blockcypher_token
+        self.api_token = BLOCKCYPHER_TOKEN
         self.api_url = (
-            "https://api.blockcypher.com/v1/btc/main" if IS_PRODUCTION else "https://api.blockcypher.com/v1/btc/test3"
+            "https://api.blockcypher.com/v1/btc/main"
+            if IS_PRODUCTION
+            else "https://api.blockcypher.com/v1/btc/test3"
         )
-        self.blockcypher_wallet_name = settings.crypto.blockcypher_wallet_title
+
+        self.blockcypher_wallet_name = BLOCKCYPHER_WALLET_TITLE
         self.netcode = "BTC" if IS_PRODUCTION else "XTN"
         self.network = btc.network if IS_PRODUCTION else tbtx.network
         super().__init__(self.api_token, self.netcode)
@@ -53,7 +57,7 @@ class BlockCypherBaseAPIWrapper(BlockcypherProvider):
         if resp.is_error:
             capture_message(
                 f"Invalid request to BlockCypher; status: {resp.status_code}; url: {url}; error {resp.text}",
-                level="info",
+                level="info"
             )
             raise HTTPException(HTTPStatus.BAD_REQUEST, resp.text)
 

@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 
+from config import DEBUG
+
 from api.controllers import account, debug, meta, invoice, transparency, admin, ping
 from api.dependencies import user_is_superuser
-from config import settings
 
 api_router = APIRouter()
 
@@ -19,5 +20,5 @@ api_router.include_router(
     dependencies=[Depends(user_is_superuser)],
 )
 
-if settings.common.debug:
+if DEBUG:
     api_router.include_router(debug.router, prefix="/debug", tags=["debug"])

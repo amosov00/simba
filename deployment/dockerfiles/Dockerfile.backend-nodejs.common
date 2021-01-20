@@ -6,3 +6,4 @@ WORKDIR /app/
 RUN yarn install --prod
 
 CMD ["yarn","start"]
+

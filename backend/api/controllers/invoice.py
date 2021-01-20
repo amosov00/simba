@@ -27,8 +27,7 @@ router = APIRouter()
 
 @router.post("/", response_model=InvoiceInDB, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS)
 async def create_invoice(
-    user: User = Depends(get_user),
-    data: InvoiceCreate = Body(...),
+        user: User = Depends(get_user), data: InvoiceCreate = Body(...),
 ):
     invoice = Invoice(user_id=user.id, status=InvoiceStatus.CREATED, invoice_type=data.invoice_type)
 
@@ -42,7 +41,9 @@ async def invoice_fetch_all(user: User = Depends(get_user)):
     return await InvoiceCRUD.find_invoices_by_user_id(user.id)
 
 
-@router.get("/{invoice_id}/", response_model=InvoiceExtended, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS)
+@router.get(
+    "/{invoice_id}/", response_model=InvoiceExtended, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS
+)
 async def invoice_fetch_one(invoice_id: str = Path(...), user: User = Depends(get_user)):
     resp = await InvoiceCRUD.aggregate(
         [
@@ -92,10 +93,14 @@ async def invoice_update(invoice_id: str, user: User = Depends(get_user), payloa
                 {"reason": "unconfirmed_btc_address", "message": "btc address must be confirmed"},
             )
 
-    return await InvoiceCRUD.update_invoice(invoice_id, user, payload, filtering_statuses=(InvoiceStatus.CREATED,))
+    return await InvoiceCRUD.update_invoice(
+        invoice_id, user, payload, filtering_statuses=(InvoiceStatus.CREATED,)
+    )
 
 
-@router.post("/{invoice_id}/confirm/", response_model=InvoiceInDB, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS)
+@router.post(
+    "/{invoice_id}/confirm/", response_model=InvoiceInDB, response_model_exclude=INVOICE_MODEL_EXCLUDE_FIELDS
+)
 async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
     invoice = await InvoiceCRUD.find_invoice_safely(invoice_id, user.id)
 

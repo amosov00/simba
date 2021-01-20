@@ -7,11 +7,12 @@ import ujson
 from bson import Decimal128
 from hexbytes import HexBytes
 from web3 import Web3
+from web3.contract import ContractEvent, LogFilter
 from web3.datastructures import AttributeDict
 
-from config import ETH_MAX_GAS_PRICE_GWEI, TRANSACTION_MIN_CONFIRMATIONS, settings
-from core.utils import gasprice_from_etherscan, gasprice_from_ethgasstation
+from config import INFURA_WS_URL, ETH_MAX_GAS_PRICE_GWEI, TRANSACTION_MIN_CONFIRMATIONS
 from schemas import EthereumContract, EthereumTransaction
+from core.utils import gasprice_from_etherscan, gasprice_from_ethgasstation
 
 __all__ = ["EthereumBaseCommonWrapper", "EthereumBaseContractWrapper"]
 
@@ -29,7 +30,9 @@ class EthereumBaseWrapper(ABC):
         return Web3.toWei(min(int(gasprice), ETH_MAX_GAS_PRICE_GWEI), "gwei")
 
     @classmethod
-    def init_web3_provider(cls, provider_type: Literal["http", "ws"], provider_url: str, websocket_timeout: int = 60):
+    def init_web3_provider(
+            cls, provider_type: Literal["http", "ws"], provider_url: str, websocket_timeout: int = 60
+    ):
         if provider_type == "http":
             return Web3.HTTPProvider(provider_url)
         elif provider_type == "ws":
@@ -60,13 +63,14 @@ class EthereumBaseWrapper(ABC):
 
 class EthereumBaseCommonWrapper(EthereumBaseWrapper):
     def __init__(self):
-        self.w3 = Web3(self.init_web3_provider("ws", settings.crypto.infura_ws_url))
+        self.w3 = Web3(self.init_web3_provider("ws", INFURA_WS_URL))
         self.blocks: List[EthereumTransaction] = []
 
 
 class EthereumBaseContractWrapper(EthereumBaseWrapper):
     def __init__(self, contract: EthereumContract):
-        pass
+        _abi = []
+        _bin = None
         # Temp fix cause of Infura maintenance
         self.w3 = Web3(self.init_web3_provider("ws", contract.provider_ws_link))
         # self.w3 = Web3(self.init_web3_provider("http", contract.provider_http_link))
@@ -102,7 +106,7 @@ class EthereumBaseContractWrapper(EthereumBaseWrapper):
 
     def _get_contract_events_titles(self) -> list:
         events = []
-        for key, _ in self.contract.events.__dict__.items():
+        for key, val in self.contract.events.__dict__.items():
             if key != "abi" and not key[0].startswith("_"):
                 events.append(key)
 
@@ -110,3 +114,4 @@ class EthereumBaseContractWrapper(EthereumBaseWrapper):
 
     def _get_contract_event_by_title(self, contract_title: str):
         return self.contract.events[contract_title]
+

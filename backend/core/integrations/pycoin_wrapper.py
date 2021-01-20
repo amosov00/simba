@@ -1,14 +1,13 @@
-import http
-import random
-from datetime import datetime
+import random, http
 from typing import Optional
+from datetime import datetime
 
-from fastapi import HTTPException
 from sentry_sdk import capture_message
+from fastapi import HTTPException
 
-from config import IS_PRODUCTION, BTC_COLD_WALLETS
+from config import IS_PRODUCTION, BTC_COLD_WALLETS, BTC_COLD_XPUB_SWISS
 from database.crud import BTCAddressCRUD, InvoiceCRUD, BTCxPubCRUD
-from schemas import BTCAddress, User, InvoiceInDB, BTCxPub
+from schemas import BTCAddress, User, InvoiceInDB, BTCxPub, BTCxPubInDB
 
 if IS_PRODUCTION:
     from pycoin.symbols.btc import network
@@ -32,12 +31,10 @@ class PycoinWrapper:
 
     @staticmethod
     async def _created_address_is_valid(address: str):
-        return not any(
-            [
-                bool(await InvoiceCRUD.find_one({"target_btc_address": address})),
-                bool(await BTCAddressCRUD.find_one({"address": address})),
-            ]
-        )
+        return not any([
+            bool(await InvoiceCRUD.find_one({"target_btc_address": address})),
+            bool(await BTCAddressCRUD.find_one({"address": address}))
+        ])
 
     @classmethod
     async def from_active_xpub(cls, **kwargs) -> "PycoinWrapper":

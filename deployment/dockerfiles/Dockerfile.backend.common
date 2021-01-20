@@ -1,27 +1,9 @@
-FROM python:3.8.6-buster
+FROM python:3.8.3-buster
 
-ENV PYTHONUNBUFFERED=1 \
-    \
-    # pip
-    PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=50 \
-    \
-    # poetry
-    POETRY_VERSION=1.1.4 \
-    POETRY_HOME="/opt/poetry" \
-    POETRY_CACHE_DIR='/var/cache/pypoetry' \
-    POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_VIRTUALENVS_IN_PROJECT=false \
-    POETRY_NO_INTERACTION=1 \
-    \
-    # paths
-    PYSETUP_PATH="/opt/pysetup"
+ENV PYTHONUNBUFFERED=1 DOCKER=1 DEBIAN_FRONTEND=noninteractive
 
-RUN pip install "poetry==$POETRY_VERSION"
-
-COPY ./backend/ /backend/
-WORKDIR /backend/
+COPY ./backend/ /app/
+WORKDIR /app/
 
 # Install requirements
-RUN poetry install --no-dev --no-ansi
+RUN pip install -r requirements.txt
