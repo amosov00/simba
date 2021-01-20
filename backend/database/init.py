@@ -23,5 +23,8 @@ class Mongo:
     def close(self):
         self._client.close()
 
+    async def ping(self):
+        return await self.client.admin.command("ping")
+
 
 mongo = Mongo()
