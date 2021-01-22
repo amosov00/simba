@@ -18,6 +18,7 @@
 export default {
   name: "profile-data",
   layout: "profile",
+  middleware: ["contract"],
   data: () => ({
     modalShow: false,
   }),
@@ -26,8 +27,7 @@ export default {
       return this.$store.getters.user || {}
     }
   },
-  methods: {
-  },
+  methods: {},
 };
 </script>
 

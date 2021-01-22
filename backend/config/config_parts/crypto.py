@@ -8,6 +8,9 @@ class CryptoSettings(VaultKVSettings):
     infura_http_url: str = Field(...)
     infura_ws_url: str = Field(...)
 
+    infura_open_http_url: str = Field(...)
+    infura_open_ws_url: str = Field(...)
+
     gasstation_api_token: str = Field(...)
     etherscan_api_token: str = Field(...)
     ethplorer_api_token: str = Field(...)
