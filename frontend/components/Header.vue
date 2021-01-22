@@ -19,10 +19,11 @@
 </template>
 
 <script>
+import {mapGetters} from "vuex";
 import ProfileDropdown from "~/components/ProfileDropdown";
 import HeaderBalance from "~/components/HeaderBalance";
-import _ from "lodash";
 import formatCurrency from "../mixins/formatCurrency";
+
 export default {
   name: "Header",
   mixins: [formatCurrency],
@@ -30,38 +31,27 @@ export default {
     ProfileDropdown,
     HeaderBalance
   },
-  computed: {
-    user() {
-      return this.$store.getters.user;
-    }
-  },
   data: () => ({
-    menu: [],
-    simbaBalance: 0
+    menu: [
+      {title: "header_menu.exchange", to: "/exchange/"},
+      {title: "header_menu.about", to: "/about"},
+      {title: "header_menu.wallet", to: "/wallet"},
+    ],
   }),
-  async created() {
-    this.menu = [
-      { title: "header_menu.exchange", to: "/exchange/" },
-      { title: "header_menu.about", to: "/about" },
-      // { title: "header_menu.howtouse", to: "/howtouse" },
-      { title: "header_menu.wallet", to: "/wallet" },
-      // { title: "header_menu.contacts", to: "/contacts" }
-    ];
-
-    if (this.$cookies.get("token")) {
-      if (_.isEmpty(this.$store.getters["contract/SIMBA"])) {
-        await this.$store.dispatch("contract/fetchContract");
-      }
-      // if (window.ethereum && await window.ethereum._metamask.isUnlocked()) {
-      //   this.$contract()
-      //     .SIMBA.methods.balanceOf(window.ethereum.selectedAddress)
-      //     .call()
-      //     .then(res => {
-      //       this.simbaBalance = res;
-      //     });
-      // }
-    }
-  }
+  computed: {
+    ...mapGetters(["user"]),
+    ...mapGetters("contract", ["simbaBalance"]),
+  },
+  // methods: {
+  //   ...mapActions({
+  //     fetchSimbaBalance: "contract/fetchSimbaBalance",
+  //   }),
+  // },
+  // async created() {
+  //   if (this.user && this.simbaBalance === 0 ) {
+  //     await this.fetchSimbaBalance()
+  //   }
+  // }
 };
 </script>
 
@@ -69,43 +59,55 @@ export default {
 .header
   padding-top: 40px
   padding-bottom: 14px
+
 .logo-link
   color: #000000
   transition: 300ms opacity
+
   &:hover
     opacity: 0.7
+
   &:active
     opacity: 1
+
 .logo
   margin-right: 20px
   height: 70px
   width: 70px
+
 .logo-text
   font-weight: bold
   font-size: 22px
   line-height: 100%
   letter-spacing: 0.1em
   color: #000000
+
 .logo-subtext
   margin-top: 3px
   font-weight: 300
   font-size: 18px
   line-height: 100%
+
 .header-menu
   padding: 7px 0 7px 0
+
 .menu-item
   font-size: 16px
   margin-right: 10px
+
   &:last-child
     margin-right: 0
+
 .balance
   display: flex
   align-items: center
   justify-content: flex-end
   font-size: 18px
+
   &__img
     margin-right: 10px
     cursor: pointer
+
 .pa-0
   padding-top: 0
   padding-bottom: 0

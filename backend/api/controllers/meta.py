@@ -6,7 +6,7 @@ from api.dependencies import get_user
 from config import SIMBA_CONTRACT, settings
 from core.mechanics import InvoiceMechanics
 from database.crud import BlockCypherWebhookCRUD, InvoiceCRUD
-from schemas import EthereumContract, BTCTransaction
+from schemas import EthereumContractMetaResponse, BTCTransaction
 
 __all__ = ["router"]
 
@@ -18,8 +18,7 @@ router = APIRouter()
     dependencies=[
         Depends(get_user),
     ],
-    response_model=EthereumContract,
-    response_model_exclude={"abi_filepath"},
+    response_model=EthereumContractMetaResponse,
 )
 async def meta_contract_fetch():
     contract = SIMBA_CONTRACT
@@ -28,7 +27,11 @@ async def meta_contract_fetch():
         abi = ujson.load(f)
         contract.abi = abi
 
-    return contract
+    return {
+        "contract": contract,
+        "provider_http_link": settings.crypto.infura_open_http_url,
+        "provider_ws_link": settings.crypto.infura_open_ws_url,
+    }
 
 
 @router.get(
