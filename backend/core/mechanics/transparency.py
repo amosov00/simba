@@ -159,7 +159,10 @@ class TransparencyMechanics:
         invoices = await InvoiceCRUD.aggregate(pipeline)
 
         for invoice in invoices:
-            for btc_tx in invoice["btc_txs"]:
+            if len(invoice["btc_txs"]) == 0:
+                continue
+            else:
+                btc_tx = invoice["btc_txs"][0]
                 if tx_type == "all":
                     if invoice["invoice_type"] == InvoiceType.SELL:
                         amount = invoice["btc_amount_proceeded"] * -1
