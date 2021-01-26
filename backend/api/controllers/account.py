@@ -29,11 +29,10 @@ from schemas import (
     UserBitcoinAddressDelete,
     UserBitcoinAddressInput,
     UserAddressesArchive,
+    UserKYCAccessTokenResponse
 )
 
 __all__ = ["router"]
-
-from schemas.user import UserKYCAccessTokenResponse
 
 router = APIRouter()
 
