@@ -11,6 +11,7 @@ import snsWebSdk from '@sumsub/websdk';
     computed: {
     },
     data: () => ({
+        token:null,
       steps: {
         current: 'profile.email_verification',
         list: ['profile.email_verification', 'profile.verify_address',
@@ -58,9 +59,10 @@ import snsWebSdk from '@sumsub/websdk';
       }
     },
     async mounted() {
-        let token = await this.$axios.get('/kyc/token')
-        console.log(token);
-        this.launchWebSdk('https://test-api.sumsub.com','basic-kyc', 'tst:Dt2mTU9SnHl9SGjALc5hhCMe.L4VJ9g2XHJbYjipw5hI39QZd7amHIzMo')
+        let {data} = await this.$axios.get('/account/kyc/token/')
+        this.token = data.token
+        // 'tst:Dt2mTU9SnHl9SGjALc5hhCMe.L4VJ9g2XHJbYjipw5hI39QZd7amHIzMo'
+        this.launchWebSdk('https://test-api.sumsub.com','basic-kyc', this.token)
     },
     async asyncData({ store }) {
     }
