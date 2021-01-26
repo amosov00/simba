@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Depends, Body, Path
 
 from api.dependencies import get_user
 from config import settings, SST_CONTRACT
+from core.integrations.person_verify import PersonVerifyClient
 from core.mechanics.referrals import ReferralMechanics
 from database.crud import UserCRUD, EthereumTransactionCRUD, UserAddressesArchiveCRUD
 from schemas import (
@@ -28,6 +29,7 @@ from schemas import (
     UserBitcoinAddressDelete,
     UserBitcoinAddressInput,
     UserAddressesArchive,
+    UserKYCAccessTokenResponse
 )
 
 __all__ = ["router"]
@@ -105,6 +107,13 @@ async def account_confirm_2fa(user: User = Depends(get_user), payload: User2faCo
 @router.delete("/2fa/")
 async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDelete = Body(...)):
     return await UserCRUD.delete_2fa(user, payload)
+
+
+@router.get("/kyc/token/", response_model=UserKYCAccessTokenResponse)
+async def account_get_kyc_token(user: User = Depends(get_user)):
+    return {
+        "token": await PersonVerifyClient.get_access_token(str(user.id))
+    }
 
 
 @router.get("/referrals/", response_model=UserReferralsResponse)

@@ -39,6 +39,7 @@ __all__ = [
     "UserBitcoinAddressDelete",
     "UserBitcoinAddressInput",
     "UserWithReferrals",
+    "UserKYCAccessTokenResponse"
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -268,3 +269,7 @@ class UserReferralInfoAdmin(BaseModel):
 
 class UserWithReferrals(User):
     referrals: List[UserReferralInfoAdmin] = Field(default=[])
+
+
+class UserKYCAccessTokenResponse(BaseModel):
+    token: str = Field(...)
