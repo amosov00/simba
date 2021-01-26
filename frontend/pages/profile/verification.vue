@@ -57,8 +57,10 @@ import snsWebSdk from '@sumsub/websdk';
         return false
       }
     },
-    mounted() {
-        this.launchWebSdk('https://test-api.sumsub.com',)
+    async mounted() {
+        let token = await this.$axios.get('/kyc/token')
+        console.log(token);
+        this.launchWebSdk('https://test-api.sumsub.com','basic-kyc', 'tst:Dt2mTU9SnHl9SGjALc5hhCMe.L4VJ9g2XHJbYjipw5hI39QZd7amHIzMo')
     },
     async asyncData({ store }) {
     }
