@@ -131,7 +131,7 @@ export default {
   },
 
   async asyncData({store, route}) {
-    let user_data = await store.dispatch("fetchUserById", route.params.id)
+    let user_data = await store.dispatch("admin/fetchUserById", route.params.id)
 
     let archived = await store.$axios.get(`/admin/users/${route.params.id}/archived_addresses/`)
       .then(res => res.data).catch(() => [])

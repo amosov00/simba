@@ -30,7 +30,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         return True
 
     async def issue_coins(self, customer_address: str, amount: int, comment: str) -> HexBytes:
-        """Simba contract"""
+        """Simba contract."""
         self.check_min_amount(amount, func_name="issue", comment=comment)
 
         customer_address = Web3.toChecksumAddress(customer_address)
@@ -47,7 +47,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
     async def redeem_coins(self, amount: int, comment: str):
-        """Simba contract"""
+        """Simba contract."""
         self.check_min_amount(amount, func_name="redeem", comment=comment)
 
         tx = self.contract.functions.redeem(amount, comment).buildTransaction(
@@ -62,7 +62,7 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         return self.w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
     async def freeze_and_transfer(self, customer_address: str, amount: int, period: int):
-        """SST contract"""
+        """SST contract."""
         customer_address = Web3.toChecksumAddress(customer_address)
         tx = self.contract.functions.freezeAndTransfer(customer_address, amount, period).buildTransaction(
             {

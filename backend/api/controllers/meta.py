@@ -3,10 +3,10 @@ from fastapi import APIRouter, Depends, Body, Path
 from sentry_sdk import capture_message
 
 from api.dependencies import get_user
-from config import SIMBA_CONTRACT, SIMBA_ADMIN_ADDRESS
+from config import SIMBA_CONTRACT, settings
 from core.mechanics import InvoiceMechanics
 from database.crud import BlockCypherWebhookCRUD, InvoiceCRUD
-from schemas import EthereumContract, BTCTransaction
+from schemas import EthereumContractMetaResponse, BTCTransaction
 
 __all__ = ["router"]
 
@@ -15,9 +15,10 @@ router = APIRouter()
 
 @router.get(
     "/eth/contract/",
-    dependencies=[Depends(get_user), ],
-    response_model=EthereumContract,
-    response_model_exclude={"abi_filepath"},
+    dependencies=[
+        Depends(get_user),
+    ],
+    response_model=EthereumContractMetaResponse,
 )
 async def meta_contract_fetch():
     contract = SIMBA_CONTRACT
@@ -26,7 +27,11 @@ async def meta_contract_fetch():
         abi = ujson.load(f)
         contract.abi = abi
 
-    return contract
+    return {
+        "contract": contract,
+        "provider_http_link": settings.crypto.infura_open_http_url,
+        "provider_ws_link": settings.crypto.infura_open_ws_url,
+    }
 
 
 @router.get(
@@ -40,12 +45,13 @@ async def meta_contract_fetch():
     },
 )
 async def meta_simba_admin_address():
-    return {"address": SIMBA_ADMIN_ADDRESS}
+    return {"address": settings.crypto.simba_admin_address}
 
 
 @router.post("/{webhook_path}/", include_in_schema=False)
 async def meta_webhook_handler(
-        webhook_path: str = Path(...), transaction: dict = Body(...),
+    webhook_path: str = Path(...),
+    transaction: dict = Body(...),
 ):
     webhook_obj = await BlockCypherWebhookCRUD.find_one({"url_path": webhook_path})
     invoice = await InvoiceCRUD.find_one({"_id": webhook_obj["invoice_id"]}) if webhook_obj else None

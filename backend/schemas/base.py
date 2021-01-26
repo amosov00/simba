@@ -1,6 +1,6 @@
-from http import HTTPStatus
 from datetime import datetime, time
 from hashlib import sha256
+from http import HTTPStatus
 
 from bson import ObjectId, Decimal128, errors
 from fastapi import HTTPException
@@ -37,7 +37,7 @@ def validate_btc_address(address_hash: str):
     try:
         bcbytes = decode_base58(address_hash, 25)
         status = bcbytes[-4:] == sha256(sha256(bcbytes[:-4]).digest()).digest()[:4]
-    except:
+    except Exception:
         pass
 
     if not status:

@@ -5,7 +5,8 @@ from urllib.parse import urlencode, urljoin
 from fastapi import APIRouter, HTTPException, Depends, Body, Path
 
 from api.dependencies import get_user
-from config import HOST_URL, SST_CONTRACT
+from config import settings, SST_CONTRACT
+from core.integrations.person_verify import PersonVerifyClient
 from core.mechanics.referrals import ReferralMechanics
 from database.crud import UserCRUD, EthereumTransactionCRUD, UserAddressesArchiveCRUD
 from schemas import (
@@ -27,7 +28,8 @@ from schemas import (
     USER_MODEL_INCLUDE_FIELDS,
     UserBitcoinAddressDelete,
     UserBitcoinAddressInput,
-    UserAddressesArchive
+    UserAddressesArchive,
+    UserKYCAccessTokenResponse
 )
 
 __all__ = ["router"]
@@ -41,9 +43,12 @@ async def account_get_user(user: User = Depends(get_user)):
 
 
 @router.post(
-    "/login/", response_model=UserLoginResponse,
+    "/login/",
+    response_model=UserLoginResponse,
 )
-async def account_login(data: UserLogin = Body(...), ):
+async def account_login(
+    data: UserLogin = Body(...),
+):
     return await UserCRUD.authenticate(data.email, data.password, data.pin_code)
 
 
@@ -82,9 +87,9 @@ async def account_recover(data: UserRecoverLink = Body(...)):
 async def account_get_referral_link(user: User = Depends(get_user)):
     params = {"referral_id": user.id}
     url = (
-            urljoin(HOST_URL, "register")
-            + "?"
-            + (urlencode(params) if user.user_eth_addresses != [] else "referral_id=*************")
+        urljoin(settings.common.host_url, "register")
+        + "?"
+        + (urlencode(params) if user.user_eth_addresses != [] else "referral_id=*************")
     )
     return {"URL": url}
 
@@ -104,21 +109,26 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
     return await UserCRUD.delete_2fa(user, payload)
 
 
+@router.get("/kyc/token/", response_model=UserKYCAccessTokenResponse)
+async def account_get_kyc_token(user: User = Depends(get_user)):
+    return {
+        "token": await PersonVerifyClient.get_access_token(str(user.id))
+    }
+
+
 @router.get("/referrals/", response_model=UserReferralsResponse)
 async def account_referrals_info(user: User = Depends(get_user)):
     referrals = await ReferralMechanics(user).fetch_referrals_top_to_bottom()
-    transactions = await EthereumTransactionCRUD.find({
-        "contract": SST_CONTRACT.title, "user_id": user.id,
-    })
+    transactions = await EthereumTransactionCRUD.find(
+        {
+            "contract": SST_CONTRACT.title,
+            "user_id": user.id,
+        }
+    )
 
     transactions = await ReferralMechanics(user).fetch_sst_tx_info_for_user(transactions)
 
     return {"referrals": referrals, "transactions": transactions}
-
-
-@router.get("/referrals/transactions/")
-async def account_referrals_info(user: User = Depends(get_user)):
-    return []
 
 
 @router.post("/eth-address/")
@@ -130,9 +140,7 @@ async def account_eth_address_add(data: UserEthereumSignedAddress = Body(...), u
 
     user.user_eth_addresses.append(data)
 
-    await UserCRUD.update_one(
-        {"_id": user.id}, {"user_eth_addresses": [i.dict() for i in user.user_eth_addresses]}
-    )
+    await UserCRUD.update_one({"_id": user.id}, {"user_eth_addresses": [i.dict() for i in user.user_eth_addresses]})
 
     return True
 
@@ -179,9 +187,7 @@ async def account_add_btc_address(user: User = Depends(get_user), data: UserBitc
 
 
 @router.delete("/btc-address/")
-async def account_add_btc_address_delete(
-        data: UserBitcoinAddressDelete = Body(...), user: User = Depends(get_user)
-):
+async def account_add_btc_address_delete(data: UserBitcoinAddressDelete = Body(...), user: User = Depends(get_user)):
     if user.two_factor and not await UserCRUD.check_2fa(user_id=user.id, pin_code=data.pin_code):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Incorrect pin-code")
 

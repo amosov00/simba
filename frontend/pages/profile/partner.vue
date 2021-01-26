@@ -43,7 +43,7 @@
             b-tooltip(:label="props.row.transactionHash" type="is-black" position="is-bottom")
               a(:href="'https://etherscan.io/tx/' + props.row.transactionHash" target="_blank").text-clamp {{ truncateHash(props.row.transactionHash) }}
           b-table-column(field="referral_level" :label="$i18n.t('other.level')") {{ props.row.referral_level }}
-          b-table-column(field="Amount" :label="$i18n.t('other.amount')") {{ divNum(props.row.amount, 18, true) }}
+          b-table-column(field="Amount" :label="$i18n.t('other.amount')") {{ divNum(props.row.amount) }}
       div.level.mt-2
         p.is-size-5.has-text-weight-bold.level-left {{ $i18n.t('other.total')}}
         p.is-size-5.has-text-weight-bold.level-right {{ txTotal }}
@@ -67,23 +67,15 @@
     middleware: ["contract", "metamask"],
     mixins: [invoiceMixins],
     computed: {
-      codeUnavailable() {
-        if(this.ref_code.includes('*')) {
-          return true
-        }
-        else {
-          return false
-        }
-      },
       rewardAddress() {
         return this.$store.getters.user.user_eth_addresses[0].address
       },
       txTotal() {
         let total = this.transactions.reduce((total, el) => {
-          return Decimal.add(total, el.amount).toJSON()
-        }, 0)
+          return total.plus(el.amount)
+        }, Decimal(0))
 
-        return Decimal.div(total, (10**18)).toFixed(18);
+        return Decimal.div(total, (10**18)).toFixed(2);
       }
     },
     data: () => ({
@@ -92,36 +84,8 @@
       referrals: []
     }),
     methods: {
-      divNum(num, prec = 18, trunc) {
-
-        let newAmount = (+num / 10**18).toFixed(prec)
-
-        let stringAmount = newAmount.toString();
-
-        if(trunc) {
-          if(stringAmount.includes('.')) {
-            let mantissa = stringAmount.substring(stringAmount.indexOf('.')+1)
-
-            let toCut = 0;
-
-            for(let i = mantissa.length - 1; i !== 0; i--) {
-              if(mantissa[i] === '0') {
-                toCut++
-              } else {
-                break;
-              }
-            }
-
-            if(toCut > 0) {
-              let formated = stringAmount.substring(0, stringAmount.length - toCut);
-              return formated;
-            } else {
-              return stringAmount;
-            }
-          }
-        }
-
-        return newAmount;
+      divNum(num) {
+        return (+num / 10**18).toFixed(2);
       },
 
       formatDate(date_str) {

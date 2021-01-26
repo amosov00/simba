@@ -17,14 +17,14 @@
 
 <script>
 import Login2FA from "~/components/Login2FA";
+
 export default {
   name: "index",
   layout: "main",
-  components: { Login2FA },
-  middleware({ store, redirect }) {
+  components: {Login2FA},
+  async middleware({store, redirect}) {
     if (store.state.user) {
-      redirect("/profile/data/");
-      return;
+      await redirect("/exchange/");
     }
   },
   data() {
@@ -46,8 +46,9 @@ export default {
         this.email,
         this.password
       );
-      if(resp !== true) {
-        if(resp.response.status >= 400) {
+
+      if (resp !== true) {
+        if (resp.response.status >= 400) {
           let resp_msg = resp.response.data[0].message
 
           if (resp_msg === "Incorrect 2FA pin code") {

@@ -6,9 +6,8 @@ __all__ = ["UserAddressesArchive", "UserAddressesArchiveInDB"]
 
 
 class UserAddressesArchive(BaseModel):
-    """
-    Is used for storing btc and eth addresses which was deleted
-    """
+    """Is used for storing btc and eth addresses which was deleted."""
+
     user_id: ObjectIdPydantic = Field(...)
     address: str = Field(...)
     signature: str = Field(default=None, description="only for eth address")
