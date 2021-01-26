@@ -268,3 +268,7 @@ class UserReferralInfoAdmin(BaseModel):
 
 class UserWithReferrals(User):
     referrals: List[UserReferralInfoAdmin] = Field(default=[])
+
+
+class UserKYCAccessTokenResponse(BaseModel):
+    token: str = Field(...)
