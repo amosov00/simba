@@ -85,13 +85,15 @@ async def account_recover(data: UserRecoverLink = Body(...)):
 
 @router.get("/referral_link/", response_model=UserReferralURLResponse)
 async def account_get_referral_link(user: User = Depends(get_user)):
-    params = {"referral_id": user.id}
-    url = (
-        urljoin(settings.common.host_url, "register")
-        + "?"
-        + (urlencode(params) if user.user_eth_addresses != [] else "referral_id=*************")
-    )
-    return {"URL": url}
+    if user.user_eth_addresses:
+        params = {"referral_id": user.id}
+    else:
+        params = {"referral_id": "*************"}
+
+    return {
+        "url": urljoin(settings.common.host_url, "register") + "?" + urlencode(params),
+        "partner_code": str(user.id),
+    }
 
 
 @router.get("/2fa/", response_model=User2faURL)
@@ -118,15 +120,17 @@ async def account_get_kyc_token(user: User = Depends(get_user)):
 
 @router.get("/referrals/", response_model=UserReferralsResponse)
 async def account_referrals_info(user: User = Depends(get_user)):
-    referrals = await ReferralMechanics(user).fetch_referrals_top_to_bottom()
-    transactions = await EthereumTransactionCRUD.find(
+    instance = ReferralMechanics(user)
+    referrals = await instance.fetch_referrals_top_to_bottom()
+
+    transactions = await EthereumTransactionCRUD.find_many(
         {
             "contract": SST_CONTRACT.title,
             "user_id": user.id,
         }
     )
 
-    transactions = await ReferralMechanics(user).fetch_sst_tx_info_for_user(transactions)
+    transactions = await instance.fetch_sst_tx_info_for_user(transactions)
 
     return {"referrals": referrals, "transactions": transactions}
 

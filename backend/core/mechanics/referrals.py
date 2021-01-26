@@ -1,10 +1,10 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from bson import ObjectId
 
 from config import SST_CONTRACT
 from database.crud import UserCRUD, ReferralCRUD, EthereumTransactionCRUD, InvoiceCRUD
-from schemas import User, InvoiceInDB, EthereumTransactionInDB, ReferralTransactionEmail
+from schemas import User, InvoiceInDB, EthereumTransactionInDB, ReferralTransactionEmail, ObjectIdPydantic
 
 __all__ = ["ReferralMechanics"]
 
@@ -27,7 +27,10 @@ class ReferralMechanics:
         return self.referral_object
 
     @staticmethod
-    def get_user_level_from_referral_object(user_id: ObjectId, referral_object: dict) -> Optional[int]:
+    def get_user_level_from_referral_object(
+        user_id: Union[ObjectId, ObjectIdPydantic], referral_object: dict
+    ) -> Optional[int]:
+
         if not referral_object:
             return None
 
@@ -140,14 +143,12 @@ class ReferralMechanics:
             connected_user = await UserCRUD.find_by_id(invoice["user_id"])
             connected_user_ref_object = await ReferralCRUD.find_by_user_id(connected_user["_id"])
 
-            level = self.get_user_level_from_referral_object(connected_user["_id"], connected_user_ref_object)
-
             resp.append(
                 ReferralTransactionEmail(
                     transactionHash=transaction.transactionHash,
                     amount=amount,
                     email=connected_user.get("email"),
-                    level=level,
+                    level=self.get_user_level_from_referral_object(self.user.id, connected_user_ref_object),
                 )
             )
 
