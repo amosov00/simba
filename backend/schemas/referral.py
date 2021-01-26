@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import Field, validator
 
@@ -23,7 +23,7 @@ class ReferralInDB(Referral):
 
 class ReferralTransactionUserID(BaseModel):
     transactionHash: str = Field(...)
-    amount: int = Field(...)
+    amount: Union[DecimalPydantic, int] = Field(...)
     user_id: ObjectIdPydantic = Field(default=None)
     level: int = Field(default=None)
 
