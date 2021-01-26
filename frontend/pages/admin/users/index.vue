@@ -20,7 +20,7 @@
 <script>
 import _ from 'lodash'
 import moment from "moment"
-import {saveAs} from 'file-saver';
+// import {saveAs} from 'file-saver';
 
 export default {
     name: "users",
@@ -47,7 +47,7 @@ export default {
         async exportUsers() {
           const data = await this.$store.dispatch("admin/exportUsers")
           if (data) {
-            saveAs(data, `simba_users.xlsx`)
+            // saveAs(data, `simba_users.xlsx`)
           }
         }
     },
