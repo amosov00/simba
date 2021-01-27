@@ -74,14 +74,14 @@ class InvoiceCRUD(BaseMongoCRUD):
                         query.append({f: ObjectId(q)})
                     except errors.InvalidId:
                         pass
-            elif q_len >= 30:
+            if q_len >= 30:
                 for f in ("btc_tx_hashes", "eth_tx_hashes", "sst_tx_hashes", ""):
                     query.append({f: {"$regex": q, "$options": "i"}})
 
-            elif q_len == 42:
+            if q_len == 42:
                 query.append({"target_eth_address": {"$regex": q, "$options": "i"}})
 
-            elif q_len == 34:
+            if q_len == 34:
                 query.append({"target_btc_address": {"$regex": q, "$options": "i"}})
 
             if 1 < q_len < 10:
