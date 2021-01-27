@@ -14,8 +14,8 @@ export default ({ app, redirect, route }, inject) => {
 				maxAge: 60 * 60 * 24 * 7,
 			});
 			redirect('/exchange');
-			
-			// window.location.href = '/exchange/'; Что это? 
+
+			// window.location.href = '/exchange/'; Что это?
 			return true;
 		}).catch(resp => {
 		  return resp;

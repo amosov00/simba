@@ -29,7 +29,7 @@ from schemas import (
     UserBitcoinAddressDelete,
     UserBitcoinAddressInput,
     UserAddressesArchive,
-    UserKYCAccessTokenResponse
+    UserKYCAccessTokenResponse,
 )
 
 __all__ = ["router"]
@@ -113,9 +113,7 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
 
 @router.get("/kyc/token/", response_model=UserKYCAccessTokenResponse)
 async def account_get_kyc_token(user: User = Depends(get_user)):
-    return {
-        "token": await PersonVerifyClient.get_access_token(str(user.id))
-    }
+    return {"token": await PersonVerifyClient.get_access_token(str(user.id))}
 
 
 @router.get("/referrals/", response_model=UserReferralsResponse)

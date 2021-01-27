@@ -13,7 +13,7 @@ from .config_parts import (
     EmailSettings,
     CelerySettings,
     KafkaSettings,
-    PersonVerifySettings
+    PersonVerifySettings,
 )
 from .configurator import configurator, IS_LOCAL, IS_PRODUCTION, BASE_DIR
 
