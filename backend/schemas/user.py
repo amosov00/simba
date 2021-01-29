@@ -146,7 +146,8 @@ class UserRecover(BaseModel):
 
 
 class UserReferralURLResponse(BaseModel):
-    URL: str = Field(...)
+    url: str = Field(...)
+    partner_code: str = Field(...)
 
 
 class UserRecoverLink(BaseModel):

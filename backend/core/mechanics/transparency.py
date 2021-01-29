@@ -176,4 +176,6 @@ class TransparencyMechanics:
                     {"hash": btc_tx["hash"], "received": btc_tx["received"], "amount": amount}
                 )
 
+        response["transactions"] = sorted(response["transactions"], key=lambda o: ["received"], reverse=True)
+
         return response
