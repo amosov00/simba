@@ -1,8 +1,12 @@
+import hmac
 from datetime import datetime
+from hashlib import sha1
 from http import HTTPStatus
 from urllib.parse import urlencode, urljoin
 
+from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Body, Path
+from starlette.requests import Request
 
 from api.dependencies import get_user
 from config import settings, SST_CONTRACT
@@ -29,7 +33,7 @@ from schemas import (
     UserBitcoinAddressDelete,
     UserBitcoinAddressInput,
     UserAddressesArchive,
-    UserKYCAccessTokenResponse
+    UserKYCAccessTokenResponse,
 )
 
 __all__ = ["router"]
@@ -111,9 +115,21 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
 
 @router.get("/kyc/token/", response_model=UserKYCAccessTokenResponse)
 async def account_get_kyc_token(user: User = Depends(get_user)):
-    return {
-        "token": await PersonVerifyClient.get_access_token(str(user.id))
-    }
+    return {"token": await PersonVerifyClient.get_access_token(str(user.id))}
+
+
+@router.get("/kyc/status/")
+async def account_receive_kyc_status(request: Request):
+    request_hashsum = hmac.new(
+        settings.person_verify.status_webhook_secret_key.encode(), await request.body(), digestmod=sha1
+    ).hexdigest()
+
+    if request.headers["x-payload-digest"] == request_hashsum:
+        request_body = await request.json()
+        await UserCRUD.update_one(
+            {"_id": ObjectId(request_body["externalUserId"])},
+            {"kyc_status": request_body["reviewStatus"], "kyc_review_response": request_body},
+        )
 
 
 @router.get("/referrals/", response_model=UserReferralsResponse)

@@ -39,7 +39,7 @@ __all__ = [
     "UserBitcoinAddressDelete",
     "UserBitcoinAddressInput",
     "UserWithReferrals",
-    "UserKYCAccessTokenResponse"
+    "UserKYCAccessTokenResponse",
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

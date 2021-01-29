@@ -22,12 +22,7 @@ class PersonVerifyClient:
         if isinstance(body, str):
             body = body.encode("utf-8")
 
-        data_to_sign = (
-            str(now).encode("utf-8")
-            + method.encode("utf-8")
-            + path_url.encode("utf-8")
-            + body
-        )
+        data_to_sign = str(now).encode("utf-8") + method.encode("utf-8") + path_url.encode("utf-8") + body
 
         signature = hmac.new(
             settings.person_verify.secret_key.encode("utf-8"),
