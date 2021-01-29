@@ -8,6 +8,7 @@ class PersonVerifySettings(VaultKVSettings):
     app_token: str = Field(...)
     secret_key: str = Field(...)
     base_url: str = Field(...)
+    status_webhook_secret_key: str = Field(...)
 
     class Config(BaseSettingsConfig):
         default_secret_path = "person_verify"
