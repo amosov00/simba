@@ -1,6 +1,6 @@
-from bson import errors, ObjectId
 from fastapi import HTTPException
 from starlette import status
+from bson import errors, ObjectId
 
 __all__ = ["to_objectid"]
 

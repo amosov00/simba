@@ -4,6 +4,6 @@ from .crypto import *
 from .db import *
 from .email import *
 from .jwt import *
+from .sentry import *
 from .kafka import *
 from .person_verify import *
-from .sentry import *

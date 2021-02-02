@@ -63,10 +63,7 @@ export default context => {
       status: 'Status',
       received_payment: 'Received payment',
       sent_payment: 'Payment sent',
-      choose_btc_wallet: {
-        p1: 'Choose BTC wallet',
-        p2: 'to get coins after redeem'
-      },
+      choose_btc_wallet: {p1: 'Choose BTC wallet', p2: 'to get coins after redeem'},
       choose_eth_wallet: {p1: 'Choose ETH wallet', p2: 'to sell SIMBA'},
       choose_btc_wallet_error: 'Please choose a BTC wallet',
       transaction_hash: 'BTC payout',
@@ -168,11 +165,7 @@ export default context => {
       your_ref_code: "Your partner code",
       your_reward_address: 'Your ETH reward address',
       refs_empty: "You don't have invited users yet",
-      how_to_get_code: {
-        p1: "To get your partner code, ",
-        p2: "add",
-        p3: "your reward wallet"
-      }
+      how_to_get_code: {p1: "To get your partner code, ", p2: "add", p3: "your reward wallet"}
     },
     password: {
       current: "Current password",
@@ -196,7 +189,7 @@ export default context => {
       transaction_failed: 'Transaction failed',
       transaction_success: 'Transaction completed successfully',
       pin_code: 'Pin-code',
-      add_new_wallet: {p1: 'Add new', p2: 'wallet'},
+      add_new_wallet: { p1: 'Add new', p2:'wallet'},
       address_deleted: 'Address successfully deleted!',
       address_added: 'Address successfully deleted!',
       address_failed_with_pin: 'Failed to add address, make sure you entered correct address and pin-code!',
@@ -352,7 +345,7 @@ export default context => {
 
     },
     su_payouts_mm: {
-      manage_payouts: {full: 'Payouts management', short: 'Manage payouts'},
+      manage_payouts: { full: 'Payouts management', short: 'Manage payouts' },
       date: "Date",
       transactions: "Transactions",
       payout: "Payout",
@@ -371,7 +364,7 @@ export default context => {
     }
   };
 
-  return new Promise(function (resolve) {
+  return new Promise(function(resolve) {
     resolve(locale);
   });
 };

@@ -1,5 +1,5 @@
-from datetime import datetime
 from typing import List
+from datetime import datetime
 
 from .base import BaseModel, Field
 

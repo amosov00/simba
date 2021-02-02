@@ -42,7 +42,7 @@
                 n-link(:to="`/admin/users/${props.row.user_id}`") {{ props.row.user_id }}
               b-table-column(field="transactionHash" label="Tx Hash" sortable)
                 b-tooltip(:label="props.row.transactionHash")
-                  a(:href="getBlockchainLink(props.row.transactionHash, 'tx', 'eth')" target="blank" rel="noopener noreferrer") {{ truncateHash(props.row.transactionHash) }}
+                    a(:href="getBlockchainLink(props.row.transactionHash, 'tx', 'eth')" target="blank" rel="noopener noreferrer") {{ truncateHash(props.row.transactionHash) }}
               b-table-column(field="level" label="Level" sortable) {{ props.row.level }}
               b-table-column(field="amount" label="Amount" sortable) {{ sstFormat(props.row.amount) }}
 
@@ -69,20 +69,20 @@ export default {
     async loadSstTransactions() {
       this.sstTransactions = await this.$store.dispatch('meta/fetchInvoiceSstTransactions', this.invoice._id)
 
-      /*      this.sstTransactions = [
-              {
-                "transactionHash": "444444444444",
-                "amount": 50,
-                "user_id": "2d3123r12w31",
-                "level": 1
-              },
-              {
-                "transactionHash": "444444444444",
-                "amount": 50,
-                "user_id": "2d3123r12w31",
-                "level": 1
-              }
-            ]*/
+/*      this.sstTransactions = [
+        {
+          "transactionHash": "444444444444",
+          "amount": 50,
+          "user_id": "2d3123r12w31",
+          "level": 1
+        },
+        {
+          "transactionHash": "444444444444",
+          "amount": 50,
+          "user_id": "2d3123r12w31",
+          "level": 1
+        }
+      ]*/
 
       this.sstTableShow = true
     }
@@ -91,7 +91,7 @@ export default {
   async asyncData({store, route}) {
     const invoice = await store.dispatch('invoices/fetchAdminSingleInvoice', route.params.id)
 
-    if ('btc_txs' && 'eth_txs' in invoice) {
+    if('btc_txs' && 'eth_txs' in invoice) {
       delete invoice['btc_txs']
       delete invoice['eth_txs']
     }
@@ -107,7 +107,6 @@ export default {
 .sst-table
   border-top: 1px solid #eeeeee
   border-left: 1px solid #eeeeee
-
 .sst-table-cell
   border-bottom: 1px solid #eeeeee
   border-right: 1px solid #eeeeee
@@ -120,11 +119,9 @@ export default {
   margin-left: -10px
   margin-right: -10px
   padding: 10px
-
   &__label
     width: 300px
     font-weight: 600
-
   &:nth-child(even)
     background-color: #FCFCFC
 </style>

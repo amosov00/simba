@@ -1,6 +1,6 @@
 from fastapi.exceptions import HTTPException
-from starlette.authentication import UnauthenticatedUser
 from starlette.requests import Request
+from starlette.authentication import UnauthenticatedUser
 
 __all__ = ["get_db", "get_user", "user_is_superuser"]
 

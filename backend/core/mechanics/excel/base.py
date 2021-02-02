@@ -1,9 +1,9 @@
 import abc
+import ujson
 from datetime import datetime
 from io import BytesIO
 from typing import Iterable
 
-import ujson
 import xlsxwriter
 from bson import Decimal128
 

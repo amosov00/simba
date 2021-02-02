@@ -1,3 +1,3 @@
-from .finish_overdue_invoices import finish_overdue_invoices_job
 from .rescue_stucked_invoices import rescue_stucked_invoices_job
 from .send_btc_to_proceeding_invoices import send_btc_to_proceeding_invoices_job
+from .finish_overdue_invoices import finish_overdue_invoices_job

@@ -163,11 +163,7 @@ export default context => {
       your_ref_code: "Ваш партнерский код",
       your_reward_address: 'Ваш ETH адрес для вознаграждений',
       refs_empty: "У вас еще нет приглашенных пользователей",
-      how_to_get_code: {
-        p1: "Чтобы принять участие в партнерской программе, ",
-        p2: "добавьте",
-        p3: "Ethereum адрес"
-      },
+      how_to_get_code: {p1: "Чтобы принять участие в партнерской программе, ", p2: "добавьте", p3:"Ethereum адрес"},
     },
     password: {
       current: "Текущий пароль",
@@ -191,7 +187,7 @@ export default context => {
       transaction_failed: 'Ошибка: транзацкия не удалась',
       transaction_success: 'Транзакция проведена успешно!',
       pin_code: 'Пин-код',
-      add_new_wallet: {p1: 'Добавить новый', p2: 'кошелек'},
+      add_new_wallet: { p1: 'Добавить новый', p2:'кошелек'},
       address_deleted: 'Адрес успешно удален!',
       address_added: 'Адрес успешно добавлен!',
       address_failed_with_pin: 'Ошибка при добавлении адреса, убедитесь что адрес и пин-код введены верно!',
@@ -346,10 +342,7 @@ export default context => {
       users: 'Пользователи'
     },
     su_payouts_mm: {
-      manage_payouts: {
-        full: 'Управление выплатами',
-        short: 'Управл. выплатами'
-      },
+      manage_payouts: { full: 'Управление выплатами', short: 'Управл. выплатами' },
       date: "Дата",
       transactions: "Транзакции",
       payout: "Выплата",
@@ -368,7 +361,7 @@ export default context => {
     }
   };
 
-  return new Promise(function (resolve) {
+  return new Promise(function(resolve) {
     resolve(locale);
   });
 };
