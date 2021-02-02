@@ -1,11 +1,13 @@
 export default {
-  mode: 'spa',
+  ssr: false,
+  target: 'server',
+
   head: {
     title: 'Simba — Swiss Quality Stablecoin',
     meta: [
       {charset: 'utf-8'},
       {name: 'viewport', content: 'width=device-width, initial-scale=1'},
-      {hid: 'description', name: 'description', content: ''}
+      {hid: 'description', name: 'description', content: 'Simba Storage'}
     ],
     link: [
       {rel: "icon", type: "image/x-icon", href: "/favicon.ico"},
@@ -65,6 +67,9 @@ export default {
     config: {
       environment: process.env.NODE_ENV,
     },
+  },
+  publicRuntimeConfig: {
+    domain: process.env.DOMAIN || "my.simba.storage",
   },
   i18n: {
     strategy: 'no_prefix',
