@@ -1,9 +1,9 @@
 export default {
   methods: {
     truncateHash(hash, fromStart = 6, fromEnd = 12) {
-      if(!hash) {
+      if (!hash) {
         return ''
-      } else if(typeof hash !== 'string') {
+      } else if (typeof hash !== 'string') {
         return ''
       }
 
@@ -20,8 +20,8 @@ export default {
       let eth_start_link;
       let btc_start_link;
 
-      if(isProd) { // Prod
-        if(hashType === 'tx') { // Transaction
+      if (isProd) { // Prod
+        if (hashType === 'tx') { // Transaction
           eth_start_link = 'https://etherscan.io/tx/'
           btc_start_link = 'https://www.blockchain.com/btc/tx/'
         } else { // Address
@@ -29,7 +29,7 @@ export default {
           btc_start_link = 'https://www.blockchain.com/btc/address/'
         }
       } else { // Dev
-        if(hashType === 'tx') { // Transaction
+        if (hashType === 'tx') { // Transaction
           eth_start_link = 'https://rinkeby.etherscan.io/tx/'
           btc_start_link = 'https://www.blockchain.com/btc-testnet/tx/'
         } else { // Address
@@ -38,9 +38,9 @@ export default {
         }
       }
 
-      if(currency === 'eth') {
+      if (currency === 'eth') {
         return eth_start_link + hash
-      } else if (currency === 'btc'){
+      } else if (currency === 'btc') {
         return btc_start_link + hash
       } else {
         return '#errhash'

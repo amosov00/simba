@@ -27,21 +27,25 @@
             div(v-else-if="key === 'btc_amount_proceeded' || key === 'btc_amount'") {{ btcFormat(el) }}
             a(v-else-if="key === 'target_eth_address'" :href="getBlockchainLink(el, 'address', 'eth')" target="_blank" rel="noreferrer noopener") {{ el }}
             a(v-else-if="key === 'target_btc_address'" :href="getBlockchainLink(el, 'address', 'btc')" target="_blank" rel="noreferrer noopener") {{ el }}
-            n-link(v-else-if="key === 'user_id'" :to="`/users/${el}`") {{ el }}
+            n-link(v-else-if="key === 'user_id'" :to="`/admin/users/${el}`") {{ el }}
             div(v-else) {{ el }}
     div.is-flex.invoice-field
       div.invoice-field__label {{ $t(`su_invoices.sst_tx_detailed`) }}:
       div.flex-1
         div(@click="loadSstTransactions" v-if="!sstTableShow").link {{ $t(`su_invoices.sst_tx_table.show`) }}
         div(v-else @click="sstTableShow = false").link {{ $t(`su_invoices.sst_tx_table.hide`) }}
-        div(v-if="sstTableShow && sstTransactions.length <= 0").mt-2 {{ $t(`su_invoices.empty`) }}
-        div(v-if="sstTableShow && sstTransactions.length > 0").sst-table.mt-2
-          div(v-for="(el, i) in sstTransactions" :key="i")
-            div(v-if="i === 0")
-              div.is-flex
-                div.sst-table-cell.flex-1.has-text-weight-bold(v-for="(_, key) in sstTransactions[0]" :key="key") {{ $t(`su_invoices.sst_tx_table.${key}`) }}
-            div.is-flex
-              div(v-for="(val, key) in el" :key="key").sst-table-cell.flex-1 {{ val }}
+        div(v-if="sstTableShow && sstTransactions.length === 0").mt-2 {{ $t(`su_invoices.empty`) }}
+        div(v-if="sstTableShow && sstTransactions.length > 0").mt-2
+          b-table(:data="sstTransactions" hoverable)
+            template(slot-scope="props")
+              b-table-column(field="user_id" label="ID" sortable)
+                n-link(:to="`/admin/users/${props.row.user_id}`") {{ props.row.user_id }}
+              b-table-column(field="transactionHash" label="Tx Hash" sortable)
+                b-tooltip(:label="props.row.transactionHash")
+                    a(:href="getBlockchainLink(props.row.transactionHash, 'tx', 'eth')" target="blank" rel="noopener noreferrer") {{ truncateHash(props.row.transactionHash) }}
+              b-table-column(field="level" label="Level" sortable) {{ props.row.level }}
+              b-table-column(field="amount" label="Amount" sortable) {{ sstFormat(props.row.amount) }}
+
 </template>
 
 <script>

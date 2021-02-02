@@ -56,159 +56,152 @@ import ModalBitcore from "~/components/ModalBitcore";
 import invoiceMixins from "~/mixins/invoiceMixins";
 
 export default {
-    layout: "main",
-    middleware: ["adminRequired"],
-    mixins: [formatDate, formatCurrency, invoiceMixins],
-    components: {ModalBitcore},
+  layout: "main",
+  middleware: ["adminRequired"],
+  mixins: [formatDate, formatCurrency, invoiceMixins],
+  components: {ModalBitcore},
 
-    data: () => ({
-      modalBitcore: false,
-      onlyWithProcessingStatus: false,
-      invoices: [],
-      invoicesToView: [],
-      isLoading: false,
-    }),
+  data: () => ({
+    modalBitcore: false,
+    onlyWithProcessingStatus: false,
+    invoices: [],
+    invoicesToView: [],
+    isLoading: false,
+  }),
 
-    async fetch() {
-      this.isLoading = true
+  async fetch() {
+    this.isLoading = true
 
-      this.invoices = await this.$store.dispatch('invoices/fetchAdminInvoices')
+    this.invoices = await this.$store.dispatch('invoices/fetchAdminInvoices')
 
-      this.invoicesToView = this.invoices.filter(inv => inv.invoice_type === 2)
+    this.invoicesToView = this.invoices.filter(inv => inv.invoice_type === 2)
 
-      if(this.onlyWithProcessingStatus) {
-        this.invoicesToView = this.invoicesToView.filter(inv => inv.status === 'processing')
-      }
-
-      this.isLoading = false
-    },
-
-    computed: {
-      meta() {
-        return this.$store.getters['meta/meta']
-      },
-      manualPayout() {
-        return this.$store.getters['meta/meta'].find(el => {
-          return el.slug === 'manual_payout'
-        })?.payload?.is_active
-      }
-    },
-
-    methods: {
-      showModalBitcore(invoice) {
-        this.$buefy.modal.open({
-          parent: this,
-          component: ModalBitcore,
-          trapFocus: true,
-          props: { invoice: invoice }
-        });
-      },
-
-      makeDecision(type, id, targetWallet, amount) {
-
-        let message = `<div>ID: <strong>${id}</strong></div>` +
-          `<div class="mt-1">Target address: <strong>${targetWallet}</strong></div>` +
-          `<div class="mt-1">Amount: <strong>${amount}</strong></div>`;
-
-        if(type === 'cancel') {
-          message = `<div class="mb-3">${this.$i18n.t('su_payouts_mm.confirm_cancel_msg')}</div>` + message
-
-        } else if (type === 'pay') {
-          message = `<div class="mb-3">${this.$i18n.t('su_payouts_mm.confirm_pay_msg')}</div>` + message
-        }
-
-        this.$buefy.dialog.confirm({
-          title: this.$i18n.t('xpub.confirm_your_action'),
-          message,
-          cancelText: this.$i18n.t('other.cancel'),
-          confirmText: this.$i18n.t('other.confirm'),
-          type: type === 'cancel' ? 'is-danger' : 'is-success',
-          onConfirm: async () => {
-            this.isLoading = true
-
-            if(await this.$store.dispatch('meta/invoiceDecision', { type, id })) {
-              this.$buefy.toast.open({message: 'Success', type:'is-primary'})
-              this.$fetch()
-            } else {
-              this.$buefy.toast.open({message: 'Something went wrong', type:'is-danger'})
-            }
-
-
-            this.isLoading = false
-          }
-        })
-
-      },
-
-      showProcessingOnly() {
-        if(this.onlyWithProcessingStatus) {
-          this.invoicesToView = this.invoices.filter(inv => inv.status === 'processing')
-        } else {
-          this.invoicesToView = this.invoicesToView = this.invoices
-        }
-      },
-
-      truncateHash(hash, fromStart = 6, fromEnd = 12) {
-
-        if(!hash) {
-          return ''
-        } else if(typeof hash !== 'string') {
-          return ''
-        }
-
-        return `${hash.substring(0, fromStart)}...${hash.substring(hash.length - fromEnd)}`
-      },
-
-      changeManualPayoutStatus() {
-        this.$buefy.dialog.confirm({
-          title: this.$i18n.t('xpub.confirm_your_action'),
-          message: this.$i18n.t('xpub.confirm_change_status'),
-          cancelText: this.$i18n.t('other.cancel'),
-          confirmText: this.$i18n.t('other.confirm'),
-          type: this.manualPayout ? 'is-danger' : 'is-primary',
-          onConfirm: async () => {
-            let data = {
-              is_active: !this.manualPayout
-            }
-
-            if(await this.$store.dispatch('meta/updateMeta', { data, slug: 'manual_payout'})) {
-              await this.$store.dispatch('meta/fetchMeta')
-              this.$buefy.toast.open({message: 'Status successfully changed!', type: 'is-primary'})
-            } else {
-              this.$buefy.toast.open({message: 'Error changing status', type: 'is-danger'})
-            }
-          }
-
-        })
-      }
-    },
-
-    async asyncData({store}) {
-      await store.dispatch('meta/fetchMeta')
+    if (this.onlyWithProcessingStatus) {
+      this.invoicesToView = this.invoicesToView.filter(inv => inv.status === 'processing')
     }
-  };
+
+    this.isLoading = false
+  },
+
+  computed: {
+    meta() {
+      return this.$store.getters['meta/meta']
+    },
+    manualPayout() {
+      return this.$store.getters['meta/meta'].find(el => {
+        return el.slug === 'manual_payout'
+      })?.payload?.is_active
+    }
+  },
+
+  methods: {
+    showModalBitcore(invoice) {
+      this.$buefy.modal.open({
+        parent: this,
+        component: ModalBitcore,
+        trapFocus: true,
+        props: {invoice: invoice}
+      });
+    },
+
+    makeDecision(type, id, targetWallet, amount) {
+
+      let message = `<div>ID: <strong>${id}</strong></div>` +
+        `<div class="mt-1">Target address: <strong>${targetWallet}</strong></div>` +
+        `<div class="mt-1">Amount: <strong>${amount}</strong></div>`;
+
+      if (type === 'cancel') {
+        message = `<div class="mb-3">${this.$i18n.t('su_payouts_mm.confirm_cancel_msg')}</div>` + message
+
+      } else if (type === 'pay') {
+        message = `<div class="mb-3">${this.$i18n.t('su_payouts_mm.confirm_pay_msg')}</div>` + message
+      }
+
+      this.$buefy.dialog.confirm({
+        title: this.$i18n.t('xpub.confirm_your_action'),
+        message,
+        cancelText: this.$i18n.t('other.cancel'),
+        confirmText: this.$i18n.t('other.confirm'),
+        type: type === 'cancel' ? 'is-danger' : 'is-success',
+        onConfirm: async () => {
+          this.isLoading = true
+
+          if (await this.$store.dispatch('meta/invoiceDecision', {type, id})) {
+            this.$buefy.toast.open({message: 'Success', type: 'is-primary'})
+            this.$fetch()
+          } else {
+            this.$buefy.toast.open({message: 'Something went wrong', type: 'is-danger'})
+          }
+
+
+          this.isLoading = false
+        }
+      })
+
+    },
+
+    showProcessingOnly() {
+      if (this.onlyWithProcessingStatus) {
+        this.invoicesToView = this.invoices.filter(inv => inv.status === 'processing')
+      } else {
+        this.invoicesToView = this.invoicesToView = this.invoices
+      }
+    },
+
+    changeManualPayoutStatus() {
+      this.$buefy.dialog.confirm({
+        title: this.$i18n.t('xpub.confirm_your_action'),
+        message: this.$i18n.t('xpub.confirm_change_status'),
+        cancelText: this.$i18n.t('other.cancel'),
+        confirmText: this.$i18n.t('other.confirm'),
+        type: this.manualPayout ? 'is-danger' : 'is-primary',
+        onConfirm: async () => {
+          let data = {
+            is_active: !this.manualPayout
+          }
+
+          if (await this.$store.dispatch('meta/updateMeta', {data, slug: 'manual_payout'})) {
+            await this.$store.dispatch('meta/fetchMeta')
+            this.$buefy.toast.open({message: 'Status successfully changed!', type: 'is-primary'})
+          } else {
+            this.$buefy.toast.open({message: 'Error changing status', type: 'is-danger'})
+          }
+        }
+
+      })
+    }
+  },
+
+  async asyncData({store}) {
+    await store.dispatch('meta/fetchMeta')
+  }
+};
 </script>
 
 <style lang="sass" scoped>
-  .manual-btn
-    border: 0
-    background: #0ACA62
-    color: #ffffff
-    padding-top: 4px
-    padding-bottom: 4px
-    border-radius: 3px
-    margin-right: 4px
-    margin-bottom: 4px
-    width: 70px
-    text-align: center
-    font-size: 12px
-    &:hover:not(:disabled)
-      cursor: pointer
-      opacity: 0.9
-    &:last-child
-      margin-right: 0
-    &--red
-      background: #DC6161
-    &:disabled
-      background: #c1c1c1
+.manual-btn
+  border: 0
+  background: #0ACA62
+  color: #ffffff
+  padding-top: 4px
+  padding-bottom: 4px
+  border-radius: 3px
+  margin-right: 4px
+  margin-bottom: 4px
+  width: 70px
+  text-align: center
+  font-size: 12px
+
+  &:hover:not(:disabled)
+    cursor: pointer
+    opacity: 0.9
+
+  &:last-child
+    margin-right: 0
+
+  &--red
+    background: #DC6161
+
+  &:disabled
+    background: #c1c1c1
 </style>
