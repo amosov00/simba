@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from core.integrations.ethereum import EventsContractWrapper
 from config import SIMBA_CONTRACT
+from core.integrations.ethereum import EventsContractWrapper
 
 __all__ = ["router"]
 

@@ -43,7 +43,7 @@ export default {
   name: "exchange-transfer",
   layout: "main",
   middleware: ["contract", "metamask"],
-  components: { WalletTable, AddNewWallet },
+  components: {WalletTable, AddNewWallet},
   data: () => {
     return {
       transferData: {
@@ -63,7 +63,7 @@ export default {
         parent: this,
         component: AddNewWallet,
         trapFocus: true,
-        props: { type: 'eth' }
+        props: {type: 'eth'}
       });
     }
   },
@@ -73,7 +73,7 @@ export default {
       .get("https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USDT")
       .then(res => res.data.USDT);
 
-    return { btc_to_usdt }
+    return {btc_to_usdt}
   },
 
   computed: {
@@ -104,6 +104,7 @@ export default {
   display: flex
   align-items: center
   margin-bottom: 20px
+
   &__label
     text-align: right
     width: 16%
@@ -111,17 +112,19 @@ export default {
     font-size: 14px
     line-height: 100%
     color: #8C8C8C
+
   &__body
     width: 384px
+
   &__action
     width: 71px
     font-size: 12px
     margin-left: 10px
 
 
-
 .wallet-content
   width: 100%
+
   &__fee
     font-weight: 300
     font-size: 12px

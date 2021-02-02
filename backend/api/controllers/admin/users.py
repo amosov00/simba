@@ -2,6 +2,7 @@ from typing import List, Optional, Literal
 
 from fastapi import APIRouter, Query, Body, Path, responses
 
+from core.mechanics import UsersToExcel
 from core.mechanics.referrals import ReferralMechanics
 from core.utils import to_objectid
 from database.crud import UserCRUD, UserAddressesArchiveCRUD
@@ -12,7 +13,6 @@ from schemas import (
     UserAddressesArchive,
     USER_MODEL_INCLUDE_FIELDS,
 )
-from core.mechanics import UsersToExcel
 
 __all__ = ["users_router"]
 

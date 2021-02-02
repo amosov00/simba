@@ -57,7 +57,6 @@ class PersonVerifyClient:
 
     @classmethod
     async def get_access_token(cls, applicant_id: str) -> str:
-
         # TODO: fix this in future - replace with async aiohttp or httpx
         with ProcessPoolExecutor(max_workers=1) as pool:
             future = pool.submit(cls._get_access_token, applicant_id)
