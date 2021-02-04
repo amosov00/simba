@@ -26,16 +26,19 @@ export default ({app, redirect, route, $config}, inject) => {
     app.$cookies.remove('token', {
       domain: $config.domain,
     });
-    redirect('/');
+    if (route.path !== "/") {
+      redirect('/');
+    }
   });
   inject('authFetchUser', async () => {
     return app.$axios.get('/account/user/',)
-      .then(resp => {
-        let {status, data} = resp;
-        if (status === 200) {
+      .then(response => {
+        if (response && response.status === 200) {
           app.store.commit('setUser', data)
         } else {
-          redirect('/');
+          if (route.path !== "/") {
+            redirect('/');
+          }
         }
       }).catch(err => {
         console.error(err)

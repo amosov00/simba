@@ -25,15 +25,15 @@
                   span.validaton-error {{ errors[0] }}
             div.form-row
               b-field.form-row__item
-                ValidationProvider(rules="required|min:8|confirmed:confirmation" vid="confirmation" v-slot="{ errors }" :name="$i18n.t('auth.password').toLocaleLowerCase()")
+                ValidationProvider(rules="required|min:8|confirmed:repeat_password" vid="confirmation" v-slot="{ errors }" :name="$i18n.t('auth.password').toLocaleLowerCase()")
                   b-input(type="password" size="is-small" :placeholder="$i18n.t('auth.password').toLocaleLowerCase()" v-model="register_form.password")
                   span.validaton-error {{ errors[0] }}
               b-field.form-row__item
-                ValidationProvider(rules="required|min:8" v-slot="{ errors }" :name="$i18n.t('auth.repeat_password').toLocaleLowerCase()")
+                ValidationProvider(rules="required|min:8" vid="repeat_password" v-slot="{ errors }" :name="$i18n.t('auth.repeat_password').toLocaleLowerCase()")
                   b-input(type="password" size="is-small" :placeholder="$i18n.t('auth.repeat_password').toLocaleLowerCase()" v-model="register_form.repeat_password")
                   span.validaton-error {{ errors[0] }}
             b-field
-              ValidationProvider(rules="required" vid="confirmation" v-slot="{ errors }" :name="$i18n.t('auth.partner_id').toLocaleLowerCase()")
+              ValidationProvider(rules="required" v-slot="{ errors }" :name="$i18n.t('auth.partner_id').toLocaleLowerCase()")
                 b-input(native-type="text" size="is-small" :placeholder="$i18n.t('auth.partner_id').toLocaleLowerCase()" v-model="register_form.referral_id")
                 span.validaton-error {{ errors[0] }}
             b-field.terms
