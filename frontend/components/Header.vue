@@ -42,16 +42,6 @@ export default {
     ...mapGetters(['user']),
     ...mapGetters('contract', ['simbaBalance']),
   },
-  // methods: {
-  //   ...mapActions({
-  //     fetchSimbaBalance: "contract/fetchSimbaBalance",
-  //   }),
-  // },
-  // async created() {
-  //   if (this.user && this.simbaBalance === 0 ) {
-  //     await this.fetchSimbaBalance()
-  //   }
-  // }
 }
 </script>
 

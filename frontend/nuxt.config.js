@@ -23,7 +23,10 @@ export default {
     ],
   },
 
-  loading: { color: '#0495FB' },
+  loadingIndicator: {
+    name: 'pulse',
+    color: '#e0b72e',
+  },
 
   css: [
     { src: '~/assets/scss/main.sass', lang: 'sass' },

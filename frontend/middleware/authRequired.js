@@ -1,7 +1,5 @@
-export default async function ({ store, redirect, app }) {
-  let user = store.state.user
-
-  if (!user) {
-    redirect('/')
+export default async function ({ store, redirect }) {
+  if (!store.getters.user) {
+    await redirect('/')
   }
 }

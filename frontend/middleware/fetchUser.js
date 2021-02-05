@@ -1,5 +1,5 @@
 export default async function ({ app, store }) {
-  if (app.$cookies.get('token') && !store.getters.user) {
+  if (!store.getters.user && app.$cookies.get('token')) {
     await app.$authFetchUser()
   }
 }
