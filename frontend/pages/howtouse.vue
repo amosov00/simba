@@ -5,23 +5,20 @@
 </template>
 
 <script>
-  import Nothing from "~/components/Nothing";
+import Nothing from '~/components/Nothing'
 
-  export default {
-    name: "howtouse",
-    layout: "main",
-    components: {Nothing},
-    data() {
-      return {
-      };
-    },
-    methods: {
-    },
-    mounted() {
-      console.log(process.env.NODE_ENV)
-    }
-  };
+export default {
+  name: 'howtouse',
+  layout: 'main',
+  components: { Nothing },
+  data() {
+    return {}
+  },
+  methods: {},
+  mounted() {
+    console.log(process.env.NODE_ENV)
+  },
+}
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>

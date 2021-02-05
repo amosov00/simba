@@ -1,5 +1,5 @@
-export default function() {
+export default function () {
   if (window.ethereum !== undefined) {
-    window.ethereum.enable();
+    window.ethereum.enable()
   }
 }

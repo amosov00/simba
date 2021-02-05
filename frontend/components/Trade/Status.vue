@@ -23,119 +23,115 @@
 </template>
 
 <script>
-  export default {
-    name: 'trade-status',
-    data: () => ({
-      interval: null,
-      confirms_loading: false,
-      tx_hash: '',
-      received_payment_amount: 0,
-      min_confirms: 3,
-      currentConfirms: 0
-    }),
+export default {
+  name: 'trade-status',
+  data: () => ({
+    interval: null,
+    confirms_loading: false,
+    tx_hash: '',
+    received_payment_amount: 0,
+    min_confirms: 3,
+    currentConfirms: 0,
+  }),
 
-    computed: {
-      tradeData() {
-        return this.$store.getters['exchange/tradeData']
-      },
-      isBuy() {
-        return this.$store.getters['exchange/tradeData']['operation'] === 1
-      },
+  computed: {
+    tradeData() {
+      return this.$store.getters['exchange/tradeData']
     },
+    isBuy() {
+      return this.$store.getters['exchange/tradeData']['operation'] === 1
+    },
+  },
 
-    async created() {
-      //this.min_confirms = process.env.NODE_ENV === 'production' ? 3 : 1
+  async created() {
+    //this.min_confirms = process.env.NODE_ENV === 'production' ? 3 : 1
 
-      // this.min_confirms = process.env.NODE_ENV === 'develop' || 'development' ? 1 : 3
+    // this.min_confirms = process.env.NODE_ENV === 'develop' || 'development' ? 1 : 3
 
-      let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id);
+    let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id)
 
+    if (this.isBuy) {
+      const btc_addr = res.target_btc_address
 
-      if(this.isBuy) {
+      let found = res.btc_txs[0].outputs.find((el) => {
+        return el.addresses.indexOf(btc_addr) !== -1
+      })
 
-        const btc_addr = res.target_btc_address
+      this.received_payment_amount = found.value
 
-        let found = res.btc_txs[0].outputs.find(el => {
-          return el.addresses.indexOf(btc_addr) !== -1
-        })
+      if (res.btc_txs.length > 0) {
+        this.setCurrentConfirms(res.btc_txs[0].confirmations)
+        //this.tx_hash = res.eth_tx_hashes[0] || ''
+        this.tx_hash = res.btc_txs[0].hash
+      }
+    } else {
+      this.received_payment_amount = res.btc_amount_proceeded
 
-        this.received_payment_amount = found.value
+      if (res.eth_txs.length > 0) {
+        this.setCurrentConfirms(res.btc_txs[0].confirmations)
+        this.tx_hash = res.btc_txs[0].hash || ''
+      }
+    }
+  },
 
-        if(res.btc_txs.length > 0) {
-          this.setCurrentConfirms(res.btc_txs[0].confirmations)
-          //this.tx_hash = res.eth_tx_hashes[0] || ''
-          this.tx_hash = res.btc_txs[0].hash
+  beforeDestroy() {
+    clearInterval(this.interval)
+    this.interval = null
+  },
+
+  mounted() {
+    this.interval = setInterval(async () => {
+      this.loadingSpinner()
+      let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id)
+
+      if (this.isBuy) {
+        this.setCurrentConfirms(res.btc_txs[0].confirmations)
+        if (res.btc_txs[0].confirmations >= this.min_confirms && res.status === 'completed') {
+          this.$store.commit('exchange/setTradeData', { prop: 'simba_issued', value: res.btc_amount_proceeded })
+          this.$store.commit('exchange/setTradeData', { prop: 'target_eth', value: res.target_eth_address })
+          this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: res.eth_tx_hashes[0] || '' })
+
+          clearInterval(this.interval)
+          this.$parent.$emit('nextStep')
         }
       } else {
-        this.received_payment_amount = res.btc_amount_proceeded
+        this.setCurrentConfirms(res.btc_txs[0].confirmations)
+        if (res.btc_txs[0].confirmations >= this.min_confirms && res.status === 'completed') {
+          this.$store.commit('exchange/setTradeData', { prop: 'simba_issued', value: res.btc_amount_proceeded })
+          this.$store.commit('exchange/setTradeData', { prop: 'btc_redeem_wallet', value: res.target_btc_address })
+          this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: res.btc_txs[0].hash })
+          this.$store.commit('exchange/setTradeData', { prop: 'tx_hash_redeem', value: res.eth_txs[0].transactionHash })
 
-        if(res.eth_txs.length > 0) {
-          this.setCurrentConfirms(res.btc_txs[0].confirmations)
-          this.tx_hash = res.btc_txs[0].hash || ''
+          clearInterval(this.interval)
+          this.$parent.$emit('nextStep')
         }
       }
+    }, 10000)
+  },
+
+  methods: {
+    setCurrentConfirms(transfer_confirms) {
+      this.currentConfirms = transfer_confirms > this.min_confirms ? this.min_confirms : transfer_confirms
     },
 
-    beforeDestroy() {
-      clearInterval(this.interval)
-      this.interval = null
+    loadingSpinner() {
+      this.confirms_loading = true
+      setTimeout(() => {
+        this.confirms_loading = false
+      }, 1000)
     },
 
-    mounted() {
-      this.interval = setInterval(async () => {
-        this.loadingSpinner()
-        let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id)
+    convert(simba) {
+      let test = (simba / 100000000).toFixed(8)
 
-        if(this.isBuy) {
-          this.setCurrentConfirms(res.btc_txs[0].confirmations)
-          if(res.btc_txs[0].confirmations >= this.min_confirms && res.status === 'completed') {
-            this.$store.commit('exchange/setTradeData', { prop: 'simba_issued', value: res.btc_amount_proceeded})
-            this.$store.commit('exchange/setTradeData', { prop: 'target_eth', value: res.target_eth_address})
-            this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: res.eth_tx_hashes[0] || ''})
+      if (isNaN(test)) {
+        return 0
+      }
 
-            clearInterval(this.interval)
-            this.$parent.$emit('nextStep')
-          }
-        } else {
-          this.setCurrentConfirms(res.btc_txs[0].confirmations)
-          if(res.btc_txs[0].confirmations >= this.min_confirms && res.status === 'completed') {
-            this.$store.commit('exchange/setTradeData', { prop: 'simba_issued', value: res.btc_amount_proceeded})
-            this.$store.commit('exchange/setTradeData', { prop: 'btc_redeem_wallet', value: res.target_btc_address})
-            this.$store.commit('exchange/setTradeData', { prop: 'tx_hash', value: res.btc_txs[0].hash })
-            this.$store.commit('exchange/setTradeData', { prop: 'tx_hash_redeem', value: res.eth_txs[0].transactionHash })
-
-            clearInterval(this.interval)
-            this.$parent.$emit('nextStep')
-          }
-        }
-      }, 10000)
+      return test
     },
-
-    methods: {
-      setCurrentConfirms(transfer_confirms) {
-        this.currentConfirms = transfer_confirms > this.min_confirms ? this.min_confirms : transfer_confirms
-      },
-
-      loadingSpinner() {
-        this.confirms_loading = true
-        setTimeout(() => {
-          this.confirms_loading = false
-        }, 1000)
-      },
-
-      convert(simba) {
-
-        let test = (simba/100000000).toFixed(8);
-
-        if(isNaN(test)) {
-          return 0
-        }
-
-        return test
-      },
-    }
-  }
+  },
+}
 </script>
 
-<style lang="sass">
-</style>
+<style lang="sass"></style>

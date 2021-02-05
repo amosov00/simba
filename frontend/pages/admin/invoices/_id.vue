@@ -49,27 +49,27 @@
 </template>
 
 <script>
-import formatDate from "~/mixins/formatDate";
-import formatCurrency from "~/mixins/formatCurrency";
+import formatDate from '~/mixins/formatDate'
+import formatCurrency from '~/mixins/formatCurrency'
 
-import invoiceMixins from "~/mixins/invoiceMixins";
+import invoiceMixins from '~/mixins/invoiceMixins'
 
 export default {
-  name: "invoicesById",
-  layout: "main",
-  middleware: ["adminRequired"],
+  name: 'invoicesById',
+  layout: 'main',
+  middleware: ['adminRequired'],
   mixins: [formatDate, formatCurrency, invoiceMixins],
 
   data: () => ({
     sstTransactions: [],
-    sstTableShow: false
+    sstTableShow: false,
   }),
 
   methods: {
     async loadSstTransactions() {
       this.sstTransactions = await this.$store.dispatch('meta/fetchInvoiceSstTransactions', this.invoice._id)
 
-/*      this.sstTransactions = [
+      /*      this.sstTransactions = [
         {
           "transactionHash": "444444444444",
           "amount": 50,
@@ -85,22 +85,22 @@ export default {
       ]*/
 
       this.sstTableShow = true
-    }
+    },
   },
 
-  async asyncData({store, route}) {
+  async asyncData({ store, route }) {
     const invoice = await store.dispatch('invoices/fetchAdminSingleInvoice', route.params.id)
 
-    if('btc_txs' && 'eth_txs' in invoice) {
+    if ('btc_txs' && 'eth_txs' in invoice) {
       delete invoice['btc_txs']
       delete invoice['eth_txs']
     }
 
     return {
-      invoice
+      invoice,
     }
-  }
-};
+  },
+}
 </script>
 
 <style lang="sass" scoped>

@@ -12,27 +12,26 @@ export const state = () => ({
   tx_hash_redeem: '',
   simba_issued: 0,
   eth_txs: [],
-});
+})
 
 export const getters = {
-  tradeData: s => s,
-  ethTxByEvent: s => event => {
-    let filtered = s.eth_txs.filter(i => i.event === event)
+  tradeData: (s) => s,
+  ethTxByEvent: (s) => (event) => {
+    let filtered = s.eth_txs.filter((i) => i.event === event)
     return filtered.length > 0 ? filtered[0] : null
   },
-};
+}
 
 export const mutations = {
   setTradeData: (state, payload) => {
     state[payload.prop] = payload.value
   },
-};
+}
 
 export const actions = {
-  fetchAdminEthAddress({commit}) {
-    return this.$axios.get('/meta/eth/admin-address/')
-      .then(res => {
-        commit('setTradeData', {prop: 'admin_eth_address', value: res.data.address})
-      })
-  }
-};
+  fetchAdminEthAddress({ commit }) {
+    return this.$axios.get('/meta/eth/admin-address/').then((res) => {
+      commit('setTradeData', { prop: 'admin_eth_address', value: res.data.address })
+    })
+  },
+}

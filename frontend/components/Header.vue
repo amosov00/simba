@@ -19,28 +19,28 @@
 </template>
 
 <script>
-import {mapGetters} from "vuex";
-import ProfileDropdown from "~/components/ProfileDropdown";
-import HeaderBalance from "~/components/HeaderBalance";
-import formatCurrency from "../mixins/formatCurrency";
+import { mapGetters } from 'vuex'
+import ProfileDropdown from '~/components/ProfileDropdown'
+import HeaderBalance from '~/components/HeaderBalance'
+import formatCurrency from '../mixins/formatCurrency'
 
 export default {
-  name: "Header",
+  name: 'Header',
   mixins: [formatCurrency],
   components: {
     ProfileDropdown,
-    HeaderBalance
+    HeaderBalance,
   },
   data: () => ({
     menu: [
-      {title: "header_menu.exchange", to: "/exchange/"},
-      {title: "header_menu.about", to: "/about"},
-      {title: "header_menu.wallet", to: "/wallet"},
+      { title: 'header_menu.exchange', to: '/exchange/' },
+      { title: 'header_menu.about', to: '/about' },
+      { title: 'header_menu.wallet', to: '/wallet' },
     ],
   }),
   computed: {
-    ...mapGetters(["user"]),
-    ...mapGetters("contract", ["simbaBalance"]),
+    ...mapGetters(['user']),
+    ...mapGetters('contract', ['simbaBalance']),
   },
   // methods: {
   //   ...mapActions({
@@ -52,7 +52,7 @@ export default {
   //     await this.fetchSimbaBalance()
   //   }
   // }
-};
+}
 </script>
 
 <style lang="sass" scoped>

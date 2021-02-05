@@ -30,99 +30,99 @@
 </template>
 
 <script>
-  import AddNewWallet from "~/components/AddNewWallet";
+import AddNewWallet from '~/components/AddNewWallet'
 
-  export default {
-    name: 'trade-wallet-confirm',
-    data: () => ({
-      selectedOptions: '',
-      selectedOptions_eth: '',
-      errors: []
-    }),
+export default {
+  name: 'trade-wallet-confirm',
+  data: () => ({
+    selectedOptions: '',
+    selectedOptions_eth: '',
+    errors: [],
+  }),
 
-    components: { AddNewWallet },
+  components: { AddNewWallet },
 
-    computed: {
-      isBuy() {
-        return this.$store.getters['exchange/tradeData']['operation'] === 1;
-      },
-      user() {
-        return this.$store.getters['user'];
-      },
-
-      eth_address() {
-        return this.$store.getters['exchange/tradeData']['eth_address']
-      }
+  computed: {
+    isBuy() {
+      return this.$store.getters['exchange/tradeData']['operation'] === 1
+    },
+    user() {
+      return this.$store.getters['user']
     },
 
-    methods: {
-      addNewWalletModal(type) {
-        this.$buefy.modal.open({
-          parent: this,
-          component: AddNewWallet,
-          trapFocus: true,
-          props: { type }
-        });
-      },
+    eth_address() {
+      return this.$store.getters['exchange/tradeData']['eth_address']
+    },
+  },
 
-      saveAddress(data) {
-        this.$store.dispatch("addAddress", data).then(_ => {
+  methods: {
+    addNewWalletModal(type) {
+      this.$buefy.modal.open({
+        parent: this,
+        component: AddNewWallet,
+        trapFocus: true,
+        props: { type },
+      })
+    },
+
+    saveAddress(data) {
+      this.$store
+        .dispatch('addAddress', data)
+        .then((_) => {
           this.$parent.$emit('nextStep')
-        }).catch(_ => {
-          this.$buefy.toast.open({message: this.$i18n.t('wallet.failed_to_get_signature'), type: 'is-danger'})
         })
-      },
+        .catch((_) => {
+          this.$buefy.toast.open({ message: this.$i18n.t('wallet.failed_to_get_signature'), type: 'is-danger' })
+        })
+    },
 
-      next() {
-
-        if (this.isBuy) {
-
-          if(this.user.user_eth_addresses.length > 0) {
-            if(this.user.user_eth_addresses.find(el => el.address === this.eth_address) !== undefined) {
-              this.$parent.$emit('nextStep')
-              return
-            }
-          }
-
-          let data = {
-            type: 'eth',
-            address: this.eth_address,
-            created_at: Date.now(),
-          }
-
-          this.saveAddress(data)
-        } else {
-
-          this.errors = []
-
-          if(this.selectedOptions_eth.length < 1) {
-            this.errors.push('Please choose ETH wallet!')
+    next() {
+      if (this.isBuy) {
+        if (this.user.user_eth_addresses.length > 0) {
+          if (this.user.user_eth_addresses.find((el) => el.address === this.eth_address) !== undefined) {
+            this.$parent.$emit('nextStep')
             return
           }
-
-          if(this.selectedOptions.length < 1) {
-            this.errors.push(this.$i18n.t('exchange.choose_btc_wallet_error'))
-            return
-          }
-
-          this.$store.commit('exchange/setTradeData', { prop: 'btc_redeem_wallet', value: this.selectedOptions })
-          this.$parent.$emit('nextStep')
         }
+
+        let data = {
+          type: 'eth',
+          address: this.eth_address,
+          created_at: Date.now(),
+        }
+
+        this.saveAddress(data)
+      } else {
+        this.errors = []
+
+        if (this.selectedOptions_eth.length < 1) {
+          this.errors.push('Please choose ETH wallet!')
+          return
+        }
+
+        if (this.selectedOptions.length < 1) {
+          this.errors.push(this.$i18n.t('exchange.choose_btc_wallet_error'))
+          return
+        }
+
+        this.$store.commit('exchange/setTradeData', { prop: 'btc_redeem_wallet', value: this.selectedOptions })
+        this.$parent.$emit('nextStep')
       }
-    }
-  }
+    },
+  },
+}
 </script>
 
 <style lang="sass">
-  .wallet-select
-    width: 500px
-    .select
-      select
-        border: 1px solid rgba(0,0,0,0)
-        border-bottom: 1px solid #E5E5E5
-        &:focus
-          border: 1px solid #0060FF
-          box-shadow: none
-        &:hover
-          border-bottom: 1px solid #0060FF
+.wallet-select
+  width: 500px
+  .select
+    select
+      border: 1px solid rgba(0,0,0,0)
+      border-bottom: 1px solid #E5E5E5
+      &:focus
+        border: 1px solid #0060FF
+        box-shadow: none
+      &:hover
+        border-bottom: 1px solid #0060FF
 </style>

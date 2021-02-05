@@ -50,21 +50,21 @@
 </template>
 
 <script>
-import invoiceMixins from "~/mixins/invoiceMixins";
+import invoiceMixins from '~/mixins/invoiceMixins'
 
-import CopyToClipboard from "~/components/CopyToClipboard";
+import CopyToClipboard from '~/components/CopyToClipboard'
 
-import WalletTable from "~/components/WalletTable";
+import WalletTable from '~/components/WalletTable'
 
 import moment from 'moment'
 
-import {Decimal} from 'decimal.js';
+import { Decimal } from 'decimal.js'
 
 export default {
-  name: "profile-partner",
-  layout: "profile",
-  components: {CopyToClipboard, WalletTable},
-  middleware: ["contract", "metamask"],
+  name: 'profile-partner',
+  layout: 'profile',
+  components: { CopyToClipboard, WalletTable },
+  middleware: ['contract', 'metamask'],
   mixins: [invoiceMixins],
   computed: {
     rewardAddress() {
@@ -75,8 +75,8 @@ export default {
         return total.plus(el.amount)
       }, Decimal(0))
 
-      return Decimal.div(total, (10 ** 18)).toFixed(2);
-    }
+      return Decimal.div(total, 10 ** 18).toFixed(2)
+    },
   },
   data: () => ({
     ref_link: '',
@@ -87,18 +87,18 @@ export default {
   }),
   methods: {
     divNum(num) {
-      return (+num / 10 ** 18).toFixed(2);
+      return (+num / 10 ** 18).toFixed(2)
     },
 
     formatDate(date_str) {
-      return moment(String(date_str)).format(("DD/MM/YYYY, h:mm:ss"))
+      return moment(String(date_str)).format('DD/MM/YYYY, h:mm:ss')
     },
 
     setTextRefLink() {
       if (this.ref_link) {
         document.getElementById('text-ref-link').setAttribute('href', this.ref_link)
       }
-    }
+    },
   },
 
   created() {
@@ -106,16 +106,16 @@ export default {
   },
 
   mounted() {
-    this.setTextRefLink();
+    this.setTextRefLink()
   },
 
   updated() {
-    this.setTextRefLink();
+    this.setTextRefLink()
   },
 
-  async asyncData({store}) {
-    const {url, partner_code} = await store.dispatch('fetchRefLink');
-    const {referrals, transactions} = await store.dispatch('fetchReferrals');
+  async asyncData({ store }) {
+    const { url, partner_code } = await store.dispatch('fetchRefLink')
+    const { referrals, transactions } = await store.dispatch('fetchReferrals')
 
     return {
       can_invite: Boolean(store.getters.user.user_eth_addresses.length),
@@ -124,8 +124,8 @@ export default {
       referrals: referrals,
       transactions: transactions,
     }
-  }
-};
+  },
+}
 </script>
 
 <style lang="sass" scoped>
@@ -139,5 +139,4 @@ export default {
 .text-clamp
   overflow: hidden
   text-overflow: ellipsis
-
 </style>

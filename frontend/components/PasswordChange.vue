@@ -22,36 +22,35 @@
 </template>
 
 <script>
-  import { ValidationProvider, ValidationObserver } from 'vee-validate';
+import { ValidationProvider, ValidationObserver } from 'vee-validate'
 
-  export default {
-    name: 'PasswordChange',
-    components: { ValidationProvider, ValidationObserver },
-    data: () => ({
-      form: {
-        old_password: '',
-        password: '',
-        repeat_password: '',
-      },
-      isLoading: false
-    }),
+export default {
+  name: 'PasswordChange',
+  components: { ValidationProvider, ValidationObserver },
+  data: () => ({
+    form: {
+      old_password: '',
+      password: '',
+      repeat_password: '',
+    },
+    isLoading: false,
+  }),
 
-    methods: {
-      async onSubmit() {
-        this.isLoading = true;
-        const resp = await this.$store.dispatch('changePassword', this.form);
+  methods: {
+    async onSubmit() {
+      this.isLoading = true
+      const resp = await this.$store.dispatch('changePassword', this.form)
 
-        if(resp) {
-          this.$parent.close()
-          this.$buefy.toast.open({message: 'Succesfully changed!', type: 'is-primary'});
-        } else {
-          this.$buefy.toast.open({message: 'Error changing password!', type: 'is-danger'});
-        }
-        this.isLoading = false;
+      if (resp) {
+        this.$parent.close()
+        this.$buefy.toast.open({ message: 'Succesfully changed!', type: 'is-primary' })
+      } else {
+        this.$buefy.toast.open({ message: 'Error changing password!', type: 'is-danger' })
       }
-    }
-  }
+      this.isLoading = false
+    },
+  },
+}
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>

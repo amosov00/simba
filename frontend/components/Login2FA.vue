@@ -12,26 +12,25 @@ export default {
   data() {
     return {
       loading: false,
-      pin_code: ''
+      pin_code: '',
     }
   },
   computed: {
     loginData() {
       return this.$store.getters.loginDataBuffer
-    }
+    },
   },
   methods: {
     async confirm() {
-      let resp = await this.$authLogin(this.loginData.email, this.loginData.password, this.pin_code);
+      let resp = await this.$authLogin(this.loginData.email, this.loginData.password, this.pin_code)
 
-      if(resp !== true) {
-        if(resp.response.status >= 400) {
+      if (resp !== true) {
+        if (resp.response.status >= 400) {
           this.$buefy.toast.open({
-            message:
-              this.$i18n.t('auth.login_failed_pin'),
-            type: "is-danger",
-            duration: 3500
-          });
+            message: this.$i18n.t('auth.login_failed_pin'),
+            type: 'is-danger',
+            duration: 3500,
+          })
           this.pin_code = ''
 
           return
@@ -39,11 +38,9 @@ export default {
       }
 
       this.$parent.close()
-    }
+    },
   },
 }
 </script>
 
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>

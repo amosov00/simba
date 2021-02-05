@@ -21,7 +21,7 @@ indent_size = 2
 indent_size = 2
 insert_final_newline = false
 
-[*.yml]
+[*.{yml, yaml}]
 indent_size = 2
 
 [*.md]

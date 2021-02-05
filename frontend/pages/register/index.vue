@@ -48,69 +48,68 @@
 </template>
 
 <script>
-import {ValidationObserver, ValidationProvider} from "vee-validate";
+import { ValidationObserver, ValidationProvider } from 'vee-validate'
 
 export default {
-  name: "register",
-  layout: "main",
+  name: 'register',
+  layout: 'main',
   components: {
     ValidationProvider,
-    ValidationObserver
+    ValidationObserver,
   },
   data() {
     return {
       register_form: {
-        first_name: "",
-        last_name: "",
-        email: "",
-        repeat_password: "",
-        password: "",
-        referral_id: "",
-        telegram: ""
+        first_name: '',
+        last_name: '',
+        email: '',
+        repeat_password: '',
+        password: '',
+        referral_id: '',
+        telegram: '',
       },
       terms_and_conditions: null,
-      loading: false
-    };
+      loading: false,
+    }
   },
   created() {
     if (this.$route.query.referral_id) {
-      this.$cookies.set("referral_id", this.$route.query.referral_id);
+      this.$cookies.set('referral_id', this.$route.query.referral_id)
     }
-    this.register_form.referral_id =
-      this.$route.query.referral_id || this.$cookies.get("referral_id");
+    this.register_form.referral_id = this.$route.query.referral_id || this.$cookies.get('referral_id')
   },
   methods: {
     async submit() {
-      this.loading = true;
-      let resp = await this.$store.dispatch("signUp", this.register_form);
+      this.loading = true
+      let resp = await this.$store.dispatch('signUp', this.register_form)
       if (resp) {
-        await this.$router.replace({ path: "/" });
+        await this.$router.replace({ path: '/' })
       }
-      this.loading = false;
-    }
-  }
-};
+      this.loading = false
+    },
+  },
+}
 </script>
 
 <style lang="sass" scoped>
-  .field
+.field
+  margin-bottom: 0
+.field:not(:last-child)
+  margin-bottom: 0
+.terms
+  padding-left: 20px
+  padding-top: 20px
+.form-row
+  display: flex
+  margin-bottom: 5px
+  &:last-child
     margin-bottom: 0
-  .field:not(:last-child)
-    margin-bottom: 0
-  .terms
-    padding-left: 20px
-    padding-top: 20px
-  .form-row
-    display: flex
-    margin-bottom: 5px
+  &__item
+    width: 50%
+    padding-left: 5px
+    padding-right: 5px
+    &:first-child
+      padding-left: 0
     &:last-child
-      margin-bottom: 0
-    &__item
-      width: 50%
-      padding-left: 5px
-      padding-right: 5px
-      &:first-child
-        padding-left: 0
-      &:last-child
-        padding-right: 0
+      padding-right: 0
 </style>

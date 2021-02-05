@@ -5,30 +5,30 @@ export default {
   head: {
     title: 'Simba — Swiss Quality Stablecoin',
     meta: [
-      {charset: 'utf-8'},
-      {name: 'viewport', content: 'width=device-width, initial-scale=1'},
-      {hid: 'description', name: 'description', content: 'Simba Storage'}
+      { charset: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { hid: 'description', name: 'description', content: 'Simba Storage' },
     ],
     link: [
-      {rel: "icon", type: "image/x-icon", href: "/favicon.ico"},
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
       {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Roboto&display=swap"
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Roboto&display=swap',
       },
       {
-        href: "https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap",
-        rel: "stylesheet"
+        href: 'https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap',
+        rel: 'stylesheet',
       },
-      {href: "/logo-lg.png", rel: "shortcut icon"}
-    ]
+      { href: '/logo-lg.png', rel: 'shortcut icon' },
+    ],
   },
 
-  loading: {color: '#0495FB'},
+  loading: { color: '#0495FB' },
 
   css: [
-    {src: '~/assets/scss/main.sass', lang: 'sass'},
-    {src: '~/assets/scss/transition.scss', lang: 'scss'},
-    {src: '@fortawesome/fontawesome-free/css/all.css', lang: 'css'},
+    { src: '~/assets/scss/main.sass', lang: 'sass' },
+    { src: '~/assets/scss/transition.scss', lang: 'scss' },
+    { src: '@fortawesome/fontawesome-free/css/all.css', lang: 'css' },
   ],
 
   plugins: [
@@ -37,27 +37,30 @@ export default {
     '~/plugins/vee-validate.js',
     '~/plugins/contract.js',
     '~/plugins/web3.js',
-    '~/plugins/i18n.js'
+    '~/plugins/i18n.js',
   ],
   modules: [
     '@nuxtjs/axios',
     '@nuxtjs/sentry',
     'cookie-universal-nuxt',
-    ['nuxt-buefy', {css: false}],
-    ['nuxt-i18n', {
-      locales: [
-        {
-          code: 'ru',
-          file: 'rus.js'
-        },
-        {
-          code: 'en',
-          file: 'eng.js'
-        },
-      ],
-      lazy: true,
-      langDir: 'lang/'
-    }]
+    ['nuxt-buefy', { css: false }],
+    [
+      'nuxt-i18n',
+      {
+        locales: [
+          {
+            code: 'ru',
+            file: 'rus.js',
+          },
+          {
+            code: 'en',
+            file: 'eng.js',
+          },
+        ],
+        lazy: true,
+        langDir: 'lang/',
+      },
+    ],
   ],
   server: {
     host: '0.0.0.0',
@@ -69,7 +72,7 @@ export default {
     },
   },
   publicRuntimeConfig: {
-    domain: process.env.DOMAIN || "my.simba.storage",
+    domain: process.env.DOMAIN || 'my.simba.storage',
   },
   i18n: {
     strategy: 'no_prefix',
@@ -77,11 +80,10 @@ export default {
       useCookie: true,
       cookieKey: 'app_lang',
       alwaysRedirect: false,
-      fallbackLocale: 'en'
+      fallbackLocale: 'en',
     },
   },
   build: {
-    extend(config, ctx) {
-    }
-  }
+    extend(config, ctx) {},
+  },
 }

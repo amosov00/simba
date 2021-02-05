@@ -19,45 +19,45 @@
 
 <script>
 import _ from 'lodash'
-import moment from "moment"
+import moment from 'moment'
 // import {saveAs} from 'file-saver';
 
 export default {
-    name: "users",
-    layout: "main",
-    middleware: ["adminRequired"],
-    data: () => ({
-        users: [],
-        searchQuery: '',
-    }),
-    computed: {
-      usersLenght() {
-        return this.users.length
+  name: 'users',
+  layout: 'main',
+  middleware: ['adminRequired'],
+  data: () => ({
+    users: [],
+    searchQuery: '',
+  }),
+  computed: {
+    usersLenght() {
+      return this.users.length
+    },
+  },
+
+  methods: {
+    toDatetime(utc) {
+      return moment.utc(utc).format('HH:mm DD-MM-YY')
+    },
+    onSearchInput: _.debounce(async function () {
+      let query = this.searchQuery.toLowerCase().trim()
+      this.users = await this.$store.dispatch('admin/fetchUsers', query)
+    }, 500),
+    async exportUsers() {
+      const data = await this.$store.dispatch('admin/exportUsers')
+      if (data) {
+        // saveAs(data, `simba_users.xlsx`)
       }
     },
+  },
 
-    methods: {
-        toDatetime(utc) {
-            return moment.utc(utc).format("HH:mm DD-MM-YY")
-        },
-        onSearchInput: _.debounce(async function () {
-            let query = this.searchQuery.toLowerCase().trim()
-            this.users = await this.$store.dispatch("admin/fetchUsers", query)
-        }, 500),
-        async exportUsers() {
-          const data = await this.$store.dispatch("admin/exportUsers")
-          if (data) {
-            // saveAs(data, `simba_users.xlsx`)
-          }
-        }
-    },
-
-    async asyncData({store}) {
-        return {
-            users: await store.dispatch("admin/fetchUsers")
-        }
+  async asyncData({ store }) {
+    return {
+      users: await store.dispatch('admin/fetchUsers'),
     }
-};
+  },
+}
 </script>
 
 <style lang="sass">
@@ -70,5 +70,4 @@ export default {
 
 .justify-content-between
   justify-content: space-between
-
 </style>
