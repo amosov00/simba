@@ -34,7 +34,7 @@ export default ({app, redirect, route, $config}, inject) => {
     return app.$axios.get('/account/user/',)
       .then(response => {
         if (response && response.status === 200) {
-          app.store.commit('setUser', data)
+          app.store.commit('setUser', response.data)
         } else {
           if (route.path !== "/") {
             redirect('/');
