@@ -9,42 +9,41 @@
 
 <script>
 export default {
-  name: "activate-index",
-  layout: "main",
+  name: 'activate-index',
+  layout: 'main',
   data: () => ({
     query: {
       verification_code: '',
-      email: ''
+      email: '',
     },
-    error_message: ''
+    error_message: '',
   }),
   methods: {},
   async mounted() {
     if (this.success) {
-      this.$axios.setToken(this.res.token, 'Bearer');
+      this.$axios.setToken(this.res.token, 'Bearer')
       this.$cookies.set('token', this.res.token, {
         path: '/',
         maxAge: 60 * 60 * 24 * 7,
-        domain: this.$config.domain
-      });
+        domain: this.$config.domain,
+      })
       await this.$authFetchUser()
       this.$nuxt.context.redirect('/profile/data/')
-      this.$buefy.toast.open({message: this.$i18n.t('auth.activation_success'), type: 'is-primary'})
+      this.$buefy.toast.open({ message: this.$i18n.t('auth.activation_success'), type: 'is-primary' })
     } else {
       this.error_message = this.$i18n.t('auth.activation_failed')
     }
   },
-  async asyncData({query, store}) {
-    let res = await store.dispatch('activateAccount', query);
+  async asyncData({ query, store }) {
+    let res = await store.dispatch('activateAccount', query)
 
     if (res) {
-      return {success: true, res}
+      return { success: true, res }
     } else {
-      return {success: false}
+      return { success: false }
     }
-  }
-};
+  },
+}
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>

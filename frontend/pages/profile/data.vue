@@ -14,21 +14,20 @@
       div.column.is-9.has-text-weight-bold.is-size-6 {{ userData.is_active ? $i18n.t('profile.email_verified') : $i18n.t('profile.email_unverified') }}
 </template>
 <script>
-
 export default {
-  name: "profile-data",
-  layout: "profile",
-  middleware: ["contract"],
+  name: 'profile-data',
+  layout: 'profile',
+  middleware: ['contract'],
   data: () => ({
     modalShow: false,
   }),
   computed: {
     userData() {
       return this.$store.getters.user || {}
-    }
+    },
   },
   methods: {},
-};
+}
 </script>
 
 <style lang="sass" scoped></style>

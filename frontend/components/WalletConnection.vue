@@ -22,26 +22,26 @@
 
 <script>
 export default {
-  name: "MetamaskWallet",
+  name: 'MetamaskWallet',
   data: () => ({
-    isAdd: false
+    isAdd: false,
   }),
   methods: {
     signAddress() {
-      this.$store.dispatch("metamask/signAddress");
-      this.$parent.close();
-    }
+      this.$store.dispatch('metamask/signAddress')
+      this.$parent.close()
+    },
   },
   computed: {
     selectedAddress() {
       if (window.ethereum) {
-        return window.ethereum.selectedAddress;
+        return window.ethereum.selectedAddress
       } else {
-        return false;
+        return false
       }
-    }
-  }
-};
+    },
+  },
+}
 </script>
 
 <style lang="sass" scoped>

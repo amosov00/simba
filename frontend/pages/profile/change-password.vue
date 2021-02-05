@@ -19,36 +19,35 @@
 </template>
 
 <script>
-  import { ValidationProvider, ValidationObserver } from 'vee-validate';
+import { ValidationProvider, ValidationObserver } from 'vee-validate'
 
-  export default {
-    name: 'profile-change-password',
-    layout: "profile",
-    components: { ValidationProvider, ValidationObserver },
-    data: () => ({
-      form: {
-        old_password: '',
-        password: '',
-        repeat_password: '',
-      },
-      isLoading: false
-    }),
+export default {
+  name: 'profile-change-password',
+  layout: 'profile',
+  components: { ValidationProvider, ValidationObserver },
+  data: () => ({
+    form: {
+      old_password: '',
+      password: '',
+      repeat_password: '',
+    },
+    isLoading: false,
+  }),
 
-    methods: {
-      async onSubmit() {
-        this.isLoading = true;
-        const resp = await this.$store.dispatch('changePassword', this.form);
+  methods: {
+    async onSubmit() {
+      this.isLoading = true
+      const resp = await this.$store.dispatch('changePassword', this.form)
 
-        if(resp) {
-          this.$buefy.toast.open({message: this.$i18n.t('password.change_success'), type: 'is-primary'});
-        } else {
-          this.$buefy.toast.open({message: this.$i18n.t('password.change_error'), type: 'is-danger'});
-        }
-        this.isLoading = false;
+      if (resp) {
+        this.$buefy.toast.open({ message: this.$i18n.t('password.change_success'), type: 'is-primary' })
+      } else {
+        this.$buefy.toast.open({ message: this.$i18n.t('password.change_error'), type: 'is-danger' })
       }
-    }
-  }
+      this.isLoading = false
+    },
+  },
+}
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>

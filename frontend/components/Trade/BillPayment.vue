@@ -65,95 +65,96 @@
 </template>
 
 <script>
-  import Countdown from "~/components/Countdown";
-  import formatCurrency from '~/mixins/formatCurrency'
+import Countdown from '~/components/Countdown'
+import formatCurrency from '~/mixins/formatCurrency'
 
-  import CopyToClipboard from "~/components/CopyToClipboard";
-  import TradeQRCode from "~/components/TradeQRCode";
+import CopyToClipboard from '~/components/CopyToClipboard'
+import TradeQRCode from '~/components/TradeQRCode'
 
-  import AddressQRCode from "~/components/AddressQRCode";
+import AddressQRCode from '~/components/AddressQRCode'
 
-  export default {
-    name: 'trade-bill-payment',
+export default {
+  name: 'trade-bill-payment',
 
-    components: {Countdown, CopyToClipboard, TradeQRCode, AddressQRCode},
-    mixins: [formatCurrency],
+  components: { Countdown, CopyToClipboard, TradeQRCode, AddressQRCode },
+  mixins: [formatCurrency],
 
-    computed: {
-      isBuy(){
-        return this.$store.getters['exchange/tradeData']['operation'] === 1;
-      },
-      btc_address() {
-        return this.updated_invoice_data.target_btc_address;
-      },
-      tradeData() {
-        return this.$store.getters['exchange/tradeData'];
-      },
-      created_invoice_id() {
-        return this.$store.getters['exchange/tradeData']['invoice_id']
+  computed: {
+    isBuy() {
+      return this.$store.getters['exchange/tradeData']['operation'] === 1
+    },
+    btc_address() {
+      return this.updated_invoice_data.target_btc_address
+    },
+    tradeData() {
+      return this.$store.getters['exchange/tradeData']
+    },
+    created_invoice_id() {
+      return this.$store.getters['exchange/tradeData']['invoice_id']
+    },
+  },
+  data: () => ({
+    expired: false,
+    busyChecking: false,
+    transaction_hash: '',
+    updated_invoice_data: {},
+    check: {},
+    showCountdown: false,
+    countdown: null,
+    goneToNextStep: false,
+    confirmInterval: null,
+    disablePayBtn: false,
+    btc_address_fetched: false,
+  }),
+  methods: {
+    truncateEthAddress(address) {
+      return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
+    },
+
+    async payWithMetamask() {
+      let transferData = {
+        address: this.tradeData.admin_eth_address,
+        amount: this.tradeData.simba,
+      }
+
+      if (await this.$store.dispatch('contract/transferSimbaToken', transferData)) {
+        this.disablePayBtn = true
       }
     },
-    data: () => ({
-      expired: false,
-      busyChecking: false,
-      transaction_hash: '',
-      updated_invoice_data: {
-      },
-      check: {},
-      showCountdown: false,
-      countdown: null,
-      goneToNextStep: false,
-      confirmInterval: null,
-      disablePayBtn: false,
-      btc_address_fetched: false
-    }),
-    methods: {
-      truncateEthAddress(address) {
-        return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
-      },
 
-      async payWithMetamask() {
-        let transferData = {
-          address: this.tradeData.admin_eth_address,
-          amount: this.tradeData.simba
-        }
+    stopCountdown() {
+      if (this.countdown !== null) {
+        clearInterval(this.countdown)
+      }
+    },
 
-        if(await this.$store.dispatch("contract/transferSimbaToken", transferData)) {
-          this.disablePayBtn = true
-        }
-      },
+    async checkSingle() {
+      this.busyChecking = true
 
-      stopCountdown() {
-        if(this.countdown !== null) {
-          clearInterval(this.countdown)
-        }
-      },
+      this.check = await this.$store.dispatch('invoices/fetchSingle', this.created_invoice_id)
 
-      async checkSingle() {
-        this.busyChecking = true
+      if (this.isBuy) {
+        // Buy
 
-        this.check = await this.$store.dispatch('invoices/fetchSingle', this.created_invoice_id)
-
-        if(this.isBuy) { // Buy
-
-          /*if(this.check.target_btc_address) {
+        /*if(this.check.target_btc_address) {
             this.btc_address_fetched = true
           }*/
 
-          if(this.check.btc_txs.length > 0) {
-            this.goneToNextStep = true
-            this.stopCountdown();
-            this.$parent.$emit('nextStep')
-            return;
-          }
-        } else { // Sell
-          if(this.check.status === 'processing') {
-            this.goneToNextStep = true
-            this.stopCountdown();
-            this.$parent.$emit('nextStep')
-            return;
-          }
-          /*if(this.check.eth_txs.length > 0 && this.check.simba_amount_proceeded > 0) {
+        if (this.check.btc_txs.length > 0) {
+          this.goneToNextStep = true
+          this.stopCountdown()
+          this.$parent.$emit('nextStep')
+          return
+        }
+      } else {
+        // Sell
+        if (this.check.status === 'processing') {
+          this.goneToNextStep = true
+          this.stopCountdown()
+          this.$parent.$emit('nextStep')
+          return
+        }
+        /*if(this.check.eth_txs.length > 0 && this.check.simba_amount_proceeded > 0) {
             if(this.check.eth_txs[0].bitcoins_sended) {
               this.goneToNextStep = true
               this.stopCountdown();
@@ -161,102 +162,106 @@
               return;
             }
           }*/
-        }
+      }
 
-        this.updated_invoice_data = JSON.parse(JSON.stringify(this.check));
+      this.updated_invoice_data = JSON.parse(JSON.stringify(this.check))
 
-        // Confirm if invoice is not confirmed
+      // Confirm if invoice is not confirmed
 
-        if(this.updated_invoice_data.status !== 'waiting'
-          && this.updated_invoice_data.status !== 'cancelled'
-          && this.updated_invoice_data.status !== 'completed') {
+      if (
+        this.updated_invoice_data.status !== 'waiting' &&
+        this.updated_invoice_data.status !== 'cancelled' &&
+        this.updated_invoice_data.status !== 'completed'
+      ) {
+        // Confirm & set confirm_status
+        let confirm_status = this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
 
-          // Confirm & set confirm_status
-          let confirm_status = this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
+        confirm_status.then((res) => {
+          if (this.isBuy && res.target_btc_address) {
+            this.updated_invoice_data.target_btc_address = res.target_btc_address
+            this.btc_address_fetched = true
+          }
+        })
+      }
 
-          confirm_status.then(res => {
-            if(this.isBuy && res.target_btc_address) {
-              this.updated_invoice_data.target_btc_address = res.target_btc_address
-              this.btc_address_fetched = true
-            }
-          })
-        }
+      if (this.updated_invoice_data.status === 'waiting') {
+        this.btc_address_fetched = true
+      }
 
-        if(this.updated_invoice_data.status === 'waiting') {
-          this.btc_address_fetched = true
-        }
-
-        /*if(this.updated_invoice_data.target_btc_address && this.updated_invoice_data.status !== 'created') {
+      /*if(this.updated_invoice_data.target_btc_address && this.updated_invoice_data.status !== 'created') {
           await this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
         }*/
 
-        await setTimeout(() => {
-          this.busyChecking = false;
-        }, 1000)
-      }
+      await setTimeout(() => {
+        this.busyChecking = false
+      }, 1000)
     },
+  },
 
-    async created() {
-      this.$on('expired', () => {
-        this.expired = true
-        this.stopCountdown()
-        this.$parent.$emit('step_failed')
-      })
-
-      await this.$store.dispatch('exchange/fetchAdminEthAddress')
-
-      await this.checkSingle()
-
-      this.$store.commit('exchange/setTradeData', { prop: 'simba', value: this.updated_invoice_data.simba_amount })
-      this.$store.commit('exchange/setTradeData', { prop: 'btc', value: (this.updated_invoice_data.btc_amount/100000000).toFixed(8) })
-
-      this.showCountdown = true;
-
-      if(!this.goneToNextStep) {
-        this.countdown = setInterval(async () => {
-          await this.checkSingle();
-        }, 10000)
-      }
-    },
-
-    beforeDestroy() {
+  async created() {
+    this.$on('expired', () => {
+      this.expired = true
       this.stopCountdown()
+      this.$parent.$emit('step_failed')
+    })
+
+    await this.$store.dispatch('exchange/fetchAdminEthAddress')
+
+    await this.checkSingle()
+
+    this.$store.commit('exchange/setTradeData', { prop: 'simba', value: this.updated_invoice_data.simba_amount })
+    this.$store.commit('exchange/setTradeData', {
+      prop: 'btc',
+      value: (this.updated_invoice_data.btc_amount / 100000000).toFixed(8),
+    })
+
+    this.showCountdown = true
+
+    if (!this.goneToNextStep) {
+      this.countdown = setInterval(async () => {
+        await this.checkSingle()
+      }, 10000)
     }
-  }
+  },
+
+  beforeDestroy() {
+    this.stopCountdown()
+  },
+}
 </script>
 
 <style lang="sass" scoped>
-  @keyframes rotate
-    to
-      transform: rotate(360deg)
-  .rotate-anim
-    opacity: 0.4
-    animation: 1s rotate infinite linear
-  .countdown-block
-    margin-top: 43px
+@keyframes rotate
+  to
+    transform: rotate(360deg)
+.rotate-anim
+  opacity: 0.4
+  animation: 1s rotate infinite linear
+.countdown-block
+  margin-top: 43px
 
-  .countdown-refresh
-    cursor: pointer
-    position: relative
-    &.rotate-anim
-      &:hover
-        cursor: default
+.countdown-refresh
+  cursor: pointer
+  position: relative
+  &.rotate-anim
     &:hover
-      opacity: 0.8
-    &:active
-      opacity: 0.6
+      cursor: default
+  &:hover
+    opacity: 0.8
+  &:active
+    opacity: 0.6
 
-  .bill-arrow
-    display: inline-block
-    align-items: center
-    vertical-align: center
-    margin: 0 30px
+.bill-arrow
+  display: inline-block
+  align-items: center
+  vertical-align: center
+  margin: 0 30px
 
-  .trade-timer
-    margin-top: 50px
-    font-style: normal
-    font-weight: 100
-    font-size: 36px
-    line-height: 100%
-    color: #000000
+.trade-timer
+  margin-top: 50px
+  font-style: normal
+  font-weight: 100
+  font-size: 36px
+  line-height: 100%
+  color: #000000
 </style>

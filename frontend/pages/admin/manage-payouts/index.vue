@@ -49,17 +49,17 @@
 </template>
 
 <script>
-import formatDate from "~/mixins/formatDate";
-import formatCurrency from "~/mixins/formatCurrency";
-import ModalBitcore from "~/components/ModalBitcore";
+import formatDate from '~/mixins/formatDate'
+import formatCurrency from '~/mixins/formatCurrency'
+import ModalBitcore from '~/components/ModalBitcore'
 
-import invoiceMixins from "~/mixins/invoiceMixins";
+import invoiceMixins from '~/mixins/invoiceMixins'
 
 export default {
-  layout: "main",
-  middleware: ["adminRequired"],
+  layout: 'main',
+  middleware: ['adminRequired'],
   mixins: [formatDate, formatCurrency, invoiceMixins],
-  components: {ModalBitcore},
+  components: { ModalBitcore },
 
   data: () => ({
     modalBitcore: false,
@@ -74,10 +74,10 @@ export default {
 
     this.invoices = await this.$store.dispatch('invoices/fetchAdminInvoices')
 
-    this.invoicesToView = this.invoices.filter(inv => inv.invoice_type === 2)
+    this.invoicesToView = this.invoices.filter((inv) => inv.invoice_type === 2)
 
     if (this.onlyWithProcessingStatus) {
-      this.invoicesToView = this.invoicesToView.filter(inv => inv.status === 'processing')
+      this.invoicesToView = this.invoicesToView.filter((inv) => inv.status === 'processing')
     }
 
     this.isLoading = false
@@ -88,10 +88,10 @@ export default {
       return this.$store.getters['meta/meta']
     },
     manualPayout() {
-      return this.$store.getters['meta/meta'].find(el => {
+      return this.$store.getters['meta/meta'].find((el) => {
         return el.slug === 'manual_payout'
       })?.payload?.is_active
-    }
+    },
   },
 
   methods: {
@@ -100,19 +100,18 @@ export default {
         parent: this,
         component: ModalBitcore,
         trapFocus: true,
-        props: {invoice: invoice}
-      });
+        props: { invoice: invoice },
+      })
     },
 
     makeDecision(type, id, targetWallet, amount) {
-
-      let message = `<div>ID: <strong>${id}</strong></div>` +
+      let message =
+        `<div>ID: <strong>${id}</strong></div>` +
         `<div class="mt-1">Target address: <strong>${targetWallet}</strong></div>` +
-        `<div class="mt-1">Amount: <strong>${amount}</strong></div>`;
+        `<div class="mt-1">Amount: <strong>${amount}</strong></div>`
 
       if (type === 'cancel') {
         message = `<div class="mb-3">${this.$i18n.t('su_payouts_mm.confirm_cancel_msg')}</div>` + message
-
       } else if (type === 'pay') {
         message = `<div class="mb-3">${this.$i18n.t('su_payouts_mm.confirm_pay_msg')}</div>` + message
       }
@@ -126,23 +125,21 @@ export default {
         onConfirm: async () => {
           this.isLoading = true
 
-          if (await this.$store.dispatch('meta/invoiceDecision', {type, id})) {
-            this.$buefy.toast.open({message: 'Success', type: 'is-primary'})
+          if (await this.$store.dispatch('meta/invoiceDecision', { type, id })) {
+            this.$buefy.toast.open({ message: 'Success', type: 'is-primary' })
             this.$fetch()
           } else {
-            this.$buefy.toast.open({message: 'Something went wrong', type: 'is-danger'})
+            this.$buefy.toast.open({ message: 'Something went wrong', type: 'is-danger' })
           }
 
-
           this.isLoading = false
-        }
+        },
       })
-
     },
 
     showProcessingOnly() {
       if (this.onlyWithProcessingStatus) {
-        this.invoicesToView = this.invoices.filter(inv => inv.status === 'processing')
+        this.invoicesToView = this.invoices.filter((inv) => inv.status === 'processing')
       } else {
         this.invoicesToView = this.invoicesToView = this.invoices
       }
@@ -157,25 +154,24 @@ export default {
         type: this.manualPayout ? 'is-danger' : 'is-primary',
         onConfirm: async () => {
           let data = {
-            is_active: !this.manualPayout
+            is_active: !this.manualPayout,
           }
 
-          if (await this.$store.dispatch('meta/updateMeta', {data, slug: 'manual_payout'})) {
+          if (await this.$store.dispatch('meta/updateMeta', { data, slug: 'manual_payout' })) {
             await this.$store.dispatch('meta/fetchMeta')
-            this.$buefy.toast.open({message: 'Status successfully changed!', type: 'is-primary'})
+            this.$buefy.toast.open({ message: 'Status successfully changed!', type: 'is-primary' })
           } else {
-            this.$buefy.toast.open({message: 'Error changing status', type: 'is-danger'})
+            this.$buefy.toast.open({ message: 'Error changing status', type: 'is-danger' })
           }
-        }
-
+        },
       })
-    }
+    },
   },
 
-  async asyncData({store}) {
+  async asyncData({ store }) {
     await store.dispatch('meta/fetchMeta')
-  }
-};
+  },
+}
 </script>
 
 <style lang="sass" scoped>

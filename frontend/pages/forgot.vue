@@ -15,32 +15,31 @@
 </template>
 
 <script>
-  export default {
-    name: "forgot",
-    layout: "main",
-    data() {
-      return {
-        email: '',
-        loading: false
-      };
-    },
-    methods: {
-      async recover(){
-        this.loading = true;
+export default {
+  name: 'forgot',
+  layout: 'main',
+  data() {
+    return {
+      email: '',
+      loading: false,
+    }
+  },
+  methods: {
+    async recover() {
+      this.loading = true
 
-        if(await this.$store.dispatch('startRecover', {"email": this.email})) {
-          this.$buefy.toast.open({message: this.$i18n.t('auth.recover_success'), type: 'is-primary'});
-          this.email = ''
-          this.$nuxt.$router.replace({ path: '/'});
-        } else {
-          this.$buefy.toast.open({message: this.$i18n.t('auth.recover_error'), type: 'is-danger'});
-        }
-
-        this.loading = false;
+      if (await this.$store.dispatch('startRecover', { email: this.email })) {
+        this.$buefy.toast.open({ message: this.$i18n.t('auth.recover_success'), type: 'is-primary' })
+        this.email = ''
+        this.$nuxt.$router.replace({ path: '/' })
+      } else {
+        this.$buefy.toast.open({ message: this.$i18n.t('auth.recover_error'), type: 'is-danger' })
       }
+
+      this.loading = false
     },
-  };
+  },
+}
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>

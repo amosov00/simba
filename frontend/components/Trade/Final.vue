@@ -32,22 +32,22 @@
 </template>
 
 <script>
-import {mapGetters} from "vuex";
-import invoiceMixins from "~/mixins/invoiceMixins";
+import { mapGetters } from 'vuex'
+import invoiceMixins from '~/mixins/invoiceMixins'
 
 export default {
   name: 'trade-final',
   mixins: [invoiceMixins],
   data: () => ({}),
   computed: {
-    ...mapGetters("exchange", ["tradeData"]),
+    ...mapGetters('exchange', ['tradeData']),
     redeemTxHash() {
-      let tx = this.$store.getters['exchange/ethTxByEvent']("OnRedeemed")
-      return tx ? tx.transactionHash : "";
+      let tx = this.$store.getters['exchange/ethTxByEvent']('OnRedeemed')
+      return tx ? tx.transactionHash : ''
     },
     issueTxHash() {
-      let tx = this.$store.getters['exchange/ethTxByEvent']("OnIssued")
-      return tx ? tx.transactionHash : "";
+      let tx = this.$store.getters['exchange/ethTxByEvent']('OnIssued')
+      return tx ? tx.transactionHash : ''
     },
     isBuy() {
       return this.tradeData.operation === 1
@@ -55,21 +55,19 @@ export default {
   },
   methods: {
     numberWithCommas(x) {
-      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     },
     convert(simba) {
-
-      let test = (simba / 100000000).toFixed(4);
+      let test = (simba / 100000000).toFixed(4)
 
       if (isNaN(test)) {
         return 0
       }
 
       return parseFloat(test)
-    }
-  }
+    },
+  },
 }
 </script>
 
-<style lang="sass">
-</style>
+<style lang="sass"></style>

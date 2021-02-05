@@ -27,22 +27,22 @@
 </template>
 
 <script>
-import AddNewWallet from "~/components/AddNewWallet";
+import AddNewWallet from '~/components/AddNewWallet'
 
 export default {
-  name: "profile-bill",
-  layout: "profile",
+  name: 'profile-bill',
+  layout: 'profile',
 
   components: { AddNewWallet },
 
   data: () => ({
-    eth_wallet_add_modal: false
+    eth_wallet_add_modal: false,
   }),
 
   computed: {
     user() {
-      return this.$store.getters.user;
-    }
+      return this.$store.getters.user
+    },
   },
 
   methods: {
@@ -51,27 +51,27 @@ export default {
         parent: this,
         component: AddNewWallet,
         trapFocus: true,
-        props: { type }
-      });
+        props: { type },
+      })
     },
 
     removeAddress(data) {
-      if (data.type === "btc" && this.user.two_factor) {
+      if (data.type === 'btc' && this.user.two_factor) {
         this.$buefy.dialog.prompt({
-          type:'is-danger',
+          type: 'is-danger',
           inputAttrs: {
             placeholder: this.$i18n.t('wallet.pin_code'),
-            value: "",
+            value: '',
             maxlength: 6,
           },
           cancelText: this.$i18n.t('other.cancel'),
           confirmText: this.$i18n.t('other.delete'),
           trapFocus: true,
           onConfirm: async (value) => {
-            await this.$store.dispatch("removeAddress", {...data, pin_code: value});
+            await this.$store.dispatch('removeAddress', { ...data, pin_code: value })
             this.$parent.$emit('close')
-          }
-        });
+          },
+        })
       } else {
         this.$buefy.dialog.confirm({
           title: this.$i18n.t('other.delete'),
@@ -80,14 +80,14 @@ export default {
           confirmText: this.$i18n.t('other.delete'),
           type: 'is-danger',
           onConfirm: async () => {
-            await this.$store.dispatch("removeAddress", data);
+            await this.$store.dispatch('removeAddress', data)
             this.$parent.$emit('close')
-          }
+          },
         })
       }
-    }
-  }
-};
+    },
+  },
+}
 </script>
 
 <style lang="sass" scoped>

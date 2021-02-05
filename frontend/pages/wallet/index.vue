@@ -36,26 +36,26 @@
 </template>
 
 <script>
-import WalletTable from "~/components/WalletTable";
-import AddNewWallet from "~/components/AddNewWallet";
+import WalletTable from '~/components/WalletTable'
+import AddNewWallet from '~/components/AddNewWallet'
 
 export default {
-  name: "exchange-transfer",
-  layout: "main",
-  middleware: ["contract", "metamask"],
+  name: 'exchange-transfer',
+  layout: 'main',
+  middleware: ['contract', 'metamask'],
   components: { WalletTable, AddNewWallet },
   data: () => {
     return {
       transferData: {
-        address: "",
-        amount: 0
+        address: '',
+        amount: 0,
       },
-    };
+    }
   },
   methods: {
     transferFunds() {
       if (this.transferData.address && this.transferData.amount > 0) {
-        this.$store.dispatch("contract/transferSimbaToken", this.transferData);
+        this.$store.dispatch('contract/transferSimbaToken', this.transferData)
       }
     },
     metamaskModal() {
@@ -63,15 +63,15 @@ export default {
         parent: this,
         component: AddNewWallet,
         trapFocus: true,
-        props: { type: 'eth' }
-      });
-    }
+        props: { type: 'eth' },
+      })
+    },
   },
 
-  async asyncData({$axios}) {
+  async asyncData({ $axios }) {
     let btc_to_usdt = await $axios
-      .get("https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USDT")
-      .then(res => res.data.USDT);
+      .get('https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USDT')
+      .then((res) => res.data.USDT)
 
     return { btc_to_usdt }
   },
@@ -79,24 +79,22 @@ export default {
   computed: {
     selectedAddress() {
       if (window.ethereum) {
-        return window.ethereum.selectedAddress;
+        return window.ethereum.selectedAddress
       } else {
-        return '';
+        return ''
       }
     },
     totalAmount() {
-      return this.transferData.amount > 0
-        ? this.transferData.amount * 1 + 5000
-        : 0;
+      return this.transferData.amount > 0 ? this.transferData.amount * 1 + 5000 : 0
     },
     totalUSDT() {
       return (this.totalBTC * this.btc_to_usdt).toFixed(2)
     },
     totalBTC() {
-      return (this.transferData.amount * 1) / 100000000;
-    }
-  }
-};
+      return (this.transferData.amount * 1) / 100000000
+    },
+  },
+}
 </script>
 
 <style lang="sass" scoped>

@@ -16,64 +16,69 @@
 </template>
 
 <script>
-  import Footer from "~/components/Footer";
-  import Header from "~/components/Header";
+import Footer from '~/components/Footer'
+import Header from '~/components/Header'
 
-  export default {
-    name: 'profile-layout',
-    middleware: ['fetchUser', 'authRequired'],
-    components: { Header, Footer },
-    data: () => ({
-      showModalNew: false,
-      sidebar: [
-        { id: 'profile.sidebar.personal',
-          links: [
-            {id: 'profile.sidebar.data', url: '/profile/data/'},{id: 'profile.sidebar.verification', url: '/profile/verification/'}
-          ]
-        },
-        { id: 'profile.sidebar.payment',
-          links: [
-            {id: 'profile.sidebar.bill_details', url: '/profile/bill/'},{id: 'profile.sidebar.partner_program', url: '/profile/partner/'}
-          ]
-        },
-        { id: 'profile.sidebar.security',
-          links: [
-            {id: 'profile.sidebar.change_password', url: '/profile/change-password/'},{id: 'profile.sidebar.two_factor', url: '/profile/2fa/'}
-          ]
-        }
-      ]
-    }),
-    methods: {
-      logout() {
-        this.$authLogout();
+export default {
+  name: 'profile-layout',
+  middleware: ['fetchUser', 'authRequired'],
+  components: { Header, Footer },
+  data: () => ({
+    showModalNew: false,
+    sidebar: [
+      {
+        id: 'profile.sidebar.personal',
+        links: [
+          { id: 'profile.sidebar.data', url: '/profile/data/' },
+          { id: 'profile.sidebar.verification', url: '/profile/verification/' },
+        ],
       },
+      {
+        id: 'profile.sidebar.payment',
+        links: [
+          { id: 'profile.sidebar.bill_details', url: '/profile/bill/' },
+          { id: 'profile.sidebar.partner_program', url: '/profile/partner/' },
+        ],
+      },
+      {
+        id: 'profile.sidebar.security',
+        links: [
+          { id: 'profile.sidebar.change_password', url: '/profile/change-password/' },
+          { id: 'profile.sidebar.two_factor', url: '/profile/2fa/' },
+        ],
+      },
+    ],
+  }),
+  methods: {
+    logout() {
+      this.$authLogout()
     },
-  }
+  },
+}
 </script>
 
 <style lang="sass" scoped>
-  .logout-block
-    padding-top: 20px
-    position: relative
-    &:before
-      content: ""
-      top: 0
-      left: 0
-      position: absolute
-      width: 71px
-      background-color: #E5E5E5
-      height: 1px
+.logout-block
+  padding-top: 20px
+  position: relative
+  &:before
+    content: ""
+    top: 0
+    left: 0
+    position: absolute
+    width: 71px
+    background-color: #E5E5E5
+    height: 1px
 
-  .sidebar
-    &__inner
-      border-right: 1px solid #E5E5E5
-      min-height: 292px
-      padding-right: 30px
-    &__links-block
-      padding-left: 20px
-      a
-        white-space: nowrap
-  .profile-content
-    padding-left: 40px
-
+.sidebar
+  &__inner
+    border-right: 1px solid #E5E5E5
+    min-height: 292px
+    padding-right: 30px
+  &__links-block
+    padding-left: 20px
+    a
+      white-space: nowrap
+.profile-content
+  padding-left: 40px
 </style>
