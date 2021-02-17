@@ -5,7 +5,7 @@ from bson import Decimal128
 
 from config import SIMBA_CONTRACT, settings
 from core.integrations.ethereum import EventsContractWrapper
-from core.mechanics.invoice import InvoiceMechanics
+from core.mechanics.invoices import InvoiceMechanics
 from database.crud import InvoiceCRUD, EthereumTransactionCRUD, UserCRUD
 from schemas import SimbaContractEvents, EthereumTransactionInDB, InvoiceStatus, InvoiceType
 from workers.agents import app
