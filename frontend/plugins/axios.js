@@ -1,13 +1,13 @@
-export default function ({$axios, app, $buefy}) {
-    $axios.setToken(app.$cookies.get('token'), 'Bearer');
+export default function ({ $axios, app }) {
+  $axios.setToken(app.$cookies.get('token'), 'Bearer')
 
-    $axios.onError(error => {
-      switch (error.response.status) {
-        case 401:
-          app.$authLogout()
-          break
-        default:
-          break
-      }
-    })
+  $axios.onError(async (error) => {
+    switch (error.response.status) {
+      case 401:
+        await app.$authLogout()
+        break
+      default:
+        break
+    }
+  })
 }

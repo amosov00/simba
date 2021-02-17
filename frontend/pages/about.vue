@@ -16,17 +16,14 @@
 </template>
 
 <script>
-  export default {
-    name: "about",
-    layout: "main",
-    data() {
-      return {
-      };
-    },
-    methods: {
-    },
-  };
+export default {
+  name: 'about',
+  layout: 'main',
+  data() {
+    return {}
+  },
+  methods: {},
+}
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>

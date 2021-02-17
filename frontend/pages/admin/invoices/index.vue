@@ -23,52 +23,51 @@
 </template>
 
 <script>
-import formatDate from "~/mixins/formatDate";
-import formatCurrency from "~/mixins/formatCurrency";
+import formatDate from '~/mixins/formatDate'
+import formatCurrency from '~/mixins/formatCurrency'
 
 import _ from 'lodash'
-import {statusToColor} from "@/consts";
+import { statusToColor } from '@/consts'
 
 export default {
-    name: "invoices",
-    layout: "main",
-    middleware: ["adminRequired"],
-    mixins: [formatDate, formatCurrency],
-    async fetch() {
-        if (this.adminInvoices.length <= 0) {
-            await this.$store.dispatch('invoices/fetchAdminInvoices', {q: this.searchQuery})
-        }
+  name: 'invoices',
+  layout: 'main',
+  middleware: ['adminRequired'],
+  mixins: [formatDate, formatCurrency],
+  async fetch() {
+    if (this.adminInvoices.length <= 0) {
+      await this.$store.dispatch('invoices/fetchAdminInvoices', { q: this.searchQuery })
+    }
+  },
+  data: () => ({
+    searchQuery: '',
+  }),
+  computed: {
+    adminInvoices() {
+      return this.$store.getters['invoices/adminInvoices']
     },
-    data: () => ({
-        searchQuery: '',
-    }),
-    computed: {
-        adminInvoices() {
-            return this.$store.getters["invoices/adminInvoices"];
-        }
-    },
-    methods: {
-        statusToColor,
-        onSearchInput: _.debounce(function () {
-            let properSearchQuery = this.searchQuery.toLowerCase().trim()
+  },
+  methods: {
+    statusToColor,
+    onSearchInput: _.debounce(function () {
+      let properSearchQuery = this.searchQuery.toLowerCase().trim()
 
-            if (properSearchQuery !== '' || properSearchQuery.length <= 0) {
-                this.$store.dispatch('invoices/fetchAdminInvoices', {q: properSearchQuery})
-            }
-        }, 500),
-        async fetchPaidInvoiced() {
-            let searchQuery = this.searchQuery.toLowerCase().trim()
-            await this.$store.dispatch('invoices/fetchAdminInvoices', {
-                q: searchQuery,
-                status: "paid",
-            })
-        }
+      if (properSearchQuery !== '' || properSearchQuery.length <= 0) {
+        this.$store.dispatch('invoices/fetchAdminInvoices', { q: properSearchQuery })
+      }
+    }, 500),
+    async fetchPaidInvoiced() {
+      let searchQuery = this.searchQuery.toLowerCase().trim()
+      await this.$store.dispatch('invoices/fetchAdminInvoices', {
+        q: searchQuery,
+        status: 'paid',
+      })
     },
-};
+  },
+}
 </script>
 
 <style lang="sass" scoped>
 .is-justified-between
     justify-content: space-between
-
 </style>

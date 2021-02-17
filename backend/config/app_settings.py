@@ -13,6 +13,7 @@ from .config_parts import (
     EmailSettings,
     CelerySettings,
     KafkaSettings,
+    PersonVerifySettings,
 )
 from .configurator import configurator, IS_LOCAL, IS_PRODUCTION, BASE_DIR
 
@@ -25,6 +26,7 @@ class AppSettings(BaseModel):
     email: EmailSettings = Field(default_factory=EmailSettings)
     celery: CelerySettings = Field(default_factory=CelerySettings)
     kafka: KafkaSettings = Field(default_factory=KafkaSettings)
+    person_verify: PersonVerifySettings = Field(default_factory=PersonVerifySettings)
 
 
 settings = AppSettings()

@@ -56,9 +56,7 @@ async def admin_invoice_fetch_one(invoice_id: str = Path(...)):
 
 @invoices_router.get("/{invoice_id}/sst_transactions/", response_model=List[ReferralTransactionUserID])
 async def admin_invoice_fetch_sst_tx_info(invoice_id: str = Path(...)):
-    invoice = await InvoiceCRUD.find_by_id(invoice_id, raise_404=True)
-    invoice = InvoiceInDB(**invoice)
-
+    invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
     return await ReferralMechanics.fetch_ref_txs_info_from_invoice(invoice)
 
 

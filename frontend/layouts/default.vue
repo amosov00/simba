@@ -5,12 +5,10 @@ div
 </template>
 
 <script>
-	export default {
-		components: {
-		},
-		middleware: ['fetchUser'],
-	}
+export default {
+  components: {},
+  middleware: ['fetchUser'],
+}
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

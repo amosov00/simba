@@ -52,49 +52,56 @@
 </template>
 
 <script>
-import formatDate from "~/mixins/formatDate";
-import CopyToClipboard from "~/components/CopyToClipboard";
+import formatDate from '~/mixins/formatDate'
+import CopyToClipboard from '~/components/CopyToClipboard'
 import _ from 'lodash'
 
-import {ValidationProvider} from 'vee-validate'
-import moment from "moment";
+import { ValidationProvider } from 'vee-validate'
+import moment from 'moment'
 
-const editable = ['email', 'email_is_active', 'first_name',
-  'last_name', 'is_active', 'is_staff', 'is_superuser', 'two_factor']
+const editable = [
+  'email',
+  'email_is_active',
+  'first_name',
+  'last_name',
+  'is_active',
+  'is_staff',
+  'is_superuser',
+  'two_factor',
+]
 
 const pre_hidden = ['verification_code', 'recover_code', 'secret_2fa']
 
 export default {
-  name: "usersById",
-  layout: "main",
-  middleware: ["adminRequired"],
+  name: 'usersById',
+  layout: 'main',
+  middleware: ['adminRequired'],
   mixins: [formatDate],
 
   components: {
     CopyToClipboard,
-    ValidationProvider
+    ValidationProvider,
   },
 
   created() {
-    editable.forEach(el => {
+    editable.forEach((el) => {
       this.$set(this.editable_data, el, this.user_data[el].value)
     })
 
-    this.editable_data_inital = JSON.parse(JSON.stringify(this.editable_data));
+    this.editable_data_inital = JSON.parse(JSON.stringify(this.editable_data))
   },
 
   data: () => ({
     editable_data_inital: {},
     editable_data: {},
-    disabled_save: true
+    disabled_save: true,
   }),
 
   computed: {
     invoiceById() {
       return this.$store.getters['users/userById']
-    }
+    },
   },
-
 
   watch: {
     editable_data: {
@@ -104,8 +111,9 @@ export default {
         } else {
           this.disabled_save = true
         }
-      }, deep: true
-    }
+      },
+      deep: true,
+    },
   },
 
   methods: {
@@ -113,35 +121,43 @@ export default {
       console.log(this.editable_data)
     },
     formatDate(date_str) {
-      return moment(String(date_str)).format(("DD/MM/YYYY, h:mm:ss"))
+      return moment(String(date_str)).format('DD/MM/YYYY, h:mm:ss')
     },
     async save() {
       if (await this.$refs.validation_obs.validate()) {
-        this.$axios.put(`/admin/users/${this.$nuxt.context.route.params.id}/`, this.editable_data).then(res => {
-          if (res.data) {
-            this.$buefy.toast.open({message: this.$i18n.t('account_page.account_changed_success'), type: 'is-primary'})
-          } else {
-            this.$buefy.toast.open({message: this.$i18n.t('account_page.account_changed_error'), type: 'is-danger'})
-          }
-        }).catch(() => {
-          this.$buefy.toast.open({message: this.$i18n.t('account_page.account_changed_error'), type: 'is-danger'})
-        })
+        this.$axios
+          .put(`/admin/users/${this.$nuxt.context.route.params.id}/`, this.editable_data)
+          .then((res) => {
+            if (res.data) {
+              this.$buefy.toast.open({
+                message: this.$i18n.t('account_page.account_changed_success'),
+                type: 'is-primary',
+              })
+            } else {
+              this.$buefy.toast.open({ message: this.$i18n.t('account_page.account_changed_error'), type: 'is-danger' })
+            }
+          })
+          .catch(() => {
+            this.$buefy.toast.open({ message: this.$i18n.t('account_page.account_changed_error'), type: 'is-danger' })
+          })
       }
-    }
+    },
   },
 
-  async asyncData({store, route}) {
-    let user_data = await store.dispatch("admin/fetchUserById", route.params.id)
+  async asyncData({ store, route }) {
+    let user_data = await store.dispatch('admin/fetchUserById', route.params.id)
 
-    let archived = await store.$axios.get(`/admin/users/${route.params.id}/archived_addresses/`)
-      .then(res => res.data).catch(() => [])
+    let archived = await store.$axios
+      .get(`/admin/users/${route.params.id}/archived_addresses/`)
+      .then((res) => res.data)
+      .catch(() => [])
 
     let addresses = {
       archived,
       active: {
         btc: [...user_data['user_btc_addresses']],
-        eth: [...user_data['user_eth_addresses']]
-      }
+        eth: [...user_data['user_eth_addresses']],
+      },
     }
 
     delete user_data['user_eth_addresses']
@@ -149,26 +165,24 @@ export default {
 
     if (!_.isEmpty(user_data)) {
       for (const prop in user_data) {
-
         user_data[prop] = {
           value: user_data[prop],
           editable: false,
           pre_hidden: false,
-          type: null
+          type: null,
         }
 
         // Set type
 
-        const value = user_data[prop]['value'];
+        const value = user_data[prop]['value']
 
         if (typeof value === 'string') {
-          prop === 'created_at' ? user_data[prop]['type'] = 'date' : user_data[prop]['type'] = 'string'
+          prop === 'created_at' ? (user_data[prop]['type'] = 'date') : (user_data[prop]['type'] = 'string')
         } else if (Array.isArray(value)) {
           user_data[prop]['type'] = 'array'
         } else if (typeof value === 'boolean') {
           user_data[prop]['type'] = 'boolean'
         }
-
 
         // Is editable
         if (editable.indexOf(prop) !== -1) {
@@ -189,24 +203,24 @@ export default {
       user_data['user_eth_addresses'] = {
         value: {
           active: addresses.active.eth,
-          archived: []
+          archived: [],
         },
         editable: false,
         pre_hidden: false,
-        type: 'addresses'
+        type: 'addresses',
       }
 
       user_data['user_btc_addresses'] = {
         value: {
           active: addresses.active.btc,
-          archived: []
+          archived: [],
         },
         editable: false,
         pre_hidden: false,
-        type: 'addresses'
+        type: 'addresses',
       }
 
-      archived.forEach(el => {
+      archived.forEach((el) => {
         if (el.signature) {
           user_data['user_eth_addresses'].value.archived.push(el)
         } else {
@@ -216,10 +230,10 @@ export default {
     }
 
     return {
-      user_data
+      user_data,
     }
-  }
-};
+  },
+}
 </script>
 
 <style lang="sass">

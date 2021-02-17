@@ -72,7 +72,7 @@ class UserCRUD(BaseMongoCRUD):
 
     @classmethod
     async def authenticate(cls, email: str, password: str, pin_code: Optional[str] = None) -> dict:
-        email = email.lower()
+        email = email.lower().strip()
 
         user = await cls.find_one(query={"email": email})
 

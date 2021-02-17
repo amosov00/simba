@@ -5,20 +5,17 @@
 </template>
 
 <script>
-  import Nothing from "~/components/Nothing";
+import Nothing from '~/components/Nothing'
 
-  export default {
-    name: "contacts",
-    layout: "main",
-    components: {Nothing},
-    data() {
-      return {
-      };
-    },
-    methods: {
-    },
-  };
+export default {
+  name: 'contacts',
+  layout: 'main',
+  components: { Nothing },
+  data() {
+    return {}
+  },
+  methods: {},
+}
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>

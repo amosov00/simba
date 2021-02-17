@@ -66,20 +66,28 @@ class InvoiceCRUD(BaseMongoCRUD):
         query = []
 
         if q:
-            if len(q) == 24:
+            q_len = len(q)
+
+            if q_len == 24:
                 for f in ("_id", "user_id"):
                     try:
                         query.append({f: ObjectId(q)})
                     except errors.InvalidId:
                         pass
-            if len(q) >= 50:
-                for f in ("btc_tx_hashes", "eth_tx_hashes", "sst_tx_hashes"):
+            if q_len >= 30:
+                for f in ("btc_tx_hashes", "eth_tx_hashes", "sst_tx_hashes", ""):
                     query.append({f: {"$regex": q, "$options": "i"}})
 
-            if 1 < len(q) < 10:
+            if q_len == 42:
+                query.append({"target_eth_address": {"$regex": q, "$options": "i"}})
+
+            if q_len == 34:
+                query.append({"target_btc_address": {"$regex": q, "$options": "i"}})
+
+            if 1 < q_len < 10:
                 query.append({"status": q})
 
-            if len(q) == 1:
+            if q_len == 1:
                 try:
                     query.append({"invoice_type": int(q)})
                 except ValueError:

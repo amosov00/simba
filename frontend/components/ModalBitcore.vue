@@ -12,38 +12,43 @@
 </template>
 
 <script>
-
 export default {
-  name: "ModalBitcore",
-  props: ["invoice"],
+  name: 'ModalBitcore',
+  props: ['invoice'],
   data() {
     return {
       rawTransactionData: null,
       rawSignatureData: null,
       rawSignedTransaction: null,
-    };
+    }
   },
   async mounted() {
     await this.fetchData()
   },
   methods: {
     async fetchData() {
-      this.$axios.get(`/admin/invoices/${this.invoice._id}/multisig/`).then(resp => {
-        this.rawTransactionData = resp.data.rawTransactionData;
-        this.rawSignatureData = resp.data.rawSignatureData;
-      }).catch(resp => {
-        resp.response.data.map(i => this.$buefy.toast.open({type: "is-danger", message: `Error: ${i.message}`}))
-      })
+      this.$axios
+        .get(`/admin/invoices/${this.invoice._id}/multisig/`)
+        .then((resp) => {
+          this.rawTransactionData = resp.data.rawTransactionData
+          this.rawSignatureData = resp.data.rawSignatureData
+        })
+        .catch((resp) => {
+          resp.response.data.map((i) => this.$buefy.toast.open({ type: 'is-danger', message: `Error: ${i.message}` }))
+        })
     },
     async sendRawTransaction() {
-      let data = {transaction_hash: this.rawSignedTransaction}
-      this.$axios.post(`/admin/invoices/${this.invoice._id}/multisig/`, data).then(resp => {
-        this.$store.commit('invoices/addInvoice', resp.data)
-        this.$buefy.toast.open({type: "is-success", message: `Success!`})
-      }).catch(resp => {
-        resp.response.data.map(i => this.$buefy.toast.open({type: "is-danger", message: `Error: ${i.message}`}))
-      })
-    }
+      let data = { transaction_hash: this.rawSignedTransaction }
+      this.$axios
+        .post(`/admin/invoices/${this.invoice._id}/multisig/`, data)
+        .then((resp) => {
+          this.$store.commit('invoices/addInvoice', resp.data)
+          this.$buefy.toast.open({ type: 'is-success', message: `Success!` })
+        })
+        .catch((resp) => {
+          resp.response.data.map((i) => this.$buefy.toast.open({ type: 'is-danger', message: `Error: ${i.message}` }))
+        })
+    },
   },
 }
 </script>

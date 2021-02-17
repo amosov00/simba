@@ -12,61 +12,60 @@
 </template>
 
 <script>
-  export default {
-    name: "xpub",
-    layout: "main",
-    middleware: ["adminRequired"],
+export default {
+  name: 'xpub',
+  layout: 'main',
+  middleware: ['adminRequired'],
 
-    computed: {
-      xpub() {
-        return this.$store.getters['xpub/xpubList']
-      }
+  computed: {
+    xpub() {
+      return this.$store.getters['xpub/xpubList']
     },
+  },
 
-    data: () => ({
-      isLoading: false,
-      flagImages: {
-        uae: 'uae.svg',
-        liechtenstein: 'liechtenstein.png',
-        newzealand: 'new-zeland.png',
-        switzerland: 'switzerland.svg',
-      }
-    }),
-
-    methods: {
-      async update(xpub) {
-
-        const data_to_send = {
-          id: xpub._id,
-          data: {
-            is_active: !xpub.is_active
-          }
-        }
-
-        this.$buefy.dialog.confirm({
-          title: this.$i18n.t('xpub.confirm_your_action'),
-          message: this.$i18n.t('xpub.confirm_change_status'),
-          cancelText: this.$i18n.t('other.cancel'),
-          confirmText: this.$i18n.t('other.confirm'),
-          type: xpub.is_active ? 'is-danger' : 'is-primary',
-          onConfirm: async () => {
-            this.isLoading = true
-            if(await this.$store.dispatch('xpub/btcXpubUpdateSingle', data_to_send)) {
-              this.$buefy.toast.open({message: this.$i18n.t('xpub.status_changed'), type:'is-primary'})
-              await this.$store.dispatch("xpub/btcXpubFetchAll")
-            } else {
-              this.$buefy.toast.open({message: this.$i18n.t('xpub.something_went_wrong'), type:'is-danger'})
-            }
-            this.isLoading = false
-          }
-        })
-      }
+  data: () => ({
+    isLoading: false,
+    flagImages: {
+      uae: 'uae.svg',
+      liechtenstein: 'liechtenstein.png',
+      newzealand: 'new-zeland.png',
+      switzerland: 'switzerland.svg',
     },
+  }),
 
-    async asyncData({store}) {
-      await store.dispatch("xpub/btcXpubFetchAll")
-    }
-  };
+  methods: {
+    async update(xpub) {
+      const data_to_send = {
+        id: xpub._id,
+        data: {
+          is_active: !xpub.is_active,
+        },
+      }
+
+      this.$buefy.dialog.confirm({
+        title: this.$i18n.t('xpub.confirm_your_action'),
+        message: this.$i18n.t('xpub.confirm_change_status'),
+        cancelText: this.$i18n.t('other.cancel'),
+        confirmText: this.$i18n.t('other.confirm'),
+        type: xpub.is_active ? 'is-danger' : 'is-primary',
+        onConfirm: async () => {
+          this.isLoading = true
+          if (await this.$store.dispatch('xpub/btcXpubUpdateSingle', data_to_send)) {
+            this.$buefy.toast.open({ message: this.$i18n.t('xpub.status_changed'), type: 'is-primary' })
+            await this.$store.dispatch('xpub/btcXpubFetchAll')
+          } else {
+            this.$buefy.toast.open({ message: this.$i18n.t('xpub.something_went_wrong'), type: 'is-danger' })
+          }
+          this.isLoading = false
+        },
+      })
+    },
+  },
+
+  async asyncData({ store }) {
+    await store.dispatch('xpub/btcXpubFetchAll')
+  },
+}
 </script>
 
 <style lang="sass">

@@ -47,7 +47,7 @@ async def rescue_stucked_invoices_cron():
     await rescue_stucked_invoices_job.cast()
 
 
-@app.crontab("30 */1 * * *")
+@app.crontab("*/5 * * * *")
 async def fetch_and_proceed_sst_contract_cron():
     await fetch_and_proceed_sst_contract_job.cast()
 

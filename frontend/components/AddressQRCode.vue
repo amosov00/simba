@@ -6,24 +6,22 @@
 </template>
 
 <script>
-  import QrcodeVue from "qrcode.vue";
+import QrcodeVue from 'qrcode.vue'
 
-  export default {
-    name: 'AddressQRCode',
-    components: {QrcodeVue},
-    props: {
-      qrcode_value: String,
-      amount: null
-    },
-    data: () => ({
-    }),
-    methods: {
-    }
-  }
+export default {
+  name: 'AddressQRCode',
+  components: { QrcodeVue },
+  props: {
+    qrcode_value: String,
+    amount: null,
+  },
+  data: () => ({}),
+  methods: {},
+}
 </script>
 
 <style lang="sass" scoped>
-  .modal-card-body
-    padding-top: 40px
-    padding-bottom: 40px
+.modal-card-body
+  padding-top: 40px
+  padding-bottom: 40px
 </style>

@@ -1,11 +1,16 @@
+import hmac
 from datetime import datetime
+from hashlib import sha1
 from http import HTTPStatus
 from urllib.parse import urlencode, urljoin
 
+from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Body, Path
+from starlette.requests import Request
 
 from api.dependencies import get_user
 from config import settings, SST_CONTRACT
+from core.integrations.person_verify import PersonVerifyClient
 from core.mechanics.referrals import ReferralMechanics
 from database.crud import UserCRUD, EthereumTransactionCRUD, UserAddressesArchiveCRUD
 from schemas import (
@@ -28,6 +33,7 @@ from schemas import (
     UserBitcoinAddressDelete,
     UserBitcoinAddressInput,
     UserAddressesArchive,
+    UserKYCAccessTokenResponse,
 )
 
 __all__ = ["router"]
@@ -83,13 +89,15 @@ async def account_recover(data: UserRecoverLink = Body(...)):
 
 @router.get("/referral_link/", response_model=UserReferralURLResponse)
 async def account_get_referral_link(user: User = Depends(get_user)):
-    params = {"referral_id": user.id}
-    url = (
-        urljoin(settings.common.host_url, "register")
-        + "?"
-        + (urlencode(params) if user.user_eth_addresses != [] else "referral_id=*************")
-    )
-    return {"URL": url}
+    if user.user_eth_addresses:
+        params = {"referral_id": user.id}
+    else:
+        params = {"referral_id": "*************"}
+
+    return {
+        "url": urljoin(settings.common.host_url, "register") + "?" + urlencode(params),
+        "partner_code": str(user.id),
+    }
 
 
 @router.get("/2fa/", response_model=User2faURL)
@@ -107,17 +115,38 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
     return await UserCRUD.delete_2fa(user, payload)
 
 
+@router.get("/kyc/token/", response_model=UserKYCAccessTokenResponse)
+async def account_get_kyc_token(user: User = Depends(get_user)):
+    return {"token": await PersonVerifyClient.get_access_token(str(user.id))}
+
+
+@router.get("/kyc/status/")
+async def account_receive_kyc_status(request: Request):
+    request_hashsum = hmac.new(
+        settings.person_verify.status_webhook_secret_key.encode(), await request.body(), digestmod=sha1
+    ).hexdigest()
+
+    if request.headers["x-payload-digest"] == request_hashsum:
+        request_body = await request.json()
+        await UserCRUD.update_one(
+            {"_id": ObjectId(request_body["externalUserId"])},
+            {"kyc_status": request_body["reviewStatus"], "kyc_review_response": request_body},
+        )
+
+
 @router.get("/referrals/", response_model=UserReferralsResponse)
 async def account_referrals_info(user: User = Depends(get_user)):
-    referrals = await ReferralMechanics(user).fetch_referrals_top_to_bottom()
-    transactions = await EthereumTransactionCRUD.find(
+    instance = ReferralMechanics(user)
+    referrals = await instance.fetch_referrals_top_to_bottom()
+
+    transactions = await EthereumTransactionCRUD.find_many(
         {
             "contract": SST_CONTRACT.title,
             "user_id": user.id,
         }
     )
 
-    transactions = await ReferralMechanics(user).fetch_sst_tx_info_for_user(transactions)
+    transactions = await instance.fetch_sst_tx_info_for_user(transactions)
 
     return {"referrals": referrals, "transactions": transactions}
 

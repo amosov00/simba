@@ -19,28 +19,28 @@
 </template>
 
 <script>
-import moment from 'moment';
+import moment from 'moment'
 
-import formatCurrency from "~/mixins/formatCurrency";
+import formatCurrency from '~/mixins/formatCurrency'
 
 export default {
-  name: "exchange-index",
+  name: 'exchange-index',
   layout: 'main',
   mixins: [formatCurrency],
-  middleware: ["authRequired", "contract"],
+  middleware: ['authRequired', 'contract'],
   computed: {
     invoiceData() {
-      let array_data = JSON.parse(JSON.stringify(this.$store.getters['invoices/invoices'])).reverse();
+      let array_data = JSON.parse(JSON.stringify(this.$store.getters['invoices/invoices'])).reverse()
 
-      let amount = this.amounToView;
+      let amount = this.amounToView
 
-      return array_data.slice(0, amount);
-    }
+      return array_data.slice(0, amount)
+    },
   },
   data: () => ({
     amounToView: 6,
     billsToShow: [],
-    showBtn: true
+    showBtn: true,
   }),
 
   mounted() {
@@ -58,20 +58,19 @@ export default {
   methods: {
     getStatus(item) {
       if (item.status === 'waiting' || item.status === 'processing' || item.status === 'created') {
-        let current = +Date.now();
-        let dt = +moment.utc(item.created_at).toDate();
+        let current = +Date.now()
+        let dt = +moment.utc(item.created_at).toDate()
 
-        let plus2hours = +dt + (2 * 60 * 60 * 1000)
+        let plus2hours = +dt + 2 * 60 * 60 * 1000
 
-
-        let diff = plus2hours - current;
+        let diff = plus2hours - current
 
         if (diff < 0) {
           //return 'expired'
           return '00:00:00'
         }
 
-        let remain = moment.duration(diff);
+        let remain = moment.duration(diff)
 
         const twoDigits = (n) => {
           if (n < 10) {
@@ -106,16 +105,16 @@ export default {
       }
 
       return 'BUY'
-    }
+    },
   },
 
-  async asyncData({store}) {
-    await store.dispatch('invoices/fetchInvoices');
+  async asyncData({ store }) {
+    await store.dispatch('invoices/fetchInvoices')
     return {
-      billsList: JSON.parse(JSON.stringify(store.getters['invoices/invoices'])).reverse()
+      billsList: JSON.parse(JSON.stringify(store.getters['invoices/invoices'])).reverse(),
     }
-  }
-};
+  },
+}
 </script>
 
 <style lang="sass" scoped>
