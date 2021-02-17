@@ -176,6 +176,7 @@ class InvoiceMechanics(CryptoValidation):
         incoming_btc: int,
     ):
         self._raise_exception_if_exists()
+
         eth_tx_hash = await SimbaWrapper().issue_tokens(
             customer_address=self.invoice.target_eth_address,
             incoming_btc=incoming_btc,

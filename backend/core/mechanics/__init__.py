@@ -1,6 +1,6 @@
 from .crypto import *
 from .webhook import BlockCypherWebhookHandler
-from .invoice import InvoiceMechanics
+from .invoices import InvoiceMechanics, rescue_stucked_invoices
 from .referrals import ReferralMechanics
 from .transparency import TransparencyMechanics
 from .excel import *
