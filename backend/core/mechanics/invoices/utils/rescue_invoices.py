@@ -15,14 +15,10 @@ async def _rescue_buy_invoices(invoice: InvoiceExtended) -> bool:
     if invoice.status == InvoiceStatus.WAITING:
         transaction: Optional[BTCTransaction] = None
 
-        if invoice.btc_txs:
-            transaction = BTCTransaction(**invoice.btc_txs[0])
-        else:
-            address_info = await BitcoinWrapper().fetch_address_and_save(invoice.target_btc_address)
-            if len(address_info.transactions_refs) != 0:
-                transaction = await BitcoinWrapper().fetch_transaction(
-                    address_info.transactions_refs[0].transactions_hash
-                )
+        address_info = await BitcoinWrapper().fetch_address_and_save(invoice.target_btc_address)
+
+        if len(address_info.transactions_refs) != 0:
+            transaction = await BitcoinWrapper().fetch_transaction(address_info.transactions_refs[0].transactions_hash)
 
         if transaction:
             await InvoiceMechanics(invoice).proceed_new_transaction(transaction)

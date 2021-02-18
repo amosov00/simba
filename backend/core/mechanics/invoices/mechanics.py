@@ -226,6 +226,7 @@ class InvoiceMechanics(CryptoValidation):
             return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
 
         else:
+            self._log("failed some conditions - save and skip")
             return await BTCTransactionCRUD.update_or_insert(
                 {"hash": new_transaction.hash}, new_transaction.dict(exclude_unset=True)
             )
