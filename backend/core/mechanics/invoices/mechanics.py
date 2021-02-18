@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from datetime import datetime
 from http import HTTPStatus
 from typing import Union, List, Optional
@@ -53,6 +54,11 @@ class InvoiceMechanics(CryptoValidation):
             raise HTTPException(HTTPStatus.BAD_REQUEST, self.errors)
         else:
             return None
+
+    def _log(self, msg: str, level: str = "info"):
+        # TODO refactor later
+        log_map = {"info": 20, "warning": 30, "error": 40}
+        return logging.log(log_map.get(level, 20), f"Invoice {self.invoice.id}: {msg}")
 
     async def update_invoice(self):
         return await InvoiceCRUD.update_one({"_id": self.invoice.id}, self.invoice.dict(exclude={"id"}))
@@ -191,12 +197,13 @@ class InvoiceMechanics(CryptoValidation):
         self.invoice.simba_amount_proceeded += incoming_btc - SIMBA_BUY_SELL_FEE
         self.invoice.add_hash("eth", eth_tx_hash)
         self.invoice.add_hash("btc", transaction.hash)
-
         await self.update_invoice()
-        user = await UserCRUD.find_by_id(self.invoice.user_id)
-        user = User(**user)
+
+        user = User(**await UserCRUD.find_by_id(self.invoice.user_id))
+
         asyncio.create_task(SSTWrapper(self.invoice).send_sst_to_referrals(user, self.invoice.btc_amount))
         asyncio.create_task(BitcoinWrapper().fetch_address_and_save(self.invoice.target_btc_address))
+        self._log(f"success simba tokens issue - tx hash {eth_tx_hash}")
         return True
 
     async def _proceed_new_btc_tx_buy(self, new_transaction: BTCTransaction, transaction_in_db: BTCTransactionInDB):
@@ -215,6 +222,7 @@ class InvoiceMechanics(CryptoValidation):
                 self.invoice.status == InvoiceStatus.WAITING,
             ]
         ):
+            self._log(f"issuing simba tokens - {incoming_btc}")
             return await self._issue_simba_tokens_and_save(new_transaction, incoming_btc)
 
         else:
@@ -260,6 +268,7 @@ class InvoiceMechanics(CryptoValidation):
 
         if transaction_in_db := await BTCTransactionCRUD.find_one({"hash": transaction.hash}):
             transaction_in_db = BTCTransactionInDB(**transaction_in_db)
+            self._log(f"find transaction_in_db (id {transaction_in_db.id})")
 
         self._raise_exception_if_exists()
 
@@ -293,7 +302,7 @@ class InvoiceMechanics(CryptoValidation):
             {"_id": transaction.id}, transaction.dict(exclude={"id"}, exclude_unset=True)
         )
         await self.update_invoice()
-
+        self._log(f"confirmed simba tokens transfer - tx hash {transaction.transactionHash}")
         return True
 
     async def _proceed_new_eth_tx_issue_redeem(self, transaction: EthereumTransactionInDB):
@@ -310,6 +319,7 @@ class InvoiceMechanics(CryptoValidation):
             {"_id": transaction.id}, transaction.dict(exclude={"id"}, exclude_unset=True)
         )
         await self.update_invoice()
+        self._log(f"confirmed simba tokens issue or redeemed - tx hash {transaction.transactionHash}")
         return True
 
     async def proceed_new_eth_transaction(self, transaction: EthereumTransactionInDB):
@@ -325,9 +335,13 @@ class InvoiceMechanics(CryptoValidation):
         self, transaction: Union[BTCTransaction, EthereumTransaction], **kwargs
     ) -> Union[bool, str]:
         if isinstance(transaction, (BTCTransaction, BTCTransactionInDB)):
+            self._log(f"new BTC transaction: {transaction.hash}")
             return await self.proceed_new_btc_transaction(transaction)
         elif isinstance(transaction, (EthereumTransaction, EthereumTransactionInDB)):
+            self._log(f"new ETH transaction: {transaction.transactionHash}")
             return await self.proceed_new_eth_transaction(transaction)
+        else:
+            self._log(f"unknown type of tx: {type(transaction)}", "error")
 
     async def send_bitcoins(self):
         self._validate_for_sending_btc()
