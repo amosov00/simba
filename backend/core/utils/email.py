@@ -84,7 +84,7 @@ class Email:
     async def support_invoice_stucked(self, **kwargs):
         msg = self.create_message(
             to=self.support_mail,
-            subject="Warning: Hot wallet BTC balance lack",
+            subject="Warning: Invoice Stucked",
             body=self._render_template("support-invoice-stuck", **kwargs),
         )
         await self._send_message(msg)
