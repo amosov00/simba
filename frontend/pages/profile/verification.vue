@@ -7,17 +7,19 @@
 
 <script>
 import snsWebSdk from '@sumsub/websdk'
-import { sumSubStyles } from '~/consts'
 export default {
   name: 'profile-verification',
   layout: 'profile',
   computed: {},
   data: () => ({
     token: null,
-    currentStep: ''
+    currentStep: '',
+    steps: ['IDENTITY', 'SELFIE', 'applicant'],
+    stepsCompleted: []
   }),
   methods: {
     launchWebSdk(apiUrl, flowName, accessToken, applicantEmail, applicantPhone) {
+      const origin = document.location.origin
       let snsWebSdkInstance = snsWebSdk
         .Builder(apiUrl, flowName)
         .withAccessToken(accessToken, (newAccessTokenCallback) => {
@@ -34,7 +36,7 @@ export default {
             }
           },
           uiConf: {
-            customCssStr: sumSubStyles
+            customCss: `${origin}/sumsub.css`
           },
           onError: (error) => {
             console.error('WebSDK onError', error)
