@@ -1,5 +1,6 @@
 .submit {
   margin-top: 20px;
+  margin-left: 0;
   height: 41px;
   width: 200px;
   border-radius: 5px;
@@ -36,6 +37,7 @@
 
 :root {
   --primary-color: black;
+  --green-color: black;
 }
 
 strong {
@@ -189,3 +191,23 @@ div > .row:last-child {
   padding-right: 0 !important;
 }
 
+.fields-list-two-columns:first-child {
+  flex-direction: column;
+}
+
+.fields-list.fields-list-two-columns .input-field:nth-child(2n) {
+  margin-left: 0;
+}
+
+.content > div:last-child:not([answer]) > .row:first-child::after {
+  content: 'Please enter your real name and surname';
+  display: block;
+}
+
+input:focus {
+  border-bottom: 2px solid black;
+}
+
+.back {
+  display: none;
+}
