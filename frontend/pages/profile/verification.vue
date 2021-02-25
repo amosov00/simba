@@ -1,7 +1,16 @@
 <template>
   <div>
+    <p
+      v-for="elem in stepsCompleted"
+      style="color: #0ACA62"
+      v-if="stepsCompleted.length !== 0"
+    >{{elem}}</p>
     <div id="sumsub-websdk-container"></div>
-    <div>{{currentStep}}</div>
+    <p
+      v-for="elem in stepsNext"
+      style="color: #0045b3"
+      v-if="stepsNext.length !== 0"
+    >{{elem}}</p>
   </div>
 </template>
 
@@ -14,12 +23,13 @@ export default {
   data: () => ({
     token: null,
     currentStep: '',
-    steps: ['IDENTITY', 'SELFIE', 'applicant'],
-    stepsCompleted: []
+    stepsCompleted: [],
+    stepsNext: [],
   }),
   methods: {
     launchWebSdk(apiUrl, flowName, accessToken, applicantEmail, applicantPhone) {
       const origin = document.location.origin
+      console.log(`${origin}/sumsub.css`)
       let snsWebSdkInstance = snsWebSdk
         .Builder(apiUrl, flowName)
         .withAccessToken(accessToken, (newAccessTokenCallback) => {
@@ -33,6 +43,11 @@ export default {
             console.log('WebSDK onMessage', type, payload)
             if (type === 'idCheck.onStepInitiated') {
               this.currentStep = payload.idDocSetType
+              localStorage.setItem('currentStep', payload.idDocSetType)
+            }
+            if (type === 'livenessSessionCompleted' && payload.answer === 'GREEN') {
+              this.currentStep = 'APPLICANT_DATA'
+              localStorage.setItem('currentStep', 'APPLICANT_DATA')
             }
           },
           uiConf: {
@@ -52,5 +67,26 @@ export default {
     // 'tst:Dt2mTU9SnHl9SGjALc5hhCMe.L4VJ9g2XHJbYjipw5hI39QZd7amHIzMo'
     this.launchWebSdk('https://test-api.sumsub.com', 'basic-kyc', this.token)
   },
+  created() {
+    if (localStorage.getItem('currentStep')) {
+      this.currentStep = localStorage.getItem('currentStep')
+    }
+  },
+  watch: {
+    currentStep() {
+      if (this.currentStep === 'IDENTITY') {
+        this.stepsCompleted = []
+        this.stepsNext = ['SELFIE', 'APPLICANT_DATA']
+      }
+      if (this.currentStep === 'SELFIE') {
+        this.stepsCompleted = ['IDENTITY']
+        this.stepsNext = ['APPLICANT_DATA']
+      }
+      if (this.currentStep === 'APPLICANT_DATA') {
+        this.stepsCompleted = ['IDENTITY', 'SELFIE']
+        this.stepsNext = []
+      }
+    }
+  }
 }
 </script>
