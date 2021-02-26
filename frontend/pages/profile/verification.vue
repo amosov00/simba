@@ -1,16 +1,6 @@
 <template>
   <div>
-    <p
-      v-for="elem in stepsCompleted"
-      style="color: #0ACA62"
-      v-if="stepsCompleted.length !== 0"
-    >{{elem}}</p>
     <div id="sumsub-websdk-container"></div>
-    <p
-      v-for="elem in stepsNext"
-      style="color: #0045b3"
-      v-if="stepsNext.length !== 0"
-    >{{elem}}</p>
   </div>
 </template>
 
@@ -51,7 +41,7 @@ export default {
             }
           },
           uiConf: {
-            customCss: `${origin}/sumsub.css`
+            customCss: `${origin}/sumsub.css`,
           },
           onError: (error) => {
             console.error('WebSDK onError', error)
@@ -86,7 +76,7 @@ export default {
         this.stepsCompleted = ['IDENTITY', 'SELFIE']
         this.stepsNext = []
       }
-    }
-  }
+    },
+  },
 }
 </script>

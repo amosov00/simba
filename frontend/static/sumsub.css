@@ -4,7 +4,7 @@
   height: 41px;
   width: 200px;
   border-radius: 5px;
-  background-color: #0060FF;
+  background-color: #0060ff;
   text-transform: capitalize;
   background-image: none !important;
 }
@@ -15,7 +15,7 @@
 
 .mobile-button {
   box-shadow: none;
-  color: #0060FF;
+  color: #0060ff;
   position: absolute;
   bottom: -25px;
   right: 0;
@@ -24,13 +24,13 @@
 }
 
 .mobile-button > div > h3 {
-  color: #0060FF;
+  color: #0060ff;
   text-decoration: underline;
-  font-size: 11px
+  font-size: 11px;
 }
 
 .mobile-button > .fa-icon {
-  fill: #0060FF;
+  fill: #0060ff;
   width: 50px;
   height: 50px;
 }
@@ -45,15 +45,14 @@ strong {
 }
 
 .steps {
-  display: none;
 }
 
 .desktop {
-  margin: 0
+  margin: 0;
 }
 
 section .row {
-  margin: 16px 0
+  margin: 16px 0;
 }
 
 .content {
@@ -66,11 +65,11 @@ section {
 }
 
 .row:nth-child(3) > h3 {
-  display: none
+  display: none;
 }
 
 .row:nth-child(2) > h3 {
-  font-weight: normal
+  font-weight: normal;
 }
 
 .row > h2 {
@@ -78,37 +77,37 @@ section {
 }
 
 .row > h2 > p {
-  color: #E0B72E;
+  color: #e0b72e;
   text-transform: lowercase;
 }
 
 .radio-group {
-  width: 1000px
+  width: 1000px;
 }
 
 .sumsub-logo {
-  display: none
+  display: none;
 }
 
 div > .row:last-child {
-  text-align: left
+  text-align: left;
 }
 
 .upload-payment-item .upload-item {
   box-shadow: none;
-  border: 2px dashed #0060FF;
+  border: 2px dashed #0060ff;
 }
 
 .radio-item .checkmark::after {
-  background-color: #E0B72E;
+  background-color: #e0b72e;
 }
 
 .radio-item .checkmark {
   border: 2px solid black;
 }
 
-.radio-item input:checked~.checkmark {
-  border: 2px solid #E0B72E;
+.radio-item input:checked ~ .checkmark {
+  border: 2px solid #e0b72e;
 }
 
 .requiredDoc::after {
@@ -116,21 +115,20 @@ div > .row:last-child {
 }
 
 .requiredDoc {
-  color: #0060FF;
+  color: #0060ff;
   text-decoration: underline;
 }
 
 .requiredDoc > span {
-  color: #0060FF;
+  color: #0060ff;
 }
 
-
 .fa-cloud-upload:before {
-  content: "";
+  content: '';
   display: block;
   width: 100px;
   height: 100px;
-  background-image: url("/upload.png");
+  background-image: url('/upload.png');
   background-repeat: no-repeat;
   background-position: center;
 }
@@ -154,20 +152,19 @@ div > .row:last-child {
   margin: 0 0 30px 0;
 }
 
-
-.submit~[role="button"] {
+.submit ~ [role='button'] {
   position: absolute;
   right: 20px;
   bottom: 120px;
   cursor: pointer;
 }
 
-.submit~[role="button"]::after {
+.submit ~ [role='button']::after {
   content: '';
   display: block;
   width: 50px;
   height: 50px;
-  background-image: url("/phone.png");
+  background-image: url('/phone.png');
   background-repeat: no-repeat;
   background-position: center;
   position: absolute;
@@ -177,8 +174,8 @@ div > .row:last-child {
   cursor: pointer;
 }
 
-.submit~[role="button"] > p {
-  color: #0060FF;
+.submit ~ [role='button'] > p {
+  color: #0060ff;
   text-decoration: underline;
 }
 
@@ -227,19 +224,22 @@ input:focus {
 
 .ident-step {
   position: relative;
-  color: #E0B72E !important;
+  color: #e0b72e !important;
   font-weight: normal !important;
 }
 
-.process.ident-step::after{
+.process.ident-step::after {
   margin: auto;
   position: absolute;
-  top: 0; left: -170px; bottom: 0; right: 0;
+  top: 0;
+  left: -170px;
+  bottom: 0;
+  right: 0;
   content: '';
   display: block;
   width: 30px;
   height: 30px;
-  background-image: url("/statusload.svg");
+  background-image: url('/statusload.svg');
   background-repeat: no-repeat;
   background-position: center;
   animation-name: rotation;
@@ -251,12 +251,15 @@ input:focus {
 .success.ident-step::after {
   margin: auto;
   position: absolute;
-  top: 0; left: -170px; bottom: 0; right: 0;
+  top: 0;
+  left: -170px;
+  bottom: 0;
+  right: 0;
   content: '';
   display: block;
   width: 50px;
   height: 50px;
-  background-image: url("/circle.svg");
+  background-image: url('/circle.svg');
   background-size: 50%;
   background-repeat: no-repeat;
   background-position: center;
@@ -265,24 +268,26 @@ input:focus {
 .success.ident-step::before {
   margin: auto;
   position: absolute;
-  top: 0; left: -162px; bottom: 15px; right: 0;
+  top: 0;
+  left: -162px;
+  bottom: 15px;
+  right: 0;
   content: '';
   display: block;
   width: 50px;
   height: 50px;
-  background-image: url("/check.svg");
+  background-image: url('/check.svg');
   background-size: 45%;
   background-repeat: no-repeat;
   background-position: center;
 }
 
-
 @keyframes rotation {
   100% {
-    transform:rotate(0deg);
+    transform: rotate(0deg);
   }
   0% {
-    transform:rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 
@@ -291,7 +296,7 @@ input:focus {
 }
 
 .footer[data-v-319be479] {
-  padding-top:0;
+  padding-top: 0;
 }
 
 .liveness-step[data-v-319be479] {
