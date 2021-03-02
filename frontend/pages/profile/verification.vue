@@ -1,6 +1,7 @@
-<template lang="pug">
-  div
-    div#sumsub-websdk-container
+<template>
+  <div>
+    <div id="sumsub-websdk-container"></div>
+  </div>
 </template>
 
 <script>
@@ -11,18 +12,14 @@ export default {
   computed: {},
   data: () => ({
     token: null,
-    steps: {
-      current: 'profile.email_verification',
-      list: [
-        'profile.email_verification',
-        'profile.verify_address',
-        'profile.id_verification',
-        'profile.source_of_funds_verification',
-      ],
-    },
+    currentStep: '',
+    stepsCompleted: [],
+    stepsNext: [],
   }),
   methods: {
     launchWebSdk(apiUrl, flowName, accessToken, applicantEmail, applicantPhone) {
+      const origin = document.location.origin
+      console.log(`${origin}/sumsub.css`)
       let snsWebSdkInstance = snsWebSdk
         .Builder(apiUrl, flowName)
         .withAccessToken(accessToken, (newAccessTokenCallback) => {
@@ -34,6 +31,17 @@ export default {
           phone: applicantPhone,
           onMessage: (type, payload) => {
             console.log('WebSDK onMessage', type, payload)
+            if (type === 'idCheck.onStepInitiated') {
+              this.currentStep = payload.idDocSetType
+              localStorage.setItem('currentStep', payload.idDocSetType)
+            }
+            if (type === 'livenessSessionCompleted' && payload.answer === 'GREEN') {
+              this.currentStep = 'APPLICANT_DATA'
+              localStorage.setItem('currentStep', 'APPLICANT_DATA')
+            }
+          },
+          uiConf: {
+            customCss: `${origin}/sumsub.css`,
           },
           onError: (error) => {
             console.error('WebSDK onError', error)
@@ -42,22 +50,6 @@ export default {
         .build()
       snsWebSdkInstance.launch('#sumsub-websdk-container', 'basic-kyc')
     },
-    activeStep(i) {
-      if (this.failedStep(i)) {
-        return false
-      }
-      return i < this.steps.list.indexOf(this.steps.current) + 1
-    },
-
-    failedStep(i) {
-      if (this.stepFail) {
-        if (i === this.stepFail) {
-          return true
-        }
-      }
-
-      return false
-    },
   },
   async mounted() {
     let { data } = await this.$axios.get('/account/kyc/token/')
@@ -65,8 +57,26 @@ export default {
     // 'tst:Dt2mTU9SnHl9SGjALc5hhCMe.L4VJ9g2XHJbYjipw5hI39QZd7amHIzMo'
     this.launchWebSdk('https://test-api.sumsub.com', 'basic-kyc', this.token)
   },
-  async asyncData({ store }) {},
+  created() {
+    if (localStorage.getItem('currentStep')) {
+      this.currentStep = localStorage.getItem('currentStep')
+    }
+  },
+  watch: {
+    currentStep() {
+      if (this.currentStep === 'IDENTITY') {
+        this.stepsCompleted = []
+        this.stepsNext = ['SELFIE', 'APPLICANT_DATA']
+      }
+      if (this.currentStep === 'SELFIE') {
+        this.stepsCompleted = ['IDENTITY']
+        this.stepsNext = ['APPLICANT_DATA']
+      }
+      if (this.currentStep === 'APPLICANT_DATA') {
+        this.stepsCompleted = ['IDENTITY', 'SELFIE']
+        this.stepsNext = []
+      }
+    },
+  },
 }
 </script>
-
-<style lang="sass" scoped></style>
