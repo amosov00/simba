@@ -118,7 +118,7 @@ async def account_get_kyc_token(user: User = Depends(get_user)):
     return {"token": await PersonVerifyClient.get_access_token(str(user.id))}
 
 
-@router.get("/kyc/status/")
+@router.post("/kyc/status/")
 async def account_receive_kyc_status(request: Request):
     request_hashsum = hmac.new(
         settings.person_verify.status_webhook_secret_key.encode(), await request.body(), digestmod=sha1
