@@ -1,15 +1,23 @@
 <template>
   <div>
     <div id="sumsub-websdk-container"></div>
+    <start-verify></start-verify>
+    <confirm-verify></confirm-verify>
   </div>
 </template>
 
 <script>
 import snsWebSdk from '@sumsub/websdk'
+import StartVerify from '@/components/StartVerify'
+import ConfirmVerify from '@/components/ConfirmVerify'
 export default {
   name: 'profile-verification',
   layout: 'profile',
   computed: {},
+  components: {
+    StartVerify,
+    ConfirmVerify
+  },
   data: () => ({
     token: null,
     currentStep: '',
