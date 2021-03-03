@@ -121,6 +121,9 @@ class User(BaseModel):
 
     created_at: Optional[datetime] = Field(default=None)
 
+    kyc_status: Optional[str] = Field(default=None)
+    kyc_review_response: Optional[dict] = Field(default=None)
+
     @property
     def is_authenticated(self):
         return True
