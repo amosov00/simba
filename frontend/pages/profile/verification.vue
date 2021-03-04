@@ -2,6 +2,7 @@
   <div>
     <div id="sumsub-websdk-container"></div>
     <start-verify v-if="false"></start-verify>
+    <pre v-show="false">{{language}}</pre>
   </div>
 </template>
 
@@ -11,7 +12,13 @@ import StartVerify from '@/components/StartVerify'
 export default {
   name: 'profile-verification',
   layout: 'profile',
-  computed: {},
+  computed: {
+    language() {
+      const lang = this.$i18n.locale
+      this.launch()
+      return lang
+    }
+  },
   components: {
     StartVerify,
   },
@@ -22,6 +29,12 @@ export default {
     stepsNext: [],
   }),
   methods: {
+    async launch() {
+      let { data } = await this.$axios.get('/account/kyc/token/')
+      this.token = data.token
+      // 'tst:Dt2mTU9SnHl9SGjALc5hhCMe.L4VJ9g2XHJbYjipw5hI39QZd7amHIzMo'
+      this.launchWebSdk('https://test-api.sumsub.com', 'basic-kyc', this.token)
+    },
     launchWebSdk(apiUrl, flowName, accessToken, applicantEmail, applicantPhone) {
       const origin = document.location.origin
       console.log(`${origin}/sumsub.css`)
@@ -31,7 +44,7 @@ export default {
           newAccessTokenCallback(accessToken)
         })
         .withConf({
-          lang: 'en',
+          lang: this.$i18n.locale,
           email: applicantEmail,
           phone: applicantPhone,
           onMessage: (type, payload) => {
@@ -57,10 +70,7 @@ export default {
     },
   },
   async mounted() {
-    let { data } = await this.$axios.get('/account/kyc/token/')
-    this.token = data.token
-    // 'tst:Dt2mTU9SnHl9SGjALc5hhCMe.L4VJ9g2XHJbYjipw5hI39QZd7amHIzMo'
-    this.launchWebSdk('https://test-api.sumsub.com', 'basic-kyc', this.token)
+    await this.launch()
   },
   created() {
     if (localStorage.getItem('currentStep')) {
