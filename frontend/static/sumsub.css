@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;400&display=swap');
+
 .submit {
   margin-top: 20px;
   margin-left: 0;
@@ -60,6 +62,11 @@ section .row {
   padding: 0;
 }
 
+.document-status > .content {
+  margin: 0;
+  padding: 0 0 0 50px;
+}
+
 section {
   box-shadow: none;
 }
@@ -78,7 +85,21 @@ section {
 
 .row > h2 > p {
   color: #e0b72e;
-  text-transform: lowercase;
+  text-transform: capitalize;
+  font-size: 19px;
+  letter-spacing: 0px;
+}
+
+.markdown-instructions ~ .row > h2 > p {
+  color: black;
+  font-weight: normal;
+  text-transform: none;
+  font-size: 16px;
+}
+
+.landing > .markdown-instructions > p {
+  font-weight: bold;
+  font-size: 15px;
 }
 
 .radio-group {
@@ -154,8 +175,8 @@ div > .row:last-child {
 
 .submit ~ [role='button'] {
   position: absolute;
-  right: 20px;
-  bottom: 120px;
+  right: 85px;
+  bottom: 45px;
   cursor: pointer;
 }
 
@@ -188,6 +209,7 @@ div > .row:last-child {
   padding-right: 0 !important;
 }
 
+
 .fields-list-two-columns:first-child {
   flex-direction: column;
 }
@@ -206,6 +228,10 @@ input:focus {
 
 .row > h4 > p {
   display: inline;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 18px !important;
+  font-weight: lighter;
+  letter-spacing: 0.1px;
 }
 
 .center {
@@ -308,5 +334,119 @@ a {
 }
 
 .fa.fa-pencil {
+  display: none;
+}
+
+.checkbox .checkmark {
+  width: 16px;
+  height: 16px;
+  border: 0 solid transparent;
+  outline: 1px solid #DFDFDF;
+  display: flex;
+}
+
+.checkbox, .radio-item {
+  padding-left: 36px;
+}
+
+.checkbox .checkmark:after {
+  display: none;
+}
+
+.checkbox input:checked~.checkmark:after {
+  display: none;
+}
+
+.checkbox input:checked~.checkmark {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.checkbox .checkmark::before {
+  display: none;
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.checkbox input:checked~.checkmark::before {
+  display: block;
+  width: 10px;
+  height: 10px;
+  background-color: #0060FF;
+}
+
+.checkbox input:checked~.checkmark {
+  outline: 2px solid #0060FF;
+  outline-offset: -1px;
+}
+
+.spacer {
+  display: none;
+}
+
+.controls[data-v-063c19f5] {
+   margin: 0;
+}
+
+.tutorial > .row:last-child {
+  margin-bottom: 30px;
+}
+
+p {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+.instructions-body > p {
+  font-size: 18px !important;
+  font-weight: lighter;
+  letter-spacing: 0.1px;
+}
+
+.uppercase {
+  text-transform: capitalize;
+  letter-spacing: normal;
+  font-weight: bold !important;
+}
+
+.review-data > p {
+  font-style: italic;
+}
+
+.review-data > div > p > span > b {
+  font-style: italic;
+}
+
+.steps {
+  display: none;
+}
+
+.review-done > p {
+  text-align: center;
+  margin-top: 60px;
+}
+
+#loader::before {
+  content: '';
+  width: 200px;
+  height: 200px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 90%;
+  background-image: url("loader.gif");
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#loader {
+  position: relative;
+}
+
+#loader > .round-icon {
   display: none;
 }

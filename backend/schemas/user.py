@@ -58,7 +58,7 @@ USER_MODEL_INCLUDE_FIELDS = frozenset(
         "terms_and_condition",
         "created_at",
         "kyc_status",
-        "kyc_review_response"
+        "kyc_review_response",
     )
 )
 
