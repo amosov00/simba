@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div id="sumsub-websdk-container"></div>
-    <start-verify v-if="false"></start-verify>
+    <div id="sumsub-websdk-container" v-show="!showStartVerify"></div>
+    <start-verify v-if="showStartVerify" @show="e => showStartVerify = e"></start-verify>
     <pre v-show="false">{{language}}</pre>
   </div>
 </template>
@@ -17,6 +17,13 @@ export default {
       const lang = this.$i18n.locale
       this.launch()
       return lang
+    },
+    flow() {
+      if (this.$i18n.locale === 'ru') {
+        return 'Basic_ru'
+      } else {
+        return 'basic-kyc'
+      }
     }
   },
   components: {
@@ -27,17 +34,17 @@ export default {
     currentStep: '',
     stepsCompleted: [],
     stepsNext: [],
+    showStartVerify: true
   }),
   methods: {
     async launch() {
       let { data } = await this.$axios.get('/account/kyc/token/')
       this.token = data.token
       // 'tst:Dt2mTU9SnHl9SGjALc5hhCMe.L4VJ9g2XHJbYjipw5hI39QZd7amHIzMo'
-      this.launchWebSdk('https://test-api.sumsub.com', 'basic-kyc', this.token)
+      this.launchWebSdk('https://test-api.sumsub.com', this.flow, this.token)
     },
     launchWebSdk(apiUrl, flowName, accessToken, applicantEmail, applicantPhone) {
       const origin = document.location.origin
-      console.log(`${origin}/sumsub.css`)
       let snsWebSdkInstance = snsWebSdk
         .Builder(apiUrl, flowName)
         .withAccessToken(accessToken, (newAccessTokenCallback) => {
@@ -59,7 +66,7 @@ export default {
             }
           },
           uiConf: {
-            customCss: `${origin}/sumsub.css`,
+            customCss: `${origin}/${this.$i18n.locale}sumsub.css`,
           },
           onError: (error) => {
             console.error('WebSDK onError', error)

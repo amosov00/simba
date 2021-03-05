@@ -258,7 +258,7 @@ input:focus {
   margin: auto;
   position: absolute;
   top: 0;
-  left: -170px;
+  left: -240px;
   bottom: 0;
   right: 0;
   content: '';
@@ -278,7 +278,7 @@ input:focus {
   margin: auto;
   position: absolute;
   top: 0;
-  left: -170px;
+  left: -240px;
   bottom: 0;
   right: 0;
   content: '';
@@ -295,7 +295,7 @@ input:focus {
   margin: auto;
   position: absolute;
   top: 0;
-  left: -162px;
+  left: -230px;
   bottom: 15px;
   right: 0;
   content: '';
@@ -388,7 +388,7 @@ a {
 }
 
 .controls[data-v-063c19f5] {
-   margin: 0;
+  margin: 0;
 }
 
 .tutorial > .row:last-child {
@@ -449,4 +449,8 @@ p {
 
 #loader > .round-icon {
   display: none;
+}
+
+.controls[data-v-5dbc79d2] {
+  margin: 0;
 }

@@ -1,5 +1,6 @@
 <template>
   <div>
+<!--    <pre>{{res}}</pre>-->
     <step-indicator class="indicator"></step-indicator>
     <h2 class="start-title">Необходимо подтвердить вашу личность</h2>
     <p class="text">
@@ -10,7 +11,7 @@
       <img :src="require('@/static/lock.png')" alt="lock" class="lock__img" />
       <p class="lock__text">Безопасное соединение установлено, можно начинать проверку</p>
     </div>
-    <btn-verify>Начать проверку</btn-verify>
+    <btn-verify @click.native="$emit('show', false)">Начать проверку</btn-verify>
   </div>
 </template>
 
@@ -23,6 +24,16 @@ export default {
     BtnVerify,
     StepIndicator,
   },
+  data() {
+    return {
+      res: ''
+    }
+  },
+  created() {
+    this.$axios.get('/account/user/').then((res)=>{
+      this.res = res.data
+    })
+  }
 }
 </script>
 
