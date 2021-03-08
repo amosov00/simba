@@ -167,6 +167,7 @@ div > .row:last-child {
 
 .liveness-step > .pad > div {
   text-align: left !important;
+  margin: 0;
 }
 
 .liveness-step > .pad > div .instructions-body {
@@ -317,8 +318,8 @@ input:focus {
   }
 }
 
-.back {
-  display: none;
+.back, .alt-back {
+  display: none !important;
 }
 
 .footer[data-v-319be479] {
@@ -453,4 +454,11 @@ p {
 
 .controls[data-v-5dbc79d2] {
    margin: 0;
+}
+.stack[data-v-04a61c9e] {
+  display: block;
+}
+
+.spacer {
+  display: none !important;
 }

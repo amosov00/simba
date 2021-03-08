@@ -25,12 +25,12 @@ export default ({ app, redirect, route, $config }, inject) => {
   inject('authLogout', async () => {
     app.store.commit('deleteUser')
     app.$axios.setToken(null)
-    app.$cookies.remove('token', {
-      domain: $config.domain,
+    app.$cookies.remove('token')
+    setTimeout(()=>{
+      if (route.path !== '/') {
+        redirect('/')
+      }
     })
-    if (route.path !== '/') {
-      await redirect('/')
-    }
   })
   inject('authFetchUser', async () => {
     return app.$axios
