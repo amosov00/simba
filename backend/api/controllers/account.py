@@ -139,7 +139,10 @@ async def account_get_kyc_status(user: User = Depends(get_user)):
 
     if not kyc_current_status or (kyc_current_status and datetime.now() >= kyc_current_status.get("_expire_at")):
         kyc_current_status = await PersonVerifyClient.get_current_status(
-            str(user.id), service_applicant_id=kyc_current_status.get("service_applicant_id_cache", None)
+            str(user.id),
+            service_applicant_id=kyc_current_status.get("service_applicant_id_cache", None)
+            if kyc_current_status
+            else None,
         )
 
         expire_at = datetime.now() + relativedelta(minutes=5)  # default cache expire time
