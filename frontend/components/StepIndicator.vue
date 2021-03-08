@@ -4,15 +4,14 @@
       <div
         class="step__number"
         :class="{
-          'step__number--active':
-            currentStep === 'first' || currentStep === 'second' || currentStep === 'third' || currentStep === 'fourth',
+          'step__number--active': emailConfirm.is_active,
         }"
       >
         <p>1</p>
         <div
           class="step__line"
           :class="{
-            'step__line--active': currentStep === 'second' || currentStep === 'third' || currentStep === 'fourth',
+            'step__line--active': passportConfirm,
           }"
         ></div>
       </div>
@@ -25,7 +24,7 @@
       <div
         class="step__number"
         :class="{
-          'step__number--active': currentStep === 'second' || currentStep === 'third' || currentStep === 'fourth',
+          'step__number--active': passportConfirm,
         }"
       >
         <p>2</p>
@@ -47,6 +46,22 @@ export default {
       type: String,
     },
   },
+  data() {
+    return {
+      emailConfirm: '',
+      passportConfirm: ''
+    }
+  },
+  created() {
+    this.$axios.get('/account/kyc/status/')
+      .then((res)=>{this.passportConfirm = res.data.kyc_current_status.docs_status.IDENTITY})
+    this.$axios.get('/account/user/').then((res)=>{
+      this.emailConfirm = res.data
+      if (this.emailConfirm.kyc_review_response?.reviewResult?.reviewAnswer === 'RED') {
+        this.emailConfirm.kyc_review_response = null
+      }
+    })
+  }
 }
 </script>
 
