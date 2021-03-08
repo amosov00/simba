@@ -5,6 +5,7 @@ from http import HTTPStatus
 from urllib.parse import urlencode, urljoin
 
 from bson import ObjectId
+from dateutil.relativedelta import relativedelta
 from fastapi import APIRouter, HTTPException, Depends, Body, Path
 from starlette.requests import Request
 
@@ -130,6 +131,24 @@ async def account_receive_kyc_status(request: Request):
             {"_id": ObjectId(request_body["externalUserId"])},
             {"kyc_status": request_body["reviewStatus"], "kyc_review_response": request_body},
         )
+
+
+@router.get("/kyc/status/")
+async def account_get_kyc_status(user: User = Depends(get_user)):
+    kyc_current_status = user.kyc_current_status
+
+    if not kyc_current_status or (kyc_current_status and datetime.now() >= kyc_current_status.get("_expire_at")):
+        kyc_current_status = await PersonVerifyClient.get_current_status(
+            str(user.id), service_applicant_id=kyc_current_status.get("service_applicant_id_cache", None)
+        )
+
+        expire_at = datetime.now() + relativedelta(minutes=5)  # default cache expire time
+
+        kyc_current_status["_expire_at"] = expire_at
+
+        await UserCRUD.update_one({"_id": user.id}, {"kyc_current_status": kyc_current_status})
+
+    return {"kyc_current_status": kyc_current_status}
 
 
 @router.get("/referrals/", response_model=UserReferralsResponse)

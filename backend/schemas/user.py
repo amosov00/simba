@@ -58,7 +58,7 @@ USER_MODEL_INCLUDE_FIELDS = frozenset(
         "terms_and_condition",
         "created_at",
         "kyc_status",
-        "kyc_review_response"
+        "kyc_review_response",
     )
 )
 
@@ -124,6 +124,7 @@ class User(BaseModel):
     created_at: Optional[datetime] = Field(default=None)
 
     kyc_status: Optional[str] = Field(default=None)
+    kyc_current_status: Optional[dict] = Field(default=None)
     kyc_review_response: Optional[dict] = Field(default=None)
 
     @property
