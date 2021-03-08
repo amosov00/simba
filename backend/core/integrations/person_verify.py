@@ -2,6 +2,8 @@ import hashlib
 import hmac
 import time
 from concurrent.futures.process import ProcessPoolExecutor
+from http import HTTPStatus
+from typing import Optional
 from urllib.parse import urljoin
 
 import requests
@@ -56,6 +58,70 @@ class PersonVerifyClient:
         return response.json()["token"]
 
     @classmethod
+    def _get_service_applicant_id(cls, applicant_id: str) -> Optional[str]:
+        params = {"userId": applicant_id, "ttlInSecs": "600"}
+        headers = {"Content-Type": "application/json", "Content-Encoding": "utf-8"}
+
+        request = cls.sign_request(
+            requests.Request(
+                "GET",
+                urljoin(settings.person_verify.base_url, f"/resources/applicants/-;externalUserId={applicant_id}/one"),
+                params=params,
+                headers=headers,
+            )
+        )
+
+        s = requests.Session()
+        response = s.send(request)
+
+        if response.status_code != HTTPStatus.OK:
+            return None
+
+        return response.json()["id"]
+
+    @classmethod
+    def _get_current_status(cls, applicant_id: Optional[str]) -> Optional[dict]:
+        if not applicant_id:
+            return None
+
+        params = {"userId": applicant_id, "ttlInSecs": "600"}
+        headers = {"Content-Type": "application/json", "Content-Encoding": "utf-8"}
+
+        status = {}
+
+        request = cls.sign_request(
+            requests.Request(
+                "GET",
+                urljoin(settings.person_verify.base_url, f"resources/applicants/{applicant_id}/status"),
+                params=params,
+                headers=headers,
+            )
+        )
+
+        s = requests.Session()
+        response = s.send(request)
+
+        status["applicant_status"] = response.json()
+
+        request = cls.sign_request(
+            requests.Request(
+                "GET",
+                urljoin(settings.person_verify.base_url, f"resources/applicants/{applicant_id}/requiredIdDocsStatus"),
+                params=params,
+                headers=headers,
+            )
+        )
+
+        s = requests.Session()
+        response = s.send(request)
+
+        status["docs_status"] = response.json()
+
+        status["service_applicant_id_cache"] = applicant_id
+
+        return status
+
+    @classmethod
     async def get_access_token(cls, applicant_id: str) -> str:
 
         # TODO: fix this in future - replace with async aiohttp or httpx
@@ -63,3 +129,15 @@ class PersonVerifyClient:
             future = pool.submit(cls._get_access_token, applicant_id)
 
         return future.result()
+
+    @classmethod
+    async def get_current_status(cls, applicant_id: str, service_applicant_id: Optional["str"] = None) -> dict:
+        # TODO: fix this in future - replace with async aiohttp or httpx
+        with ProcessPoolExecutor(max_workers=1) as pool:
+            if not service_applicant_id:
+                service_applicant_id_future = pool.submit(cls._get_service_applicant_id, applicant_id)
+                service_applicant_id = service_applicant_id_future.result()
+
+            current_status_future = pool.submit(cls._get_current_status, service_applicant_id)
+
+        return current_status_future.result()
