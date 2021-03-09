@@ -1,16 +1,20 @@
 <template>
   <div>
-    <step-indicator class="indicator"></step-indicator>
-    <h2 class="start-title">Необходимо подтвердить вашу личность</h2>
+    <step-indicator
+      class="indicator"
+      :emailConfirm="emailConfirm"
+    >
+    </step-indicator>
+    <h2 class="start-title">{{$t('verify["You need to verify your identity"]')}}</h2>
     <p class="text">
-      Если вы потеряете доступ к кошельку,<br />
-      мы сможем идентифицировать вас по указанным данным.
+      {{$t('verify["If you lose access to your wallet"]')}},<br />
+      {{$t('verify["we will be able to identify you by the specified data"]')}}.
     </p>
     <div class="lock">
       <img :src="require('@/static/lock.png')" alt="lock" class="lock__img" />
-      <p class="lock__text">Безопасное соединение установлено, можно начинать проверку</p>
+      <p class="lock__text">{{$t('verify["A secure connection has been established, you can start testing"]')}}</p>
     </div>
-    <btn-verify @click.native="$emit('show', false)">Начать проверку</btn-verify>
+    <btn-verify @click.native="$emit('show', false)">{{$t('verify["To be tested"]')}}</btn-verify>
   </div>
 </template>
 
@@ -22,6 +26,12 @@ export default {
   components: {
     BtnVerify,
     StepIndicator,
+  },
+  props: {
+    emailConfirm: {
+      default: false,
+      type: Boolean
+    }
   },
 }
 </script>

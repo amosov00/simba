@@ -4,7 +4,7 @@
       <div
         class="step__number"
         :class="{
-          'step__number--active': emailConfirm.is_active,
+          'step__number--active': emailConfirm,
         }"
       >
         <p>1</p>
@@ -16,7 +16,7 @@
         ></div>
       </div>
       <p class="step__text">
-        Подтверждение<br />
+        {{$t('verify.confirmation')}}<br />
         email
       </p>
     </div>
@@ -30,8 +30,8 @@
         <p>2</p>
       </div>
       <p class="step__text">
-        Подтверждение<br />
-        паспорта
+        {{$t('verify.confirmation')}}<br />
+        {{$t('verify["of the document"]')}}
       </p>
     </div>
   </div>
@@ -41,26 +41,21 @@
 export default {
   name: 'StepIndicator',
   props: {
-    currentStep: {
-      default: '',
-      type: String,
-    },
+    emailConfirm: {
+      default: false,
+      type: Boolean
+    }
   },
   data() {
     return {
-      emailConfirm: '',
       passportConfirm: ''
     }
   },
   created() {
     this.$axios.get('/account/kyc/status/')
-      .then((res)=>{this.passportConfirm = res.data.kyc_current_status.docs_status.IDENTITY})
-    this.$axios.get('/account/user/').then((res)=>{
-      this.emailConfirm = res.data
-      if (this.emailConfirm.kyc_review_response?.reviewResult?.reviewAnswer === 'RED') {
-        this.emailConfirm.kyc_review_response = null
-      }
-    })
+      .then((res)=>{
+        this.passportConfirm = res.data.kyc_current_status.docs_status.IDENTITY
+      })
   }
 }
 </script>

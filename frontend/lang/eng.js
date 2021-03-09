@@ -366,6 +366,15 @@ export default (context) => {
       processing_only: 'With "Processing" status only',
       refresh: 'Refresh',
     },
+    verify: {
+      'You need to verify your identity': 'You need to verify your identity',
+      'If you lose access to your wallet': 'If you lose access to your wallet',
+      'we will be able to identify you by the specified data' : 'we will be able to identify you by the specified data',
+      'A secure connection has been established, you can start testing': 'A secure connection has been established, you can start testing',
+      'To be tested': 'To be tested',
+      confirmation: 'Confirmation',
+      'of the document': 'of the document'
+    }
   }
 
   return new Promise(function (resolve) {
