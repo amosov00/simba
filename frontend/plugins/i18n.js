@@ -2,6 +2,18 @@ import { localize } from 'vee-validate'
 
 function loadLocale(code) {
   return import(`vee-validate/dist/locale/${code}.json`).then((locale) => {
+    if (code === 'ru') {
+      locale.messages.confirmed = 'Пароли не совпадают'
+    }
+    if (code === 'en') {
+      locale.messages.confirmed = 'Password mismatch'
+    }
+    if (code === 'en') {
+      locale.messages.alpha_spaces = 'The {_field_} field can only contain letters and spaces'
+    }
+    if (code === 'en') {
+      locale.messages.min = 'The {_field_} field must be at least {length} characters long'
+    }
     localize(code, locale)
   })
 }

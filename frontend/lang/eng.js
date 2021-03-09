@@ -362,7 +362,7 @@ export default (context) => {
       status: 'Manual mode',
       enabled: 'Enabled',
       disabled: 'Disabled',
-      change_status: 'Change status',
+      change_status: 'Toggle payout management mode',
       processing_only: 'With "Processing" status only',
       refresh: 'Refresh',
     },
