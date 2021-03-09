@@ -358,7 +358,7 @@ export default (context) => {
       status: 'Ручной режим',
       enabled: 'Включен',
       disabled: 'Выключен',
-      change_status: 'Изменить статус',
+      change_status: 'Переключить режим управления выплатами',
       processing_only: 'Только со статусом "В обработке"',
       refresh: 'Обновить',
     },
@@ -370,6 +370,9 @@ export default (context) => {
       'To be tested': 'Пройти проверку',
       confirmation: 'Подтверждение',
       'of the document': 'документов'
+    },
+    errors: {
+
     }
   }
 
