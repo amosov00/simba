@@ -1,7 +1,20 @@
 <template>
   <div>
-    <div id="sumsub-websdk-container" v-show="!showStartVerify"></div>
-    <start-verify v-if="showStartVerify" @show="e => showStartVerify = e"></start-verify>
+    <div v-if="kyc_status !== ''">
+      <step-indicator
+        class="indicat"
+        :emailConfirm="emailConfirm"
+        v-if="kyc_status === 'completed'"
+      >
+      </step-indicator>
+      <div id="sumsub-websdk-container" v-show="!showStartVerify"></div>
+      <start-verify
+        v-if="showStartVerify"
+        @show="e => showStartVerify = e"
+        :emailConfirm="emailConfirm"
+      >
+      </start-verify>
+    </div>
     <pre v-show="false">{{language}}</pre>
   </div>
 </template>
@@ -9,6 +22,7 @@
 <script>
 import snsWebSdk from '@sumsub/websdk'
 import StartVerify from '@/components/StartVerify'
+import StepIndicator from '@/components/StepIndicator'
 export default {
   name: 'profile-verification',
   layout: 'profile',
@@ -28,13 +42,16 @@ export default {
   },
   components: {
     StartVerify,
+    StepIndicator
   },
   data: () => ({
     token: null,
     currentStep: '',
     stepsCompleted: [],
     stepsNext: [],
-    showStartVerify: true
+    showStartVerify: true,
+    emailConfirm: false,
+    kyc_status: ''
   }),
   methods: {
     async launch() {
@@ -80,6 +97,13 @@ export default {
     await this.launch()
   },
   created() {
+    this.$axios.get('/account/user/').then((res)=>{
+      this.emailConfirm = res.data.is_active
+      this.kyc_status = res.data.kyc_status
+      if (this.kyc_status === 'completed') {
+        this.showStartVerify = false
+      }
+    })
     if (localStorage.getItem('currentStep')) {
       this.currentStep = localStorage.getItem('currentStep')
     }
@@ -102,3 +126,9 @@ export default {
   },
 }
 </script>
+<style lang="scss">
+  .indicat {
+    margin-left: 135px;
+    margin-bottom: 30px;
+  }
+</style>

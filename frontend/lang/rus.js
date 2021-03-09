@@ -362,6 +362,15 @@ export default (context) => {
       processing_only: 'Только со статусом "В обработке"',
       refresh: 'Обновить',
     },
+    verify: {
+      'You need to verify your identity': 'Необходимо подтвердить вашу личность',
+      'If you lose access to your wallet': 'Если вы потеряете доступ к кошельку',
+      'we will be able to identify you by the specified data' : 'мы сможем идентифицировать вас по указанным данным',
+      'A secure connection has been established, you can start testing': 'Безопасное соединение установлено, можно начинать проверку',
+      'To be tested': 'Пройти проверку',
+      confirmation: 'Подтверждение',
+      'of the document': 'документов'
+    }
   }
 
   return new Promise(function (resolve) {
