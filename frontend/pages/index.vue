@@ -22,9 +22,9 @@ export default {
   name: 'index',
   layout: 'main',
   components: { Login2FA },
-  async middleware({ store, redirect }) {
+  middleware({ store, redirect }) {
     if (store.state.user) {
-      await redirect('/exchange/')
+      redirect('/exchange/')
     }
   },
   data() {
