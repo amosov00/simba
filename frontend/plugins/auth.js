@@ -23,8 +23,12 @@ export default ({ app, redirect, route }, inject) => {
   })
   inject('authLogout', async () => {
     app.store.commit('deleteUser')
-    await app.$axios.setToken(null)
-    await app.$cookies.remove('token')
+    await app.$axios.setToken(null, 'Bearer')
+    await app.$cookies.remove('token', {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
+      domain: document.domain,
+    })
     setTimeout(()=>{
       redirect('/')
     })
