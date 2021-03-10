@@ -1,4 +1,4 @@
-export default ({ app, redirect, route, $config }, inject) => {
+export default ({ app, redirect, route }, inject) => {
   inject('authLogin', async (email, password, pin_code) => {
     return await app.$axios
       .post('/account/login/', {
@@ -6,15 +6,14 @@ export default ({ app, redirect, route, $config }, inject) => {
         password: password,
         pin_code: pin_code,
       })
-      .then((resp) => {
-        console.log(resp.data.user)
-        app.store.commit('setUser', resp.data.user)
+      .then(async (resp) => {
         app.$axios.setToken(resp.data.token, 'Bearer')
         app.$cookies.set('token', resp.data.token, {
           path: '/',
           maxAge: 60 * 60 * 24 * 7,
-          domain: $config.domain,
+          domain: document.domain,
         })
+        await app.store.dispatch('getUser')
         redirect('/exchange')
         return true
       })
@@ -24,11 +23,11 @@ export default ({ app, redirect, route, $config }, inject) => {
   })
   inject('authLogout', async () => {
     app.store.commit('deleteUser')
-    app.$axios.setToken(null)
-    app.$cookies.remove('token')
-    if (route.path !== '/') {
+    await app.$axios.setToken(null)
+    await app.$cookies.remove('token')
+    setTimeout(()=>{
       redirect('/')
-    }
+    })
   })
   inject('authFetchUser', async () => {
     return app.$axios
