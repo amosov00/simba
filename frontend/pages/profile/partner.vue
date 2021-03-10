@@ -119,7 +119,7 @@ export default {
 
     return {
       can_invite: Boolean(store.getters.user.user_eth_addresses.length),
-      ref_link: url,
+      ref_link: decodeURI(url),
       ref_code: partner_code,
       referrals: referrals,
       transactions: transactions,
