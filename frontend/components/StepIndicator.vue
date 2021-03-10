@@ -44,19 +44,12 @@ export default {
     emailConfirm: {
       default: false,
       type: Boolean
+    },
+    passportConfirm: {
+      default: false,
+      type: Boolean
     }
   },
-  data() {
-    return {
-      passportConfirm: ''
-    }
-  },
-  created() {
-    this.$axios.get('/account/kyc/status/')
-      .then((res)=>{
-        this.passportConfirm = res.data.kyc_current_status.docs_status.IDENTITY
-      })
-  }
 }
 </script>
 

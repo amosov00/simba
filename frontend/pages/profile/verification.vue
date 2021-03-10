@@ -4,6 +4,7 @@
       <step-indicator
         class="indicat"
         :emailConfirm="emailConfirm"
+        :passportConfirm="documentReviewed"
         v-if="kyc_status === 'completed'"
       >
       </step-indicator>
@@ -32,6 +33,9 @@ export default {
       this.launch()
       return lang
     },
+    documentReviewed() {
+      return this.reviewAnswer === 'GREEN' && this.reviewStatus === 'completed'
+    },
     flow() {
       if (this.$i18n.locale === 'ru') {
         return 'Basic_ru'
@@ -51,7 +55,9 @@ export default {
     stepsNext: [],
     showStartVerify: true,
     emailConfirm: false,
-    kyc_status: ''
+    kyc_status: '',
+    reviewAnswer: '',
+    reviewStatus: ''
   }),
   methods: {
     async launch() {
@@ -100,6 +106,8 @@ export default {
     this.$axios.get('/account/user/').then((res)=>{
       this.emailConfirm = res.data.is_active
       this.kyc_status = res.data.kyc_status
+      this.reviewStatus = res.data.kyc_review_response.reviewStatus
+      this.reviewAnswer = res.data.kyc_review_response.reviewResult.reviewAnswer
       if (this.kyc_status === 'completed') {
         this.showStartVerify = false
       }
