@@ -13,7 +13,7 @@ from api.dependencies import get_user
 from config import settings, SST_CONTRACT
 from core.integrations.person_verify import PersonVerifyClient
 from core.mechanics.referrals import ReferralMechanics
-from database.crud import UserCRUD, EthereumTransactionCRUD, UserAddressesArchiveCRUD
+from database.crud import UserCRUD, EthereumTransactionCRUD, UserAddressesArchiveCRUD, UserKYCCRUD
 from schemas import (
     UserLogin,
     User,
@@ -35,6 +35,7 @@ from schemas import (
     UserBitcoinAddressInput,
     UserAddressesArchive,
     UserKYCAccessTokenResponse,
+    UserKYC,
 )
 
 __all__ = ["router"]
@@ -129,10 +130,17 @@ async def account_receive_kyc_status(request: Request):
 
     if request.headers["x-payload-digest"] == request_hashsum:
         request_body = await request.json()
-        await UserCRUD.update_one(
-            {"_id": ObjectId(request_body["externalUserId"])},
-            {"kyc_status": request_body["reviewStatus"], "kyc_review_response": request_body},
+        await UserKYCCRUD.update_or_insert(
+            {"user_id": ObjectId(request_body["externalUserId"])},
+            UserKYC(
+                user_id=ObjectId(request_body["externalUserId"]),  # noqa
+                result=request_body["reviewResult"].get("reviewAnswer"),
+                review_status=request_body["reviewStatus"],
+                review_data=request_body,
+            ).dict(exclude_unset=True)
         )
+
+    return None
 
 
 @router.get("/kyc/status/")

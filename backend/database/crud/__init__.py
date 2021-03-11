@@ -9,3 +9,4 @@ from .referral import ReferralCRUD
 from .btc_xpub import BTCxPubCRUD
 from .meta import MetaCRUD
 from .user_addresses_archive import UserAddressesArchiveCRUD
+from .user_kyc import UserKYCCRUD

@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from http import HTTPStatus
 from typing import Union, List, Optional
 
@@ -14,9 +14,10 @@ from config import (
     TRANSACTION_MIN_CONFIRMATIONS,
     BTC_FEE,
     settings,
+    InvoiceVerificationLimits,
 )
 from core.mechanics import SimbaWrapper, SSTWrapper, BitcoinWrapper, BlockCypherWebhookHandler
-from core.mechanics.crypto.base import CryptoValidation
+from core.mechanics.crypto.base import CryptoValidation, CryptoCurrencyRate
 from database.crud import BTCTransactionCRUD, InvoiceCRUD, EthereumTransactionCRUD, UserCRUD, MetaCRUD
 from schemas import (
     User,
@@ -32,6 +33,7 @@ from schemas import (
     SimbaContractEvents,
     BlockCypherWebhookEvents,
     MetaSlugs,
+    MetaCurrencyRatePayload
 )
 
 
@@ -140,7 +142,45 @@ class InvoiceMechanics(CryptoValidation):
 
         return True
 
-    def validate(self) -> bool:
+    async def _validate_verification_limits(self) -> None:
+        """Validate user with verification / kyc limits"""
+
+        match_stage = {
+            "$match": {
+                "user_id": self.user.id,
+                "status": InvoiceStatus.COMPLETED,
+            }
+        }
+        # if user verified
+        if self.user.id:
+            match_stage["$match"]["finished_at"] = {"$gte": datetime.now() - timedelta(days=30)}
+
+        previous_total_btc = (await InvoiceCRUD.aggregate([
+            match_stage,
+            {"$group": {
+                "_id": None,
+                "total_btc": {"$sum": "$btc_amount_proceeded"}
+            }}
+        ]))[0]["total_btc"]
+
+        btc_price = MetaCurrencyRatePayload(
+            **(await MetaCRUD.find_by_slug(MetaSlugs.CURRENCY_RATE, raise_500=True))["payload"]
+        ).BTCUSD
+
+        total_btc = previous_total_btc + self.invoice.btc_amount_proceeded
+        total_usd = (total_btc * btc_price) / 10 ** CryptoCurrencyRate.BTC_DECIMALS
+
+        verification_limit = InvoiceVerificationLimits.VERIFIED \
+            if self.user.verification_code else InvoiceVerificationLimits.NON_VERIFIED
+
+        # if user verified
+        if total_usd > verification_limit:
+            self.errors.append("usd verification limit failed")
+
+        return None
+
+    async def validate(self, raise_exceprion: bool = True) -> bool:
+        """Validate invoice, returns True if valid"""
         self._validate_common()
 
         if self.invoice.invoice_type == InvoiceType.BUY:
@@ -149,9 +189,10 @@ class InvoiceMechanics(CryptoValidation):
         elif self.invoice.invoice_type == InvoiceType.SELL:
             self._validate_for_sell()
 
-        self._raise_exception_if_exists()
+        if raise_exceprion:
+            self._raise_exception_if_exists()
 
-        return True
+        return not bool(self.errors)
 
     @classmethod
     def get_incoming_btc_from_outputs(
@@ -375,7 +416,7 @@ class InvoiceMechanics(CryptoValidation):
 
     async def fetch_multisig_transaction_data(self):
         """Fetch data for cosigner 1."""
-        self.validate()
+        await self.validate()
         await self._validate_for_multisig()
         self._raise_exception_if_exists()
 
@@ -387,7 +428,8 @@ class InvoiceMechanics(CryptoValidation):
         if self.invoice.simba_amount_proceeded >= multisig_wallet.balance:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "not enough balance to pay")
 
-        spendables = await BitcoinWrapper().api_wrapper.get_spendables(settings.crypto.btc_multisig_wallet_address)
+        spendables = await BitcoinWrapper().blockcypher_api_wrapper.get_spendables(
+            settings.crypto.btc_multisig_wallet_address)
         payables = [(self.invoice.target_btc_address, self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE)]
         return {
             "cosig1Priv": settings.crypto.btc_multisig_cosig_1_wif,
@@ -400,13 +442,13 @@ class InvoiceMechanics(CryptoValidation):
 
     async def proceed_multisig_transaction(self, transaction_hash: str) -> InvoiceInDB:
         bitcoin_wrapper = BitcoinWrapper()
-        decoded_tx = await bitcoin_wrapper.api_wrapper.decode_tx(transaction_hash)
+        decoded_tx = await bitcoin_wrapper.blockcypher_api_wrapper.decode_tx(transaction_hash)
 
         # validate decoded
         self._validate_transaction(decoded_tx)
         self._raise_exception_if_exists()
 
-        pushed_tx = await bitcoin_wrapper.api_wrapper.push_raw_tx(transaction_hash)
+        pushed_tx = await bitcoin_wrapper.blockcypher_api_wrapper.push_raw_tx(transaction_hash)
 
         self.invoice.btc_amount_proceeded = self.get_incoming_btc_from_outputs(
             pushed_tx.outputs, self.invoice.target_btc_address

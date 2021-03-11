@@ -108,7 +108,7 @@ async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
     if invoice.invoice_type == InvoiceType.BUY:
         invoice.target_btc_address = await BitcoinWrapper().create_wallet_address(invoice, user)
 
-    InvoiceMechanics(invoice, user).validate()
+    await InvoiceMechanics(invoice, user).validate()
 
     invoice.status = InvoiceStatus.WAITING
 
