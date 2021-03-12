@@ -12,6 +12,7 @@ from database.crud import UserCRUD, EthereumTransactionCRUD, UserAddressesArchiv
 from schemas import (
     UserLogin,
     User,
+    UserKYC,
     UserLoginResponse,
     UserCreationSafe,
     UserChangePassword,
@@ -113,12 +114,13 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
 
 @router.get("/kyc/token/", response_model=UserKYCAccessTokenResponse)
 async def account_get_kyc_token(user: User = Depends(get_user)):
-    return {"token": await KYCController().get_access_token(user)}
+    return {"token": await KYCController(user=user).get_access_token()}
 
 
-@router.get("/kyc/status/")
+@router.get("/kyc/status/", response_model=UserKYC, response_model_exclude={"review_data", "status_data"})
 async def account_get_kyc_status(user: User = Depends(get_user)):
-    return {"kyc_current_status": await KYCController().get_current_status(user)}
+    kyc_instance = await KYCController.init(user)
+    return await kyc_instance.get_status()
 
 
 @router.post("/kyc/status/")

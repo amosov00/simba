@@ -1,7 +1,6 @@
 import hashlib
 import hmac
 import time
-from concurrent.futures.process import ProcessPoolExecutor
 from http import HTTPStatus
 from typing import Optional
 from urllib.parse import urljoin
@@ -40,15 +39,12 @@ class SumSubWrapper:
 
     @classmethod
     def _get_access_token(cls, applicant_id: str) -> str:
-        params = {"userId": applicant_id, "ttlInSecs": "600"}
-        headers = {"Content-Type": "application/json", "Content-Encoding": "utf-8"}
-
         request = cls.sign_request(
             requests.Request(
                 "POST",
-                urljoin(settings.person_verify.base_url, "resources/accessTokens"),
-                params=params,
-                headers=headers,
+                url=urljoin(settings.person_verify.base_url, "resources/accessTokens"),
+                params={"userId": applicant_id, "ttlInSecs": "600"},
+                headers={"Content-Type": "application/json", "Content-Encoding": "utf-8"},
             )
         )
 
@@ -117,27 +113,15 @@ class SumSubWrapper:
 
         status["docs_status"] = response.json()
 
-        status["service_applicant_id_cache"] = applicant_id
-
         return status
 
     @classmethod
     async def get_access_token(cls, applicant_id: str) -> str:
-
-        # TODO: fix this in future - replace with async aiohttp or httpx
-        with ProcessPoolExecutor(max_workers=1) as pool:
-            future = pool.submit(cls._get_access_token, applicant_id)
-
-        return future.result()
+        return cls._get_access_token(applicant_id=applicant_id)
 
     @classmethod
     async def get_current_status(cls, applicant_id: str, service_applicant_id: Optional["str"] = None) -> dict:
-        # TODO: fix this in future - replace with async aiohttp or httpx
-        with ProcessPoolExecutor(max_workers=1) as pool:
-            if not service_applicant_id:
-                service_applicant_id_future = pool.submit(cls._get_service_applicant_id, applicant_id)
-                service_applicant_id = service_applicant_id_future.result()
+        if not service_applicant_id:
+            service_applicant_id = cls._get_service_applicant_id(applicant_id)
 
-            current_status_future = pool.submit(cls._get_current_status, service_applicant_id)
-
-        return current_status_future.result()
+        return cls._get_current_status(service_applicant_id)

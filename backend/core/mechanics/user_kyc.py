@@ -1,21 +1,29 @@
 import hmac
 from datetime import datetime, timedelta
 from hashlib import sha1
+from typing import Optional, Literal
 
 from bson import ObjectId
 from fastapi import Request
 
 from config import settings
 from core.integrations.sumsub_wrapper import SumSubWrapper
-from database.crud import UserCRUD, UserKYCCRUD
-from schemas import UserKYC, User
+from database.crud import UserKYCCRUD
+from schemas import UserKYCInDB, UserKYC, User, UserKYCDocsStatus
 
 __all__ = ["KYCController"]
 
 
 class KYCController:
-    def __init__(self):
+    def __init__(self, user: User = None, kyc: UserKYCInDB = None):
         self.api_wrapper = SumSubWrapper()
+        self.user: Optional[User] = user
+        self.kyc: Optional[UserKYCInDB] = kyc
+
+    @classmethod
+    async def init(cls, user: User):
+        kyc_instance = await UserKYCCRUD.find_one({"user_id": user.id})
+        return cls(user, UserKYCInDB(**kyc_instance) if kyc_instance else None)
 
     @classmethod
     async def _generate_hashsum(cls, request: Request) -> str:
@@ -23,46 +31,89 @@ class KYCController:
             key=settings.person_verify.status_webhook_secret_key.encode(), msg=await request.body(), digestmod=sha1
         ).hexdigest()
 
-    async def get_access_token(self, user: User) -> str:
-        return await self.api_wrapper.get_access_token(str(user.id))
+    async def get_access_token(self) -> str:
+        return await self.api_wrapper.get_access_token(str(self.user.id))
 
-    async def _prepare_schema_data(self, data: dict) -> UserKYC:
-        pass
+    @staticmethod
+    def _prepare_docs_status(docs_data: dict) -> UserKYCDocsStatus:
+        instance = UserKYCDocsStatus()
+        if applicant_data := docs_data.get("APPLICANT_DATA"):
+            instance.applicant_data = applicant_data.get("reviewResult", {}).get("reviewAnswer") == "GREEN"
+        if identity_data := docs_data.get("IDENTITY"):
+            instance.identity = identity_data.get("reviewResult", {}).get("reviewAnswer") == "GREEN"
+        if selfie_data := docs_data.get("SELFIE"):
+            instance.selfie = selfie_data.get("reviewResult", {}).get("reviewAnswer") == "GREEN"
 
-    async def proceed_webhook(self, request: Request):
-        hashsum = await self._generate_hashsum(request)
+        return instance
+
+    @classmethod
+    def _prepare_schema_data(
+        cls,
+        data_type: Literal["review_data", "status_data"],
+        data: dict,
+        user: Optional[User] = None
+    ) -> UserKYC:
+        if data_type == "review_data":
+            result = data.get("reviewResult", {}).get("reviewAnswer") == "GREEN"
+
+            kyc = UserKYC(
+                user_id=ObjectId(request_body["externalUserId"]),  # noqa
+                applicant_id=data.get("applicantId"),
+                status=data.get("reviewStatus"),
+                result=result,
+                review_data=data,
+                updated_at=datetime.now()
+            )
+
+        else:
+            assert user, "user is requeired"
+            docs_data = cls._prepare_docs_status(data["docs_status"])
+            result = data["applicant_status"].get("reviewResult", {}).get("reviewAnswer") == "GREEN"
+
+            kyc = UserKYC(
+                user_id=user.id,
+                applicant_id=data["applicant_status"].get("applicantId"),
+                docs_status=docs_data,
+                status=data["applicant_status"].get("reviewStatus"),
+                updated_at=datetime.now(),
+                status_data=data,
+                result=result
+            )
+
+        return kyc
+
+    @classmethod
+    async def proceed_webhook(cls, request: Request):
+        hashsum = await cls._generate_hashsum(request)
 
         if request.headers["x-payload-digest"] != hashsum:
             return None
 
         request_body = await request.json()
+        payload = cls._prepare_schema_data("review_data", await request.json()).dict(exclude_unset=True)
+
         await UserKYCCRUD.update_or_insert(
-            {"user_id": ObjectId(request_body["externalUserId"])},
-            UserKYC(
-                user_id=ObjectId(request_body["externalUserId"]),  # noqa
-                result=request_body["reviewResult"].get("reviewAnswer"),
-                status=request_body["reviewStatus"],
-                review_data=request_body,
-            ).dict(exclude_unset=True),
+            query={"user_id": ObjectId(request_body["externalUserId"])},
+            payload=payload
         )
 
         return True
 
-    async def get_current_status(self, user: User):
-        kyc_current_status = user.kyc_current_status
+    async def get_status(self) -> UserKYC:
+        if self.kyc:
+            # Caching requests
+            if self.kyc.updated_at and self.kyc.updated_at + timedelta(minutes=10) > datetime.now():
+                return self.kyc
 
-        if not kyc_current_status or (kyc_current_status and datetime.now() >= kyc_current_status.get("_expire_at")):
-            kyc_current_status = await self.api_wrapper.get_current_status(
-                applicant_id=str(user.id),
-                service_applicant_id=kyc_current_status.get("service_applicant_id_cache")
-                if kyc_current_status
-                else None,
-            )
+        status_data = await self.api_wrapper.get_current_status(
+            applicant_id=str(self.user.id),
+            service_applicant_id=self.kyc.applicant_id if self.kyc else None
+        )
+        payload = self._prepare_schema_data("status_data", status_data, user=self.user)
 
-            expire_at = datetime.now() + timedelta(minutes=5)  # default cache expire time
+        await UserKYCCRUD.update_or_insert(
+            {"user_id": self.user.id},
+            payload.dict(exclude_unset=True)
+        )
 
-            kyc_current_status["_expire_at"] = expire_at
-
-            await UserCRUD.update_one({"_id": user.id}, {"kyc_current_status": kyc_current_status})
-
-        return kyc_current_status
+        return payload

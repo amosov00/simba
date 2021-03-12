@@ -1,8 +1,9 @@
 from typing import Optional
+from datetime import datetime
 
 from schemas.base import BaseModel, ObjectIdPydantic, Field
 
-__all__ = ["UserKYC", "UserKYCDocsStatus", "UserKYCInDB"]
+__all__ = ["UserKYC", "UserKYCDocsStatus", "UserKYCInDB", "UserKYCAccessTokenResponse"]
 
 
 class UserKYCDocsStatus(BaseModel):
@@ -13,6 +14,7 @@ class UserKYCDocsStatus(BaseModel):
 
 class UserKYC(BaseModel):
     user_id: ObjectIdPydantic = Field(...)
+    applicant_id: Optional[str] = Field(default=None)  # applicantId
     result: bool = Field(default=False)  # reviewResult.reviewAnswer
     status: Optional[str] = Field(default=None)  # reviewStatus
 
@@ -21,6 +23,12 @@ class UserKYC(BaseModel):
     review_data: dict = Field(default={})
     status_data: dict = Field(default={})
 
+    updated_at: datetime = Field(default=None)
 
-class UserKYCInDB(BaseModel):
+
+class UserKYCInDB(UserKYC):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
+
+
+class UserKYCAccessTokenResponse(BaseModel):
+    token: str = Field(...)
