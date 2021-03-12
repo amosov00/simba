@@ -21,8 +21,8 @@ import Login2FA from '~/components/Login2FA'
 export default {
   name: 'index',
   layout: 'main',
-  components: { Login2FA },
-  middleware({ store, redirect }) {
+  components: {Login2FA},
+  middleware({store, redirect}) {
     if (store.state.user) {
       redirect('/exchange/')
     }
@@ -44,8 +44,14 @@ export default {
       })
       let resp = await this.$authLogin(this.email, this.password)
 
-      if (resp !== true) {
-        if (resp.response.status >= 400) {
+      if (!resp) {
+        this.$buefy.toast.open({
+          message: this.$i18n.t('auth.login_failed'),
+          type: 'is-danger',
+          duration: 3500,
+        })
+      } else if (resp === true) {
+      } else if (resp.response.status >= 400) {
           let resp_msg = resp.response.data[0].message
 
           if (resp_msg === 'Incorrect 2FA pin code') {
@@ -63,7 +69,6 @@ export default {
               duration: 3500,
             })
           }
-        }
       }
 
       this.password = ''

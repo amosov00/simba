@@ -2,7 +2,7 @@ import asyncio
 import logging
 from datetime import timedelta
 
-from core.mechanics import BitcoinWrapper
+from core.mechanics.crypto import BitcoinWrapper
 from database.crud import BTCAddressCRUD, InvoiceCRUD
 from schemas import BTCAddressInDB, InvoiceStatus
 from workers.agents import app

@@ -7,13 +7,13 @@ from database.crud import MetaCRUD
 from schemas import MetaSlugs, MetaCurrencyRatePayload
 from workers.agents import app
 
-__all__ = ["currency_rate_job"]
+__all__ = ["user_kyc_status_job"]
 
-currency_rate_topic = app.topic("currency_rate", internal=True, retention=timedelta(minutes=10), partitions=1)
+user_kyc_status_topic = app.topic("user_kyc_status", internal=True, retention=timedelta(minutes=10), partitions=1)
 
 
-@app.agent(currency_rate_topic, concurrency=1)
-async def currency_rate_job(stream):
+@app.agent(user_kyc_status_topic, concurrency=1)
+async def user_kyc_status_job(stream):
     async for _ in stream:
         currency_rate = await BitcoinWrapper().fetch_current_price()
 

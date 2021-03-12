@@ -16,8 +16,9 @@ from config import (
     settings,
     InvoiceVerificationLimits,
 )
-from core.mechanics import SimbaWrapper, SSTWrapper, BitcoinWrapper, BlockCypherWebhookHandler
+from core.mechanics.crypto import SimbaWrapper, SSTWrapper, BitcoinWrapper
 from core.mechanics.crypto.base import CryptoValidation, CryptoCurrencyRate
+from core.mechanics.blockcypher_webhook import BlockCypherWebhookHandler
 from database.crud import BTCTransactionCRUD, InvoiceCRUD, EthereumTransactionCRUD, UserCRUD, MetaCRUD
 from schemas import (
     User,
@@ -33,7 +34,7 @@ from schemas import (
     SimbaContractEvents,
     BlockCypherWebhookEvents,
     MetaSlugs,
-    MetaCurrencyRatePayload
+    MetaCurrencyRatePayload,
 )
 
 
@@ -155,13 +156,11 @@ class InvoiceMechanics(CryptoValidation):
         if self.user.id:
             match_stage["$match"]["finished_at"] = {"$gte": datetime.now() - timedelta(days=30)}
 
-        previous_total_btc = (await InvoiceCRUD.aggregate([
-            match_stage,
-            {"$group": {
-                "_id": None,
-                "total_btc": {"$sum": "$btc_amount_proceeded"}
-            }}
-        ]))[0]["total_btc"]
+        previous_total_btc = (
+            await InvoiceCRUD.aggregate(
+                [match_stage, {"$group": {"_id": None, "total_btc": {"$sum": "$btc_amount_proceeded"}}}]
+            )
+        )[0]["total_btc"]
 
         btc_price = MetaCurrencyRatePayload(
             **(await MetaCRUD.find_by_slug(MetaSlugs.CURRENCY_RATE, raise_500=True))["payload"]
@@ -170,8 +169,11 @@ class InvoiceMechanics(CryptoValidation):
         total_btc = previous_total_btc + self.invoice.btc_amount_proceeded
         total_usd = (total_btc * btc_price) / 10 ** CryptoCurrencyRate.BTC_DECIMALS
 
-        verification_limit = InvoiceVerificationLimits.VERIFIED \
-            if self.user.verification_code else InvoiceVerificationLimits.NON_VERIFIED
+        verification_limit = (
+            InvoiceVerificationLimits.VERIFIED
+            if self.user.verification_code
+            else InvoiceVerificationLimits.NON_VERIFIED
+        )
 
         # if user verified
         if total_usd > verification_limit:
@@ -429,7 +431,8 @@ class InvoiceMechanics(CryptoValidation):
             raise HTTPException(HTTPStatus.BAD_REQUEST, "not enough balance to pay")
 
         spendables = await BitcoinWrapper().blockcypher_api_wrapper.get_spendables(
-            settings.crypto.btc_multisig_wallet_address)
+            settings.crypto.btc_multisig_wallet_address
+        )
         payables = [(self.invoice.target_btc_address, self.invoice.simba_amount_proceeded - SIMBA_BUY_SELL_FEE)]
         return {
             "cosig1Priv": settings.crypto.btc_multisig_cosig_1_wif,

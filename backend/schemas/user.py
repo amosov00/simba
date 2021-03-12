@@ -174,8 +174,8 @@ class UserVerifyEmailResponse(BaseModel):
 
 
 class UserLogin(BaseModel):
-    email: str = Field(..., example="email")
-    password: str = Field(..., example="password")
+    email: str = Field(..., min_length=6, example="email")
+    password: str = Field(..., min_length=6, example="password")
     pin_code: Optional[str] = Field(default=None, example="auth pin-code")
 
 

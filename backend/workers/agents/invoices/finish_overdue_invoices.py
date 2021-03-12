@@ -5,7 +5,7 @@ from pydantic import ValidationError
 from sentry_sdk import capture_exception
 
 from config import INVOICE_TIMEOUT
-from core.mechanics import BlockCypherWebhookHandler
+from core.mechanics.blockcypher_webhook import BlockCypherWebhookHandler
 from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
 from schemas import InvoiceExtended, InvoiceStatus, InvoiceType
 from workers.agents import app

@@ -5,7 +5,9 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Body, Response, Path
 
 from api.dependencies import get_user
-from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler
+from core.mechanics.crypto import BitcoinWrapper
+from core.mechanics.blockcypher_webhook import BlockCypherWebhookHandler
+from core.mechanics import InvoiceMechanics
 from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
 from schemas import (
     Invoice,

@@ -21,15 +21,8 @@ export default {
   methods: {},
   async mounted() {
     if (this.success) {
-      this.$axios.setToken(this.res.token, 'Bearer')
-      this.$cookies.set('token', this.res.token, {
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7,
-        domain: this.$config.domain,
-      })
-      await this.$authFetchUser()
-      this.$nuxt.context.redirect('/profile/data/')
       this.$buefy.toast.open({ message: this.$i18n.t('auth.activation_success'), type: 'is-primary' })
+      this.$nuxt.context.redirect('/')
     } else {
       this.error_message = this.$i18n.t('auth.activation_failed')
     }

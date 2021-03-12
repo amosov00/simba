@@ -11,7 +11,7 @@ import requests
 from config import settings
 
 
-class PersonVerifyClient:
+class SumSubWrapper:
     @classmethod
     def sign_request(cls, request: requests.Request) -> requests.PreparedRequest:
         prepared_request = request.prepare()

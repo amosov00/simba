@@ -7,7 +7,9 @@ export default ({ app, redirect, route, $config }, inject) => {
         pin_code: pin_code,
       })
       .then((resp) => {
-        console.log(resp.data.user)
+        if (!resp) {
+          return false
+        }
         app.store.commit('setUser', resp.data.user)
         app.$axios.setToken(resp.data.token, 'Bearer')
         app.$cookies.set('token', resp.data.token, {
