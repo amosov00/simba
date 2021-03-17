@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 
 import sentry_sdk
@@ -23,3 +24,5 @@ async def currency_rate_job(stream):
             )
         else:
             sentry_sdk.capture_message("Failed to fetch BTC/USD currency rate", level="error")
+
+        logging.info(f"Updated btc/usd currency rate")

@@ -53,6 +53,11 @@ import { ValidationObserver, ValidationProvider } from 'vee-validate'
 export default {
   name: 'register',
   layout: 'main',
+  middleware({store, redirect}) {
+    if (store.state.user) {
+      redirect('/exchange/')
+    }
+  },
   components: {
     ValidationProvider,
     ValidationObserver,
