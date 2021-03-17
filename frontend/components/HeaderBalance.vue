@@ -32,7 +32,7 @@ export default {
   },
   computed: {
     tetherBalance() {
-      return (((this.simbaBalance * 1) / 100000000) * this.btcPrice).toFixed(2)
+      return (((this.simbaBalance * 1) / 10 ** 8) * this.btcPrice).toFixed(2)
     },
     btcBalance() {
       return ((this.simbaBalance * 1) / 100000000).toFixed(4)

@@ -7,7 +7,7 @@ export default {
       return (value / 10 ** 18).toFixed(2)
     },
     btcFormat(value) {
-      return (value / 100000000).toFixed(4)
+      return (value / 10 ** 8).toFixed(4)
     },
   },
 }

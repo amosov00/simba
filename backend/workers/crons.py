@@ -15,7 +15,7 @@ async def fetch_and_proceed_simba_contract_cron():
     await fetch_and_proceed_simba_contract_job.cast()
 
 
-@app.crontab("5 */1 * * *")
+@app.crontab("*/15 * * *")
 async def fetch_simba_meta_cron():
     await fetch_simba_meta_job.cast()
 
@@ -55,7 +55,7 @@ async def double_check_contracts_cron():
     await double_check_contracts_job.cast()
 
 
-@app.crontab("15 */12 * * *")
+@app.crontab("15 */6 * * *")
 async def update_blacklisted_balance_cron():
     await update_blacklisted_balance_job.cast()
 
