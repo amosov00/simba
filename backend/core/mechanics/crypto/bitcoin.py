@@ -7,6 +7,7 @@ from sentry_sdk import capture_message
 
 from config import BTC_FEE, settings
 from core.integrations.blockcypher import BlockCypherAPIWrapper
+from core.integrations.bitcoin import BitcoinPriceWrapper
 from core.integrations.pycoin_wrapper import PycoinWrapper
 from database.crud import BTCAddressCRUD
 from schemas import User, InvoiceInDB, BTCTransaction, BTCAddress, ObjectIdPydantic
@@ -15,7 +16,8 @@ from .base import CryptoValidation, ParseCryptoTransaction
 
 class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
     def __init__(self):
-        self.api_wrapper = BlockCypherAPIWrapper()
+        self.blockcypher_api_wrapper = BlockCypherAPIWrapper()
+        self.price_wrapper = BitcoinPriceWrapper()
         self.hot_wallet_balance = 0
         self.multisig_wallet_balance = 0
 
@@ -34,13 +36,16 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         inst = await PycoinWrapper(user=user, invoice=invoice).from_active_xpub()
         return await inst.generate_new_address()
 
+    async def fetch_current_price(self) -> Optional[float]:
+        return await self.price_wrapper.fetch_bitcoin_price()
+
     async def fetch_transaction(self, transaction_hash: str) -> BTCTransaction:
-        return await self.api_wrapper.fetch_transaction_info(transaction_hash)
+        return await self.blockcypher_api_wrapper.fetch_transaction_info(transaction_hash)
 
     async def fetch_address_and_save(
         self, address: str, *, invoice_id: ObjectIdPydantic = None, user_id: ObjectIdPydantic = None, save: bool = True
     ) -> Optional[BTCAddress]:
-        address_info = await self.api_wrapper.fetch_address_info(address) if address else None
+        address_info = await self.blockcypher_api_wrapper.fetch_address_info(address) if address else None
         if address_info:
             address_info.user_id = user_id
             address_info.invoice_id = invoice_id
@@ -78,8 +83,8 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         Wif передавать в формате [<wif>, ]
         """
         fee = fee or BTC_FEE
-        self.hot_wallet_balance = await self.api_wrapper.current_balance(settings.crypto.btc_hot_wallet_address)
-        spendables = await self.api_wrapper.get_spendables(settings.crypto.btc_hot_wallet_address)
+        self.hot_wallet_balance = await self.blockcypher_api_wrapper.current_balance(settings.crypto.btc_hot_wallet_address)
+        spendables = await self.blockcypher_api_wrapper.get_spendables(settings.crypto.btc_hot_wallet_address)
         payables = self.proceed_payables(address, amount, settings.crypto.btc_hot_wallet_address, fee)
 
         self._validate_payables(payables)
@@ -89,7 +94,7 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
             raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, "Invalid spendables value")
 
         tx = create_signed_tx(
-            self.api_wrapper.network,
+            self.blockcypher_api_wrapper.network,
             spendables=spendables,
             payables=payables,
             wifs=[
@@ -97,4 +102,4 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
             ],
             fee=fee,
         )
-        return await self.api_wrapper.push_raw_tx(tx)
+        return await self.blockcypher_api_wrapper.push_raw_tx(tx)

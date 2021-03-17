@@ -1,16 +1,4 @@
-from workers.agents import (
-    delete_unused_webhooks_job,
-    finish_overdue_invoices_job,
-    rescue_stucked_invoices_job,
-    send_btc_to_proceeding_invoices_job,
-    fetch_and_proceed_simba_contract_job,
-    fetch_simba_meta_job,
-    fetch_and_proceed_sst_contract_job,
-    update_btc_addresses_info_job,
-    update_empty_btc_addresses_info_job,
-    double_check_contracts_job,
-    update_blacklisted_balance_job,
-)
+from workers.agents import *
 
 from workers.app import get_faust_app
 
@@ -70,3 +58,8 @@ async def double_check_contracts_cron():
 @app.crontab("15 */12 * * *")
 async def update_blacklisted_balance_cron():
     await update_blacklisted_balance_job.cast()
+
+
+@app.crontab("*/1 * * * *")
+async def currency_rate_cron():
+    await currency_rate_job.cast()

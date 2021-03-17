@@ -84,15 +84,6 @@ class InvoiceCRUD(BaseMongoCRUD):
             if q_len == 34:
                 query.append({"target_btc_address": {"$regex": q, "$options": "i"}})
 
-            if 1 < q_len < 10:
-                query.append({"status": q})
-
-            if q_len == 1:
-                try:
-                    query.append({"invoice_type": int(q)})
-                except ValueError:
-                    pass
-
         if invoice_type:
             query.append({"invoice_type": int(invoice_type)})
 

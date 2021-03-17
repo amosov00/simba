@@ -16,6 +16,7 @@ class BaseApiWrapper:
         request_type: Literal["GET", "POST", "DELETE"] = "GET",  # Noqa
         params: dict = None,
         data: dict = None,
+        raise_error: bool = True
     ) -> Union[list, dict, str, None]:
         async with httpx.AsyncClient(timeout=10.0) as client:
             if request_type == "POST":
@@ -31,9 +32,10 @@ class BaseApiWrapper:
                 resp = await client.get(url, params=params)
 
         if resp.is_error:
+            if not raise_error:
+                return None
             capture_message(f"Invalid request; status: {resp.status_code}; url: {url}; error {resp.text}", level="info")
             raise HTTPException(HTTPStatus.BAD_REQUEST, resp.text)
-
         elif resp.text:
             return resp.json()
         else:

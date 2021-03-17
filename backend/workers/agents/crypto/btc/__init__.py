@@ -1,2 +1,3 @@
+from .currency_rate import currency_rate_job
 from .update_empty_wallets_info import update_empty_btc_addresses_info_job
 from .update_wallets_info import update_btc_addresses_info_job

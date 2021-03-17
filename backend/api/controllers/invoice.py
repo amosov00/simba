@@ -5,7 +5,9 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException, Depends, Body, Response, Path
 
 from api.dependencies import get_user
-from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler
+from core.mechanics.crypto import BitcoinWrapper
+from core.mechanics.blockcypher_webhook import BlockCypherWebhookHandler
+from core.mechanics import InvoiceMechanics
 from database.crud import InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD
 from schemas import (
     Invoice,
@@ -108,7 +110,7 @@ async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
     if invoice.invoice_type == InvoiceType.BUY:
         invoice.target_btc_address = await BitcoinWrapper().create_wallet_address(invoice, user)
 
-    InvoiceMechanics(invoice, user).validate()
+    await InvoiceMechanics(invoice, user).validate()
 
     invoice.status = InvoiceStatus.WAITING
 

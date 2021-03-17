@@ -7,6 +7,9 @@ export default ({ app, redirect, route }, inject) => {
         pin_code: pin_code,
       })
       .then(async (resp) => {
+        if (!resp) {
+          return false
+        }
         app.$axios.setToken(resp.data.token, 'Bearer')
         app.$cookies.set('token', resp.data.token, {
           path: '/',

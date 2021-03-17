@@ -4,7 +4,8 @@ from datetime import timedelta
 from sentry_sdk import capture_exception
 
 from config import settings
-from core.mechanics import BitcoinWrapper, InvoiceMechanics
+from core.mechanics import InvoiceMechanics
+from core.mechanics.crypto import BitcoinWrapper
 from core.mechanics.notifier import SupportNotifier
 from database.crud import InvoiceCRUD, UserCRUD, MetaCRUD
 from schemas import InvoiceInDB, InvoiceStatus, InvoiceType, MetaSlugs

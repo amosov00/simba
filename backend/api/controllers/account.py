@@ -1,22 +1,18 @@
-import hmac
 from datetime import datetime
-from hashlib import sha1
 from http import HTTPStatus
 from urllib.parse import urlencode, urljoin
 
-from bson import ObjectId
-from dateutil.relativedelta import relativedelta
-from fastapi import APIRouter, HTTPException, Depends, Body, Path
-from starlette.requests import Request
+from fastapi import APIRouter, HTTPException, Depends, Body, Path, Request
 
 from api.dependencies import get_user
 from config import settings, SST_CONTRACT
-from core.integrations.person_verify import PersonVerifyClient
 from core.mechanics.referrals import ReferralMechanics
+from core.mechanics.user_kyc import KYCController
 from database.crud import UserCRUD, EthereumTransactionCRUD, UserAddressesArchiveCRUD
 from schemas import (
     UserLogin,
     User,
+    UserKYC,
     UserLoginResponse,
     UserCreationSafe,
     UserChangePassword,
@@ -35,6 +31,7 @@ from schemas import (
     UserBitcoinAddressInput,
     UserAddressesArchive,
     UserKYCAccessTokenResponse,
+    UserKYCVerificationLimit,
 )
 
 __all__ = ["router"]
@@ -73,7 +70,7 @@ async def account_change_password(user: User = Depends(get_user), payload: UserC
     return await UserCRUD.change_password(user, payload)
 
 
-@router.post("/verify/", response_model=UserLoginResponse)
+@router.post("/verify/")
 async def account_verify_email(data: UserVerifyEmail = Body(...)):
     return await UserCRUD.verify_email(data.email, data.verification_code)
 
@@ -118,42 +115,24 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
 
 @router.get("/kyc/token/", response_model=UserKYCAccessTokenResponse)
 async def account_get_kyc_token(user: User = Depends(get_user)):
-    return {"token": await PersonVerifyClient.get_access_token(str(user.id))}
+    return {"token": await KYCController(user=user).get_access_token()}
+
+
+@router.get("/kyc/limit/", response_model=UserKYCVerificationLimit)
+async def account_get_kyc_token(user: User = Depends(get_user)):
+    kyc_instance = await KYCController.init(user)
+    return await kyc_instance.calculate_verification_limit()
+
+
+@router.get("/kyc/status/", response_model=UserKYC, response_model_exclude={"review_data", "status_data"})
+async def account_get_kyc_status(user: User = Depends(get_user)):
+    kyc_instance = await KYCController.init(user)
+    return await kyc_instance.get_status()
 
 
 @router.post("/kyc/status/")
 async def account_receive_kyc_status(request: Request):
-    request_hashsum = hmac.new(
-        settings.person_verify.status_webhook_secret_key.encode(), await request.body(), digestmod=sha1
-    ).hexdigest()
-
-    if request.headers["x-payload-digest"] == request_hashsum:
-        request_body = await request.json()
-        await UserCRUD.update_one(
-            {"_id": ObjectId(request_body["externalUserId"])},
-            {"kyc_status": request_body["reviewStatus"], "kyc_review_response": request_body},
-        )
-
-
-@router.get("/kyc/status/")
-async def account_get_kyc_status(user: User = Depends(get_user)):
-    kyc_current_status = user.kyc_current_status
-
-    if not kyc_current_status or (kyc_current_status and datetime.now() >= kyc_current_status.get("_expire_at")):
-        kyc_current_status = await PersonVerifyClient.get_current_status(
-            str(user.id),
-            service_applicant_id=kyc_current_status.get("service_applicant_id_cache", None)
-            if kyc_current_status
-            else None,
-        )
-
-        expire_at = datetime.now() + relativedelta(minutes=5)  # default cache expire time
-
-        kyc_current_status["_expire_at"] = expire_at
-
-        await UserCRUD.update_one({"_id": user.id}, {"kyc_current_status": kyc_current_status})
-
-    return {"kyc_current_status": kyc_current_status}
+    return await KYCController().proceed_webhook(request)
 
 
 @router.get("/referrals/", response_model=UserReferralsResponse)

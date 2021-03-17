@@ -1,3 +1,3 @@
-import { statusToColor } from '@/consts/invoice'
+import { statusToColor, InvoiceStatus } from '@/consts/invoice'
 
-export { statusToColor }
+export { statusToColor, InvoiceStatus }

@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timedelta
 
 from config import SIMBA_CONTRACT
-from core.mechanics import SimbaWrapper
+from core.mechanics.crypto import SimbaWrapper
 from database.crud import EthereumTransactionCRUD, MetaCRUD
 from schemas import SimbaContractEvents, EthereumTransactionInDB, MetaSlugs, Meta
 from workers.agents import app

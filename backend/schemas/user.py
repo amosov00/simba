@@ -39,7 +39,6 @@ __all__ = [
     "UserBitcoinAddressDelete",
     "UserBitcoinAddressInput",
     "UserWithReferrals",
-    "UserKYCAccessTokenResponse",
 ]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -57,8 +56,8 @@ USER_MODEL_INCLUDE_FIELDS = frozenset(
         "is_active",
         "terms_and_condition",
         "created_at",
-        "kyc_status",
-        "kyc_review_response",
+        # "kyc_status",
+        # "kyc_review_response",
     )
 )
 
@@ -174,8 +173,8 @@ class UserVerifyEmailResponse(BaseModel):
 
 
 class UserLogin(BaseModel):
-    email: str = Field(..., example="email")
-    password: str = Field(..., example="password")
+    email: str = Field(..., min_length=6, example="email")
+    password: str = Field(..., min_length=6, example="password")
     pin_code: Optional[str] = Field(default=None, example="auth pin-code")
 
 
@@ -276,7 +275,3 @@ class UserReferralInfoAdmin(BaseModel):
 
 class UserWithReferrals(User):
     referrals: List[UserReferralInfoAdmin] = Field(default=[])
-
-
-class UserKYCAccessTokenResponse(BaseModel):
-    token: str = Field(...)

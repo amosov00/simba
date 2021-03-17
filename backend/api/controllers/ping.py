@@ -7,9 +7,17 @@ __all__ = ["router"]
 router = APIRouter()
 
 
+@router.head(
+    "/",
+    include_in_schema=False,
+)
+async def ping_head():
+    return True
+
+
 @router.get(
     "/",
     include_in_schema=False,
 )
-async def ping():
+async def ping_get():
     return await mongo.ping()

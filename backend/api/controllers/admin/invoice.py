@@ -6,7 +6,9 @@ from sentry_sdk import capture_exception
 
 from config import settings
 from core.integrations import SimbaNodeJSWrapper
-from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler, ReferralMechanics
+from core.mechanics.crypto import BitcoinWrapper
+from core.mechanics import InvoiceMechanics, ReferralMechanics
+from core.mechanics.blockcypher_webhook import BlockCypherWebhookHandler
 from core.utils import to_objectid
 from database.crud import UserCRUD, InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD, MetaCRUD
 from schemas import InvoiceInDB, InvoiceExtended, InvoiceStatus, InvoiceType, MetaSlugs, ReferralTransactionUserID
