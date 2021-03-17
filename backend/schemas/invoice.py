@@ -34,9 +34,9 @@ class InvoiceStatus:
     PAID = "paid"  # Paid but waiting for tx confirmation
     COMPLETED = "completed"  # success end
     CANCELLED = "cancelled"  # invoice closed
-    DISPUTE = "dispute"  # KYC and verification issues
+    SUSPENDED = "suspended"  # KYC and verification issues
 
-    ALL = (CREATED, WAITING, PROCESSING, PAID, COMPLETED, CANCELLED, DISPUTE)
+    ALL = (CREATED, WAITING, PROCESSING, PAID, COMPLETED, CANCELLED, SUSPENDED)
 
 
 class InvoiceType(IntEnum):

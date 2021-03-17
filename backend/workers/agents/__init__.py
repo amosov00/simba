@@ -5,5 +5,4 @@ app = get_faust_app()  # noqa
 from .blockcypher_webhooks import *
 from .invoices import *
 from .crypto import *
-from .currency_rate import *
 

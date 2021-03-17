@@ -1,9 +1,9 @@
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
 from schemas.base import BaseModel, ObjectIdPydantic, Field
 
-__all__ = ["UserKYC", "UserKYCDocsStatus", "UserKYCInDB", "UserKYCAccessTokenResponse"]
+__all__ = ["UserKYC", "UserKYCDocsStatus", "UserKYCInDB", "UserKYCAccessTokenResponse", "UserKYCVerificationLimit"]
 
 
 class UserKYCDocsStatus(BaseModel):
@@ -15,7 +15,7 @@ class UserKYCDocsStatus(BaseModel):
 class UserKYC(BaseModel):
     user_id: ObjectIdPydantic = Field(...)
     applicant_id: Optional[str] = Field(default=None)  # applicantId
-    result: bool = Field(default=False)  # reviewResult.reviewAnswer
+    is_verified: bool = Field(default=False)  # reviewResult.reviewAnswer
     status: Optional[str] = Field(default=None)  # reviewStatus
 
     docs_status: UserKYCDocsStatus = Field(default_factory=UserKYCDocsStatus)
@@ -26,8 +26,19 @@ class UserKYC(BaseModel):
     updated_at: datetime = Field(default=None)
 
 
+class UserKYCResponse(UserKYC):
+    allowed_usd: Optional[int] = Field(default=2000)
+
+
 class UserKYCInDB(UserKYC):
     id: ObjectIdPydantic = Field(default=None, alias="_id", title="_id")
+
+
+class UserKYCVerificationLimit(BaseModel):
+    usd_used: float = Field(default=0.0)
+    usd_remain: float = Field(default=0.0)
+    usd_limit: float = Field(default=0.0)
+    is_allowed: bool = Field(default=False)
 
 
 class UserKYCAccessTokenResponse(BaseModel):

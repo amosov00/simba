@@ -1,7 +1,8 @@
-import { DialogProgrammatic as Dialog, ToastProgrammatic as Toast } from 'buefy'
+import {DialogProgrammatic as Dialog, ToastProgrammatic as Toast} from 'buefy'
 
 export const state = () => ({
   user: null,
+  kyc: null,
   contract: '',
   tradeData: {
     operation: 1,
@@ -21,6 +22,7 @@ export const getters = {
 
 export const mutations = {
   setUser: (state, user) => (state.user = user),
+  setKYC: (state, payload) => (state.kyc = payload),
   deleteUser: (state) => (state.user = null),
   setContract: (state, data) => (state.contract = data),
   setTradeData: (state, payload) => {
@@ -48,7 +50,7 @@ export const actions = {
       .catch(() => false)
   },
 
-  async addAddress({ dispatch }, data) {
+  async addAddress({dispatch}, data) {
     if (data.type === 'eth') {
       return await dispatch('metamask/createSignature', data)
     } else {
@@ -77,7 +79,7 @@ export const actions = {
     }
   },
 
-  async removeAddress({ dispatch }, data) {
+  async removeAddress({dispatch}, data) {
     if (data.type === 'btc') {
       return this.$axios
         .delete(`/account/btc-address/`, {
@@ -120,7 +122,7 @@ export const actions = {
     }
   },
 
-  async fetchContracts({ commit }) {
+  async fetchContracts({commit}) {
     return this.$axios
       .get('/meta/eth/contract/')
       .then((res) => {
@@ -143,7 +145,7 @@ export const actions = {
       })
   },
 
-  async getUser({ commit }) {
+  async getUser({commit}) {
     return this.$axios
       .get('/account/user/')
       .then((resp) => {
@@ -169,7 +171,7 @@ export const actions = {
       .catch((_) => false)
   },
 
-  async signUp({ commit }, data) {
+  async signUp({commit}, data) {
     if (!data) return false
     return this.$axios
       .post('/account/signup/', data)
@@ -229,7 +231,7 @@ export const actions = {
         return false
       })
   },
-  async confirm2fa({ commit }, data) {
+  async confirm2fa({commit}, data) {
     return this.$axios
       .post('/account/2fa/', {
         token: data.token,
@@ -249,7 +251,7 @@ export const actions = {
         })
       })
   },
-  async delete2fa({ commit }, pin_code) {
+  async delete2fa({commit}, pin_code) {
     return this.$axios
       .delete('/account/2fa/', {
         data: {
@@ -269,5 +271,28 @@ export const actions = {
           type: 'is-danger',
         })
       })
+  },
+  async getKYCStatus({ commit }) {
+    return this.$axios
+      .get('/account/kyc/status/')
+      .then((resp) => {
+        if (resp.status === 200) {
+          commit('setKYC', resp.data)
+          return true
+        }
+        return false
+      })
+      .catch((_) => false)
+  },
+  async getKYCToken({ commit }) {
+    return this.$axios
+      .get('/account/kyc/token/')
+      .then((resp) => {
+        if (resp.status === 200) {
+          return resp.data.token
+        }
+        return false
+      })
+      .catch((_) => false)
   },
 }

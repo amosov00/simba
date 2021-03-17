@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from http import HTTPStatus
 from typing import Union, List, Optional
 
@@ -14,11 +14,11 @@ from config import (
     TRANSACTION_MIN_CONFIRMATIONS,
     BTC_FEE,
     settings,
-    InvoiceVerificationLimits,
 )
-from core.mechanics.crypto import SimbaWrapper, SSTWrapper, BitcoinWrapper
-from core.mechanics.crypto.base import CryptoValidation, CryptoCurrencyRate
 from core.mechanics.blockcypher_webhook import BlockCypherWebhookHandler
+from core.mechanics.crypto import SimbaWrapper, SSTWrapper, BitcoinWrapper
+from core.mechanics.crypto.base import CryptoValidation
+from core.mechanics.user_kyc import KYCController
 from database.crud import BTCTransactionCRUD, InvoiceCRUD, EthereumTransactionCRUD, UserCRUD, MetaCRUD
 from schemas import (
     User,
@@ -34,7 +34,6 @@ from schemas import (
     SimbaContractEvents,
     BlockCypherWebhookEvents,
     MetaSlugs,
-    MetaCurrencyRatePayload,
 )
 
 
@@ -66,7 +65,7 @@ class InvoiceMechanics(CryptoValidation):
     async def update_invoice(self):
         return await InvoiceCRUD.update_one({"_id": self.invoice.id}, self.invoice.dict(exclude={"id"}))
 
-    def _validate_common(self):
+    async def _validate_common(self):
         if not self.invoice.user_id:
             self.errors.append("`user_id` field is missing")
         if not self.invoice.target_btc_address:
@@ -77,6 +76,8 @@ class InvoiceMechanics(CryptoValidation):
             self.errors.append(f"min simba token amount: {SIMBA_MINIMAL_BUY_AMOUNT}")
         if self.invoice.invoice_type not in (InvoiceType.SELL, InvoiceType.BUY):
             self.errors.append("invalid invoice type")
+
+        await self._validate_verification_limits()
 
         return None
 
@@ -101,6 +102,19 @@ class InvoiceMechanics(CryptoValidation):
             if not self.user.has_address("btc", self.invoice.target_btc_address):
                 self.errors.append("user has no target_btc_address")
         return True
+
+    async def _validate_verification_limits(self) -> bool:
+        btc_amount = self.invoice.btc_amount_proceeded \
+            if self.invoice.btc_amount_proceeded > 0 else self.invoice.btc_amount
+
+        verification_limit = await (
+            await KYCController.init(self.user)
+        ).calculate_verification_limit(btc_amount)
+
+        if not verification_limit.is_allowed:
+            self.errors.append("verification limit exceeded")
+
+        return verification_limit.is_allowed
 
     def _validate_for_sending_btc(self):
         if not self.invoice.status == InvoiceStatus.PROCESSING:
@@ -143,47 +157,9 @@ class InvoiceMechanics(CryptoValidation):
 
         return True
 
-    async def _validate_verification_limits(self) -> None:
-        """Validate user with verification / kyc limits"""
-
-        match_stage = {
-            "$match": {
-                "user_id": self.user.id,
-                "status": InvoiceStatus.COMPLETED,
-            }
-        }
-        # if user verified
-        if self.user.id:
-            match_stage["$match"]["finished_at"] = {"$gte": datetime.now() - timedelta(days=30)}
-
-        previous_total_btc = (
-            await InvoiceCRUD.aggregate(
-                [match_stage, {"$group": {"_id": None, "total_btc": {"$sum": "$btc_amount_proceeded"}}}]
-            )
-        )[0]["total_btc"]
-
-        btc_price = MetaCurrencyRatePayload(
-            **(await MetaCRUD.find_by_slug(MetaSlugs.CURRENCY_RATE, raise_500=True))["payload"]
-        ).BTCUSD
-
-        total_btc = previous_total_btc + self.invoice.btc_amount_proceeded
-        total_usd = (total_btc * btc_price) / 10 ** CryptoCurrencyRate.BTC_DECIMALS
-
-        verification_limit = (
-            InvoiceVerificationLimits.VERIFIED
-            if self.user.verification_code
-            else InvoiceVerificationLimits.NON_VERIFIED
-        )
-
-        # if user verified
-        if total_usd > verification_limit:
-            self.errors.append("usd verification limit failed")
-
-        return None
-
     async def validate(self, raise_exceprion: bool = True) -> bool:
         """Validate invoice, returns True if valid"""
-        self._validate_common()
+        await self._validate_common()
 
         if self.invoice.invoice_type == InvoiceType.BUY:
             self._validate_for_buy()

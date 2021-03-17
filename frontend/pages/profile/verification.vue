@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div v-if="kyc_status !== ''">
+    <div v-if="kycStatus !== ''">
       <step-indicator
         class="indicat"
         :emailConfirm="emailConfirm"
         :passportConfirm="documentReviewed"
-        v-if="kyc_status === 'completed'"
+        v-if="kycStatus === 'completed'"
       >
       </step-indicator>
       <div id="sumsub-websdk-container" v-show="!showStartVerify"></div>
@@ -21,20 +21,29 @@
 </template>
 
 <script>
+import {mapActions, mapState} from "vuex"
 import snsWebSdk from '@sumsub/websdk'
 import StartVerify from '@/components/StartVerify'
 import StepIndicator from '@/components/StepIndicator'
+
 export default {
   name: 'profile-verification',
   layout: 'profile',
   computed: {
+    ...mapState(["user", "kyc"]),
     language() {
       const lang = this.$i18n.locale
       this.launch()
       return lang
     },
+    emailConfirm() {
+      return this.user.is_active
+    },
     documentReviewed() {
-      return this.reviewAnswer === 'GREEN' && this.reviewStatus === 'completed'
+      return this.kyc.is_verified && this.kyc.status === "completed"
+    },
+    kycStatus() {
+      return this.kyc ? this.kyc.status : ""
     },
     flow() {
       if (this.$i18n.locale === 'ru') {
@@ -54,17 +63,12 @@ export default {
     stepsCompleted: [],
     stepsNext: [],
     showStartVerify: true,
-    emailConfirm: false,
-    kyc_status: '',
-    reviewAnswer: '',
-    reviewStatus: ''
   }),
   methods: {
+    ...mapActions(["getKYCStatus", "getKYCToken"]),
     async launch() {
-      let { data } = await this.$axios.get('/account/kyc/token/')
-      this.token = data.token
       // 'tst:Dt2mTU9SnHl9SGjALc5hhCMe.L4VJ9g2XHJbYjipw5hI39QZd7amHIzMo'
-      this.launchWebSdk('https://test-api.sumsub.com', this.flow, this.token)
+      this.launchWebSdk('https://test-api.sumsub.com', this.flow, await this.getKYCToken())
     },
     launchWebSdk(apiUrl, flowName, accessToken, applicantEmail, applicantPhone) {
       const origin = document.location.origin
@@ -78,7 +82,6 @@ export default {
           email: applicantEmail,
           phone: applicantPhone,
           onMessage: (type, payload) => {
-            console.log('WebSDK onMessage', type, payload)
             if (type === 'idCheck.onStepInitiated') {
               this.currentStep = payload.idDocSetType
               localStorage.setItem('currentStep', payload.idDocSetType)
@@ -100,21 +103,17 @@ export default {
     },
   },
   async mounted() {
-    await this.launch()
-  },
-  created() {
-    this.$axios.get('/account/user/').then((res)=>{
-      this.emailConfirm = res.data.is_active
-      this.kyc_status = res.data.kyc_status
-      this.reviewStatus = res.data.kyc_review_response.reviewStatus
-      this.reviewAnswer = res.data.kyc_review_response.reviewResult.reviewAnswer
-      if (this.kyc_status === 'completed') {
-        this.showStartVerify = false
-      }
-    })
+    if (_.isEmpty(this.kyc)) {
+      await this.getKYCStatus()
+    }
+
+    this.showStartVerify = !this.kyc.is_verified
+
     if (localStorage.getItem('currentStep')) {
       this.currentStep = localStorage.getItem('currentStep')
     }
+
+    await this.launch()
   },
   watch: {
     currentStep() {

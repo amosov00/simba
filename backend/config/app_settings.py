@@ -105,5 +105,5 @@ INVOICE_TIMEOUT = timedelta(hours=2)
 
 
 class InvoiceVerificationLimits:
-    NON_VERIFIED = 2000    # Email verification, all time
-    VERIFIED = 5000     # KYC done, per month
+    NON_VERIFIED = 2000.0    # Email verification, all time
+    VERIFIED = 5000.0     # KYC done, per month
