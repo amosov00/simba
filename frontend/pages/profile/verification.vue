@@ -36,6 +36,9 @@ export default {
     documentReviewed() {
       return this.reviewAnswer === 'GREEN' && this.reviewStatus === 'completed'
     },
+     KYCtoken() {
+      return this.$store.getters['sumsub/KYCtoken']
+    },
     flow() {
       if (this.$i18n.locale === 'ru') {
         return 'Basic_ru'
@@ -49,8 +52,6 @@ export default {
     StepIndicator
   },
   data: () => ({
-    token: null,
-    currentStep: '',
     stepsCompleted: [],
     stepsNext: [],
     showStartVerify: true,
@@ -61,10 +62,8 @@ export default {
   }),
   methods: {
     async launch() {
-      let { data } = await this.$axios.get('/account/kyc/token/')
-      this.token = data.token
-      // 'tst:Dt2mTU9SnHl9SGjALc5hhCMe.L4VJ9g2XHJbYjipw5hI39QZd7amHIzMo'
-      this.launchWebSdk('https://test-api.sumsub.com', this.flow, this.token)
+      await this.$store.dispatch('sumsub/fetchKYCtoken')
+      this.launchWebSdk('https://test-api.sumsub.com', this.flow, this.KYCtoken)
     },
     launchWebSdk(apiUrl, flowName, accessToken, applicantEmail, applicantPhone) {
       const origin = document.location.origin
@@ -77,17 +76,6 @@ export default {
           lang: this.$i18n.locale,
           email: applicantEmail,
           phone: applicantPhone,
-          onMessage: (type, payload) => {
-            console.log('WebSDK onMessage', type, payload)
-            if (type === 'idCheck.onStepInitiated') {
-              this.currentStep = payload.idDocSetType
-              localStorage.setItem('currentStep', payload.idDocSetType)
-            }
-            if (type === 'livenessSessionCompleted' && payload.answer === 'GREEN') {
-              this.currentStep = 'APPLICANT_DATA'
-              localStorage.setItem('currentStep', 'APPLICANT_DATA')
-            }
-          },
           uiConf: {
             customCss: `${origin}/${this.$i18n.locale}sumsub.css`,
           },
@@ -99,38 +87,16 @@ export default {
       snsWebSdkInstance.launch('#sumsub-websdk-container', 'basic-kyc')
     },
   },
-  async mounted() {
-    await this.launch()
-  },
-  created() {
-    this.$axios.get('/account/user/').then((res)=>{
-      this.emailConfirm = res.data.is_active
-      this.kyc_status = res.data.kyc_status
-      this.reviewStatus = res.data.kyc_review_response.reviewStatus
-      this.reviewAnswer = res.data.kyc_review_response.reviewResult.reviewAnswer
-      if (this.kyc_status === 'completed') {
-        this.showStartVerify = false
-      }
-    })
-    if (localStorage.getItem('currentStep')) {
-      this.currentStep = localStorage.getItem('currentStep')
+  async created() {
+    const res = await this.$store.dispatch('sumsub/fetchUserData')
+    this.emailConfirm = res.data.is_active
+    this.kyc_status = res.data.kyc_status
+    this.reviewStatus = res.data.kyc_review_response.reviewStatus
+    this.reviewAnswer = res.data.kyc_review_response.reviewResult.reviewAnswer
+    if (this.kyc_status === 'completed') {
+      this.showStartVerify = false
     }
-  },
-  watch: {
-    currentStep() {
-      if (this.currentStep === 'IDENTITY') {
-        this.stepsCompleted = []
-        this.stepsNext = ['SELFIE', 'APPLICANT_DATA']
-      }
-      if (this.currentStep === 'SELFIE') {
-        this.stepsCompleted = ['IDENTITY']
-        this.stepsNext = ['APPLICANT_DATA']
-      }
-      if (this.currentStep === 'APPLICANT_DATA') {
-        this.stepsCompleted = ['IDENTITY', 'SELFIE']
-        this.stepsNext = []
-      }
-    },
+    await this.launch()
   },
 }
 </script>
