@@ -45,9 +45,6 @@ export default {
     kycStatus() {
       return this.kyc ? this.kyc.status : ""
     },
-     KYCtoken() {
-      return this.$store.getters['sumsub/KYCtoken']
-    },
     flow() {
       if (this.$i18n.locale === 'ru') {
         return 'Basic_ru'
@@ -68,8 +65,7 @@ export default {
   methods: {
     ...mapActions(["getKYCStatus", "getKYCToken"]),
     async launch() {
-      await this.$store.dispatch('sumsub/fetchKYCtoken')
-      this.launchWebSdk(this.$config.sumsubURL, this.flow, this.KYCtoken)
+      this.launchWebSdk(this.$config.sumsubURL, this.flow, await this.getKYCToken())
     },
     launchWebSdk(apiUrl, flowName, accessToken, applicantEmail, applicantPhone) {
       const origin = document.location.origin

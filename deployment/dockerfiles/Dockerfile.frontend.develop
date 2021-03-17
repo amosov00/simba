@@ -7,6 +7,7 @@ ENV NUXT_HOST=0.0.0.0
 ENV NUXT_PORT=3015
 ENV API_URL=https://simba-dev.elastoo.com/api
 ENV API_URL_BROWSER=https://simba-dev.elastoo.com/api
+ENV API_URL_SUMSUB=https://test-api.sumsub.com
 ENV DOMAIN=simba-dev.elastoo.com
 ENV SENTRY_DSN=https://99fbc649c9234967a1668a5ef519e2e2@sentry.elastoo.com/7
 
