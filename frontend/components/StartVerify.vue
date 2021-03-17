@@ -1,10 +1,5 @@
 <template>
   <div>
-    <step-indicator
-      class="indicator"
-      :emailConfirm="emailConfirm"
-    >
-    </step-indicator>
     <h2 class="start-title">{{$t('verify["You need to verify your identity"]')}}</h2>
     <p class="text">
       {{$t('verify["If you lose access to your wallet"]')}},<br />
@@ -26,13 +21,7 @@ export default {
   components: {
     BtnVerify,
     StepIndicator,
-  },
-  props: {
-    emailConfirm: {
-      default: false,
-      type: Boolean
-    }
-  },
+  }
 }
 </script>
 
