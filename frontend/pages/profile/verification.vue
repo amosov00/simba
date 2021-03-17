@@ -63,7 +63,7 @@ export default {
   methods: {
     async launch() {
       await this.$store.dispatch('sumsub/fetchKYCtoken')
-      this.launchWebSdk('https://test-api.sumsub.com', this.flow, this.KYCtoken)
+      this.launchWebSdk(this.$config.sumsubURL, this.flow, this.KYCtoken)
     },
     launchWebSdk(apiUrl, flowName, accessToken, applicantEmail, applicantPhone) {
       const origin = document.location.origin

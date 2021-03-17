@@ -76,6 +76,7 @@ export default {
   },
   publicRuntimeConfig: {
     domain: process.env.DOMAIN || 'my.simba.storage',
+    sumsubURL: process.env.API_URL_SUMSUB
   },
   i18n: {
     strategy: 'no_prefix',
