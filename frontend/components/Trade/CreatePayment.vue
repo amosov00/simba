@@ -1,10 +1,13 @@
 <template lang="pug">
-  div
+  div.mr-10
     h3.text-large.has-text-weight-bold {{$t('exchange.cr_payment_bill')}}
     div.is-flex.mt-2.align-items-center.space-between
       div.is-flex.align-items-center(:class="{ 'flex-row-reverse': isBuy}")
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
-          //--money(v-model.lazy="simba" v-bind="money" change.native="convert").smb-input
+          input(v-model="simba" type="text" @input="convert" :disabled="btn_loading").smb-input
+        span.mr-2.ml-2
+          | {{$t('exchange.or')}}
+        div.is-flex.flex-column.align-items-center.smb-input-wrapper
           input(v-model="simba" type="text" @input="convert" :disabled="btn_loading").smb-input
         span.mr-2.ml-2
           | =
@@ -13,6 +16,8 @@
       b-button.btn(@click="confirm" :loading="btn_loading" :disabled="!accepted_terms") {{$t('exchange.create')}}
     div.is-flex.space-between
       div.is-flex.has-text-centered(:class="{ 'flex-row-reverse': isBuy, 'justify-content-end': isBuy}")
+        div.smb-input-wrapper.mt-2 USDT
+        span.mr-4
         div.smb-input-wrapper.mt-2 SIMBA
         span.mr-4
         div.smb-input-wrapper.mt-2 BTC
@@ -23,10 +28,15 @@
             =' '
             a(href="https://simba.storage/terms-of-use.pdf" target="_blank" rel="noreferrer noopener").link {{$i18n.t('auth.terms_of_agreement')}}
           span.validaton-error {{ errors[0] }}
+    div.mt-4 {{usedTranslate}} BTC / {{limitTranslate}} BTC
     div(v-if="!error")
-      div(v-if="isBuy").mt-4.has-text-grey-light {{$t('exchange.applied_fee')}} {{ fee }} BTC {{$t('exchange.fee_in_simba')}}
-      div(v-else).mt-4.has-text-grey-light {{$t('exchange.applied_fee')}} = {{ (+fee * 100000000) }} SIMBA
-    div(v-if="error").error.has-text-danger.mt-4 {{ $t('exchange.amount_err') }} 200,000 SIMBA
+      div(v-if="isBuy").mt-2.has-text-grey-light {{$t('exchange.applied_fee')}} {{ fee }} BTC {{$t('exchange.fee_in_simba')}}
+      div(v-else).mt-2.has-text-grey-light {{$t('exchange.applied_fee')}} = {{ (+fee * 100000000) }} SIMBA
+    div(v-if="error").error.has-text-danger.mt-2 {{ $t('exchange.amount_err') }} 200,000 SIMBA
+    div(v-if="beyondLimit").error.has-text-danger.mt-2
+      | {{$t('exchange["Above your limit"]')}} {{limitTranslate}} BTC. {{$t('exchange.Please')}},
+      a  {{$t('exchange.update')}}
+      |  {{$t('exchange["your verification level"]')}}.
 </template>
 
 <script>
@@ -55,18 +65,46 @@ export default {
     check_btc_address_interval: null,
   }),
 
-  created() {
+  async created() {
     this.fee = 0.00055
 
     if (!this.isBuy) {
       this.btc = 0.0015
       this.simba = 200000
     }
+    await this.$store.dispatch('exchange/fetchLimits')
   },
 
   computed: {
     isBuy() {
       return this.$store.getters['exchange/tradeData']['operation'] === 1
+    },
+
+    limits() {
+      return this.$store.getters['exchange/limits']
+    },
+
+    beyondLimit() {
+      const limit = (this.limits.usd_limit / this.limits.BTCUSD) - (this.limits.usd_used / this.limits.BTCUSD)
+      return this.btc > limit
+    },
+
+    usedTranslate() {
+      const result = this.limits.usd_used / this.limits.BTCUSD
+      if (Number.isInteger(result)) {
+        return result
+      } else {
+        return result.toFixed(6).replace(/.$/,'')
+      }
+    },
+
+    limitTranslate() {
+      const result = this.limits.usd_limit / this.limits.BTCUSD
+      if (Number.isInteger(result)) {
+        return result
+      } else {
+        return result.toFixed(6).replace(/.$/,'')
+      }
     },
 
     tradeData() {
@@ -82,6 +120,9 @@ export default {
     async confirm() {
       if (this.simba < 200000) {
         this.error = true
+        return
+      }
+      if (this.beyondLimit === true) {
         return
       }
 
