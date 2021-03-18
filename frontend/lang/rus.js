@@ -40,6 +40,10 @@ export default (context) => {
       contacts: 'Контакты',
     },
     exchange: {
+      update: 'обновите',
+      Please : 'Пожалуйста',
+      'Above your limit': 'Введённая сумма привышает лимит в',
+      'your verification level': 'ваш уровень верификации',
       buy: 'Покупка',
       sell: 'Продажа',
       last_bills: 'Последние сделки',
@@ -91,6 +95,7 @@ export default (context) => {
       send_simba_now: 'Отправить SIMBA сейчас',
       applied_fee: 'Комиссия',
       fee_in_simba: '(взымается в SIMBA)',
+      or: 'или'
     },
     dropdown: {
       bill_details: 'Реквизиты',

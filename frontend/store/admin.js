@@ -48,4 +48,12 @@ export const actions = {
       })
       .catch(() => {})
   },
+  async fetchKYCUserById({}, id) {
+    return await this.$axios
+      .get(`/admin/users/${id}/kyc/status/`)
+      .then((res) => {
+        return res.data
+      })
+      .catch(() => {})
+  },
 }

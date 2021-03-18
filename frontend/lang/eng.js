@@ -40,6 +40,10 @@ export default (context) => {
       contacts: 'Contacts',
     },
     exchange: {
+      update: 'update',
+      Please : 'Please',
+      'Above your limit': 'Above your limit',
+      'your verification level': 'your verification level',
       buy: 'Buy',
       sell: 'Sell',
       last_bills: 'Last bills',
@@ -91,6 +95,7 @@ export default (context) => {
       send_simba_now: 'Send SIMBA now',
       applied_fee: 'Applied fee',
       fee_in_simba: '(charged in SIMBA)',
+      or: 'or'
     },
     dropdown: {
       bill_details: 'Bill details',
