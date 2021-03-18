@@ -119,7 +119,7 @@ async def account_get_kyc_token(user: User = Depends(get_user)):
 
 
 @router.get("/kyc/limit/", response_model=UserKYCVerificationLimit)
-async def account_get_kyc_token(user: User = Depends(get_user)):
+async def account_get_kyc_limits(user: User = Depends(get_user)):
     kyc_instance = await KYCController.init(user)
     return await kyc_instance.calculate_verification_limit()
 
@@ -131,7 +131,7 @@ async def account_get_kyc_status(user: User = Depends(get_user)):
 
 
 @router.post("/kyc/status/")
-async def account_receive_kyc_status(request: Request):
+async def account_proceed_kyc_status(request: Request):
     return await KYCController().proceed_webhook(request)
 
 
