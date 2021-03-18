@@ -2,7 +2,9 @@
     div.main-content
         div.is-flex.is-justified-between.mb-3
             h1.is-size-4 {{$t('su_invoices.invoices')}}
-            button.btn(@click="fetchPaidInvoiced") {{ $t('su_invoices.not_completed') }}
+            b-select(v-model="status").mr-3.wallet-select
+              template(v-for="op in options")
+                option(:value="op.value") {{ op.text }}
         div.mb-3
             b-input(v-model="searchQuery" @input="onSearchInput" :placeholder="`${this.$i18n.t('other.search')}...`" icon="magnify")
         div(v-if="adminInvoices.length <= 0") {{ $t('other.search_empty_results') }}
@@ -34,6 +36,11 @@ export default {
   layout: 'main',
   middleware: ['adminRequired'],
   mixins: [formatDate, formatCurrency],
+  watch: {
+    async status(value) {
+      await this.fetchPaidInvoiced(value)
+    }
+  },
   async fetch() {
     if (this.adminInvoices.length <= 0) {
       await this.$store.dispatch('invoices/fetchAdminInvoices', { q: this.searchQuery })
@@ -41,6 +48,17 @@ export default {
   },
   data: () => ({
     searchQuery: '',
+    options: [
+      {text: 'Созданные', value: 'created'},
+      {text: 'В ожидании', value: 'waiting'},
+      {text: 'В обработке', value: 'processing'},
+      {text: 'Оплаченые', value: 'paid'},
+      {text: 'Завершённые', value: 'completed'},
+      {text: 'Отклоненные', value: 'cancelled'},
+      {text: 'Приостановленные', value: 'suspended'},
+      {text: 'Все', value: null},
+    ],
+    status: null
   }),
   computed: {
     adminInvoices() {
@@ -56,12 +74,14 @@ export default {
         this.$store.dispatch('invoices/fetchAdminInvoices', { q: properSearchQuery })
       }
     }, 500),
-    async fetchPaidInvoiced() {
-      let searchQuery = this.searchQuery.toLowerCase().trim()
-      await this.$store.dispatch('invoices/fetchAdminInvoices', {
-        q: searchQuery,
-        status: 'paid',
-      })
+    async fetchPaidInvoiced(status) {
+      const searchQuery = this.searchQuery.toLowerCase().trim()
+      const payload = {}
+      payload.q = searchQuery
+      if (status !== null) {
+        payload.status = status
+      }
+      await this.$store.dispatch('invoices/fetchAdminInvoices', payload)
     },
   },
 }

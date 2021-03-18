@@ -1,10 +1,10 @@
 <template lang="pug">
   div.mr-10
-    h3.text-large.has-text-weight-bold {{$t('exchange.cr_payment_bill')}}
+    h3.text-large.has-text-weight-bold {{$t('exchange.cr_payment_bill')}} {{BTCtoUSDT}}
     div.is-flex.mt-2.align-items-center.space-between
       div.is-flex.align-items-center(:class="{ 'flex-row-reverse': isBuy}")
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
-          input(v-model="simba" type="text" @input="convert" :disabled="btn_loading").smb-input
+          input(v-model="usdt" type="text" :disabled="true").smb-input
         span.mr-2.ml-2
           | {{$t('exchange.or')}}
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
@@ -53,6 +53,7 @@ export default {
     isConverting: false,
     error: false,
     btc: 0.0025,
+    usdt: 0,
     simba: 200000,
     fee: 0,
     btn_loading: false,
@@ -67,12 +68,12 @@ export default {
 
   async created() {
     this.fee = 0.00055
-
+    await this.$store.dispatch('exchange/fetchLimits')
     if (!this.isBuy) {
       this.btc = 0.0015
       this.simba = 200000
     }
-    await this.$store.dispatch('exchange/fetchLimits')
+    this.usdt = (this.btc * this.limits.BTCUSD).toFixed(2).replace(/.$/,'')
   },
 
   computed: {
@@ -110,6 +111,12 @@ export default {
     tradeData() {
       return this.$store.getters['exchange/tradeData']
     },
+  },
+
+  watch: {
+    btc() {
+      this.usdt = (this.btc * this.limits.BTCUSD).toFixed(2).replace(/.$/,'')
+    }
   },
 
   methods: {

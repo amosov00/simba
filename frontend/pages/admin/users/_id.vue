@@ -16,7 +16,7 @@
             div(v-else)
               span(v-if="!field.editable") {{ field.value }}
           div(v-else-if="field.type === 'array'")
-            div(v-if="field.value.length === 0") {{ $t('account_page.list_is_empty') }}
+            div(v-if="field.value.length === 0") {{ $t('account_page.list_is_empty') }}321
             div(v-for="(el, i) in field.value" :key="i" style="height: 36px").is-flex.align-items-center
               div {{ el.address }}
               CopyToClipboard(:value_to_copy="el.address").ml-1
