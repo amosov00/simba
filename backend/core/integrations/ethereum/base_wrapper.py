@@ -7,7 +7,8 @@ from web3 import Web3
 from web3.datastructures import AttributeDict
 
 from config import ETH_MAX_GAS_PRICE_GWEI, TRANSACTION_MIN_CONFIRMATIONS, settings
-from core.utils import gasprice_from_etherscan, gasprice_from_ethgasstation, to_decimal128
+from core.utils import gasprice_from_etherscan, gasprice_from_ethgasstation
+from core.utils.decimal128 import to_decimal128
 from schemas import EthereumContract, EthereumTransaction
 
 __all__ = ["EthereumBaseCommonWrapper", "EthereumBaseContractWrapper"]

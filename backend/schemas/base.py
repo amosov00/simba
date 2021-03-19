@@ -7,8 +7,6 @@ from fastapi import HTTPException
 from pydantic import BaseModel as PydanticBaseModel, Field
 from web3 import Web3
 
-from core.utils import from_decimal128
-
 
 def validate_eth_address(address_hash: str):
     if not address_hash:
@@ -68,7 +66,10 @@ class DecimalPydantic(int):
 
     @classmethod
     def validate(cls, v):
-        return from_decimal128(v)
+        if isinstance(v, Decimal128):
+            return int(v.to_decimal())
+        else:
+            return int(v)
 
 
 class BaseModel(PydanticBaseModel):
@@ -78,7 +79,7 @@ class BaseModel(PydanticBaseModel):
             ObjectIdPydantic: lambda o: str(o),
             datetime: lambda o: o.isoformat(),
             time: lambda o: o.isoformat(),
-            Decimal128: lambda o: from_decimal128(o),
+            Decimal128: lambda o: int(o.to_decimal()),
         }
 
 
