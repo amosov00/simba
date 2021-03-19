@@ -45,13 +45,10 @@ export const actions = {
       commit('setTradeData', { prop: 'admin_eth_address', value: res.data.address })
     })
   },
-  fetchLimits({commit}) {
-    this.$axios.get('/account/kyc/limit/').then((res) => {
-      commit('setLimits', res.data)
-    }).then(()=>{
-      this.$axios.get('/meta/currency-rate/').then((res) => {
-        commit('setRate', res.data)
-      })
-    })
+  async fetchLimits({commit}) {
+    const limitRes = await this.$axios.get('/account/kyc/limit/')
+    const rateRes = await this.$axios.get('/meta/currency-rate/')
+    commit('setLimits', limitRes.data)
+    commit('setRate', rateRes.data)
   }
 }

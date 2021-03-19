@@ -378,7 +378,9 @@ export default (context) => {
       'A secure connection has been established, you can start testing': 'A secure connection has been established, you can start testing',
       'To be tested': 'To be tested',
       confirmation: 'Confirmation',
-      'of the document': 'of the document'
+      'of the document': 'of the document',
+      daily: 'daily',
+      lifetime: 'lifetime'
     }
   }
 
