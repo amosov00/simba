@@ -1,8 +1,10 @@
 from fastapi import APIRouter
 
-from core.mechanics.crypto.bitcoin import BitcoinWrapper
-from schemas import MetaSlugs, MetaCurrencyRatePayload
-from database.crud import MetaCRUD
+
+from bson import ObjectId
+from schemas import InvoiceInDB
+from database.crud import InvoiceCRUD
+from core.utils.email import Email
 
 __all__ = ["router"]
 
@@ -11,12 +13,8 @@ router = APIRouter()
 
 @router.get("/")
 async def debug_get():
-    currency_rate = await BitcoinWrapper().fetch_current_price()
-
-    if currency_rate:
-        await MetaCRUD.update_by_slug(
-            slug=MetaSlugs.CURRENCY_RATE, payload=MetaCurrencyRatePayload(BTCUSD=currency_rate).dict()
-        )
+    invoice = await InvoiceCRUD.find_one({"_id": ObjectId("6054a002194575326398518d")})
+    await Email().new_suspended_invoice(invoice=InvoiceInDB(**invoice))
     return
 
 

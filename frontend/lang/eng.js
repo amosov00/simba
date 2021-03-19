@@ -84,6 +84,7 @@ export default (context) => {
         cancelled: 'Cancelled',
         expired: 'Expired',
         processing: 'Processing',
+        suspended: 'Suspended',
       },
       error_creating_invoice: 'Error creating invoice',
       error_updating_invoice: 'Error updating invoice',
