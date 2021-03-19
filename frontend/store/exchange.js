@@ -29,13 +29,19 @@ export const mutations = {
     state[payload.prop] = payload.value
   },
   setLimits: (state, payload) => {
-    state.limits = payload
+    state.limits = {
+      ...payload,
+      btc_limit: payload.btc_limit / 100000000,
+      btc_remain: payload.btc_remain / 100000000,
+      btc_used: payload.btc_used / 100000000,
+    }
   },
   setRate: (state, payload) => {
     state.limits = {
       ...state.limits,
-      ...payload
+      ...payload,
     }
+    console.log(state.limits)
   }
 }
 
