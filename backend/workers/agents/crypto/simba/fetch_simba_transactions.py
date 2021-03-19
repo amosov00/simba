@@ -72,6 +72,8 @@ async def fetch_and_proceed_simba_contract_job(stream):
                     counter += 1
                     user = await UserCRUD.find_by_id(invoice["user_id"])
                     await InvoiceMechanics(invoice, user).proceed_new_transaction(transaction)
+                else:
+                    pass
 
             elif transaction.event in (SimbaContractEvents.OnIssued, SimbaContractEvents.OnRedeemed):
                 customer_address = transaction.args.get("customerAddress")
@@ -106,6 +108,8 @@ async def fetch_and_proceed_simba_contract_job(stream):
                 if invoice:
                     counter += 1
                     await InvoiceMechanics(invoice).proceed_new_transaction(transaction)
+                else:
+                    pass
 
             elif transaction.event in (SimbaContractEvents.BlacklistedAdded, SimbaContractEvents.BlacklistedRemoved):
                 transaction.skip = True

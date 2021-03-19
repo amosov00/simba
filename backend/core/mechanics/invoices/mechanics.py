@@ -68,17 +68,16 @@ class InvoiceMechanics(InvoiceValidation):
             )
             transaction.simba_tokens_issued = True
             self.invoice.status = InvoiceStatus.PAID
-            self.invoice.btc_amount_proceeded += incoming_btc
             # Subtract fee
             self.invoice.simba_amount_proceeded += incoming_btc - SIMBA_BUY_SELL_FEE
             self.invoice.add_hash("eth", eth_tx_hash)
-            self.invoice.add_hash("btc", transaction.hash)
 
         else:
+            eth_tx_hash = ""
             self.invoice.status = InvoiceStatus.SUSPENDED
-            self.invoice.btc_amount_proceeded += incoming_btc
-            self.invoice.add_hash("btc", transaction.hash)
 
+        self.invoice.btc_amount_proceeded += incoming_btc
+        self.invoice.add_hash("btc", transaction.hash)
         await BTCTransactionCRUD.update_or_insert({"hash": transaction.hash}, transaction.dict())
         await self.update_invoice()
 
@@ -180,17 +179,28 @@ class InvoiceMechanics(InvoiceValidation):
 
         transaction.invoice_id = self.invoice.id
 
-        if self.invoice.invoice_type == InvoiceType.SELL and self.invoice.status == InvoiceStatus.WAITING:
-            self.invoice.status = InvoiceStatus.PROCESSING
-            self.invoice.simba_amount_proceeded = incoming_eth
+        verification_limit_instance = await self._validate_verification_limits(incoming_eth)
 
-        self.invoice.add_hash("eth", transaction.transactionHash)
+        if verification_limit_instance.is_allowed:
+            if self.invoice.invoice_type == InvoiceType.SELL and self.invoice.status == InvoiceStatus.WAITING:
+                self.invoice.status = InvoiceStatus.PROCESSING
+                self.invoice.simba_amount_proceeded = incoming_eth
+
+        else:
+            self.invoice.status = InvoiceStatus.SUSPENDED
+            self.invoice.simba_amount_proceeded = incoming_eth
 
         await EthereumTransactionCRUD.update_one(
             {"_id": transaction.id}, transaction.dict(exclude={"id"}, exclude_unset=True)
         )
+        self.invoice.add_hash("eth", transaction.transactionHash)
         await self.update_invoice()
-        self._log(f"confirmed simba tokens transfer - tx hash {transaction.transactionHash}")
+
+        if verification_limit_instance.is_allowed:
+            self._log(f"confirmed simba tokens transfer - tx hash {transaction.transactionHash}")
+        else:
+            self._log(f"got suspended invoice (sell type): {self.invoice.id}")
+
         return True
 
     async def _proceed_new_eth_tx_issue_redeem(self, transaction: EthereumTransactionInDB):
@@ -220,7 +230,7 @@ class InvoiceMechanics(InvoiceValidation):
         return True
 
     async def proceed_new_transaction(
-        self, transaction: Union[BTCTransaction, EthereumTransaction], **kwargs
+        self, transaction: Union[BTCTransaction, EthereumTransaction]
     ) -> Union[bool, str]:
         if isinstance(transaction, (BTCTransaction, BTCTransactionInDB)):
             self._log(f"new BTC transaction: {transaction.hash}")

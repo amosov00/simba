@@ -124,12 +124,12 @@ class KYCController:
         match_stage = {
             "$match": {
                 "user_id": self.user.id,
-                "status": InvoiceStatus.COMPLETED,
+                "status": {"$in": [InvoiceStatus.COMPLETED, InvoiceStatus.PROCESSING, InvoiceStatus.SUSPENDED]},
             }
         }
 
         if self.kyc_instance.is_verified:
-            match_stage["$match"]["finished_at"] = {"$gte": datetime.now() - timedelta(days=30)}
+            match_stage["$match"]["finished_at"] = {"$gte": datetime.now() - timedelta(days=1)}  # noqa
 
         # calculate btc
         result = (

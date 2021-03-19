@@ -14,4 +14,5 @@ rescue_stucked_invoices_topic = app.topic(
 async def rescue_stucked_invoices_job(stream):
     async for _ in stream:
         await rescue_stucked_invoices()
+
     return
