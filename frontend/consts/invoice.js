@@ -8,6 +8,11 @@ export const InvoiceStatus = {
   SUSPENDED: "suspended",  // KYC and verification issues
 }
 
+export const InvoiceType = {
+  BUY: 1,
+  SELL: 2,
+}
+
 
 export const statusToColor = (status) => {
   switch (status) {

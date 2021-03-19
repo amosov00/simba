@@ -8,8 +8,7 @@ from fastapi import Request
 
 from config import settings, InvoiceVerificationLimits
 from core.integrations.sumsub_wrapper import SumSubWrapper
-from core.mechanics.crypto.base import CryptoCurrencyRate
-from database.crud import UserKYCCRUD, MetaCRUD, InvoiceCRUD
+from database.crud import UserKYCCRUD, InvoiceCRUD
 from schemas import (
     UserKYCInDB,
     UserKYC,
@@ -17,8 +16,7 @@ from schemas import (
     UserKYCVerificationLimit,
     UserKYCDocsStatus,
     InvoiceStatus,
-    MetaCurrencyRatePayload,
-    MetaSlugs,
+    InvoiceType,
 )
 
 __all__ = ["KYCController"]
@@ -57,7 +55,7 @@ class KYCController:
     async def get_access_token(self) -> str:
         return await self.api_wrapper.get_access_token(str(self.user.id))
 
-    def _get_verification_limit(self) -> float:
+    def _get_verification_limit(self) -> int:
         return InvoiceVerificationLimits.LEVEL_2 \
             if self.kyc_instance.is_verified else InvoiceVerificationLimits.LEVEL_1
 
@@ -134,10 +132,24 @@ class KYCController:
         # calculate btc
         result = (
             await InvoiceCRUD.aggregate(
-                [match_stage, {"$group": {"_id": None, "total_btc": {"$sum": "$btc_amount_proceeded"}}}]
+                [
+                    match_stage,
+                    {
+                        "$group": {
+                            "_id": "$invoice_type",
+                            "total_btc": {"$sum": "$btc_amount_proceeded"},
+                            "total_simba": {"$sum": "$simba_amount_proceeded"},
+                        }
+                    }
+                ]
             )
         )
-        total_btc = result[0]["total_btc"] if result else 0
+        total_btc = 0
+        for i in result:
+            if i["_id"] == InvoiceType.BUY:
+                total_btc += i["total_btc"]
+            elif i["_id"] == InvoiceType.SELL:
+                total_btc += i["total_simba"]
 
         if future_btc_amount:
             total_btc += future_btc_amount

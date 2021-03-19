@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<div>
+  <h3>New suspended invoice</h3>
+  <p>Invoice ID: {{invoice.id}}</p>
+  <p>User ID: {{invoice.user_id}}</p>
+  <p>Invoice Type: {{invoice.invoice_type}}</p>
+
+  <p>Amount to send: {% if invoice.simba_amount_proceeded != 0 %} {{invoice.simba_amount_proceeded}} SIMBA {% else %} {{ invoice.btc_amount_proceeded }} satoshi {% endif %}</p>
+  <p>Invoice created at: {{invoice.created_at}}</p>
+</div>
+
+</body>
+</html>

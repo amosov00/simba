@@ -16,6 +16,7 @@ from config import (
 from core.mechanics.blockcypher_webhook import BlockCypherWebhookHandler
 from core.mechanics.crypto import SimbaWrapper, SSTWrapper, BitcoinWrapper
 from core.mechanics.invoices.validation import InvoiceValidation
+from core.utils.email import Email
 from database.crud import BTCTransactionCRUD, EthereumTransactionCRUD, UserCRUD
 from schemas import (
     User,
@@ -88,6 +89,7 @@ class InvoiceMechanics(InvoiceValidation):
             asyncio.create_task(SSTWrapper(self.invoice).send_sst_to_referrals(user, self.invoice.btc_amount))
             self._log(f"success simba tokens issue - tx hash {eth_tx_hash}")
         else:
+            asyncio.create_task(await Email().new_suspended_invoice(invoice=self.invoice))
             self._log(f"got suspended invoice (buy type): {self.invoice.id}")
 
         return True
@@ -199,6 +201,7 @@ class InvoiceMechanics(InvoiceValidation):
         if verification_limit_instance.is_allowed:
             self._log(f"confirmed simba tokens transfer - tx hash {transaction.transactionHash}")
         else:
+            asyncio.create_task(await Email().new_suspended_invoice(invoice=self.invoice))
             self._log(f"got suspended invoice (sell type): {self.invoice.id}")
 
         return True
