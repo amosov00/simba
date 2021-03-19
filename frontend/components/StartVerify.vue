@@ -1,10 +1,10 @@
 <template>
   <div>
     <h2 class="start-title">{{$t('verify["You need to verify your identity"]')}}</h2>
-    <p class="text">
-      {{$t('verify["If you lose access to your wallet"]')}},<br />
-      {{$t('verify["we will be able to identify you by the specified data"]')}}.
-    </p>
+    <ul class="text">
+      <li class="mb-3 mt-3">{{$t('verify.oneItem')}}</li>
+      <li>{{$t('verify.twoItem')}}</li>
+    </ul>
     <div class="lock">
       <img :src="require('@/static/lock.png')" alt="lock" class="lock__img" />
       <p class="lock__text">{{$t('verify["A secure connection has been established, you can start testing"]')}}</p>
@@ -26,6 +26,13 @@ export default {
 </script>
 
 <style scoped lang="scss">
+ul {
+  list-style-type: disc;
+  list-style-position: inside;
+  li {
+    font-weight: 300;
+  }
+}
 .indicator {
   margin-bottom: 72px;
 }

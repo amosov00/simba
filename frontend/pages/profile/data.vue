@@ -15,6 +15,8 @@
     div.is-flex.align-items-center.columns
       div.column.is-3.has-text-grey {{$t('profile.verification')}}
       div.column.is-9.has-text-weight-bold.is-size-6 {{tier}}: {{limits.btc_used}} BTC / {{limits.btc_limit}} BTC
+        |
+        nuxt-link(to="/profile/verification")  ({{ $i18n.t('profile.upgrade') }})
 </template>
 <script>
 export default {
