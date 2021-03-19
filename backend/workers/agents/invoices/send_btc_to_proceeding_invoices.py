@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from datetime import timedelta
 
 from sentry_sdk import capture_exception
@@ -47,6 +48,7 @@ async def send_btc_to_proceeding_invoices_job(stream):
         for invoice in proceeding_invoices:
             # Finish pipeline if wallet has unconfirmed transactions
             if hot_wallet_info.unconfirmed_transactions_number:
+                logging.info(f"Found active tx in btc hot wallet, skipping")
                 return True
 
             invoice = InvoiceInDB(**invoice)

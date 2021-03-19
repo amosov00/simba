@@ -58,8 +58,8 @@ class KYCController:
         return await self.api_wrapper.get_access_token(str(self.user.id))
 
     def _get_verification_limit(self) -> float:
-        return InvoiceVerificationLimits.VERIFIED \
-            if self.kyc_instance.is_verified else InvoiceVerificationLimits.NON_VERIFIED
+        return InvoiceVerificationLimits.LEVEL_2 \
+            if self.kyc_instance.is_verified else InvoiceVerificationLimits.LEVEL_1
 
     @classmethod
     def _prepare_schema_data(
@@ -143,19 +143,19 @@ class KYCController:
             total_btc += future_btc_amount
 
         # calculate usd
-        btc_price = MetaCurrencyRatePayload(
-            **(await MetaCRUD.find_by_slug(MetaSlugs.CURRENCY_RATE, raise_500=True))["payload"]
-        ).BTCUSD
-
-        total_usd = round((total_btc * btc_price) / CryptoCurrencyRate.BTC_DECIMALS, 2)
+        # btc_price = MetaCurrencyRatePayload(
+        #     **(await MetaCRUD.find_by_slug(MetaSlugs.CURRENCY_RATE, raise_500=True))["payload"]
+        # ).BTCUSD
+        #
+        # total_usd = round((total_btc * btc_price) / CryptoCurrencyRate.BTC_DECIMALS, 2)
 
         verification_limit = self._get_verification_limit()
 
         return UserKYCVerificationLimit(
-            usd_used=total_usd,
-            usd_remain=verification_limit - total_usd,
-            usd_limit=verification_limit,
-            is_allowed=verification_limit - total_usd > 0,
+            btc_used=total_btc,
+            btc_remain=verification_limit - total_btc,
+            btc_limit=verification_limit,
+            is_allowed=verification_limit - total_btc > 0,
         )
 
     async def get_status(self) -> UserKYC:
