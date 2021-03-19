@@ -105,5 +105,5 @@ INVOICE_TIMEOUT = timedelta(hours=2)
 
 
 class InvoiceVerificationLimits:
-    NON_VERIFIED = 2000.0    # Email verification, all time
-    VERIFIED = 5000.0     # KYC done, per month
+    LEVEL_1 = int(0.1 * 10 ** 8)     # Satoshi, Email verification, all time
+    LEVEL_2 = int(2.0 * 10 ** 8) if IS_PRODUCTION else int(0.3 * 10 ** 8)    # Satoshi, KYC done, per month

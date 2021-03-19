@@ -15,7 +15,7 @@ async def fetch_and_proceed_simba_contract_cron():
     await fetch_and_proceed_simba_contract_job.cast()
 
 
-@app.crontab("*/15 * * *")
+@app.crontab("*/15 * * * *")
 async def fetch_simba_meta_cron():
     await fetch_simba_meta_job.cast()
 

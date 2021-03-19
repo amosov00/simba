@@ -84,6 +84,7 @@ export default (context) => {
         cancelled: 'Отменена',
         expired: 'Просрочена',
         processing: 'В обработке',
+        suspended: 'Приостановлена'
       },
       error_creating_invoice: 'Произошла ошибка при создании инвойса',
       error_updating_invoice: 'Произошла ошибка при обновлении инвойса',

@@ -5,8 +5,8 @@ from sentry_sdk import capture_message
 from api.dependencies import get_user
 from config import SIMBA_CONTRACT, settings
 from core.mechanics import InvoiceMechanics
-from database.crud import BlockCypherWebhookCRUD, InvoiceCRUD, MetaCRUD
-from schemas import EthereumContractMetaResponse, BTCTransaction, MetaSlugs, MetaCurrencyRatePayload
+from database.crud import BlockCypherWebhookCRUD, InvoiceCRUD, MetaCRUD, UserCRUD
+from schemas import EthereumContractMetaResponse, BTCTransaction, MetaSlugs, MetaCurrencyRatePayload, User
 
 __all__ = ["router"]
 
@@ -58,7 +58,8 @@ async def meta_webhook_handler(
 
     if webhook_obj and invoice:
         transaction = BTCTransaction(**transaction)
-        await InvoiceMechanics(invoice).proceed_new_transaction(transaction)
+        user = await UserCRUD.find_by_id(invoice["user_id"])
+        await InvoiceMechanics(invoice, user).proceed_new_transaction(transaction)
     else:
         capture_message("Webhook obj or invoice not found", level="error")
 

@@ -58,4 +58,5 @@ async def update_empty_btc_addresses_info_job(stream):
 
         if counter:
             logging.info(f"Updated {counter} btc wallets")
-    return True
+
+    return
