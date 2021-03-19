@@ -1,11 +1,11 @@
 <template lang="pug">
   div
-    h3(v-if="isBuy").text-large.has-text-weight-bold {{ $t('exchange.confirm_wallet')}}
+    h3(v-if="operation === InvoiceTypeSlug.BUY").text-large.has-text-weight-bold {{ $t('exchange.confirm_wallet')}}
     div.is-flex.mt-2.align-items-center.space-between
-      div(v-if="isBuy").is-flex.align-items-center
-        img(src="~assets/images/eth.svg").mr-2
+      div(v-if="operation === InvoiceTypeSlug.BUY").is-flex.align-items-center
+        img(:src="require('~/assets/images/eth.svg')").mr-2
         div.text-large {{ eth_address }}
-        //-- img(src="~assets/images/bitcoin.svg").mr-2
+
       div(v-else)
         div.is-size-6.mb-1
           span.has-text-weight-bold {{$t('exchange.choose_eth_wallet.p1')}}
@@ -25,16 +25,23 @@
           a(href="#" @click="addNewWalletModal('btc')") {{$t('wallet.add_wallet')}}
         div.mt-4
           button.btn(@click="next") {{ $t('exchange.confirm')}}
-      button.btn(@click="next" v-if="isBuy") {{ $t('exchange.confirm')}}
+
+      button.btn(@click="next" v-if="operation === InvoiceTypeSlug.BUY") {{ $t('exchange.confirm')}}
+
     div.mt-2.has-text-danger {{ errors[0] }}
 </template>
 
 <script>
-import AddNewWallet from '~/components/AddNewWallet'
+import {mapActions, mapGetters, mapMutations, mapState} from 'vuex'
 
+import AddNewWallet from '~/components/AddNewWallet'
+import {InvoiceTypeSlug} from "~/consts";
+
+// Step 1
 export default {
-  name: 'trade-wallet-confirm',
+  name: 'trade-choose-wallet',
   data: () => ({
+    InvoiceTypeSlug,
     selectedOptions: '',
     selectedOptions_eth: '',
     errors: [],
@@ -43,19 +50,15 @@ export default {
   components: { AddNewWallet },
 
   computed: {
-    isBuy() {
-      return this.$store.getters['exchange/tradeData']['operation'] === 1
-    },
-    user() {
-      return this.$store.getters['user']
-    },
-
+    ...mapState("exchange", ["operation"]),
+    ...mapState(["user"]),
     eth_address() {
       return this.$store.getters['exchange/tradeData']['eth_address']
     },
   },
 
   methods: {
+    ...mapActions(["addAddress"]),
     addNewWalletModal(type) {
       this.$buefy.modal.open({
         parent: this,
@@ -66,8 +69,7 @@ export default {
     },
 
     saveAddress(data) {
-      this.$store
-        .dispatch('addAddress', data)
+      return this.addAddress(data)
         .then((_) => {
           this.$parent.$emit('nextStep')
         })
@@ -77,7 +79,8 @@ export default {
     },
 
     next() {
-      if (this.isBuy) {
+      if (this.operation === InvoiceTypeSlug.BUY) {
+
         if (this.user.user_eth_addresses.length > 0) {
           if (this.user.user_eth_addresses.find((el) => el.address === this.eth_address) !== undefined) {
             this.$parent.$emit('nextStep')

@@ -1,3 +1,3 @@
-import { statusToColor, InvoiceStatus, InvoiceType } from '@/consts/invoice'
+import { statusToColor, typeToText, InvoiceStatus, InvoiceTypeEnum, InvoiceTypeSlug } from '@/consts/invoice'
 
-export { statusToColor, InvoiceStatus, InvoiceType }
+export { statusToColor, typeToText, InvoiceStatus, InvoiceTypeEnum, InvoiceTypeSlug }

@@ -131,7 +131,7 @@ export default {
     async checkSingle() {
       this.busyChecking = true
 
-      this.check = await this.$store.dispatch('invoices/fetchSingle', this.created_invoice_id)
+      this.check = await this.$store.dispatch('invoices/fetchSingleInvoice', this.created_invoice_id)
 
       if (this.isBuy) {
         // Buy
@@ -174,7 +174,7 @@ export default {
         this.updated_invoice_data.status !== 'completed'
       ) {
         // Confirm & set confirm_status
-        let confirm_status = this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
+        let confirm_status = this.$store.dispatch('invoices/confirmInvoice', this.created_invoice_id)
 
         confirm_status.then((res) => {
           if (this.isBuy && res.target_btc_address) {
@@ -189,7 +189,7 @@ export default {
       }
 
       /*if(this.updated_invoice_data.target_btc_address && this.updated_invoice_data.status !== 'created') {
-          await this.$store.dispatch('invoices/confirmTransaction', this.created_invoice_id)
+          await this.$store.dispatch('invoices/confirmInvoice', this.created_invoice_id)
         }*/
 
       await setTimeout(() => {

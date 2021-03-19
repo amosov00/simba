@@ -40,22 +40,26 @@
 </template>
 
 <script>
+import {mapActions, mapGetters, mapMutations, mapState} from 'vuex'
+
 import { ValidationProvider } from 'vee-validate'
+import {InvoiceTypeSlug} from "~/consts";
 //import {Money} from 'v-money'
 
 export default {
-  name: 'trade-create-payment',
+  name: 'trade-confirm-invoice',
 
   components: { ValidationProvider },
 
   data: () => ({
+    InvoiceTypeSlug,
     accepted_terms: false,
     isConverting: false,
     error: false,
     btc: 0.0025,
     usdt: 0,
     simba: 200000,
-    fee: 0,
+    fee: 0.00055,
     btn_loading: false,
     money: {
       thousands: ' ',
@@ -66,23 +70,26 @@ export default {
     check_btc_address_interval: null,
   }),
 
-  async created() {
-    this.fee = 0.00055
-    await this.$store.dispatch('exchange/fetchLimits')
-    if (!this.isBuy) {
+  async mounted() {
+    if (this.operation === this.InvoiceTypeSlug.BUY) {
+      this.btc = 0.0025
+      this.simba = 200000
+    } else {
       this.btc = 0.0015
       this.simba = 200000
     }
     this.usdt = (this.btc * this.limits.BTCUSD).toFixed(2).replace(/.$/,'')
   },
 
-  computed: {
-    isBuy() {
-      return this.$store.getters['exchange/tradeData']['operation'] === 1
-    },
+  async created() {
+    await this.$store.dispatch('exchange/fetchLimits')
+  },
 
-    limits() {
-      return this.$store.getters['exchange/limits']
+  computed: {
+    ...mapState("exchange", ["operation", "limits"]),
+
+    isBuy() {
+      return this.operation === this.InvoiceTypeSlug.BUY
     },
 
     beyondLimit() {
@@ -120,10 +127,6 @@ export default {
   },
 
   methods: {
-    /*async checkBitcoinAddress(id) {
-        return await this.$store.dispatch('invoices/fetchSingle', id)
-      },*/
-
     async confirm() {
       if (this.simba < 200000) {
         this.error = true
@@ -138,7 +141,7 @@ export default {
       this.$store.commit('exchange/setTradeData', { prop: 'btc', value: this.btc })
 
       // create transaction
-      let created_invoice = await this.$store.dispatch('invoices/createTransaction', this.tradeData.operation)
+      let created_invoice = await this.$store.dispatch('invoices/createInvoice', this.tradeData.operation)
 
       this.$store.commit('exchange/setTradeData', { prop: 'invoice_id', value: created_invoice._id })
 
@@ -151,38 +154,14 @@ export default {
         }
 
         // Update invoice with amounts
-        let updated_invoice_res = await this.$store.dispatch('invoices/updateTransaction', data_for_update)
+        let updated_invoice_res = await this.$store.dispatch('invoices/updateInvoice', data_for_update)
 
         // Add invoice id to url, go to next step
 
         this.btn_loading = false
         if (updated_invoice_res) {
-          this.$nuxt.$router.push({ path: '/exchange/buysell', query: { id: created_invoice._id } })
+          await this.$nuxt.$router.push({path: '/exchange/buysell', query: {id: created_invoice._id}})
         }
-
-        /*this.check_btc_address_interval = setInterval(async () => {
-            let invoice = await this.checkBitcoinAddress(created_invoice._id)
-
-            if(invoice.target_btc_address) {
-              clearInterval(this.check_btc_address_interval)
-              this.btn_loading = false
-              let data_for_update = {
-                id: created_invoice._id,
-                eth_address: this.tradeData.eth_address,
-                simba_amount: this.tradeData.btc * 100000000,
-                btc_amount: this.tradeData.btc * 100000000
-              }
-
-              // Update invoice with amounts
-              let updated_invoice_res = await this.$store.dispatch('invoices/updateTransaction', data_for_update)
-
-              // Add invoice id to url, go to next step
-              if(updated_invoice_res) {
-                this.$nuxt.$router.push({ path: '/exchange/buysell', query: {id: invoice._id }})
-                //this.$parent.$emit('nextStep')
-              }
-            }
-          }, 3000)*/
       } else {
         let data_for_update = {
           id: created_invoice._id,
@@ -192,23 +171,19 @@ export default {
           btc_amount: (this.tradeData.btc * 100000000).toFixed(0),
         }
         // Update invoice with amounts
-        let updated_invoice_res = await this.$store.dispatch('invoices/updateTransaction', data_for_update)
+        let updated_invoice_res = await this.$store.dispatch('invoices/updateInvoice', data_for_update)
         this.btn_loading = false
 
         // Add invoice id to url, go to next step
         if (updated_invoice_res) {
-          this.$nuxt.$router.push({ path: '/exchange/buysell', query: { id: created_invoice._id } })
+          await this.$nuxt.$router.push({path: '/exchange/buysell', query: {id: created_invoice._id}})
           //this.$parent.$emit('nextStep')
         }
       }
     },
 
     checkMinimum() {
-      if (this.simba < 200000) {
-        this.error = true
-      } else {
-        this.error = false
-      }
+      this.error = this.simba < 200000;
     },
 
     convert() {

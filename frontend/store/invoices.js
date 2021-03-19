@@ -10,6 +10,7 @@ export const state = () => ({
 
 export const getters = {
   invoices: (s) => s.invoices,
+  invoicesReverse: (s) => [...s.invoices].reverse(),
   adminInvoices: (s) => s.adminInvoices,
 }
 
@@ -20,7 +21,7 @@ export const mutations = {
 }
 
 export const actions = {
-  async createTransaction({}, data) {
+  async createInvoice({}, data) {
     return await this.$axios
       .post('/invoices/', { invoice_type: data })
       .then((res) => {
@@ -36,7 +37,7 @@ export const actions = {
       })
   },
 
-  async updateTransaction({}, data) {
+  async updateInvoice({}, data) {
     let data_to_send = {
       target_eth_address: data.eth_address,
       btc_amount: data.btc_amount,
@@ -80,7 +81,7 @@ export const actions = {
       })
   },
 
-  async confirmTransaction({}, id) {
+  async confirmInvoice({}, id) {
     return await this.$axios
       .post(`/invoices/${id}/confirm/`)
       .then((res) => res.data)
@@ -123,7 +124,7 @@ export const actions = {
       .catch(() => {})
   },
 
-  async fetchSingle({ commit }, id) {
+  async fetchSingleInvoice({ commit }, id) {
     return await this.$axios
       .get(`/invoices/${id}/`)
       .then((res) => res.data)

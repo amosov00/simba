@@ -41,7 +41,7 @@ export default {
   async created() {
     // this.min_confirms = process.env.NODE_ENV === 'develop' || 'development' ? 1 : 3
 
-    let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id)
+    let res = await this.$store.dispatch('invoices/fetchSingleInvoice', this.tradeData.invoice_id)
     this.received_payment_amount = res.simba_amount_proceeded
 
     let transfer_confirms = this.findEthTransactionByEvent(res, 'Transfer')?.confirmations
@@ -61,7 +61,7 @@ export default {
   mounted() {
     this.interval = setInterval(async () => {
       this.loadingSpinner()
-      let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id)
+      let res = await this.$store.dispatch('invoices/fetchSingleInvoice', this.tradeData.invoice_id)
 
       let desired_tx = this.findEthTransactionByEvent(res, 'Transfer')
 

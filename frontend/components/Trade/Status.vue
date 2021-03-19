@@ -48,7 +48,7 @@ export default {
 
     // this.min_confirms = process.env.NODE_ENV === 'develop' || 'development' ? 1 : 3
 
-    let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id)
+    let res = await this.$store.dispatch('invoices/fetchSingleInvoice', this.tradeData.invoice_id)
 
     if (this.isBuy) {
       const btc_addr = res.target_btc_address
@@ -82,7 +82,7 @@ export default {
   mounted() {
     this.interval = setInterval(async () => {
       this.loadingSpinner()
-      let res = await this.$store.dispatch('invoices/fetchSingle', this.tradeData.invoice_id)
+      let res = await this.$store.dispatch('invoices/fetchSingleInvoice', this.tradeData.invoice_id)
 
       if (this.isBuy) {
         this.setCurrentConfirms(res.btc_txs[0].confirmations)

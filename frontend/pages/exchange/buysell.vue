@@ -8,42 +8,27 @@
         div.operation.mr-4 {{ $t(`exchange.${operation.toLowerCase()}`) }}
         span(v-for="(step, i) in tradeData.steps.list" :key="i" :class="{ 'steps-item--failed': failedStep(i), 'steps-item--active': activeStep(i)}").steps-item {{ i+1 }}
       div.trade-content
-        component(:is="tradeData.steps.current")
+        component(:is="tradeData.steps.current" @nextStep="nextStep" @failStep="failStep")
 </template>
 
 <script>
-import WalletConfirm from '@/components/Trade/WalletConfirm'
-import CreatePayment from '@/components/Trade/CreatePayment'
-import BillPayment from '@/components/Trade/BillPayment'
-import Status from '@/components/Trade/Status'
-import SimbaRecieved from '~/components/Trade/SimbaRecieved'
-import Final from '@/components/Trade/Final'
+import {mapActions, mapGetters, mapMutations, mapState} from 'vuex'
+import {BillPayment, ConfirmInvoice, Final, SimbaRecieved, Status, Suspended, ChooseWallet} from "~/components/Trade";
 
 import { ToastProgrammatic as Toast } from 'buefy'
+import {typeToText, InvoiceStatus, InvoiceTypeEnum} from "~/consts";
 
 export default {
   name: 'exchange-buysell',
   layout: 'main',
-  components: { WalletConfirm, CreatePayment, BillPayment, Status, Final, SimbaRecieved },
-
-  methods: {
-    activeStep(i) {
-      if (this.failedStep(i)) {
-        return false
-      }
-
-      return i < this.tradeData.steps.list.indexOf(this.tradeData.steps.current) + 1
-    },
-
-    failedStep(i) {
-      if (this.stepFail) {
-        if (i === this.stepFail) {
-          return true
-        }
-      }
-
-      return false
-    },
+  components: {
+    ChooseWallet, // step 1
+    ConfirmInvoice, // step 2
+    BillPayment,
+    Status,
+    Final,
+    SimbaRecieved,
+    Suspended
   },
 
   async middleware({ redirect, store }) {
@@ -65,6 +50,95 @@ export default {
     }
   },
 
+  data: () => {
+    return {
+      InvoiceStatus,
+      InvoiceTypeEnum,
+      interval: null,
+      stepFail: null,
+      operation: '',
+      tradeData: {
+        ethAddress: '',
+        steps: {
+          current: 'ChooseWallet',
+          list: ['ChooseWallet', 'ConfirmInvoice', 'BillPayment', 'Status', 'Final'],
+        },
+      },
+    }
+},
+
+  computed: {
+    ...mapState("exchange", ["invoice_id", "invoice", "currentStepComponent", "currentStepIndicatorIndex"]),
+  },
+
+  methods: {
+    ...mapActions("invoices", ["fetchSingleInvoice"]),
+    ...mapMutations("exchange", ["setTradeData", "clearState"]),
+    typeToText,
+    nextStep() {
+      let {steps} = this.tradeData
+      this.tradeData.steps.current = steps.list[steps.list.indexOf(steps.current) + 1]
+    },
+    failStep() {
+      this.stepFail = this.tradeData.steps.list.indexOf(this.tradeData.steps.current)
+    },
+    activeStep(i) {
+      if (this.failedStep(i)) {
+        return false
+      }
+
+      return i < this.tradeData.steps.list.indexOf(this.tradeData.steps.current) + 1
+    },
+    failedStep(i) {
+      if (this.stepFail) {
+        if (i === this.stepFail) {
+          return true
+        }
+      }
+
+      return false
+    },
+    async proceedInvoice() {
+      if (!this.invoice_id) {
+        return
+      }
+      let invoice = await this.fetchSingleInvoice(this.invoice_id)
+
+      if (invoice) {
+        this.setTradeData({prop: "invoice", value: invoice})
+        this.setTradeData({prop: "operation", value: this.typeToText(invoice.invoice_type)})
+
+        switch (invoice.status) {
+          case InvoiceStatus.CREATED:
+            this.tradeData.steps.current = "ConfirmInvoice"
+            break;
+          case InvoiceStatus.WAITING:
+            this.tradeData.steps.current = 'BillPayment'
+            break;
+          case InvoiceStatus.PROCESSING:
+            if (invoice.invoice_type === this.InvoiceTypeEnum.BUY) {
+              this.tradeData.steps.current = 'BillPayment'
+            } else {
+              this.tradeData.steps.current = 'SimbaRecieved'
+            }
+            break;
+          case InvoiceStatus.PAID:
+            this.tradeData.steps.current = 'Status'
+            break;
+          case InvoiceStatus.CANCELLED:
+            break;
+          case InvoiceStatus.SUSPENDED:
+            break;
+          case InvoiceStatus.COMPLETED:
+            this.tradeData.steps.current = 'Final'
+            break;
+          default:
+            break
+        }
+      }
+    },
+  },
+
   beforeRouteUpdate(to, from, next) {
     if (to.query.hasOwnProperty('id')) {
       this.tradeData.steps.current = 'BillPayment'
@@ -72,30 +146,43 @@ export default {
     next()
   },
 
-  async beforeMount() {
-    this.$on('nextStep', () => {
-      let steps = this.tradeData.steps
-      steps.current = steps.list[steps.list.indexOf(steps.current) + 1]
-    })
-
-    this.$on('step_failed', () => {
-      this.stepFail = this.tradeData.steps.list.indexOf(this.tradeData.steps.current)
-    })
-
-    if (this.$nuxt.$route.query['op']) {
-      if (this.$nuxt.$route.query['op'] === 'buy') {
-        this.operation = 'Buy'
-        this.$store.commit('exchange/setTradeData', { prop: 'operation', value: 1 })
-      } else {
-        this.operation = 'Sell'
-        this.$store.commit('exchange/setTradeData', { prop: 'operation', value: 2 })
-        this.tradeData.steps.list.splice(3, 0, 'SimbaRecieved')
-      }
+  async mounted() {
+    if (this.$nuxt.$route.query.op) {
+      this.setTradeData({prop: "operation", value: this.$nuxt.$route.query['op']})
     }
+    if (this.$nuxt.$route.query.id) {
+      this.setTradeData({prop: "invoice_id", value: this.$nuxt.$route.query['id']})
+    }
+    await this.proceedInvoice()
+    this.interval = setInterval(async () => {
+      await this.proceedInvoice()
+    }, 5000)
+  },
+
+
+  async beforeDestroy() {
+    clearInterval(this.interval)
+    this.interval = null
+    this.clearState()
+  },
+
+
+
+  async beforeMount() {
+    // if (this.$nuxt.$route.query['op']) {
+    //   if (this.$nuxt.$route.query['op'] === 'buy') {
+    //     this.operation = 'Buy'
+    //     this.$store.commit('exchange/setTradeData', { prop: 'operation', value: 1 })
+    //   } else {
+    //     this.operation = 'Sell'
+    //     this.$store.commit('exchange/setTradeData', { prop: 'operation', value: 2 })
+    //     this.tradeData.steps.list.splice(3, 0, 'SimbaRecieved')
+    //   }
+    // }
 
     // Handle url with invoice id
     if (this.$nuxt.$route.query['id']) {
-      let single_res = await this.$store.dispatch('invoices/fetchSingle', this.$nuxt.$route.query['id'])
+      let single_res = await this.$store.dispatch('invoices/fetchSingleInvoice', this.$nuxt.$route.query['id'])
 
       this.$store.commit('exchange/setTradeData', {
         prop: 'invoice_id',
@@ -161,20 +248,6 @@ export default {
         this.$buefy.toast.open({ message: 'Error: invoice not found', type: 'is-danger' })
         this.$nuxt.context.redirect('/exchange/')
       }
-    }
-  },
-
-  data: () => {
-    return {
-      stepFail: null,
-      operation: '',
-      tradeData: {
-        ethAddress: '',
-        steps: {
-          current: 'WalletConfirm',
-          list: ['WalletConfirm', 'CreatePayment', 'BillPayment', 'Status', 'Final'],
-        },
-      },
     }
   },
 }

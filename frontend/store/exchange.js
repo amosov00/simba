@@ -1,5 +1,11 @@
 export const state = () => ({
-  invoice_id: '',
+  invoice: null,
+  invoice_id: null,
+  currentStepComponent: '',
+  currentStepIndicatorIndex: 1,
+  stepComponents: [],
+
+
   operation: 1,
   eth_address: '',
   btc_redeem_wallet: '',
@@ -36,6 +42,11 @@ export const mutations = {
       ...state.limits,
       ...payload
     }
+  },
+  clearState: (state) => {
+    state.invoice = null
+    state.invoice_id = null
+    state.operation = null
   }
 }
 
