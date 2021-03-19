@@ -35,9 +35,9 @@ class UserKYCInDB(UserKYC):
 
 
 class UserKYCVerificationLimit(BaseModel):
-    usd_used: float = Field(default=0.0)
-    usd_remain: float = Field(default=0.0)
-    usd_limit: float = Field(default=0.0)
+    btc_used: float = Field(default=0.0)
+    btc_remain: float = Field(default=0.0)
+    btc_limit: float = Field(default=0.0)
     is_allowed: bool = Field(default=False)
 
 
