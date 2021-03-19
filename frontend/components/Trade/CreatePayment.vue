@@ -1,6 +1,6 @@
 <template lang="pug">
   div.mr-10
-    h3.text-large.has-text-weight-bold {{$t('exchange.cr_payment_bill')}} {{BTCtoUSDT}}
+    h3.text-large.has-text-weight-bold {{$t('exchange.cr_payment_bill')}}
     div.is-flex.mt-2.align-items-center.space-between
       div.is-flex.align-items-center(:class="{ 'flex-row-reverse': isBuy}")
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
@@ -12,7 +12,7 @@
         span.mr-2.ml-2
           | =
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
-          input(v-model="btc" type="text" @input="convertBTCtoSimba($event)" maxlength="10" :disabled="btn_loading").smb-input
+          input(:class="{'btc-input': error || beyondLimit}" v-model="btc" type="text" @input="convertBTCtoSimba($event)" maxlength="10" :disabled="btn_loading").smb-input
       b-button.btn(@click="confirm" :loading="btn_loading" :disabled="!accepted_terms") {{$t('exchange.create')}}
     div.is-flex.space-between
       div.is-flex.has-text-centered(:class="{ 'flex-row-reverse': isBuy, 'justify-content-end': isBuy}")
@@ -28,7 +28,7 @@
             =' '
             a(href="https://simba.storage/terms-of-use.pdf" target="_blank" rel="noreferrer noopener").link {{$i18n.t('auth.terms_of_agreement')}}
           span.validaton-error {{ errors[0] }}
-    div.mt-4 {{usedTranslate}} BTC / {{limitTranslate}} BTC
+    div.mt-4 {{limits.btc_used}} BTC / {{limits.btc_limit}} BTC
     div(v-if="!error")
       div(v-if="isBuy").mt-2.has-text-grey-light {{$t('exchange.applied_fee')}} {{ fee }} BTC {{$t('exchange.fee_in_simba')}}
       div(v-else).mt-2.has-text-grey-light {{$t('exchange.applied_fee')}} = {{ (+fee * 100000000) }} SIMBA
@@ -41,7 +41,6 @@
 
 <script>
 import { ValidationProvider } from 'vee-validate'
-//import {Money} from 'v-money'
 
 export default {
   name: 'trade-create-payment',
@@ -86,26 +85,8 @@ export default {
     },
 
     beyondLimit() {
-      const limit = (this.limits.usd_limit / this.limits.BTCUSD) - (this.limits.usd_used / this.limits.BTCUSD)
+      const limit = this.limits.btc_limit - this.limits.btc_used
       return this.btc > limit
-    },
-
-    usedTranslate() {
-      const result = this.limits.usd_used / this.limits.BTCUSD
-      if (Number.isInteger(result)) {
-        return result
-      } else {
-        return result.toFixed(6).replace(/.$/,'')
-      }
-    },
-
-    limitTranslate() {
-      const result = this.limits.usd_limit / this.limits.BTCUSD
-      if (Number.isInteger(result)) {
-        return result
-      } else {
-        return result.toFixed(6).replace(/.$/,'')
-      }
     },
 
     tradeData() {
@@ -276,4 +257,7 @@ export default {
 <style lang="sass" scoped>
 .checkbox-fix:not(.button)
   margin-right: 0
+
+.btc-input
+  color: red
 </style>

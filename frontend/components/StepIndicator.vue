@@ -1,11 +1,14 @@
 <template>
   <div class="wrap">
-    <div class="step">
+    <div class="step" :class="{
+          'step__number--active': emailConfirm,
+        }">
+      <p class="step__text">
+        {{$t('verify.confirmation')}}<br />
+        email
+      </p>
       <div
         class="step__number"
-        :class="{
-          'step__number--active': emailConfirm,
-        }"
       >
         <p>1</p>
         <div
@@ -16,22 +19,23 @@
         ></div>
       </div>
       <p class="step__text">
-        {{$t('verify.confirmation')}}<br />
-        email
+        0.1 BTC {{$t('verify.lifetime')}}
       </p>
     </div>
-    <div class="step">
+    <div class="step" :class="{
+          'step__number--active': passportConfirm,
+        }">
+      <p class="step__text">
+        {{$t('verify.confirmation')}}<br />
+        {{$t('verify["of the document"]')}}
+      </p>
       <div
         class="step__number"
-        :class="{
-          'step__number--active': passportConfirm,
-        }"
       >
         <p>2</p>
       </div>
       <p class="step__text">
-        {{$t('verify.confirmation')}}<br />
-        {{$t('verify["of the document"]')}}
+        2 BTC {{$t('verify.daily')}}
       </p>
     </div>
   </div>
@@ -54,8 +58,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.step__number--active ~ .step__text {
+.step__number--active .step__text {
   color: #e0b72e;
+}
+
+.step__number--active .step__number {
+  background-color: #e0b72e !important;
 }
 .wrap {
   display: flex;
@@ -63,9 +71,6 @@ export default {
   max-width: 500px;
   .step {
     position: relative;
-    .step__number--active {
-      background-color: #e0b72e !important;
-    }
     .step__number {
       width: 30px;
       height: 30px;
@@ -74,6 +79,7 @@ export default {
       border-radius: 100%;
       vertical-align: middle;
       position: relative;
+      margin-top: 8px;
       margin-bottom: 8px;
       .step__line {
         position: absolute;

@@ -37,6 +37,25 @@
               b-switch(v-model="editable_data[key]")
             div(v-else) {{ field.value ? $t('account_page.yes') : $t('account_page.no') }}
           div(v-else) {{$t('account_page.not_available')}}
+    div.has-text-weight-bold.is-size-5.mt-4.mb-3 KYC
+    div.is-flex.account-field
+      div.account-field__label {{$t('KYC.is_verified')}}
+      div.flex-1 {{userKYC.is_verified ? $t('KYC.true') : $t('KYC.false')}}
+    div.is-flex.account-field
+      div.account-field__label {{$t('KYC.status')}}
+      div.flex-1 {{userKYC.status}}
+    div.is-flex.account-field
+      div.account-field__label {{$t('KYC.updated_at')}}
+      div.flex-1 {{timestampFromUtc(userKYC.updated_at)}}
+    div.is-flex.account-field
+      div.account-field__label {{$t('KYC.applicant_data')}}
+      div.flex-1 {{userKYC.docs_status.applicant_data ? $t('KYC.true') : $t('KYC.false')}}
+    div.is-flex.account-field
+      div.account-field__label {{$t('KYC.identity')}}
+      div.flex-1 {{userKYC.docs_status.identity ? $t('KYC.true') : $t('KYC.false')}}
+    div.is-flex.account-field
+      div.account-field__label {{$t('KYC.selfie')}}
+      div.flex-1 {{userKYC.docs_status.selfie ? $t('KYC.true') : $t('KYC.false')}}
     div.has-text-weight-bold.is-size-5.mt-4 {{$t('partner.invited')}}
     b-table(:data="user_data.referrals.value" focusable striped default-sort="created_at" default-sort-direction="desc" per-page="5" :paginated="Boolean(user_data.referrals.value.length)" pagination-simple).mt-3
       template(slot="empty")
@@ -151,6 +170,7 @@ export default {
       .get(`/admin/users/${route.params.id}/archived_addresses/`)
       .then((res) => res.data)
       .catch(() => [])
+    let userKYC = await store.dispatch('admin/fetchKYCUserById', route.params.id)
 
     let addresses = {
       archived,
@@ -231,6 +251,7 @@ export default {
 
     return {
       user_data,
+      userKYC
     }
   },
 }

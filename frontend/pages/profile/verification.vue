@@ -122,7 +122,7 @@ export default {
 </script>
 <style lang="scss">
   .indicat {
-    margin-left: 135px;
+    margin-left: 115px;
     margin-bottom: 30px;
   }
 </style>

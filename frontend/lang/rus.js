@@ -26,6 +26,16 @@ export default (context) => {
       login_failed: 'Проверьте введенные email/пароль, возможно ваш email не подтвержден',
       login_failed_pin: 'Проверьте введенные email/пароль и пинкод',
     },
+    KYC: {
+      is_verified: 'Проверен',
+      true: 'Да',
+      false: 'Нет',
+      status: 'Статус',
+      updated_at: 'Обновлено в',
+      applicant_data: 'Предоставлена информация о пользователе',
+      identity: 'Предоставлено удостоверение личности',
+      selfie: 'Предоставлена фотография лица'
+    },
     footer: {
       tos: 'Условия использования',
       privacy: 'Политики конфиденциальности',
@@ -134,8 +144,12 @@ export default (context) => {
         two_factor: 'Двухфакт. аутентификация',
         logout: 'Выход',
       },
+      upgrade: 'обновить',
+      oneTier: 'Уровень 1 | лимит за всё время',
+      twoTier: 'Уровень 2 | ежедневный лимит',
       edit_my_profile: 'Изменить мои данные',
       identity: 'Верификация',
+      verification: 'Верификация',
       email_verified: 'Email подтвержден',
       email_unverified: 'Email не подтверджен',
       email_verification: 'Подтверждение email',
@@ -369,13 +383,16 @@ export default (context) => {
       refresh: 'Обновить',
     },
     verify: {
-      'You need to verify your identity': 'Необходимо подтвердить вашу личность',
-      'If you lose access to your wallet': 'Если вы потеряете доступ к кошельку',
+      'You need to verify your identity': 'Подтвердить вашу личность',
+      oneItem: 'Необходимо для расширения ежедневного лимита на покупку / продажу до 2 BTC.',
+      twoItem: 'Если вы потеряете доступ к кошельку, мы сможем идентифицировать вас по указанным данным и помочь восстановить доступ к активам.',
       'we will be able to identify you by the specified data' : 'мы сможем идентифицировать вас по указанным данным',
       'A secure connection has been established, you can start testing': 'Безопасное соединение установлено, можно начинать проверку',
       'To be tested': 'Пройти проверку',
       confirmation: 'Подтверждение',
-      'of the document': 'документов'
+      'of the document': 'документов',
+      daily: 'ежедневно',
+      lifetime: 'за всё время'
     },
     errors: {
 

@@ -26,6 +26,16 @@ export default (context) => {
       login_failed: 'Check your email/password and make sure you activated your account',
       login_failed_pin: 'Please check your email/password and pin-code',
     },
+    KYC: {
+      is_verified: 'Verified',
+      true: 'Yes',
+      false: 'No',
+      status: 'Status',
+      updated_at: 'Updated at',
+      applicant_data: 'Applicant data provided',
+      identity: 'Identity provided',
+      selfie: 'Selfie provided'
+    },
     footer: {
       tos: 'Terms of Use',
       privacy: 'Privacy Policy',
@@ -134,7 +144,11 @@ export default (context) => {
         two_factor: 'Two-Factor Auth',
         logout: 'Logout',
       },
+      upgrade: 'upgrade',
+      oneTier: 'Tier 1 | lifetime limit',
+      twoTier: 'Tier 2 | daily limit',
       edit_my_profile: 'Edit my profile',
+      verification: 'Verification',
       identity: 'Identify verification',
       email_verified: 'Email verified',
       email_unverified: 'Email Unverified',
@@ -373,13 +387,16 @@ export default (context) => {
       refresh: 'Refresh',
     },
     verify: {
-      'You need to verify your identity': 'You need to verify your identity',
-      'If you lose access to your wallet': 'If you lose access to your wallet',
+      'You need to verify your identity': 'Verify your identity',
+      oneItem: 'Required to increase daily buy/sell limit up to 2 BTC.',
+      twoItem: 'If you lose access to your wallet, we can identify you according to the specified data and help restore access to assets.',
       'we will be able to identify you by the specified data' : 'we will be able to identify you by the specified data',
       'A secure connection has been established, you can start testing': 'A secure connection has been established, you can start testing',
       'To be tested': 'To be tested',
       confirmation: 'Confirmation',
-      'of the document': 'of the document'
+      'of the document': 'of the document',
+      daily: 'daily',
+      lifetime: 'lifetime'
     }
   }
 

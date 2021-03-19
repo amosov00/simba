@@ -29,13 +29,19 @@ export const mutations = {
     state[payload.prop] = payload.value
   },
   setLimits: (state, payload) => {
-    state.limits = payload
+    state.limits = {
+      ...payload,
+      btc_limit: payload.btc_limit / 100000000,
+      btc_remain: payload.btc_remain / 100000000,
+      btc_used: payload.btc_used / 100000000,
+    }
   },
   setRate: (state, payload) => {
     state.limits = {
       ...state.limits,
-      ...payload
+      ...payload,
     }
+    console.log(state.limits)
   }
 }
 
@@ -45,13 +51,10 @@ export const actions = {
       commit('setTradeData', { prop: 'admin_eth_address', value: res.data.address })
     })
   },
-  fetchLimits({commit}) {
-    this.$axios.get('/account/kyc/limit/').then((res) => {
-      commit('setLimits', res.data)
-    }).then(()=>{
-      this.$axios.get('/meta/currency-rate/').then((res) => {
-        commit('setRate', res.data)
-      })
-    })
+  async fetchLimits({commit}) {
+    const limitRes = await this.$axios.get('/account/kyc/limit/')
+    const rateRes = await this.$axios.get('/meta/currency-rate/')
+    commit('setLimits', limitRes.data)
+    commit('setRate', rateRes.data)
   }
 }
