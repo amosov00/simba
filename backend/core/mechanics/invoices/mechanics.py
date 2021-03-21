@@ -36,7 +36,7 @@ __all__ = ["InvoiceMechanics"]
 
 class InvoiceMechanics(InvoiceValidation):
     async def validate(self, raise_exceprion: bool = True) -> bool:
-        """Validate invoice, returns True if valid"""
+        """Validate invoice, returns True if valid."""
         await self._validate_common()
 
         if self.invoice.invoice_type == InvoiceType.BUY:

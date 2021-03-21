@@ -16,7 +16,7 @@ class BaseApiWrapper:
         request_type: Literal["GET", "POST", "DELETE"] = "GET",  # Noqa
         params: dict = None,
         data: dict = None,
-        raise_error: bool = True
+        raise_error: bool = True,
     ) -> Union[list, dict, str, None]:
         async with httpx.AsyncClient(timeout=10.0) as client:
             if request_type == "POST":

@@ -61,15 +61,11 @@ class KYCController:
         return await self.api_wrapper.get_access_token(str(self.user_id))
 
     def _get_verification_limit(self) -> int:
-        return InvoiceVerificationLimits.LEVEL_2 \
-            if self.kyc_instance.is_verified else InvoiceVerificationLimits.LEVEL_1
+        return InvoiceVerificationLimits.LEVEL_2 if self.kyc_instance.is_verified else InvoiceVerificationLimits.LEVEL_1
 
     @classmethod
     def _prepare_schema_data(
-        cls,
-        data_type: Literal["review_data", "status_data"],
-        data: dict,
-        user_id: Union[str, ObjectId] = None
+        cls, data_type: Literal["review_data", "status_data"], data: dict, user_id: Union[str, ObjectId] = None
     ) -> UserKYC:
         if not data and user_id:
             return UserKYC(**{"user_id": user_id})
@@ -83,7 +79,7 @@ class KYCController:
                 status=data.get("reviewStatus"),
                 is_verified=is_verified,
                 review_data=data,
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             )
 
         else:
@@ -92,13 +88,13 @@ class KYCController:
             is_verified = data["applicant_status"].get("reviewResult", {}).get("reviewAnswer") == "GREEN"
 
             kyc = UserKYC(
-                user_id=user_id, # noqa
+                user_id=user_id,  # noqa
                 applicant_id=data["applicant_status"].get("applicantId"),
                 docs_status=docs_data,
                 status=data["applicant_status"].get("reviewStatus"),
                 updated_at=datetime.now(),
                 status_data=data,
-                is_verified=is_verified
+                is_verified=is_verified,
             )
 
         return kyc
@@ -111,17 +107,16 @@ class KYCController:
             return None
 
         request_body = await request.json()
-        payload = cls._prepare_schema_data("review_data", await request.json(), user_id=self.user_id)
+        payload = cls._prepare_schema_data("review_data", await request.json())
 
         await UserKYCCRUD.update_or_insert(
-            query={"user_id": ObjectId(request_body["externalUserId"])},
-            payload=payload.dict(exclude_unset=True)
+            query={"user_id": ObjectId(request_body["externalUserId"])}, payload=payload.dict(exclude_unset=True)
         )
 
         return True
 
     async def calculate_verification_limit(self, future_btc_amount: int = 0) -> UserKYCVerificationLimit:
-        """Calculate user with verification / kyc limits
+        """Calculate user with verification / kyc limits.
 
         :param future_btc_amount: add to total btc to calculate previous btc + new invoice btc
         :return:
@@ -138,19 +133,17 @@ class KYCController:
             match_stage["$match"]["finished_at"] = {"$gte": datetime.now() - timedelta(days=1)}  # noqa
 
         # calculate btc
-        result = (
-            await InvoiceCRUD.aggregate(
-                [
-                    match_stage,
-                    {
-                        "$group": {
-                            "_id": "$invoice_type",
-                            "total_btc": {"$sum": "$btc_amount_proceeded"},
-                            "total_simba": {"$sum": "$simba_amount_proceeded"},
-                        }
+        result = await InvoiceCRUD.aggregate(
+            [
+                match_stage,
+                {
+                    "$group": {
+                        "_id": "$invoice_type",
+                        "total_btc": {"$sum": "$btc_amount_proceeded"},
+                        "total_simba": {"$sum": "$simba_amount_proceeded"},
                     }
-                ]
-            )
+                },
+            ]
         )
         total_btc = 0
         for i in result:
@@ -186,14 +179,11 @@ class KYCController:
 
         status_data = await self.api_wrapper.get_current_status(
             applicant_id=str(self.user_id),
-            service_applicant_id=self.kyc_instance.applicant_id if self.kyc_instance else None
+            service_applicant_id=self.kyc_instance.applicant_id if self.kyc_instance else None,
         )
 
         payload = self._prepare_schema_data("status_data", status_data, user_id=self.user_id)
 
-        await UserKYCCRUD.update_or_insert(
-            {"user_id": self.user_id},
-            payload.dict(exclude_unset=True)
-        )
+        await UserKYCCRUD.update_or_insert({"user_id": self.user_id}, payload.dict(exclude_unset=True))
 
         return payload

@@ -42,16 +42,16 @@
 </template>
 
 <script>
-import {mapActions, mapGetters, mapMutations, mapState} from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-import {ValidationProvider} from 'vee-validate'
-import {InvoiceTypeSlug, InvoiceTypeTextToEnum} from "~/consts";
+import { ValidationProvider } from 'vee-validate'
+import { InvoiceTypeSlug, InvoiceTypeTextToEnum } from '~/consts'
 //import {Money} from 'v-money'
 
 export default {
   name: 'trade-confirm-invoice',
 
-  components: {ValidationProvider},
+  components: { ValidationProvider },
 
   data: () => ({
     InvoiceTypeSlug,
@@ -88,7 +88,7 @@ export default {
     ...mapState(['metamaskEthAddress']),
 
     beyondLimit() {
-      const {btc_limit, btc_used} = this.limits
+      const { btc_limit, btc_used } = this.limits
       return this.btc * 10 ** 8 + btc_used > btc_limit
     },
 
@@ -96,7 +96,7 @@ export default {
       return this.limits.btc_used ? (this.limits.btc_used / 10 ** 8).toFixed(6) : 0
     },
     btcLimit() {
-      return this.limits.btc_limit ? (this.limits.btc_limit / 10 ** 8) : 0
+      return this.limits.btc_limit ? this.limits.btc_limit / 10 ** 8 : 0
     },
   },
 
@@ -107,9 +107,9 @@ export default {
   },
 
   methods: {
-    ...mapMutations("exchange", ["setInvoiceId", "setNextStep"]),
-    ...mapActions("exchange", ["fetchLimits", "fetchCurrencyRate"]),
-    ...mapActions("invoices", ["createInvoice", "updateInvoice", "confirmInvoice"]),
+    ...mapMutations('exchange', ['setInvoiceId', 'setNextStep']),
+    ...mapActions('exchange', ['fetchLimits', 'fetchCurrencyRate']),
+    ...mapActions('invoices', ['createInvoice', 'updateInvoice', 'confirmInvoice']),
 
     async confirm() {
       if (this.simba < 200000) {
@@ -122,15 +122,19 @@ export default {
 
       this.loading = true
 
-      let updatedInvoice = await this.updateInvoice(this.isBuyInvoice ? {
-        id: this.invoiceId,
-        simba_amount: (this.btc * 10 ** 8).toFixed(0),
-        btc_amount: (this.btc * 10 ** 8).toFixed(0),
-      } : {
-        id: this.invoiceId,
-        simba_amount: this.simba.toFixed(0),
-        btc_amount: (this.btc * 10 ** 8).toFixed(0),
-      })
+      let updatedInvoice = await this.updateInvoice(
+        this.isBuyInvoice
+          ? {
+              id: this.invoiceId,
+              simba_amount: (this.btc * 10 ** 8).toFixed(0),
+              btc_amount: (this.btc * 10 ** 8).toFixed(0),
+            }
+          : {
+              id: this.invoiceId,
+              simba_amount: this.simba.toFixed(0),
+              btc_amount: (this.btc * 10 ** 8).toFixed(0),
+            }
+      )
 
       if (!updatedInvoice) {
         this.loading = false
@@ -146,11 +150,11 @@ export default {
 
       this.loading = false
 
-      await this.setNextStep("Waiting")
+      await this.setNextStep('Waiting')
     },
 
     checkMinimum() {
-      this.error = this.simba < 200000;
+      this.error = this.simba < 200000
     },
 
     convert() {

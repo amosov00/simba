@@ -39,13 +39,10 @@
 </template>
 
 <script>
-import {mapActions, mapGetters, mapMutations, mapState} from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 import invoiceMixins from '~/mixins/invoiceMixins'
 import formatCurrency from '~/mixins/formatCurrency'
-
-
-
 
 export default {
   name: 'trade-watching-transactions',
@@ -84,7 +81,6 @@ export default {
     BTCTxConfirmations() {
       return this.invoice.btc_txs.length > 0 ? this.invoice.btc_txs[0].confirmations : 0
     },
-
   },
 }
 </script>

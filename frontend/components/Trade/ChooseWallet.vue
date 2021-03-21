@@ -33,10 +33,10 @@
 </template>
 
 <script>
-import {mapActions, mapGetters, mapMutations, mapState} from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 import AddNewWallet from '~/components/AddNewWallet'
-import {InvoiceTypeSlug, InvoiceTypeTextToEnum} from "~/consts";
+import { InvoiceTypeSlug, InvoiceTypeTextToEnum } from '~/consts'
 
 // Step 1
 export default {
@@ -48,30 +48,30 @@ export default {
     errors: [],
   }),
 
-  components: {AddNewWallet},
+  components: { AddNewWallet },
 
   computed: {
-    ...mapGetters("exchange", ["isBuyInvoice"]),
-    ...mapState(["user", "metamaskEthAddress"]),
-    ...mapState("exchange", ["operation"])
+    ...mapGetters('exchange', ['isBuyInvoice']),
+    ...mapState(['user', 'metamaskEthAddress']),
+    ...mapState('exchange', ['operation']),
   },
 
   methods: {
     ...mapMutations({
-      setMetamaskEthAddress: "setMetamaskEthAddress",
-      setNextStep: "exchange/setNextStep",
-      setAddresses: "exchange/setAddresses",
-      setInvoiceId: "exchange/setInvoiceId",
+      setMetamaskEthAddress: 'setMetamaskEthAddress',
+      setNextStep: 'exchange/setNextStep',
+      setAddresses: 'exchange/setAddresses',
+      setInvoiceId: 'exchange/setInvoiceId',
     }),
-    ...mapActions(["addAddress"]),
-    ...mapActions("invoices", ["createInvoice", "updateInvoice"]),
+    ...mapActions(['addAddress']),
+    ...mapActions('invoices', ['createInvoice', 'updateInvoice']),
 
     addNewWalletModal(type) {
       this.$buefy.modal.open({
         parent: this,
         component: AddNewWallet,
         trapFocus: true,
-        props: {type},
+        props: { type },
       })
     },
 
@@ -108,7 +108,7 @@ export default {
         return
       }
       let createdInvoice = await this.createInvoice({
-        invoice_type: InvoiceTypeTextToEnum[this.operation]
+        invoice_type: InvoiceTypeTextToEnum[this.operation],
       })
 
       if (!createdInvoice) {
@@ -130,7 +130,7 @@ export default {
       }
 
       this.setInvoiceId(createdInvoice._id)
-      await this.setNextStep("ConfirmInvoice")
+      await this.setNextStep('ConfirmInvoice')
     },
   },
 
@@ -144,14 +144,14 @@ export default {
           return true
         })
         .catch((_) => {
-          this.$nuxt.$router.push({path: '/exchange/'})
+          this.$nuxt.$router.push({ path: '/exchange/' })
           return false
         })
     } else {
-      Toast.open({message: 'Metamask is not installed!', type: 'is-danger', duration: 4000})
-      await this.$nuxt.$router.push({path: '/exchange/'})
+      Toast.open({ message: 'Metamask is not installed!', type: 'is-danger', duration: 4000 })
+      await this.$nuxt.$router.push({ path: '/exchange/' })
     }
-  }
+  },
 }
 </script>
 

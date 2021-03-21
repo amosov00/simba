@@ -10,7 +10,7 @@ class BitcoinPriceWrapper(BaseApiWrapper):
         response = await self.request(
             url="https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD",
             request_type="GET",
-            raise_error=raise_error
+            raise_error=raise_error,
         )
 
         if response:
@@ -28,9 +28,7 @@ class BitcoinPriceWrapper(BaseApiWrapper):
 
     async def fetch_price_from_coinconverter(self, raise_error: bool = True) -> Optional[float]:
         response = await self.request(
-            url="https://api.coinconvert.net/convert/btc/usd?amount=1",
-            request_type="GET",
-            raise_error=raise_error
+            url="https://api.coinconvert.net/convert/btc/usd?amount=1", request_type="GET", raise_error=raise_error
         )
 
         if response and response["status"] == "success":
@@ -39,8 +37,10 @@ class BitcoinPriceWrapper(BaseApiWrapper):
         return None
 
     async def fetch_bitcoin_price(self):
-        price = await self.fetch_price_from_blockchain_info(raise_error=False) \
-                or await self.fetch_price_cryptocompare(raise_error=False) \
-                or await self.fetch_price_from_coinconverter(raise_error=True)
+        price = (
+            await self.fetch_price_from_blockchain_info(raise_error=False)
+            or await self.fetch_price_cryptocompare(raise_error=False)
+            or await self.fetch_price_from_coinconverter(raise_error=True)
+        )
 
         return price

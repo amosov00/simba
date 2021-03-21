@@ -6,5 +6,3 @@ export { default as Suspended } from './Suspended'
 export { default as ChooseWallet } from './ChooseWallet'
 export { default as Cancelled } from './Cancelled'
 export { default as Completed } from './Completed'
-
-

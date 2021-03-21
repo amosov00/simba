@@ -39,7 +39,7 @@ export default {
   watch: {
     async status(value) {
       await this.fetchPaidInvoiced(value)
-    }
+    },
   },
   async fetch() {
     if (this.adminInvoices.length <= 0) {
@@ -49,16 +49,16 @@ export default {
   data: () => ({
     searchQuery: '',
     options: [
-      {text: 'Созданные', value: 'created'},
-      {text: 'В ожидании', value: 'waiting'},
-      {text: 'В обработке', value: 'processing'},
-      {text: 'Оплаченые', value: 'paid'},
-      {text: 'Завершённые', value: 'completed'},
-      {text: 'Отклоненные', value: 'cancelled'},
-      {text: 'Приостановленные', value: 'suspended'},
-      {text: 'Все', value: null},
+      { text: 'Созданные', value: 'created' },
+      { text: 'В ожидании', value: 'waiting' },
+      { text: 'В обработке', value: 'processing' },
+      { text: 'Оплаченые', value: 'paid' },
+      { text: 'Завершённые', value: 'completed' },
+      { text: 'Отклоненные', value: 'cancelled' },
+      { text: 'Приостановленные', value: 'suspended' },
+      { text: 'Все', value: null },
     ],
-    status: null
+    status: null,
   }),
   computed: {
     adminInvoices() {

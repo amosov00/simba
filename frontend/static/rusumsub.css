@@ -210,7 +210,6 @@ div > .row:last-child {
   padding-right: 0 !important;
 }
 
-
 .fields-list-two-columns:first-child {
   flex-direction: column;
 }
@@ -342,11 +341,12 @@ a {
   width: 16px;
   height: 16px;
   border: 0 solid transparent;
-  outline: 1px solid #DFDFDF;
+  outline: 1px solid #dfdfdf;
   display: flex;
 }
 
-.checkbox, .radio-item {
+.checkbox,
+.radio-item {
   padding-left: 36px;
 }
 
@@ -354,11 +354,11 @@ a {
   display: none;
 }
 
-.checkbox input:checked~.checkmark:after {
+.checkbox input:checked ~ .checkmark:after {
   display: none;
 }
 
-.checkbox input:checked~.checkmark {
+.checkbox input:checked ~ .checkmark {
   background-color: transparent;
   border-color: transparent;
 }
@@ -372,15 +372,15 @@ a {
   transform: translate(-50%, -50%);
 }
 
-.checkbox input:checked~.checkmark::before {
+.checkbox input:checked ~ .checkmark::before {
   display: block;
   width: 10px;
   height: 10px;
-  background-color: #0060FF;
+  background-color: #0060ff;
 }
 
-.checkbox input:checked~.checkmark {
-  outline: 2px solid #0060FF;
+.checkbox input:checked ~ .checkmark {
+  outline: 2px solid #0060ff;
   outline-offset: -1px;
 }
 
@@ -436,7 +436,7 @@ p {
   background-position: center;
   background-repeat: no-repeat;
   background-size: 90%;
-  background-image: url("loader.gif");
+  background-image: url('loader.gif');
   display: block;
   position: absolute;
   top: 50%;

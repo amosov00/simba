@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import {mapActions, mapGetters, mapMutations, mapState} from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 import Countdown from '~/components/Countdown'
 import CopyToClipboard from '~/components/CopyToClipboard'
@@ -99,7 +99,7 @@ export default {
     disablePayBtn: false,
   }),
   methods: {
-    ...mapActions("exchange", ["fetchAdminEthAddress"]),
+    ...mapActions('exchange', ['fetchAdminEthAddress']),
     onExpired() {
       this.expired = true
       // this.$parent.$emit('step_failed')

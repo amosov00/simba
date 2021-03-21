@@ -37,7 +37,7 @@ export const actions = {
   },
 
   async updateInvoice({}, data) {
-    let sendData = {...data}
+    let sendData = { ...data }
     delete sendData.id
 
     return await this.$axios

@@ -1,4 +1,4 @@
-import {DialogProgrammatic as Dialog, ToastProgrammatic as Toast} from 'buefy'
+import { DialogProgrammatic as Dialog, ToastProgrammatic as Toast } from 'buefy'
 
 export const state = () => ({
   user: null,
@@ -20,7 +20,7 @@ export const mutations = {
   setKYC: (state, payload) => (state.kyc = payload),
   deleteUser: (state) => (state.user = null),
   setContract: (state, data) => (state.contract = data),
-  setMetamaskEthAddress: (state, payload) => state.metamaskEthAddress = payload,
+  setMetamaskEthAddress: (state, payload) => (state.metamaskEthAddress = payload),
   setTwoFactor: (state, payload) => (state.user.two_factor = payload),
   setSignedAddresses: (state, payload) => state.user.signed_addresses.push(payload),
   setLoginDataBuffer: (state, payload) => {
@@ -43,16 +43,16 @@ export const actions = {
       .catch(() => false)
   },
 
-  async addAddress({dispatch}, data) {
+  async addAddress({ dispatch }, data) {
     if (data.type === 'eth') {
       try {
         await dispatch('metamask/createSignature', data)
         return true
       } catch (e) {
         Toast.open({
-            message: this.$i18n.t('wallet.failed_to_get_signature'),
-            type: 'is-danger',
-            duration: 6000,
+          message: this.$i18n.t('wallet.failed_to_get_signature'),
+          type: 'is-danger',
+          duration: 6000,
         })
         return false
       }
@@ -84,7 +84,7 @@ export const actions = {
     }
   },
 
-  async removeAddress({dispatch}, data) {
+  async removeAddress({ dispatch }, data) {
     if (data.type === 'btc') {
       return this.$axios
         .delete(`/account/btc-address/`, {
@@ -127,7 +127,7 @@ export const actions = {
     }
   },
 
-  async fetchContracts({commit}) {
+  async fetchContracts({ commit }) {
     return this.$axios
       .get('/meta/eth/contract/')
       .then((res) => {
@@ -150,7 +150,7 @@ export const actions = {
       })
   },
 
-  async getUser({commit}) {
+  async getUser({ commit }) {
     return this.$axios
       .get('/account/user/')
       .then((resp) => {
@@ -176,7 +176,7 @@ export const actions = {
       .catch((_) => false)
   },
 
-  async signUp({commit}, data) {
+  async signUp({ commit }, data) {
     if (!data) return false
     return this.$axios
       .post('/account/signup/', data)
@@ -236,7 +236,7 @@ export const actions = {
         return false
       })
   },
-  async confirm2fa({commit}, data) {
+  async confirm2fa({ commit }, data) {
     return this.$axios
       .post('/account/2fa/', {
         token: data.token,
@@ -256,7 +256,7 @@ export const actions = {
         })
       })
   },
-  async delete2fa({commit}, pin_code) {
+  async delete2fa({ commit }, pin_code) {
     return this.$axios
       .delete('/account/2fa/', {
         data: {

@@ -32,7 +32,7 @@ export default ({ app, redirect, route }, inject) => {
       maxAge: 60 * 60 * 24 * 7,
       domain: document.domain,
     })
-    setTimeout(()=>{
+    setTimeout(() => {
       redirect('/')
     })
   })

@@ -42,7 +42,7 @@ export default (context) => {
     exchange: {
       update: 'обновите',
       upgradeTier2: 'Обновить до 2 уровня',
-      Please : 'Пожалуйста',
+      Please: 'Пожалуйста',
       'Above your limit': 'Введённая сумма привышает лимит в',
       'your verification level': 'ваш уровень верификации',
       buy: 'Покупка',
@@ -76,8 +76,7 @@ export default (context) => {
       confirms: 'Подтверждений',
       payment_confirmation_buy:
         'Как только сеть получит 3 подтверждения, токены SIMBA будут отправлены на ваш ETH адрес.',
-      payment_confirmation_sell:
-        'Как только сеть получит 3 подтверждения, BTC будут отправлены на ваш адрес.',
+      payment_confirmation_sell: 'Как только сеть получит 3 подтверждения, BTC будут отправлены на ваш адрес.',
       statuses: {
         completed: 'Завершена',
         paid: 'Оплачена',
@@ -86,7 +85,7 @@ export default (context) => {
         cancelled: 'Отменена',
         expired: 'Просрочена',
         processing: 'В обработке',
-        suspended: 'Приостановлена'
+        suspended: 'Приостановлена',
       },
       error_creating_invoice: 'Произошла ошибка при создании инвойса',
       error_updating_invoice: 'Произошла ошибка при обновлении инвойса',
@@ -100,9 +99,9 @@ export default (context) => {
       applied_fee: 'Комиссия',
       fee_in_simba: '(взымается в SIMBA)',
       or: 'или',
-      suspended_title: "Приостановлена, ваш лимит был превышен",
-      suspended_help_text: "не может быть отправлено, пожалуйста повысти ваш уровень верификации",
-      contact_support: "Поддержка",
+      suspended_title: 'Приостановлена, ваш лимит был превышен',
+      suspended_help_text: 'не может быть отправлено, пожалуйста повысти ваш уровень верификации',
+      contact_support: 'Поддержка',
     },
     dropdown: {
       bill_details: 'Реквизиты',
@@ -377,15 +376,14 @@ export default (context) => {
     verify: {
       'You need to verify your identity': 'Необходимо подтвердить вашу личность',
       'If you lose access to your wallet': 'Если вы потеряете доступ к кошельку',
-      'we will be able to identify you by the specified data' : 'мы сможем идентифицировать вас по указанным данным',
-      'A secure connection has been established, you can start testing': 'Безопасное соединение установлено, можно начинать проверку',
+      'we will be able to identify you by the specified data': 'мы сможем идентифицировать вас по указанным данным',
+      'A secure connection has been established, you can start testing':
+        'Безопасное соединение установлено, можно начинать проверку',
       'To be tested': 'Пройти проверку',
       confirmation: 'Подтверждение',
-      'of the document': 'документов'
+      'of the document': 'документов',
     },
-    errors: {
-
-    }
+    errors: {},
   }
 
   return new Promise(function (resolve) {

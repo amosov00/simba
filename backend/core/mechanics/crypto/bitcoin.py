@@ -83,7 +83,9 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
         Wif передавать в формате [<wif>, ]
         """
         fee = fee or BTC_FEE
-        self.hot_wallet_balance = await self.blockcypher_api_wrapper.current_balance(settings.crypto.btc_hot_wallet_address)
+        self.hot_wallet_balance = await self.blockcypher_api_wrapper.current_balance(
+            settings.crypto.btc_hot_wallet_address
+        )
         spendables = await self.blockcypher_api_wrapper.get_spendables(settings.crypto.btc_hot_wallet_address)
         payables = self.proceed_payables(address, amount, settings.crypto.btc_hot_wallet_address, fee)
 

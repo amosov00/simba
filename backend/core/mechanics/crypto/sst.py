@@ -56,7 +56,7 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
                 scope.set_extra("amount", str(amount))
                 for k, v in kwargs.items():
                     scope.set_extra(k, str(v))
-                capture_message(f"Failed to send SST")
+                capture_message("Failed to send SST")
             return None
 
         return tx_hash.hex()

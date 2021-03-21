@@ -56,9 +56,9 @@ async def admin_users_fetch_one(user_id: str = Path(...)):
     "/{user_id}/kyc/status/",
     response_model=UserKYC,
 )
-async def admin_users_fetch_one(user_id: str = Path(...)):
+async def admin_users_fetch_one_kyc(user_id: str = Path(...)):
     user = User(**await UserCRUD.find_by_id(user_id, raise_404=True))
-    kyc_instance = await KYCController.init(user)
+    kyc_instance = await KYCController.init(user.id)
     return await kyc_instance.get_status()
 
 

@@ -4,7 +4,7 @@ import {
   InvoiceTypeEnum,
   InvoiceTypeSlug,
   InvoiceTypeTextToEnum,
-  InvoiceTypeToText
+  InvoiceTypeToText,
 } from '@/consts/invoice'
 
 export {
@@ -13,5 +13,5 @@ export {
   InvoiceStatus,
   InvoiceTypeEnum,
   InvoiceTypeSlug,
-  InvoiceTypeTextToEnum
+  InvoiceTypeTextToEnum,
 }

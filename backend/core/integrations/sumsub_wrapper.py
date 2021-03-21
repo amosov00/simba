@@ -120,7 +120,9 @@ class SumSubWrapper:
         return cls._get_access_token(applicant_id=applicant_id)
 
     @classmethod
-    async def get_current_status(cls, applicant_id: str, service_applicant_id: Optional["str"] = None) -> Optional[dict]:
+    async def get_current_status(
+        cls, applicant_id: str, service_applicant_id: Optional["str"] = None
+    ) -> Optional[dict]:
         if not service_applicant_id:
             service_applicant_id = cls._get_service_applicant_id(applicant_id)
 

@@ -1,31 +1,29 @@
 export const InvoiceStatus = {
-  CREATED: "created",
-  WAITING: "waiting",  // Waiting transaction from user
-  PROCESSING: "processing",  // Waiting to generate SIMBA or send BTC
-  PAID: "paid",  // Paid but waiting for tx confirmation
-  COMPLETED: "completed",  // success end
-  CANCELLED: "cancelled",  // invoice closed
-  SUSPENDED: "suspended",  // KYC and verification issues
+  CREATED: 'created',
+  WAITING: 'waiting', // Waiting transaction from user
+  PROCESSING: 'processing', // Waiting to generate SIMBA or send BTC
+  PAID: 'paid', // Paid but waiting for tx confirmation
+  COMPLETED: 'completed', // success end
+  CANCELLED: 'cancelled', // invoice closed
+  SUSPENDED: 'suspended', // KYC and verification issues
 }
 
 export const InvoiceTypeSlug = {
-  BUY: "buy",
-  SELL: "sell",
+  BUY: 'buy',
+  SELL: 'sell',
 }
-
 
 export const InvoiceTypeEnum = {
   BUY: 1,
   SELL: 2,
 }
 
-
 export const InvoiceTypeToText = (invoiceType) => {
   switch (invoiceType) {
     case InvoiceTypeEnum.BUY:
-      return "buy"
+      return 'buy'
     case InvoiceTypeEnum.SELL:
-      return "sell"
+      return 'sell'
   }
 }
 

@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import _ from "lodash";
+import _ from 'lodash'
 import { mapGetters, mapState } from 'vuex'
 import invoiceMixins from '~/mixins/invoiceMixins'
 import formatCurrency from '~/mixins/formatCurrency'
@@ -59,7 +59,7 @@ export default {
         return ''
       }
       return this.invoice.btc_tx_hashes.length > 0 ? this.invoice.btc_tx_hashes[0] : ''
-    }
+    },
   },
   methods: {
     numberWithCommas(x) {

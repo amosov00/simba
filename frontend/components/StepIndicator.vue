@@ -16,7 +16,7 @@
         ></div>
       </div>
       <p class="step__text">
-        {{$t('verify.confirmation')}}<br />
+        {{ $t('verify.confirmation') }}<br />
         email
       </p>
     </div>
@@ -30,8 +30,8 @@
         <p>2</p>
       </div>
       <p class="step__text">
-        {{$t('verify.confirmation')}}<br />
-        {{$t('verify["of the document"]')}}
+        {{ $t('verify.confirmation') }}<br />
+        {{ $t('verify["of the document"]') }}
       </p>
     </div>
   </div>
@@ -43,12 +43,12 @@ export default {
   props: {
     emailConfirm: {
       default: false,
-      type: Boolean
+      type: Boolean,
     },
     passportConfirm: {
       default: false,
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
 }
 </script>

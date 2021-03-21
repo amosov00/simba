@@ -20,9 +20,9 @@
 
 <script>
 import moment from 'moment'
-import {mapGetters, mapActions} from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import formatCurrency from '~/mixins/formatCurrency'
-import {InvoiceTypeToText, InvoiceStatus} from "~/consts";
+import { InvoiceTypeToText, InvoiceStatus } from '~/consts'
 
 export default {
   name: 'exchange-index',
@@ -30,23 +30,27 @@ export default {
   mixins: [formatCurrency],
   middleware: ['authRequired', 'contract'],
   computed: {
-    ...mapGetters("invoices", ["invoicesReverse"]),
+    ...mapGetters('invoices', ['invoicesReverse']),
     invoicesToShow() {
       return this.invoicesReverse.slice(0, this.invoicesAmountToShow)
     },
     showBtn() {
       return this.invoicesReverse.length !== 0 && this.invoicesAmountToShow + 10 < this.invoicesReverse.length
-    }
+    },
   },
   data: () => ({
     invoicesAmountToShow: 10,
   }),
 
   methods: {
-    ...mapActions({fetchInvoices: "invoices/fetchInvoices"}),
+    ...mapActions({ fetchInvoices: 'invoices/fetchInvoices' }),
     InvoiceTypeToText,
     getStatus(item) {
-      if ([InvoiceStatus.CREATED, InvoiceStatus.WAITING, InvoiceStatus.PROCESSING, InvoiceStatus.PAID].includes(item.status)) {
+      if (
+        [InvoiceStatus.CREATED, InvoiceStatus.WAITING, InvoiceStatus.PROCESSING, InvoiceStatus.PAID].includes(
+          item.status
+        )
+      ) {
         let current = +Date.now()
         let dt = +moment.utc(item.created_at).toDate()
 

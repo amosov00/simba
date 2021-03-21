@@ -12,8 +12,8 @@
 </template>
 
 <script>
-import _ from 'lodash';
-import {mapActions, mapMutations, mapState} from 'vuex'
+import _ from 'lodash'
+import { mapActions, mapMutations, mapState } from 'vuex'
 
 import {
   Waiting,
@@ -23,9 +23,9 @@ import {
   ConfirmInvoice,
   WatchingIncomingTransactions,
   WatchingOutcomingTransactions,
-  Suspended
-} from "~/components/Trade";
-import {InvoiceStatus, InvoiceTypeEnum, InvoiceTypeToText} from "~/consts";
+  Suspended,
+} from '~/components/Trade'
+import { InvoiceStatus, InvoiceTypeEnum, InvoiceTypeToText } from '~/consts'
 
 export default {
   name: 'exchange-buysell',
@@ -53,27 +53,37 @@ export default {
   },
 
   computed: {
-    ...mapState("exchange", ["invoiceId", "invoice", "operation", "currentStepComponent", "currentStepIndicatorIndex", "fetchInvoiceDataLoop"]),
+    ...mapState('exchange', [
+      'invoiceId',
+      'invoice',
+      'operation',
+      'currentStepComponent',
+      'currentStepIndicatorIndex',
+      'fetchInvoiceDataLoop',
+    ]),
   },
 
   methods: {
-    ...mapActions("invoices", ["fetchSingleInvoice"]),
-    ...mapMutations(["setMetamaskEthAddress"]),
-    ...mapMutations("exchange", [
-      "setInvoice",
-      "setInvoiceId",
-      "setCurrentStepComponent",
-      "setCurrentStepIndicatorIndex",
-      "clearState",
-      "setFetchInvoiceDataLoop",
-      "setOperation",
+    ...mapActions('invoices', ['fetchSingleInvoice']),
+    ...mapMutations(['setMetamaskEthAddress']),
+    ...mapMutations('exchange', [
+      'setInvoice',
+      'setInvoiceId',
+      'setCurrentStepComponent',
+      'setCurrentStepIndicatorIndex',
+      'clearState',
+      'setFetchInvoiceDataLoop',
+      'setOperation',
     ]),
     InvoiceTypeToText,
     generateSteps() {
       return _.range(this.stepsAmount)
     },
     isFailStep(i) {
-      return [this.InvoiceStatus.CANCELLED, this.InvoiceStatus.SUSPENDED].includes(this.invoice?.status) && i === this.stepsAmount - 1
+      return (
+        [this.InvoiceStatus.CANCELLED, this.InvoiceStatus.SUSPENDED].includes(this.invoice?.status) &&
+        i === this.stepsAmount - 1
+      )
     },
     isActiveStep(i) {
       return this.isFailStep(i) ? false : i <= this.currentStepIndicatorIndex
@@ -90,46 +100,45 @@ export default {
         this.setOperation(this.InvoiceTypeToText(invoice.invoice_type))
         switch (invoice.status) {
           case InvoiceStatus.CREATED:
-            this.setCurrentStepComponent("ConfirmInvoice")
+            this.setCurrentStepComponent('ConfirmInvoice')
             this.setCurrentStepIndicatorIndex(1)
             this.setFetchInvoiceDataLoop(false)
-            break;
+            break
           case InvoiceStatus.WAITING:
-            this.setCurrentStepComponent("Waiting")
+            this.setCurrentStepComponent('Waiting')
             this.setCurrentStepIndicatorIndex(2)
             this.setFetchInvoiceDataLoop(true)
-            break;
+            break
           case InvoiceStatus.PROCESSING:
             this.setCurrentStepIndicatorIndex(3)
-            this.setCurrentStepComponent("WatchingIncomingTransactions")
+            this.setCurrentStepComponent('WatchingIncomingTransactions')
             this.setFetchInvoiceDataLoop(true)
             break
           case InvoiceStatus.PAID:
             this.setCurrentStepIndicatorIndex(4)
-            this.setCurrentStepComponent("WatchingOutcomingTransactions")
+            this.setCurrentStepComponent('WatchingOutcomingTransactions')
             this.setFetchInvoiceDataLoop(true)
-            break;
+            break
           case InvoiceStatus.CANCELLED:
-            this.setCurrentStepComponent("Cancelled")
+            this.setCurrentStepComponent('Cancelled')
             this.setCurrentStepIndicatorIndex(5)
             this.setFetchInvoiceDataLoop(false)
-            break;
+            break
           case InvoiceStatus.SUSPENDED:
-            this.setCurrentStepComponent("Suspended")
+            this.setCurrentStepComponent('Suspended')
             this.setCurrentStepIndicatorIndex(5)
             this.setFetchInvoiceDataLoop(false)
-            break;
+            break
           case InvoiceStatus.COMPLETED:
-            this.setCurrentStepComponent("Completed")
+            this.setCurrentStepComponent('Completed')
             this.setCurrentStepIndicatorIndex(5)
             this.setFetchInvoiceDataLoop(false)
-            break;
+            break
           default:
             break
         }
-      }
-      else {
-        this.$buefy.toast.open({message: 'Error: invoice not found', type: 'is-danger'})
+      } else {
+        this.$buefy.toast.open({ message: 'Error: invoice not found', type: 'is-danger' })
         await this.$nuxt.context.redirect('/exchange/')
       }
 
@@ -152,7 +161,6 @@ export default {
       }
     }, 10000)
   },
-
 
   async beforeDestroy() {
     clearInterval(this.interval)

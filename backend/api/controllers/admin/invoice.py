@@ -12,7 +12,13 @@ from core.mechanics.blockcypher_webhook import BlockCypherWebhookHandler
 from core.utils import to_objectid
 from database.crud import UserCRUD, InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD, MetaCRUD
 from schemas import (
-    InvoiceInDB, InvoiceExtended, InvoiceUpdateAdmin, InvoiceStatus, InvoiceType, MetaSlugs, ReferralTransactionUserID,
+    InvoiceInDB,
+    InvoiceExtended,
+    InvoiceUpdateAdmin,
+    InvoiceStatus,
+    InvoiceType,
+    MetaSlugs,
+    ReferralTransactionUserID,
 )
 
 __all__ = ["invoices_router"]
@@ -59,14 +65,12 @@ async def admin_invoice_fetch_one(invoice_id: str = Path(...)):
 
 
 @invoices_router.put("/{invoice_id}/")
-async def admin_invoice_fetch_sst_tx_info(
+async def admin_invoice_update(
     invoice_id: str = Path(...),
     payload: InvoiceUpdateAdmin = Body(...),
 ):
     await InvoiceCRUD.update_invoice_not_safe(
-        invoice_id=to_objectid(invoice_id),
-        payload=payload.dict(),
-        filtering_statuses=(InvoiceStatus.SUSPENDED,)
+        invoice_id=to_objectid(invoice_id), payload=payload.dict(), filtering_statuses=(InvoiceStatus.SUSPENDED,)
     )
     return True
 

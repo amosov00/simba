@@ -42,7 +42,7 @@ export default (context) => {
     exchange: {
       update: 'update',
       upgradeTier2: 'Upgrade TIER 2',
-      Please : 'Please',
+      Please: 'Please',
       'Above your limit': 'Above your limit',
       'your verification level': 'your verification level',
       buy: 'Buy',
@@ -77,8 +77,7 @@ export default (context) => {
       confirms: 'Confirmations',
       payment_confirmation_buy:
         'As soon as network get 3 confirmations, SIMBA tokens will be issued to your ETH address.',
-      payment_confirmation_sell:
-        'As soon as network get 3 confirmation(s), BTC will be sent to your address.',
+      payment_confirmation_sell: 'As soon as network get 3 confirmation(s), BTC will be sent to your address.',
       statuses: {
         completed: 'Completed',
         paid: 'Paid',
@@ -101,8 +100,8 @@ export default (context) => {
       applied_fee: 'Applied fee',
       fee_in_simba: '(charged in SIMBA)',
       or: 'or',
-      suspended_title: "Suspended, your limit is exceeded",
-      contact_support: "Contact support",
+      suspended_title: 'Suspended, your limit is exceeded',
+      contact_support: 'Contact support',
     },
     dropdown: {
       bill_details: 'Bill details',
@@ -381,12 +380,13 @@ export default (context) => {
     verify: {
       'You need to verify your identity': 'You need to verify your identity',
       'If you lose access to your wallet': 'If you lose access to your wallet',
-      'we will be able to identify you by the specified data' : 'we will be able to identify you by the specified data',
-      'A secure connection has been established, you can start testing': 'A secure connection has been established, you can start testing',
+      'we will be able to identify you by the specified data': 'we will be able to identify you by the specified data',
+      'A secure connection has been established, you can start testing':
+        'A secure connection has been established, you can start testing',
       'To be tested': 'To be tested',
       confirmation: 'Confirmation',
-      'of the document': 'of the document'
-    }
+      'of the document': 'of the document',
+    },
   }
 
   return new Promise(function (resolve) {

@@ -12,22 +12,22 @@ export default {
       })
     },
     ethTxByEvent(txs, event) {
-      return txs.find(i => i.event === event)
+      return txs.find((i) => i.event === event)
     },
     invoiceEthTxTransfer: (invoice) => {
-      let filtered = invoice ? invoice.eth_txs.filter(i => i.event === "Transfer") : []
+      let filtered = invoice ? invoice.eth_txs.filter((i) => i.event === 'Transfer') : []
       return filtered.length > 0 ? filtered[0] : null
     },
     invoiceEthTxRedeem: (invoice) => {
-      let filtered = invoice ? invoice.eth_txs.filter(i => i.event === "OnRedeemed") : []
+      let filtered = invoice ? invoice.eth_txs.filter((i) => i.event === 'OnRedeemed') : []
       return filtered.length > 0 ? filtered[0] : null
     },
     invoiceEthTxIssue: (invoice) => {
-      let filtered = invoice ? invoice.eth_txs.filter(i => i.event === "OnIssued") : []
+      let filtered = invoice ? invoice.eth_txs.filter((i) => i.event === 'OnIssued') : []
       return filtered.length > 0 ? filtered[0] : null
     },
     getBlockchainLink(hash, hashType, currency) {
-      const {isProduction} = this.$config
+      const { isProduction } = this.$config
 
       let eth_start_link
       let btc_start_link

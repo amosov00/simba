@@ -4,7 +4,7 @@ const initialState = {
   fetchInvoiceDataLoop: true,
   currentStepComponent: '',
   currentStepIndicatorIndex: 0,
-  operation: "buy",
+  operation: 'buy',
   limits: {},
   currencyRate: {},
   addresses: {
@@ -29,14 +29,14 @@ export const getters = {
 }
 
 export const mutations = {
-  setOperation: (state, payload) => state.operation = payload,
-  setFetchInvoiceDataLoop: (state, payload) => state.fetchInvoiceDataLoop = payload,
-  setInvoice: (state, payload) => state.invoice = payload,
-  setInvoiceId: (state, payload) => state.invoiceId = payload,
-  setCurrentStepComponent: (state, payload) => state.currentStepComponent = payload,
-  setCurrentStepIndicatorIndex: (state, payload) => state.currentStepIndicatorIndex = payload,
-  setAddresses: (state, payload) => state.addresses = payload,
-  setAdminEthHash: (state, payload) => state.adminEthHash = payload,
+  setOperation: (state, payload) => (state.operation = payload),
+  setFetchInvoiceDataLoop: (state, payload) => (state.fetchInvoiceDataLoop = payload),
+  setInvoice: (state, payload) => (state.invoice = payload),
+  setInvoiceId: (state, payload) => (state.invoiceId = payload),
+  setCurrentStepComponent: (state, payload) => (state.currentStepComponent = payload),
+  setCurrentStepIndicatorIndex: (state, payload) => (state.currentStepIndicatorIndex = payload),
+  setAddresses: (state, payload) => (state.addresses = payload),
+  setAdminEthHash: (state, payload) => (state.adminEthHash = payload),
   setNextStep: (state, payload) => {
     state.currentStepComponent = payload
     state.currentStepIndicatorIndex += 1
@@ -50,7 +50,6 @@ export const mutations = {
   clearState: (state) => {
     state = Object.assign(state, initialState)
   },
-
 }
 
 export const actions = {
@@ -58,23 +57,23 @@ export const actions = {
     return this.$axios
       .get('/meta/eth/admin-address/')
       .then((res) => {
-        commit("setAdminEthHash", res.data.address)
+        commit('setAdminEthHash', res.data.address)
       })
       .catch(() => false)
   },
-  async fetchLimits({commit}) {
+  async fetchLimits({ commit }) {
     return this.$axios
       .get('/account/kyc/limit/')
       .then((res) => {
-        commit("setLimits", res.data)
+        commit('setLimits', res.data)
       })
       .catch(() => false)
   },
-  async fetchCurrencyRate({commit}) {
+  async fetchCurrencyRate({ commit }) {
     return this.$axios
       .get('/meta/currency-rate/')
       .then((res) => {
-        commit("setCurrencyRate", res.data)
+        commit('setCurrencyRate', res.data)
       })
       .catch(() => false)
   },

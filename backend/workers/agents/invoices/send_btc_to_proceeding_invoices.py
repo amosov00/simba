@@ -48,7 +48,7 @@ async def send_btc_to_proceeding_invoices_job(stream):
         for invoice in proceeding_invoices:
             # Finish pipeline if wallet has unconfirmed transactions
             if hot_wallet_info.unconfirmed_transactions_number:
-                logging.info(f"Found active tx in btc hot wallet, skipping")
+                logging.info("Found active tx in btc hot wallet, skipping")
                 continue
 
             invoice = InvoiceInDB(**invoice)

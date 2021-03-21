@@ -17,8 +17,8 @@
 </template>
 
 <script>
-import _ from 'lodash';
-import {mapActions, mapGetters, mapMutations, mapState} from 'vuex'
+import _ from 'lodash'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import invoiceMixins from '~/mixins/invoiceMixins'
 import formatCurrency from '~/mixins/formatCurrency'
 
@@ -48,14 +48,14 @@ export default {
       } else {
         return this.invoice.simba_amount_proceeded
       }
-    }
+    },
   },
   methods: {
-    ...mapActions("exchange", ["fetchLimits", "fetchCurrencyRate"]),
+    ...mapActions('exchange', ['fetchLimits', 'fetchCurrencyRate']),
   },
   async mounted() {
     await this.fetchLimits()
-  }
+  },
 }
 </script>
 

@@ -12,14 +12,14 @@
 </template>
 
 <script>
-import {mapGetters, mapState} from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import Countdown from '~/components/Countdown'
 import invoiceMixins from '~/mixins/invoiceMixins'
 
 export default {
   name: 'trade-final',
   mixins: [invoiceMixins],
-  components: {Countdown},
+  components: { Countdown },
   data: () => ({}),
   computed: {
     ...mapGetters('exchange', ['isBuyInvoice']),
