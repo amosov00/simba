@@ -34,7 +34,7 @@ export default (context) => {
       updated_at: 'Updated at',
       applicant_data: 'Applicant data provided',
       identity: 'Identity provided',
-      selfie: 'Selfie provided'
+      selfie: 'Selfie provided',
     },
     footer: {
       tos: 'Terms of Use',
@@ -394,15 +394,17 @@ export default (context) => {
     verify: {
       'You need to verify your identity': 'Verify your identity',
       oneItem: 'Required to increase daily buy/sell limit up to 2 BTC.',
-      twoItem: 'If you lose access to your wallet, we can identify you according to the specified data and help restore access to assets.',
-      'we will be able to identify you by the specified data' : 'we will be able to identify you by the specified data',
-      'A secure connection has been established, you can start testing': 'A secure connection has been established, you can start testing',
+      twoItem:
+        'If you lose access to your wallet, we can identify you according to the specified data and help restore access to assets.',
+      'we will be able to identify you by the specified data': 'we will be able to identify you by the specified data',
+      'A secure connection has been established, you can start testing':
+        'A secure connection has been established, you can start testing',
       'To be tested': 'To be tested',
       confirmation: 'Confirmation',
       'of the document': 'of the document',
       daily: 'daily',
-      lifetime: 'lifetime'
-    }
+      lifetime: 'lifetime',
+    },
   }
 
   return new Promise(function (resolve) {

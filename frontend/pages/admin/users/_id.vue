@@ -251,7 +251,7 @@ export default {
 
     return {
       user_data,
-      userKYC
+      userKYC,
     }
   },
 }

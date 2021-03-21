@@ -1,9 +1,9 @@
 <template>
   <div>
-    <h2 class="start-title">{{$t('verify["You need to verify your identity"]')}}</h2>
+    <h2 class="start-title">{{ $t('verify["You need to verify your identity"]') }}</h2>
     <ul class="text">
-      <li class="mb-3 mt-3">{{$t('verify.oneItem')}}</li>
-      <li>{{$t('verify.twoItem')}}</li>
+      <li class="mb-3 mt-3">{{ $t('verify.oneItem') }}</li>
+      <li>{{ $t('verify.twoItem') }}</li>
     </ul>
     <div class="lock">
       <img :src="require('@/static/lock.png')" alt="lock" class="lock__img" />

@@ -1,15 +1,16 @@
 <template>
   <div class="wrap">
-    <div class="step" :class="{
-          'step__number--active': emailConfirm,
-        }">
+    <div
+      class="step"
+      :class="{
+        'step__number--active': emailConfirm,
+      }"
+    >
       <p class="step__text">
-        {{$t('verify.confirmation')}}<br />
+        {{ $t('verify.confirmation') }}<br />
         email
       </p>
-      <div
-        class="step__number"
-      >
+      <div class="step__number">
         <p>1</p>
         <div
           class="step__line"
@@ -18,25 +19,22 @@
           }"
         ></div>
       </div>
-      <p class="step__text">
-        0.1 BTC {{$t('verify.lifetime')}}
-      </p>
+      <p class="step__text">0.1 BTC {{ $t('verify.lifetime') }}</p>
     </div>
-    <div class="step" :class="{
-          'step__number--active': passportConfirm,
-        }">
+    <div
+      class="step"
+      :class="{
+        'step__number--active': passportConfirm,
+      }"
+    >
       <p class="step__text">
-        {{$t('verify.confirmation')}}<br />
-        {{$t('verify["of the document"]')}}
+        {{ $t('verify.confirmation') }}<br />
+        {{ $t('verify["of the document"]') }}
       </p>
-      <div
-        class="step__number"
-      >
+      <div class="step__number">
         <p>2</p>
       </div>
-      <p class="step__text">
-        2 BTC {{$t('verify.daily')}}
-      </p>
+      <p class="step__text">2 BTC {{ $t('verify.daily') }}</p>
     </div>
   </div>
 </template>

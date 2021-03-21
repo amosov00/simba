@@ -34,7 +34,7 @@ export default (context) => {
       updated_at: 'Обновлено в',
       applicant_data: 'Предоставлена информация о пользователе',
       identity: 'Предоставлено удостоверение личности',
-      selfie: 'Предоставлена фотография лица'
+      selfie: 'Предоставлена фотография лица',
     },
     footer: {
       tos: 'Условия использования',
@@ -390,18 +390,18 @@ export default (context) => {
     verify: {
       'You need to verify your identity': 'Подтвердить вашу личность',
       oneItem: 'Необходимо для расширения ежедневного лимита на покупку / продажу до 2 BTC.',
-      twoItem: 'Если вы потеряете доступ к кошельку, мы сможем идентифицировать вас по указанным данным и помочь восстановить доступ к активам.',
-      'we will be able to identify you by the specified data' : 'мы сможем идентифицировать вас по указанным данным',
-      'A secure connection has been established, you can start testing': 'Безопасное соединение установлено, можно начинать проверку',
+      twoItem:
+        'Если вы потеряете доступ к кошельку, мы сможем идентифицировать вас по указанным данным и помочь восстановить доступ к активам.',
+      'we will be able to identify you by the specified data': 'мы сможем идентифицировать вас по указанным данным',
+      'A secure connection has been established, you can start testing':
+        'Безопасное соединение установлено, можно начинать проверку',
       'To be tested': 'Пройти проверку',
       confirmation: 'Подтверждение',
       'of the document': 'документов',
       daily: 'ежедневно',
-      lifetime: 'за всё время'
+      lifetime: 'за всё время',
     },
-    errors: {
-
-    }
+    errors: {},
   }
 
   return new Promise(function (resolve) {

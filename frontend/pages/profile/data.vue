@@ -42,7 +42,7 @@ export default {
       } else if (this.limits.btc_limit === 2) {
         return this.$t('profile.twoTier')
       }
-    }
+    },
   },
   methods: {},
 }
