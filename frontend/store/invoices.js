@@ -23,9 +23,8 @@ export const mutations = {
 export const actions = {
   async createInvoice({}, data) {
     return await this.$axios
-      .post('/invoices/', { invoice_type: data })
+      .post('/invoices/', data)
       .then((res) => {
-        //Toast.open({message: 'Transaction created!', type: 'is-primary'});
         return res.data
       })
       .catch((_) => {
@@ -38,20 +37,12 @@ export const actions = {
   },
 
   async updateInvoice({}, data) {
-    let data_to_send = {
-      target_eth_address: data.eth_address,
-      btc_amount: data.btc_amount,
-      simba_amount: data.simba_amount,
-    }
-
-    if (data.btc_address) {
-      data_to_send['target_btc_address'] = data.btc_address
-    }
+    let sendData = {...data}
+    delete sendData.id
 
     return await this.$axios
-      .put(`/invoices/${data.id}/`, data_to_send)
+      .put(`/invoices/${data.id}/`, sendData)
       .then((res) => {
-        //Toast.open({message: 'Transaction updated!', type: 'is-primary'});
         return res.data
       })
       .catch((_) => {

@@ -1,12 +1,9 @@
 export default {
   methods: {
     truncateHash(hash, fromStart = 6, fromEnd = 12) {
-      if (!hash) {
-        return ''
-      } else if (typeof hash !== 'string') {
+      if (!hash || typeof hash !== 'string') {
         return ''
       }
-
       return `${hash.substring(0, fromStart)}...${hash.substring(hash.length - fromEnd)}`
     },
     findEthTransactionByEvent(invoice, eventName) {
@@ -14,13 +11,28 @@ export default {
         return el.event === eventName
       })
     },
+    ethTxByEvent(txs, event) {
+      return txs.find(i => i.event === event)
+    },
+    invoiceEthTxTransfer: (invoice) => {
+      let filtered = invoice ? invoice.eth_txs.filter(i => i.event === "Transfer") : []
+      return filtered.length > 0 ? filtered[0] : null
+    },
+    invoiceEthTxRedeem: (invoice) => {
+      let filtered = invoice ? invoice.eth_txs.filter(i => i.event === "OnRedeemed") : []
+      return filtered.length > 0 ? filtered[0] : null
+    },
+    invoiceEthTxIssue: (invoice) => {
+      let filtered = invoice ? invoice.eth_txs.filter(i => i.event === "OnIssued") : []
+      return filtered.length > 0 ? filtered[0] : null
+    },
     getBlockchainLink(hash, hashType, currency) {
-      const isProd = process.env.NODE_ENV === 'production'
+      const {isProduction} = this.$config
 
       let eth_start_link
       let btc_start_link
 
-      if (isProd) {
+      if (isProduction) {
         // Prod
         if (hashType === 'tx') {
           // Transaction

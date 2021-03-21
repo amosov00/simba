@@ -110,15 +110,13 @@ class InvoiceCRUD(BaseMongoCRUD):
         if invoice["invoice_type"] == InvoiceType.BUY:
             payload = payload.dict(exclude={"target_btc_address"}, exclude_unset=True)
         elif invoice["invoice_type"] == InvoiceType.SELL:
-            payload = payload.dict(exclude_none=True)
+            payload = payload.dict(exclude_unset=True)
 
-        modified_count = (
-            await cls.update_one(
-                query={"user_id": user.id, "_id": invoice["_id"]},
-                payload=payload,
-            )
-        ).modified_count
-        return bool(modified_count)
+        await cls.update_one(
+            query={"user_id": user.id, "_id": invoice["_id"]},
+            payload=payload,
+        )
+        return True
 
     @classmethod
     async def update_invoice_not_safe(

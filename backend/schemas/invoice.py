@@ -105,8 +105,8 @@ class InvoiceUpdate(BaseModel):
     target_eth_address: Optional[str] = Field(default=None, description="Address which will be scanned")
     target_btc_address: Optional[str] = Field(default=None, description="Address which will be scanned")
 
-    btc_amount: Union[int, DecimalPydantic] = Field(..., description="Planned amount to receive / send", gt=0)
-    simba_amount: Union[int, DecimalPydantic] = Field(..., description="Planned amount to receive / send", gt=0)
+    btc_amount: Union[int, DecimalPydantic] = Field(..., description="Planned amount to receive / send", ge=0)
+    simba_amount: Union[int, DecimalPydantic] = Field(..., description="Planned amount to receive / send", ge=0)
 
     _validate_target_btc_address = validator("target_btc_address", allow_reuse=True)(validate_btc_address)
     _validate_target_eth_address = validator("target_eth_address", allow_reuse=True)(validate_eth_address)

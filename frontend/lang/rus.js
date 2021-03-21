@@ -41,6 +41,7 @@ export default (context) => {
     },
     exchange: {
       update: 'обновите',
+      upgradeTier2: 'Обновить до 2 уровня',
       Please : 'Пожалуйста',
       'Above your limit': 'Введённая сумма привышает лимит в',
       'your verification level': 'ваш уровень верификации',
@@ -69,6 +70,7 @@ export default (context) => {
       choose_btc_wallet: { p1: 'Выберите BTC кошелек', p2: 'для вывода' },
       choose_eth_wallet: { p1: 'Выберите ETH кошелек', p2: 'для продажи SIMBA' },
       choose_btc_wallet_error: 'Пожалуйста выберите BTC кошелек',
+      choose_eth_wallet_error: 'Пожалуйста выберите ETH кошелек',
       received_payment: 'Получен платеж',
       transaction_hash: 'Хеш транзакции',
       confirms: 'Подтверждений',
@@ -96,7 +98,10 @@ export default (context) => {
       send_simba_now: 'Отправить SIMBA сейчас',
       applied_fee: 'Комиссия',
       fee_in_simba: '(взымается в SIMBA)',
-      or: 'или'
+      or: 'или',
+      suspended_title: "Приостановлена, ваш лимит был превышен",
+      suspended_help_text: "не может быть отправлено, пожалуйста повысти ваш уровень верификации",
+      contact_support: "Поддержка",
     },
     dropdown: {
       bill_details: 'Реквизиты',

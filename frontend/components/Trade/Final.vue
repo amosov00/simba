@@ -1,7 +1,7 @@
 <template lang="pug">
   div
     div.has-text-success.is-size-5.has-text-weight-bold {{$t('exchange.success')}}
-    div.mt-4(v-if="isBuy")
+    div.mt-4(v-if="isBuyInvoice")
       div.is-size-5
         span.has-text-weight-bold {{ numberWithCommas(tradeData.simba_issued - 50000) }} SIMBA
         =' '
@@ -27,7 +27,7 @@
           =' '
           a(:href="getBlockchainLink(redeemTxHash, 'tx', 'eth')" target="_blank").link {{ redeemTxHash }}
     div.mt-4
-      a(href="/exchange/buysell?op=buy" v-if="isBuy").btn {{$t('exchange.buy_more')}}
+      a(href="/exchange/buysell?op=buy" v-if="isBuyInvoice").btn {{$t('exchange.buy_more')}}
       a(href="/exchange/buysell?op=sell" v-else).btn {{$t('exchange.sell_more')}}
 </template>
 

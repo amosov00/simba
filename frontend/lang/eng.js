@@ -41,6 +41,7 @@ export default (context) => {
     },
     exchange: {
       update: 'update',
+      upgradeTier2: 'Upgrade TIER 2',
       Please : 'Please',
       'Above your limit': 'Above your limit',
       'your verification level': 'your verification level',
@@ -67,15 +68,17 @@ export default (context) => {
       status: 'Status',
       received_payment: 'Received payment',
       sent_payment: 'Payment sent',
+      sent_payment_simba: 'is beeing issuing',
       choose_btc_wallet: { p1: 'Choose BTC wallet', p2: 'to get coins after redeem' },
       choose_eth_wallet: { p1: 'Choose ETH wallet', p2: 'to sell SIMBA' },
       choose_btc_wallet_error: 'Please choose a BTC wallet',
-      transaction_hash: 'BTC payout',
+      choose_eth_wallet_error: 'Please choose a ETH wallet',
+      transaction_hash: 'Transaction hash',
       confirms: 'Confirmations',
       payment_confirmation_buy:
         'As soon as network get 3 confirmations, SIMBA tokens will be issued to your ETH address.',
       payment_confirmation_sell:
-        'As soon as network get {min_confirms} confirmation(s), BTC will be sent to your address.',
+        'As soon as network get 3 confirmation(s), BTC will be sent to your address.',
       statuses: {
         completed: 'Completed',
         paid: 'Paid',
@@ -96,7 +99,10 @@ export default (context) => {
       send_simba_now: 'Send SIMBA now',
       applied_fee: 'Applied fee',
       fee_in_simba: '(charged in SIMBA)',
-      or: 'or'
+      or: 'or',
+      suspended_title: "Suspended, your limit is exceeded",
+      suspended_help_text: "cannot be send, please upgrade verification level",
+      contact_support: "Contact support",
     },
     dropdown: {
       bill_details: 'Bill details',

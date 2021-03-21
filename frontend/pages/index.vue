@@ -22,9 +22,9 @@ export default {
   name: 'index',
   layout: 'main',
   components: {Login2FA},
-  middleware({store, redirect}) {
-    if (store.state.user) {
-      redirect('/exchange/')
+  async middleware({store, redirect}) {
+    if (store.getters.user) {
+      await redirect('/exchange/')
     }
   },
   data() {
@@ -43,6 +43,7 @@ export default {
         password: this.password,
       })
       let resp = await this.$authLogin(this.email, this.password)
+      console.log(resp)
 
       if (!resp) {
         this.$buefy.toast.open({

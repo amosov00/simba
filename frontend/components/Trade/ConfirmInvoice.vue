@@ -1,21 +1,23 @@
 <template lang="pug">
   div.mr-10
-    h3.text-large.has-text-weight-bold {{$t('exchange.cr_payment_bill')}} {{BTCtoUSDT}}
+    h3.text-large.has-text-weight-bold {{$t('exchange.cr_payment_bill')}}
     div.is-flex.mt-2.align-items-center.space-between
-      div.is-flex.align-items-center(:class="{ 'flex-row-reverse': isBuy}")
+      div.is-flex.align-items-center(:class="{ 'flex-row-reverse': isBuyInvoice}")
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
           input(v-model="usdt" type="text" :disabled="true").smb-input
         span.mr-2.ml-2
           | {{$t('exchange.or')}}
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
-          input(v-model="simba" type="text" @input="convert" :disabled="btn_loading").smb-input
+          input(v-model="simba" type="text" @input="convert" :disabled="loading").smb-input
         span.mr-2.ml-2
           | =
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
-          input(v-model="btc" type="text" @input="convertBTCtoSimba($event)" maxlength="10" :disabled="btn_loading").smb-input
-      b-button.btn(@click="confirm" :loading="btn_loading" :disabled="!accepted_terms") {{$t('exchange.create')}}
+          input(v-model="btc" type="text" @input="convertBTCtoSimba($event)" maxlength="10" :disabled="loading").smb-input
+
+      n-link.btn(v-if="beyondLimit" to="/profile/verification/") {{$t('exchange.upgradeTier2')}}
+      b-button.btn(v-else @click="confirm" :loading="loading" :disabled="!termsAccepted || error") {{$t('exchange.create')}}
     div.is-flex.space-between
-      div.is-flex.has-text-centered(:class="{ 'flex-row-reverse': isBuy, 'justify-content-end': isBuy}")
+      div.is-flex.has-text-centered(:class="{ 'flex-row-reverse': isBuyInvoice, 'justify-content-end': isBuyInvoice}")
         div.smb-input-wrapper.mt-2 USDT
         span.mr-4
         div.smb-input-wrapper.mt-2 SIMBA
@@ -23,51 +25,44 @@
         div.smb-input-wrapper.mt-2 BTC
       div
         ValidationProvider(:rules="{ required: { allowFalse: false } }" v-slot="{ errors }" :name="$i18n.t('auth.terms_of_agreement')" tag="div").mt-2
-          b-checkbox(v-model="accepted_terms" :disabled="btn_loading").checkbox-fix
+          b-checkbox(v-model="termsAccepted" :disabled="loading").checkbox-fix
             span {{$t('auth.i_accept')}}
             =' '
             a(href="https://simba.storage/terms-of-use.pdf" target="_blank" rel="noreferrer noopener").link {{$i18n.t('auth.terms_of_agreement')}}
           span.validaton-error {{ errors[0] }}
-    div.mt-4 {{usedTranslate}} BTC / {{limitTranslate}} BTC
+    div.mt-4 {{btcUsed}} BTC / {{btcLimit}} BTC
     div(v-if="!error")
-      div(v-if="isBuy").mt-2.has-text-grey-light {{$t('exchange.applied_fee')}} {{ fee }} BTC {{$t('exchange.fee_in_simba')}}
+      div(v-if="isBuyInvoice").mt-2.has-text-grey-light {{$t('exchange.applied_fee')}} {{ fee }} BTC {{$t('exchange.fee_in_simba')}}
       div(v-else).mt-2.has-text-grey-light {{$t('exchange.applied_fee')}} = {{ (+fee * 100000000) }} SIMBA
     div(v-if="error").error.has-text-danger.mt-2 {{ $t('exchange.amount_err') }} 200,000 SIMBA
     div(v-if="beyondLimit").error.has-text-danger.mt-2
-      | {{$t('exchange["Above your limit"]')}} {{limitTranslate}} BTC. {{$t('exchange.Please')}},
-      a  {{$t('exchange.update')}}
+      | {{$t('exchange["Above your limit"]')}} {{btcLimit}} BTC. {{$t('exchange.Please')}},
+      n-link(to="/profile/verification/")  {{$t('exchange.update')}}
       |  {{$t('exchange["your verification level"]')}}.
 </template>
 
 <script>
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex'
 
-import { ValidationProvider } from 'vee-validate'
-import {InvoiceTypeSlug} from "~/consts";
+import {ValidationProvider} from 'vee-validate'
+import {InvoiceTypeSlug, InvoiceTypeTextToEnum} from "~/consts";
 //import {Money} from 'v-money'
 
 export default {
   name: 'trade-confirm-invoice',
 
-  components: { ValidationProvider },
+  components: {ValidationProvider},
 
   data: () => ({
     InvoiceTypeSlug,
-    accepted_terms: false,
+    termsAccepted: false,
     isConverting: false,
     error: false,
     btc: 0.0025,
     usdt: 0,
     simba: 200000,
     fee: 0.00055,
-    btn_loading: false,
-    money: {
-      thousands: ' ',
-      precision: 0,
-      masked: false,
-    },
-    invoice_id: '',
-    check_btc_address_interval: null,
+    loading: false,
   }),
 
   async mounted() {
@@ -78,55 +73,44 @@ export default {
       this.btc = 0.0015
       this.simba = 200000
     }
-    this.usdt = (this.btc * this.limits.BTCUSD).toFixed(2).replace(/.$/,'')
   },
 
   async created() {
-    await this.$store.dispatch('exchange/fetchLimits')
+    await this.fetchLimits()
+    await this.fetchCurrencyRate()
+
+    this.usdt = (this.btc * this.currencyRate.BTCUSD).toFixed(2)
   },
 
   computed: {
-    ...mapState("exchange", ["operation", "limits"]),
-
-    isBuy() {
-      return this.operation === this.InvoiceTypeSlug.BUY
-    },
+    ...mapGetters('exchange', ['isBuyInvoice']),
+    ...mapState('exchange', ['invoice', 'invoiceId', 'operation', 'limits', 'currencyRate']),
+    ...mapState(['metamaskEthAddress']),
 
     beyondLimit() {
-      const limit = (this.limits.usd_limit / this.limits.BTCUSD) - (this.limits.usd_used / this.limits.BTCUSD)
-      return this.btc > limit
+      const {btc_limit, btc_used} = this.limits
+      return this.btc * 10 ** 8 + btc_used > btc_limit
     },
 
-    usedTranslate() {
-      const result = this.limits.usd_used / this.limits.BTCUSD
-      if (Number.isInteger(result)) {
-        return result
-      } else {
-        return result.toFixed(6).replace(/.$/,'')
-      }
+    btcUsed() {
+      return this.limits.btc_used ? (this.limits.btc_used / 10 ** 8).toFixed(6) : 0
     },
-
-    limitTranslate() {
-      const result = this.limits.usd_limit / this.limits.BTCUSD
-      if (Number.isInteger(result)) {
-        return result
-      } else {
-        return result.toFixed(6).replace(/.$/,'')
-      }
-    },
-
-    tradeData() {
-      return this.$store.getters['exchange/tradeData']
+    btcLimit() {
+      return this.limits.btc_limit ? (this.limits.btc_limit / 10 ** 8) : 0
     },
   },
 
   watch: {
     btc() {
-      this.usdt = (this.btc * this.limits.BTCUSD).toFixed(2).replace(/.$/,'')
-    }
+      this.usdt = (this.btc * this.currencyRate.BTCUSD).toFixed(2)
+    },
   },
 
   methods: {
+    ...mapMutations("exchange", ["setInvoiceId", "setNextStep"]),
+    ...mapActions("exchange", ["fetchLimits", "fetchCurrencyRate"]),
+    ...mapActions("invoices", ["createInvoice", "updateInvoice", "confirmInvoice"]),
+
     async confirm() {
       if (this.simba < 200000) {
         this.error = true
@@ -136,50 +120,33 @@ export default {
         return
       }
 
-      this.btn_loading = true
-      this.$store.commit('exchange/setTradeData', { prop: 'simba', value: this.simba })
-      this.$store.commit('exchange/setTradeData', { prop: 'btc', value: this.btc })
+      this.loading = true
 
-      // create transaction
-      let created_invoice = await this.$store.dispatch('invoices/createInvoice', this.tradeData.operation)
+      let updatedInvoice = await this.updateInvoice(this.isBuyInvoice ? {
+        id: this.invoiceId,
+        simba_amount: (this.btc * 10 ** 8).toFixed(0),
+        btc_amount: (this.btc * 10 ** 8).toFixed(0),
+      } : {
+        id: this.invoiceId,
+        simba_amount: this.simba.toFixed(0),
+        btc_amount: (this.btc * 10 ** 8).toFixed(0),
+      })
 
-      this.$store.commit('exchange/setTradeData', { prop: 'invoice_id', value: created_invoice._id })
-
-      if (this.isBuy) {
-        let data_for_update = {
-          id: created_invoice._id,
-          eth_address: this.tradeData.eth_address,
-          simba_amount: (this.tradeData.btc * 100000000).toFixed(0),
-          btc_amount: (this.tradeData.btc * 100000000).toFixed(0),
-        }
-
-        // Update invoice with amounts
-        let updated_invoice_res = await this.$store.dispatch('invoices/updateInvoice', data_for_update)
-
-        // Add invoice id to url, go to next step
-
-        this.btn_loading = false
-        if (updated_invoice_res) {
-          await this.$nuxt.$router.push({path: '/exchange/buysell', query: {id: created_invoice._id}})
-        }
-      } else {
-        let data_for_update = {
-          id: created_invoice._id,
-          btc_address: this.tradeData.btc_redeem_wallet,
-          eth_address: this.tradeData.eth_address,
-          simba_amount: this.tradeData.simba,
-          btc_amount: (this.tradeData.btc * 100000000).toFixed(0),
-        }
-        // Update invoice with amounts
-        let updated_invoice_res = await this.$store.dispatch('invoices/updateInvoice', data_for_update)
-        this.btn_loading = false
-
-        // Add invoice id to url, go to next step
-        if (updated_invoice_res) {
-          await this.$nuxt.$router.push({path: '/exchange/buysell', query: {id: created_invoice._id}})
-          //this.$parent.$emit('nextStep')
-        }
+      if (!updatedInvoice) {
+        this.loading = false
+        return
       }
+
+      let invoiceConfirmed = await this.confirmInvoice(this.invoiceId)
+
+      if (!invoiceConfirmed) {
+        this.loading = false
+        return
+      }
+
+      this.loading = false
+
+      await this.setNextStep("BillPayment")
     },
 
     checkMinimum() {
@@ -197,7 +164,7 @@ export default {
         this.btc = 0
       } else {
         if (res_in_btc > 0.0005) {
-          if (this.isBuy) {
+          if (this.isBuyInvoice) {
             this.btc = +parseFloat((res_in_btc + 0.0005).toFixed(8))
           } else {
             this.btc = +parseFloat((res_in_btc - 0.0005).toFixed(8))
@@ -225,7 +192,7 @@ export default {
         let simba = this.btc * 100000000
         let simba_with_fee = 0
 
-        if (this.isBuy) {
+        if (this.isBuyInvoice) {
           simba_with_fee = (simba - 50000).toFixed(0)
           this.fee = simba > 50000 ? 0.0005 : 0
         } else {

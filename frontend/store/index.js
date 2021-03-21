@@ -3,6 +3,7 @@ import {DialogProgrammatic as Dialog, ToastProgrammatic as Toast} from 'buefy'
 export const state = () => ({
   user: null,
   kyc: null,
+  metamaskEthAddress: '',
   contract: '',
   tradeData: {
     operation: 1,
@@ -28,6 +29,7 @@ export const mutations = {
   setTradeData: (state, payload) => {
     state.tradeData[payload.prop] = payload.value
   },
+  setMetamaskEthAddress: (state, payload) => state.metamaskEthAddress = payload,
   setTwoFactor: (state, payload) => (state.user.two_factor = payload),
   setSignedAddresses: (state, payload) => state.user.signed_addresses.push(payload),
   setLoginDataBuffer: (state, payload) => {
@@ -52,7 +54,17 @@ export const actions = {
 
   async addAddress({dispatch}, data) {
     if (data.type === 'eth') {
-      return await dispatch('metamask/createSignature', data)
+      try {
+        await dispatch('metamask/createSignature', data)
+        return true
+      } catch (e) {
+        Toast.open({
+            message: this.$i18n.t('wallet.failed_to_get_signature'),
+            type: 'is-danger',
+            duration: 6000,
+        })
+        return false
+      }
     } else {
       return this.$axios
         .post(`/account/btc-address/`, data)
@@ -62,19 +74,21 @@ export const actions = {
             message: this.$i18n.t('wallet.address_added'),
             type: 'is-primary',
           })
+          return true
         })
         .catch((_) => {
-          let error_msg = this.$i18n.t('wallet.address_failed_to_add')
-
+          let error
           if (this.getters.user.two_factor) {
-            error_msg = this.$i18n.t('wallet.address_failed_with_pin')
+            error = this.$i18n.t('wallet.address_failed_with_pin')
+          } else {
+            error = this.$i18n.t('wallet.address_failed_to_add')
           }
-
           Toast.open({
-            message: error_msg,
+            message: error,
             type: 'is-danger',
             duration: 6000,
           })
+          return false
         })
     }
   },

@@ -1,29 +1,28 @@
-export const state = () => ({
-  invoice: null,
-  invoice_id: null,
-  currentStepComponent: '',
-  currentStepIndicatorIndex: 1,
+const initialState = {
+  invoice: {},
+  invoiceId: null,
+  fetchInvoiceDataLoop: true,
+  currentStepComponent: 'ChooseWallet',
+  currentStepIndicatorIndex: 0,
   stepComponents: [],
+  operation: "buy",
+  limits: {},
+  currencyRate: {},
+  addresses: {
+    eth: null,
+    btc: null,
+  }, // eth and btc address
+  adminEthHash: null,
+}
 
-
-  operation: 1,
-  eth_address: '',
-  btc_redeem_wallet: '',
-  admin_eth_address: '',
-  simba: 0,
-  btc: 0,
-  btc_amount_proceeded: 0,
-  target_eth: '',
-  tx_hash: '',
-  tx_hash_redeem: '',
-  simba_issued: 0,
-  eth_txs: [],
-  limits: {}
-})
+export const state = () => {
+  return Object.assign({}, initialState)
+}
 
 export const getters = {
   tradeData: (s) => s,
   limits: (s) => s.limits,
+  isBuyInvoice: (s) => s.operation === 'buy',
   ethTxByEvent: (s) => (event) => {
     let filtered = s.eth_txs.filter((i) => i.event === event)
     return filtered.length > 0 ? filtered[0] : null
@@ -34,35 +33,53 @@ export const mutations = {
   setTradeData: (state, payload) => {
     state[payload.prop] = payload.value
   },
+  setOperation: (state, payload) => state.operation = payload,
+  setFetchInvoiceDataLoop: (state, payload) => state.fetchInvoiceDataLoop = payload,
+  setInvoice: (state, payload) => state.invoice = payload,
+  setInvoiceId: (state, payload) => state.invoiceId = payload,
+  setCurrentStepComponent: (state, payload) => state.currentStepComponent = payload,
+  setCurrentStepIndicatorIndex: (state, payload) => state.currentStepIndicatorIndex = payload,
+  setAddresses: (state, payload) => state.addresses = payload,
+  setAdminEthHash: (state, payload) => state.adminEthHash = payload,
+  setNextStep: (state, payload) => {
+    state.currentStepComponent = payload
+    state.currentStepIndicatorIndex += 1
+  },
   setLimits: (state, payload) => {
     state.limits = payload
   },
-  setRate: (state, payload) => {
-    state.limits = {
-      ...state.limits,
-      ...payload
-    }
+  setCurrencyRate: (state, payload) => {
+    state.currencyRate = payload
   },
   clearState: (state) => {
-    state.invoice = null
-    state.invoice_id = null
-    state.operation = null
-  }
+    state = Object.assign(state, initialState)
+  },
+
 }
 
 export const actions = {
   fetchAdminEthAddress({ commit }) {
-    return this.$axios.get('/meta/eth/admin-address/').then((res) => {
-      commit('setTradeData', { prop: 'admin_eth_address', value: res.data.address })
-    })
-  },
-  fetchLimits({commit}) {
-    this.$axios.get('/account/kyc/limit/').then((res) => {
-      commit('setLimits', res.data)
-    }).then(()=>{
-      this.$axios.get('/meta/currency-rate/').then((res) => {
-        commit('setRate', res.data)
+    return this.$axios
+      .get('/meta/eth/admin-address/')
+      .then((res) => {
+        commit("setAdminEthHash", res.data.address)
       })
-    })
-  }
+      .catch(() => false)
+  },
+  async fetchLimits({commit}) {
+    return this.$axios
+      .get('/account/kyc/limit/')
+      .then((res) => {
+        commit("setLimits", res.data)
+      })
+      .catch(() => false)
+  },
+  async fetchCurrencyRate({commit}) {
+    return this.$axios
+      .get('/meta/currency-rate/')
+      .then((res) => {
+        commit("setCurrencyRate", res.data)
+      })
+      .catch(() => false)
+  },
 }

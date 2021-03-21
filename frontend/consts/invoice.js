@@ -20,7 +20,7 @@ export const InvoiceTypeEnum = {
 }
 
 
-export const typeToText = (invoiceType) => {
+export const InvoiceTypeToText = (invoiceType) => {
   switch (invoiceType) {
     case InvoiceTypeEnum.BUY:
       return "buy"
@@ -29,7 +29,12 @@ export const typeToText = (invoiceType) => {
   }
 }
 
-export const statusToColor = (status) => {
+export const InvoiceTypeTextToEnum = {
+  [InvoiceTypeSlug.BUY]: 1,
+  [InvoiceTypeSlug.SELL]: 2,
+}
+
+export const InvoiceStatusToColor = (status) => {
   switch (status) {
     case InvoiceStatus.CREATED:
       return '#0065a9'

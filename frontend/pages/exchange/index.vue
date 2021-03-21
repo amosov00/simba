@@ -11,7 +11,7 @@
           div {{ item._id }}
           div {{ simbaFormat(item.simba_amount) }}
           div {{ (new Date(item.created_at)).toLocaleString() }}
-          div {{ $t(`exchange.${typeToText(item.invoice_type)}`)  }}
+          div {{ $t(`exchange.${InvoiceTypeToText(item.invoice_type)}`)  }}
           div(v-if="!getStatus(item).includes(':')") {{ $t(`exchange.statuses.${getStatus(item)}`) }}
           div(v-else) {{ getStatus(item) }}
       div.has-text-centered
@@ -22,7 +22,7 @@
 import moment from 'moment'
 import {mapGetters, mapActions} from 'vuex'
 import formatCurrency from '~/mixins/formatCurrency'
-import {typeToText} from "~/consts";
+import {InvoiceTypeToText} from "~/consts";
 
 export default {
   name: 'exchange-index',
@@ -44,7 +44,7 @@ export default {
 
   methods: {
     ...mapActions({fetchInvoices: "invoices/fetchInvoices"}),
-    typeToText,
+    InvoiceTypeToText,
     getStatus(item) {
       if (item.status === 'waiting' || item.status === 'processing' || item.status === 'created') {
         let current = +Date.now()
@@ -83,9 +83,7 @@ export default {
   },
 
   async created() {
-    if (this.invoicesReverse.length === 0) {
-      await this.fetchInvoices()
-    }
+    await this.fetchInvoices()
   },
 }
 </script>
