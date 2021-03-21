@@ -3,7 +3,7 @@
     div.main-content
       div.position-relative
         n-link(to="/exchange/")
-          img(src="~assets/images/back.svg").back-btn
+          img(:src="require('~/assets/images/back.svg')").back-btn
       div.steps.is-flex.align-items-center
         div.operation.mr-4(v-if="operation") {{ $t(`exchange.${operation.toLowerCase()}`) }}
         span(v-for="i in generateSteps()" :key="i" :class="{ 'steps-item--failed': isFailStep(i), 'steps-item--active': isActiveStep(i)}").steps-item {{ i+1 }}
@@ -16,7 +16,7 @@ import _ from 'lodash';
 import {mapActions, mapMutations, mapState} from 'vuex'
 
 import {
-  BillPayment,
+  Waiting,
   Cancelled,
   ChooseWallet,
   Completed,
@@ -33,7 +33,7 @@ export default {
   components: {
     ChooseWallet, // step 1
     ConfirmInvoice, // step 2
-    BillPayment, // step 3
+    Waiting, // step 3
     WatchingIncomingTransactions, // step 4
     WatchingOutcomingTransactions, // step 5
     Completed, // step 6
@@ -49,13 +49,6 @@ export default {
       stepFail: null,
       loading: false,
       stepsAmount: 6,
-      tradeData: {
-        ethAddress: '',
-        steps: {
-          current: 'ChooseWallet',
-          list: ['ChooseWallet', 'ConfirmInvoice', 'BillPayment', 'Status', 'Final'],
-        },
-      },
     }
   },
 
@@ -67,7 +60,6 @@ export default {
     ...mapActions("invoices", ["fetchSingleInvoice"]),
     ...mapMutations(["setMetamaskEthAddress"]),
     ...mapMutations("exchange", [
-      "setTradeData",
       "setInvoice",
       "setInvoiceId",
       "setCurrentStepComponent",
@@ -76,17 +68,11 @@ export default {
       "setFetchInvoiceDataLoop",
       "setOperation",
     ]),
-    typeToText: InvoiceTypeToText,
+    InvoiceTypeToText,
     generateSteps() {
       return _.range(this.stepsAmount)
     },
-    nextStep() {
-      let {steps} = this.tradeData
-      this.tradeData.steps.current = steps.list[steps.list.indexOf(steps.current) + 1]
-    },
-
     isFailStep(i) {
-
       return [this.InvoiceStatus.CANCELLED, this.InvoiceStatus.SUSPENDED].includes(this.invoice?.status) && i === this.stepsAmount - 1
     },
     isActiveStep(i) {
@@ -101,7 +87,7 @@ export default {
 
       if (invoice) {
         this.setInvoice(invoice)
-        this.setOperation(this.typeToText(invoice.invoice_type))
+        this.setOperation(this.InvoiceTypeToText(invoice.invoice_type))
         switch (invoice.status) {
           case InvoiceStatus.CREATED:
             this.setCurrentStepComponent("ConfirmInvoice")
@@ -109,7 +95,7 @@ export default {
             this.setFetchInvoiceDataLoop(false)
             break;
           case InvoiceStatus.WAITING:
-            this.setCurrentStepComponent("BillPayment")
+            this.setCurrentStepComponent("Waiting")
             this.setCurrentStepIndicatorIndex(2)
             this.setFetchInvoiceDataLoop(true)
             break;
@@ -142,6 +128,10 @@ export default {
             break
         }
       }
+      else {
+        this.$buefy.toast.open({message: 'Error: invoice not found', type: 'is-danger'})
+        await this.$nuxt.context.redirect('/exchange/')
+      }
 
       this.loading = false
     },
@@ -168,90 +158,6 @@ export default {
     clearInterval(this.interval)
     this.interval = null
     this.clearState()
-  },
-
-
-  async hello() {
-    // if (this.$nuxt.$route.query['op']) {
-    //   if (this.$nuxt.$route.query['op'] === 'buy') {
-    //     this.operation = 'Buy'
-    //     this.$store.commit('exchange/setTradeData', { prop: 'operation', value: 1 })
-    //   } else {
-    //     this.operation = 'Sell'
-    //     this.$store.commit('exchange/setTradeData', { prop: 'operation', value: 2 })
-    //     this.tradeData.steps.list.splice(3, 0, 'SimbaRecieved')
-    //   }
-    // }
-
-    // Handle url with invoice id
-    if (this.$nuxt.$route.query['id']) {
-      let single_res = await this.$store.dispatch('invoices/fetchSingleInvoice', this.$nuxt.$route.query['id'])
-
-      this.$store.commit('exchange/setTradeData', {
-        prop: 'invoice_id',
-        value: this.$nuxt.$route.query['id'],
-      })
-
-      if (single_res) {
-        if (single_res.invoice_type === 1) {
-          this.operation = 'Buy'
-          this.$store.commit('exchange/setTradeData', {prop: 'operation', value: 1})
-        } else {
-          this.operation = 'Sell'
-          this.$store.commit('exchange/setTradeData', {prop: 'operation', value: 2})
-          this.tradeData.steps.list.splice(3, 0, 'SimbaRecieved')
-        }
-
-        if (single_res.status === 'waiting' || single_res.status === 'created') {
-          this.$store.commit('exchange/setTradeData', {prop: 'btc', value: single_res.btc_amount})
-          this.$store.commit('exchange/setTradeData', {prop: 'simba', value: single_res.simba_amount})
-          this.tradeData.steps.current = 'BillPayment'
-        } else if (single_res.status === 'processing') {
-          if (single_res.btc_txs.length > 0 && single_res.eth_txs.length > 0) {
-            this.tradeData.steps.current = 'Status'
-          } else if (single_res.eth_txs.length > 0) {
-            this.tradeData.steps.current = 'SimbaRecieved'
-          }
-        } else if (single_res.status === 'paid' || single_res.status === 'completed') {
-          this.$store.commit('exchange/setTradeData', {prop: 'eth_txs', value: single_res.eth_txs})
-          this.$store.commit('exchange/setTradeData', {prop: 'btc_txs', value: single_res.btc_txs})
-          if (single_res.invoice_type === 1) {
-            this.$store.commit('exchange/setTradeData', {
-              prop: 'btc_amount_proceeded',
-              value: single_res.btc_amount_proceeded,
-            })
-            this.$store.commit('exchange/setTradeData', {prop: 'target_eth', value: single_res.target_eth_address})
-            this.$store.commit('exchange/setTradeData', {prop: 'tx_hash', value: single_res.eth_tx_hashes[0] || ''})
-            this.$store.commit('exchange/setTradeData', {
-              prop: 'simba_issued',
-              value: single_res.btc_amount_proceeded,
-            })
-          } else {
-            this.$store.commit('exchange/setTradeData', {
-              prop: 'simba_issued',
-              value: single_res.btc_amount_proceeded,
-            })
-            this.$store.commit('exchange/setTradeData', {
-              prop: 'btc_redeem_wallet',
-              value: single_res.target_btc_address,
-            })
-            this.$store.commit('exchange/setTradeData', {prop: 'tx_hash', value: single_res.btc_txs[0].hash})
-            this.$store.commit('exchange/setTradeData', {
-              prop: 'tx_hash_redeem',
-              value: single_res.eth_txs[0]?.transactionHash || single_res.eth_tx_hashes[0],
-            })
-          }
-          this.tradeData.steps.current = 'Final'
-        } else if (single_res.status === 'cancelled') {
-          this.tradeData.steps.current = 'BillPayment'
-          /*this.$buefy.toast.open({message:'Invoice cancelled!', type: 'is-danger'})
-            this.$nuxt.context.redirect('/exchange/')*/
-        }
-      } else {
-        this.$buefy.toast.open({message: 'Error: invoice not found', type: 'is-danger'})
-        this.$nuxt.context.redirect('/exchange/')
-      }
-    }
   },
 }
 </script>

@@ -22,7 +22,7 @@
 import moment from 'moment'
 import {mapGetters, mapActions} from 'vuex'
 import formatCurrency from '~/mixins/formatCurrency'
-import {InvoiceTypeToText} from "~/consts";
+import {InvoiceTypeToText, InvoiceStatus} from "~/consts";
 
 export default {
   name: 'exchange-index',
@@ -46,7 +46,7 @@ export default {
     ...mapActions({fetchInvoices: "invoices/fetchInvoices"}),
     InvoiceTypeToText,
     getStatus(item) {
-      if (item.status === 'waiting' || item.status === 'processing' || item.status === 'created') {
+      if ([InvoiceStatus.CREATED, InvoiceStatus.WAITING, InvoiceStatus.PROCESSING, InvoiceStatus.PAID].includes(item.status)) {
         let current = +Date.now()
         let dt = +moment.utc(item.created_at).toDate()
 
@@ -55,7 +55,6 @@ export default {
         let diff = plus2hours - current
 
         if (diff < 0) {
-          //return 'expired'
           return '00:00:00'
         }
 
@@ -70,8 +69,6 @@ export default {
         }
 
         return `${remain.hours()}:${twoDigits(remain.minutes())}:${twoDigits(remain.seconds())}`
-      } else if (item.status === 'cancelled') {
-        return 'expired'
       }
 
       return item.status

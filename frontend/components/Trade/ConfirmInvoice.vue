@@ -146,7 +146,7 @@ export default {
 
       this.loading = false
 
-      await this.setNextStep("BillPayment")
+      await this.setNextStep("Waiting")
     },
 
     checkMinimum() {

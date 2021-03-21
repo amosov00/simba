@@ -1,7 +1,7 @@
 import hmac
 from datetime import datetime, timedelta
 from hashlib import sha1
-from typing import Optional, Literal
+from typing import Optional, Literal, Union
 
 from bson import ObjectId
 from fastapi import Request
@@ -12,27 +12,32 @@ from database.crud import UserKYCCRUD, InvoiceCRUD
 from schemas import (
     UserKYCInDB,
     UserKYC,
-    User,
     UserKYCVerificationLimit,
     UserKYCDocsStatus,
     InvoiceStatus,
     InvoiceType,
+    ObjectIdPydantic,
 )
 
 __all__ = ["KYCController"]
 
 
 class KYCController:
-    def __init__(self, user: User = None, kyc: UserKYCInDB = None):
+    def __init__(self, user_id: Union[ObjectId, ObjectIdPydantic], kyc: UserKYCInDB = None):
+        if not isinstance(user_id, ObjectId):
+            user_id = ObjectId(user_id)
+
         self.api_wrapper = SumSubWrapper()
-        self.user: Optional[User] = user
+        self.user_id: ObjectId = user_id
         self.kyc_instance: Optional[UserKYCInDB] = kyc
 
     @classmethod
-    async def init(cls, user: User):
-        kyc_instance = await UserKYCCRUD.find_one({"user_id": user.id})
-        kyc_instance = kyc_instance or {"user_id": user.id}
-        return cls(user, UserKYCInDB(**kyc_instance))
+    async def init(cls, user_id: Union[str, ObjectId, ObjectIdPydantic]):
+        if not isinstance(user_id, ObjectId):
+            user_id = ObjectId(user_id)
+
+        kyc_instance = await UserKYCCRUD.find_one({"user_id": user_id}) or {"user_id": user_id}
+        return cls(user_id, UserKYCInDB(**kyc_instance))
 
     @classmethod
     async def _generate_hashsum(cls, request: Request) -> str:
@@ -53,7 +58,7 @@ class KYCController:
         return instance
 
     async def get_access_token(self) -> str:
-        return await self.api_wrapper.get_access_token(str(self.user.id))
+        return await self.api_wrapper.get_access_token(str(self.user_id))
 
     def _get_verification_limit(self) -> int:
         return InvoiceVerificationLimits.LEVEL_2 \
@@ -64,8 +69,11 @@ class KYCController:
         cls,
         data_type: Literal["review_data", "status_data"],
         data: dict,
-        user: Optional[User] = None
+        user_id: Union[str, ObjectId] = None
     ) -> UserKYC:
+        if not data and user_id:
+            return UserKYC(**{"user_id": user_id})
+
         if data_type == "review_data":
             is_verified = data.get("reviewResult", {}).get("reviewAnswer") == "GREEN"
 
@@ -79,12 +87,12 @@ class KYCController:
             )
 
         else:
-            assert user, "user is requeired"
+            assert user_id, "user is requeired"
             docs_data = cls._prepare_docs_status(data["docs_status"])
             is_verified = data["applicant_status"].get("reviewResult", {}).get("reviewAnswer") == "GREEN"
 
             kyc = UserKYC(
-                user_id=user.id,
+                user_id=user_id, # noqa
                 applicant_id=data["applicant_status"].get("applicantId"),
                 docs_status=docs_data,
                 status=data["applicant_status"].get("reviewStatus"),
@@ -103,11 +111,11 @@ class KYCController:
             return None
 
         request_body = await request.json()
-        payload = cls._prepare_schema_data("review_data", await request.json()).dict(exclude_unset=True)
+        payload = cls._prepare_schema_data("review_data", await request.json(), user_id=self.user_id)
 
         await UserKYCCRUD.update_or_insert(
             query={"user_id": ObjectId(request_body["externalUserId"])},
-            payload=payload
+            payload=payload.dict(exclude_unset=True)
         )
 
         return True
@@ -121,7 +129,7 @@ class KYCController:
         # make query
         match_stage = {
             "$match": {
-                "user_id": self.user.id,
+                "user_id": self.user_id,
                 "status": {"$in": [InvoiceStatus.COMPLETED, InvoiceStatus.PROCESSING, InvoiceStatus.SUSPENDED]},
             }
         }
@@ -177,13 +185,14 @@ class KYCController:
                 return self.kyc_instance
 
         status_data = await self.api_wrapper.get_current_status(
-            applicant_id=str(self.user.id),
+            applicant_id=str(self.user_id),
             service_applicant_id=self.kyc_instance.applicant_id if self.kyc_instance else None
         )
-        payload = self._prepare_schema_data("status_data", status_data, user=self.user)
+
+        payload = self._prepare_schema_data("status_data", status_data, user_id=self.user_id)
 
         await UserKYCCRUD.update_or_insert(
-            {"user_id": self.user.id},
+            {"user_id": self.user_id},
             payload.dict(exclude_unset=True)
         )
 

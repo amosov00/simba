@@ -11,7 +11,9 @@ from core.mechanics import InvoiceMechanics, ReferralMechanics
 from core.mechanics.blockcypher_webhook import BlockCypherWebhookHandler
 from core.utils import to_objectid
 from database.crud import UserCRUD, InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD, MetaCRUD
-from schemas import InvoiceInDB, InvoiceExtended, InvoiceStatus, InvoiceType, MetaSlugs, ReferralTransactionUserID
+from schemas import (
+    InvoiceInDB, InvoiceExtended, InvoiceUpdateAdmin, InvoiceStatus, InvoiceType, MetaSlugs, ReferralTransactionUserID,
+)
 
 __all__ = ["invoices_router"]
 
@@ -54,6 +56,19 @@ async def admin_invoice_fetch_one(invoice_id: str = Path(...)):
         ]
     )
     return resp[0] if resp else Response(status_code=404)
+
+
+@invoices_router.put("/{invoice_id}/")
+async def admin_invoice_fetch_sst_tx_info(
+    invoice_id: str = Path(...),
+    payload: InvoiceUpdateAdmin = Body(...),
+):
+    await InvoiceCRUD.update_invoice_not_safe(
+        invoice_id=to_objectid(invoice_id),
+        payload=payload.dict(),
+        filtering_statuses=(InvoiceStatus.SUSPENDED,)
+    )
+    return True
 
 
 @invoices_router.get("/{invoice_id}/sst_transactions/", response_model=List[ReferralTransactionUserID])

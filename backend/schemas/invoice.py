@@ -21,6 +21,7 @@ __all__ = [
     "InvoiceInDB",
     "InvoiceExtended",
     "InvoiceTransactionManual",
+    "InvoiceUpdateAdmin",
     "INVOICE_MODEL_EXCLUDE_FIELDS",
 ]
 
@@ -115,3 +116,7 @@ class InvoiceUpdate(BaseModel):
 class InvoiceTransactionManual(BaseModel):
     btc_transaction_hash: str = None
     eth_transaction_hash: str = None
+
+
+class InvoiceUpdateAdmin(BaseModel):
+    status: Literal[InvoiceStatus.PROCESSING, InvoiceStatus.COMPLETED, InvoiceStatus.CANCELLED] = Field(...)  # noqa

@@ -43,7 +43,6 @@ export default {
         password: this.password,
       })
       let resp = await this.$authLogin(this.email, this.password)
-      console.log(resp)
 
       if (!resp) {
         this.$buefy.toast.open({

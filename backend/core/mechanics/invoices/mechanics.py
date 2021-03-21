@@ -126,7 +126,7 @@ class InvoiceMechanics(InvoiceValidation):
                 bool(new_transaction.block_height),
                 new_transaction.confirmations >= TRANSACTION_MIN_CONFIRMATIONS,
                 transaction_in_db.simba_tokens_issued is False if transaction_in_db else True,
-                self.invoice.status == InvoiceStatus.PROCESSING,
+                self.invoice.status == InvoiceStatus.PAID,
             ]
         ):
             self.invoice.status = InvoiceStatus.COMPLETED
@@ -267,6 +267,7 @@ class InvoiceMechanics(InvoiceValidation):
 
         btc_tx.invoice_id = self.invoice.id
         self.invoice.btc_amount_proceeded = btc_outcoming_with_fee
+        self.invoice.status = InvoiceStatus.PAID
         self.invoice.add_hash("btc", btc_tx.hash)
 
         await BTCTransactionCRUD.insert_one(btc_tx.dict())

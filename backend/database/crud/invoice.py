@@ -122,10 +122,15 @@ class InvoiceCRUD(BaseMongoCRUD):
     async def update_invoice_not_safe(
         cls,
         invoice_id: Union[ObjectId, ObjectIdPydantic],
-        user_id: Union[ObjectId, ObjectIdPydantic],
         payload: dict,
+        filtering_statuses: tuple = None
     ) -> bool:
-        return await super().update_one({"_id": invoice_id, "user_id": user_id}, payload)
+        query = {"_id": invoice_id, "user_id": user_id}
+
+        if filtering_statuses:
+            query.update({"status": {"$in": filtering_statuses}})
+
+        return await super().update_one(query, payload)
 
     @classmethod
     async def need_to_update(

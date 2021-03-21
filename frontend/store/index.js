@@ -5,12 +5,6 @@ export const state = () => ({
   kyc: null,
   metamaskEthAddress: '',
   contract: '',
-  tradeData: {
-    operation: 1,
-    eth_address: '',
-    simba: 0,
-    btc: 0,
-  },
   loginDataBuffer: {},
 })
 
@@ -26,9 +20,6 @@ export const mutations = {
   setKYC: (state, payload) => (state.kyc = payload),
   deleteUser: (state) => (state.user = null),
   setContract: (state, data) => (state.contract = data),
-  setTradeData: (state, payload) => {
-    state.tradeData[payload.prop] = payload.value
-  },
   setMetamaskEthAddress: (state, payload) => state.metamaskEthAddress = payload,
   setTwoFactor: (state, payload) => (state.user.two_factor = payload),
   setSignedAddresses: (state, payload) => state.user.signed_addresses.push(payload),

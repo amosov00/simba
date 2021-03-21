@@ -77,7 +77,7 @@ export default (context) => {
       payment_confirmation_buy:
         'Как только сеть получит 3 подтверждения, токены SIMBA будут отправлены на ваш ETH адрес.',
       payment_confirmation_sell:
-        'Как только сеть получит {min_confirms} подтверждение(-я), BTC будут отправлены на ваш адрес.',
+        'Как только сеть получит 3 подтверждения, BTC будут отправлены на ваш адрес.',
       statuses: {
         completed: 'Завершена',
         paid: 'Оплачена',
@@ -92,6 +92,7 @@ export default (context) => {
       error_updating_invoice: 'Произошла ошибка при обновлении инвойса',
       error_confirming_invoice: 'Произошла ошибка при подтверждении инвойса',
       bill_expired: 'Сделка просрочена',
+      cancelled_or_expired: 'отменена или просрочена',
       time_is_out: 'Время вышло',
       time_is_limited: 'Время на каждую сделку ограничено 2 часами.',
       simba_redemption: 'Вывод Simba',

@@ -37,7 +37,7 @@ class InvoiceValidation(CryptoValidation, InvoiceBase):
 
     async def _validate_verification_limits(self, btc_amount: int = 0) -> UserKYCVerificationLimit:
         verification_limit = await (
-            await KYCController.init(self.user)
+            await KYCController.init(self.user.id)
         ).calculate_verification_limit(btc_amount)
 
         if not verification_limit.is_allowed:

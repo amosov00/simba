@@ -93,6 +93,7 @@ export default (context) => {
       error_updating_invoice: 'Error updating invoice',
       error_confirming_invoice: 'Error confirming invoice',
       bill_expired: 'Bill expired',
+      cancelled_or_expired: 'cancelled or expired',
       time_is_out: 'Time is out',
       time_is_limited: 'Time for each bill is limited with 2 hours.',
       simba_redemption: 'Simba redemption',
@@ -101,7 +102,6 @@ export default (context) => {
       fee_in_simba: '(charged in SIMBA)',
       or: 'or',
       suspended_title: "Suspended, your limit is exceeded",
-      suspended_help_text: "cannot be send, please upgrade verification level",
       contact_support: "Contact support",
     },
     dropdown: {

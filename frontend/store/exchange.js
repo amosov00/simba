@@ -2,9 +2,8 @@ const initialState = {
   invoice: {},
   invoiceId: null,
   fetchInvoiceDataLoop: true,
-  currentStepComponent: 'ChooseWallet',
+  currentStepComponent: '',
   currentStepIndicatorIndex: 0,
-  stepComponents: [],
   operation: "buy",
   limits: {},
   currencyRate: {},
@@ -30,9 +29,6 @@ export const getters = {
 }
 
 export const mutations = {
-  setTradeData: (state, payload) => {
-    state[payload.prop] = payload.value
-  },
   setOperation: (state, payload) => state.operation = payload,
   setFetchInvoiceDataLoop: (state, payload) => state.fetchInvoiceDataLoop = payload,
   setInvoice: (state, payload) => state.invoice = payload,
