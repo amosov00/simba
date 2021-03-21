@@ -115,24 +115,24 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
 
 @router.get("/kyc/token/", response_model=UserKYCAccessTokenResponse)
 async def account_get_kyc_token(user: User = Depends(get_user)):
-    return {"token": await KYCController(user=user).get_access_token()}
+    return {"token": await KYCController(user_id=user.id).get_access_token()}
 
 
 @router.get("/kyc/limit/", response_model=UserKYCVerificationLimit)
 async def account_get_kyc_limits(user: User = Depends(get_user)):
-    kyc_instance = await KYCController.init(user)
+    kyc_instance = await KYCController.init(user.id)
     return await kyc_instance.calculate_verification_limit()
 
 
 @router.get("/kyc/status/", response_model=UserKYC, response_model_exclude={"review_data", "status_data"})
 async def account_get_kyc_status(user: User = Depends(get_user)):
-    kyc_instance = await KYCController.init(user)
+    kyc_instance = await KYCController.init(user.id)
     return await kyc_instance.get_status()
 
 
 @router.post("/kyc/status/")
 async def account_proceed_kyc_status(request: Request):
-    return await KYCController().proceed_webhook(request)
+    return await KYCController.proceed_webhook(request)
 
 
 @router.get("/referrals/", response_model=UserReferralsResponse)

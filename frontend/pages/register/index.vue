@@ -53,7 +53,7 @@ import { ValidationObserver, ValidationProvider } from 'vee-validate'
 export default {
   name: 'register',
   layout: 'main',
-  middleware({store, redirect}) {
+  middleware({ store, redirect }) {
     if (store.state.user) {
       redirect('/exchange/')
     }
@@ -84,7 +84,7 @@ export default {
     this.register_form.referral_id = this.$route.query.referral_id || this.$cookies.get('referral_id')
   },
   watch: {
-    '$i18n.locale': function() {
+    '$i18n.locale': function () {
       console.log(this.$refs.first_name.errors.length)
       setTimeout(() => {
         if (this.$refs.first_name.errors.length !== 0) {
@@ -109,7 +109,7 @@ export default {
           this.$refs.terms_of_agreement.validate()
         }
       })
-    }
+    },
   },
   methods: {
     async submit() {

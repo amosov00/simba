@@ -76,7 +76,11 @@ export default {
   },
   publicRuntimeConfig: {
     domain: process.env.DOMAIN || 'my.simba.storage',
-    sumsubURL: process.env.API_URL_SUMSUB
+    sumsubURL: process.env.API_URL_SUMSUB,
+    isProduction: process.env.NODE_ENV === 'production',
+  },
+  env: {
+    isProduction: process.env.NODE_ENV === 'production',
   },
   i18n: {
     strategy: 'no_prefix',

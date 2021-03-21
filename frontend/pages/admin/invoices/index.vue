@@ -18,7 +18,7 @@
                 b-table-column(field="status" :label="$i18n.t('su_invoices.invoice_type')"  width="100" sortable)
                     span {{ $t(`su_invoices.invoice_type_${props.row.invoice_type}`) }}
                 b-table-column(field="status" :label="$i18n.t('su_invoices.status')"  width="100" sortable)
-                    span(:style="{color: statusToColor(props.row.status)}") {{ $t(`exchange.statuses.${props.row.status}`) }}
+                    span(:style="{color: InvoiceStatusToColor(props.row.status)}") {{ $t(`exchange.statuses.${props.row.status}`) }}
                 b-table-column(field="btc_amount" label="BTC"  width="50" sortable) {{ btcFormat(props.row.btc_amount) }}
                 b-table-column(field="simba_amount" label="SIMBA"  width="50" sortable) {{ simbaFormat(props.row.simba_amount) }}
 
@@ -29,7 +29,7 @@ import formatDate from '~/mixins/formatDate'
 import formatCurrency from '~/mixins/formatCurrency'
 
 import _ from 'lodash'
-import { statusToColor } from '@/consts'
+import { InvoiceStatusToColor } from '@/consts'
 
 export default {
   name: 'invoices',
@@ -39,7 +39,7 @@ export default {
   watch: {
     async status(value) {
       await this.fetchPaidInvoiced(value)
-    }
+    },
   },
   async fetch() {
     if (this.adminInvoices.length <= 0) {
@@ -49,16 +49,16 @@ export default {
   data: () => ({
     searchQuery: '',
     options: [
-      {text: 'Созданные', value: 'created'},
-      {text: 'В ожидании', value: 'waiting'},
-      {text: 'В обработке', value: 'processing'},
-      {text: 'Оплаченые', value: 'paid'},
-      {text: 'Завершённые', value: 'completed'},
-      {text: 'Отклоненные', value: 'cancelled'},
-      {text: 'Приостановленные', value: 'suspended'},
-      {text: 'Все', value: null},
+      { text: 'Созданные', value: 'created' },
+      { text: 'В ожидании', value: 'waiting' },
+      { text: 'В обработке', value: 'processing' },
+      { text: 'Оплаченые', value: 'paid' },
+      { text: 'Завершённые', value: 'completed' },
+      { text: 'Отклоненные', value: 'cancelled' },
+      { text: 'Приостановленные', value: 'suspended' },
+      { text: 'Все', value: null },
     ],
-    status: null
+    status: null,
   }),
   computed: {
     adminInvoices() {
@@ -66,7 +66,7 @@ export default {
     },
   },
   methods: {
-    statusToColor,
+    statusToColor: InvoiceStatusToColor,
     onSearchInput: _.debounce(function () {
       let properSearchQuery = this.searchQuery.toLowerCase().trim()
 

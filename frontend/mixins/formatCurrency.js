@@ -6,8 +6,8 @@ export default {
     sstFormat(value) {
       return (value / 10 ** 18).toFixed(2)
     },
-    btcFormat(value) {
-      return (value / 10 ** 8).toFixed(4)
+    btcFormat(value, decimals = 4) {
+      return (value / 10 ** 8).toFixed(decimals)
     },
   },
 }

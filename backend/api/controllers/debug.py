@@ -1,10 +1,7 @@
 from fastapi import APIRouter
 
 
-from bson import ObjectId
-from schemas import InvoiceInDB
-from database.crud import InvoiceCRUD
-from core.utils.email import Email
+from core.mechanics.invoices import rescue_stucked_invoices
 
 __all__ = ["router"]
 
@@ -13,8 +10,7 @@ router = APIRouter()
 
 @router.get("/")
 async def debug_get():
-    invoice = await InvoiceCRUD.find_one({"_id": ObjectId("6054a002194575326398518d")})
-    await Email().new_suspended_invoice(invoice=InvoiceInDB(**invoice))
+    await rescue_stucked_invoices()
     return
 
 

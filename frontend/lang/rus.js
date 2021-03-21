@@ -51,7 +51,8 @@ export default (context) => {
     },
     exchange: {
       update: 'обновите',
-      Please : 'Пожалуйста',
+      upgradeTier2: 'Обновить до 2 уровня',
+      Please: 'Пожалуйста',
       'Above your limit': 'Введённая сумма привышает лимит в',
       'your verification level': 'ваш уровень верификации',
       buy: 'Покупка',
@@ -79,13 +80,13 @@ export default (context) => {
       choose_btc_wallet: { p1: 'Выберите BTC кошелек', p2: 'для вывода' },
       choose_eth_wallet: { p1: 'Выберите ETH кошелек', p2: 'для продажи SIMBA' },
       choose_btc_wallet_error: 'Пожалуйста выберите BTC кошелек',
+      choose_eth_wallet_error: 'Пожалуйста выберите ETH кошелек',
       received_payment: 'Получен платеж',
       transaction_hash: 'Хеш транзакции',
       confirms: 'Подтверждений',
       payment_confirmation_buy:
         'Как только сеть получит 3 подтверждения, токены SIMBA будут отправлены на ваш ETH адрес.',
-      payment_confirmation_sell:
-        'Как только сеть получит {min_confirms} подтверждение(-я), BTC будут отправлены на ваш адрес.',
+      payment_confirmation_sell: 'Как только сеть получит 3 подтверждения, BTC будут отправлены на ваш адрес.',
       statuses: {
         completed: 'Завершена',
         paid: 'Оплачена',
@@ -94,19 +95,23 @@ export default (context) => {
         cancelled: 'Отменена',
         expired: 'Просрочена',
         processing: 'В обработке',
-        suspended: 'Приостановлена'
+        suspended: 'Приостановлена',
       },
       error_creating_invoice: 'Произошла ошибка при создании инвойса',
       error_updating_invoice: 'Произошла ошибка при обновлении инвойса',
       error_confirming_invoice: 'Произошла ошибка при подтверждении инвойса',
       bill_expired: 'Сделка просрочена',
+      cancelled_or_expired: 'отменена или просрочена',
       time_is_out: 'Время вышло',
       time_is_limited: 'Время на каждую сделку ограничено 2 часами.',
       simba_redemption: 'Вывод Simba',
       send_simba_now: 'Отправить SIMBA сейчас',
       applied_fee: 'Комиссия',
       fee_in_simba: '(взымается в SIMBA)',
-      or: 'или'
+      or: 'или',
+      suspended_title: 'Приостановлена, ваш лимит был превышен',
+      suspended_help_text: 'не может быть отправлено, пожалуйста повысти ваш уровень верификации',
+      contact_support: 'Поддержка',
     },
     dropdown: {
       bill_details: 'Реквизиты',

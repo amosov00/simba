@@ -12,7 +12,7 @@ from schemas import (
     BTCTransactionOutputs,
     EthereumTransactionInDB,
     EthereumTransaction,
-    SimbaContractEvents
+    SimbaContractEvents,
 )
 
 

@@ -35,7 +35,14 @@ async def _rescue_buy_invoices(invoice: InvoiceExtended) -> bool:
 
 async def _rescue_sell_invoices(invoice: InvoiceExtended) -> bool:
     if invoice.status == InvoiceStatus.PAID and invoice.created_at < datetime.now() - timedelta(hours=2):
-        await SupportNotifier(skip_timeout=True).invoice_stucked(invoice=invoice)
+        btc_tx_hash = invoice.btc_tx_hashes[0] if invoice.btc_tx_hashes else None
+
+        if btc_tx_hash:
+            transaction = await BitcoinWrapper().fetch_transaction(btc_tx_hash)
+            await InvoiceMechanics(invoice).proceed_new_transaction(transaction)
+            return True
+        else:
+            await SupportNotifier(skip_timeout=True).invoice_stucked(invoice=invoice)
 
     return False
 

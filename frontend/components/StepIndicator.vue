@@ -47,12 +47,12 @@ export default {
   props: {
     emailConfirm: {
       default: false,
-      type: Boolean
+      type: Boolean,
     },
     passportConfirm: {
       default: false,
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
 }
 </script>

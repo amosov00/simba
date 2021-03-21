@@ -9,19 +9,15 @@
       >
       </step-indicator>
       <div id="sumsub-websdk-container" v-show="!showStartVerify"></div>
-      <start-verify
-        v-if="showStartVerify"
-        @show="e => showStartVerify = e"
-        :emailConfirm="emailConfirm"
-      >
+      <start-verify v-if="showStartVerify" @show="(e) => (showStartVerify = e)" :emailConfirm="emailConfirm">
       </start-verify>
     </div>
-    <pre v-show="false">{{language}}</pre>
+    <pre v-show="false">{{ language }}</pre>
   </div>
 </template>
 
 <script>
-import {mapActions, mapState} from "vuex"
+import { mapActions, mapState } from 'vuex'
 import snsWebSdk from '@sumsub/websdk'
 import StartVerify from '@/components/StartVerify'
 import StepIndicator from '@/components/StepIndicator'
@@ -30,7 +26,7 @@ export default {
   name: 'profile-verification',
   layout: 'profile',
   computed: {
-    ...mapState(["user", "kyc"]),
+    ...mapState(['user', 'kyc']),
     language() {
       const lang = this.$i18n.locale
       this.launch()
@@ -40,10 +36,10 @@ export default {
       return this.user.is_active
     },
     documentReviewed() {
-      return this.kyc.is_verified && this.kyc.status === "completed"
+      return this.kyc.is_verified && this.kyc.status === 'completed'
     },
     kycStatus() {
-      return this.kyc ? this.kyc.status : ""
+      return this.kyc ? this.kyc.status : ''
     },
     flow() {
       if (this.$i18n.locale === 'ru') {
@@ -51,11 +47,11 @@ export default {
       } else {
         return 'basic-kyc'
       }
-    }
+    },
   },
   components: {
     StartVerify,
-    StepIndicator
+    StepIndicator,
   },
   data: () => ({
     stepsCompleted: [],
@@ -63,7 +59,7 @@ export default {
     showStartVerify: true,
   }),
   methods: {
-    ...mapActions(["getKYCStatus", "getKYCToken"]),
+    ...mapActions(['getKYCStatus', 'getKYCToken']),
     async launch() {
       this.launchWebSdk(this.$config.sumsubURL, this.flow, await this.getKYCToken())
     },

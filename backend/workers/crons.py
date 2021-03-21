@@ -30,7 +30,7 @@ async def delete_unused_webhooks_cron():
     await delete_unused_webhooks_job.cast()
 
 
-@app.crontab("20 */1 * * *")
+@app.crontab("*/20 * * * *")
 async def rescue_stucked_invoices_cron():
     await rescue_stucked_invoices_job.cast()
 

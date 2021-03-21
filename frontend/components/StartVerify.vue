@@ -7,9 +7,9 @@
     </ul>
     <div class="lock">
       <img :src="require('@/static/lock.png')" alt="lock" class="lock__img" />
-      <p class="lock__text">{{$t('verify["A secure connection has been established, you can start testing"]')}}</p>
+      <p class="lock__text">{{ $t('verify["A secure connection has been established, you can start testing"]') }}</p>
     </div>
-    <btn-verify @click.native="$emit('show', false)">{{$t('verify["To be tested"]')}}</btn-verify>
+    <btn-verify @click.native="$emit('show', false)">{{ $t('verify["To be tested"]') }}</btn-verify>
   </div>
 </template>
 
@@ -21,7 +21,7 @@ export default {
   components: {
     BtnVerify,
     StepIndicator,
-  }
+  },
 }
 </script>
 

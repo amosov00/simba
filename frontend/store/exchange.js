@@ -1,23 +1,27 @@
-export const state = () => ({
-  invoice_id: '',
-  operation: 1,
-  eth_address: '',
-  btc_redeem_wallet: '',
-  admin_eth_address: '',
-  simba: 0,
-  btc: 0,
-  btc_amount_proceeded: 0,
-  target_eth: '',
-  tx_hash: '',
-  tx_hash_redeem: '',
-  simba_issued: 0,
-  eth_txs: [],
-  limits: {}
-})
+const initialState = {
+  invoice: {},
+  invoiceId: null,
+  fetchInvoiceDataLoop: true,
+  currentStepComponent: '',
+  currentStepIndicatorIndex: 0,
+  operation: 'buy',
+  limits: {},
+  currencyRate: {},
+  addresses: {
+    eth: null,
+    btc: null,
+  }, // eth and btc address
+  adminEthHash: null,
+}
+
+export const state = () => {
+  return Object.assign({}, initialState)
+}
 
 export const getters = {
   tradeData: (s) => s,
   limits: (s) => s.limits,
+  isBuyInvoice: (s) => s.operation === 'buy',
   ethTxByEvent: (s) => (event) => {
     let filtered = s.eth_txs.filter((i) => i.event === event)
     return filtered.length > 0 ? filtered[0] : null
@@ -25,36 +29,52 @@ export const getters = {
 }
 
 export const mutations = {
-  setTradeData: (state, payload) => {
-    state[payload.prop] = payload.value
+  setOperation: (state, payload) => (state.operation = payload),
+  setFetchInvoiceDataLoop: (state, payload) => (state.fetchInvoiceDataLoop = payload),
+  setInvoice: (state, payload) => (state.invoice = payload),
+  setInvoiceId: (state, payload) => (state.invoiceId = payload),
+  setCurrentStepComponent: (state, payload) => (state.currentStepComponent = payload),
+  setCurrentStepIndicatorIndex: (state, payload) => (state.currentStepIndicatorIndex = payload),
+  setAddresses: (state, payload) => (state.addresses = payload),
+  setAdminEthHash: (state, payload) => (state.adminEthHash = payload),
+  setNextStep: (state, payload) => {
+    state.currentStepComponent = payload
+    state.currentStepIndicatorIndex += 1
   },
   setLimits: (state, payload) => {
-    state.limits = {
-      ...payload,
-      btc_limit: payload.btc_limit / 100000000,
-      btc_remain: payload.btc_remain / 100000000,
-      btc_used: payload.btc_used / 100000000,
-    }
+    state.limits = payload
   },
-  setRate: (state, payload) => {
-    state.limits = {
-      ...state.limits,
-      ...payload,
-    }
-    console.log(state.limits)
-  }
+  setCurrencyRate: (state, payload) => {
+    state.currencyRate = payload
+  },
+  clearState: (state) => {
+    state = Object.assign(state, initialState)
+  },
 }
 
 export const actions = {
   fetchAdminEthAddress({ commit }) {
-    return this.$axios.get('/meta/eth/admin-address/').then((res) => {
-      commit('setTradeData', { prop: 'admin_eth_address', value: res.data.address })
-    })
+    return this.$axios
+      .get('/meta/eth/admin-address/')
+      .then((res) => {
+        commit('setAdminEthHash', res.data.address)
+      })
+      .catch(() => false)
   },
-  async fetchLimits({commit}) {
-    const limitRes = await this.$axios.get('/account/kyc/limit/')
-    const rateRes = await this.$axios.get('/meta/currency-rate/')
-    commit('setLimits', limitRes.data)
-    commit('setRate', rateRes.data)
-  }
+  async fetchLimits({ commit }) {
+    return this.$axios
+      .get('/account/kyc/limit/')
+      .then((res) => {
+        commit('setLimits', res.data)
+      })
+      .catch(() => false)
+  },
+  async fetchCurrencyRate({ commit }) {
+    return this.$axios
+      .get('/meta/currency-rate/')
+      .then((res) => {
+        commit('setCurrencyRate', res.data)
+      })
+      .catch(() => false)
+  },
 }
