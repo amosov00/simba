@@ -12,13 +12,13 @@
       a(:href="walletLink" target="_blank").link {{ walletAddress }}
 
     div.mt-4
-      b-button.btn.mr-4(href='#' disabled) {{$t('exchange.contact_support')}}
-      n-link(to='/profile/verification/').btn {{$t('exchange.upgradeTier2')}}
+      //b-button.btn.mr-4(href='#' disabled) {{$t('exchange.contact_support')}}
+      b-button.btn(tag="router-link" to='/profile/verification/' :disabled="kyc.is_verified") {{$t('exchange.upgradeTier2')}}
 </template>
 
 <script>
 import _ from 'lodash'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import invoiceMixins from '~/mixins/invoiceMixins'
 import formatCurrency from '~/mixins/formatCurrency'
 
@@ -27,6 +27,7 @@ export default {
   mixins: [invoiceMixins, formatCurrency],
   data: () => ({}),
   computed: {
+    ...mapGetters(["kyc"]),
     ...mapGetters('exchange', ['isBuyInvoice']),
     ...mapState('exchange', ['invoice', 'operation', 'limits', 'currencyRate']),
     amount() {
@@ -42,19 +43,17 @@ export default {
     walletLink() {
       return this.getBlockchainLink(this.walletAddress, 'address', this.isBuyInvoice ? 'eth' : 'btc')
     },
-    totalBtcUsed() {
-      if (this.isBuyInvoice) {
-        return this.limits.btc_used
-      } else {
-        return this.invoice.simba_amount_proceeded
-      }
-    },
   },
   methods: {
     ...mapActions('exchange', ['fetchLimits', 'fetchCurrencyRate']),
+    ...mapActions(["getKYCStatus"])
   },
   async mounted() {
     await this.fetchLimits()
+
+    if (_.isEmpty(this.kyc)) {
+      await this.getKYCStatus()
+    }
   },
 }
 </script>

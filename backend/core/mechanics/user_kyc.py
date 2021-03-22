@@ -74,7 +74,7 @@ class KYCController:
             is_verified = data.get("reviewResult", {}).get("reviewAnswer") == "GREEN"
 
             kyc = UserKYC(
-                user_id=ObjectId(request_body["externalUserId"]),  # noqa
+                user_id=ObjectId(data["externalUserId"]),  # noqa
                 applicant_id=data.get("applicantId"),
                 status=data.get("reviewStatus"),
                 is_verified=is_verified,
@@ -125,12 +125,17 @@ class KYCController:
         match_stage = {
             "$match": {
                 "user_id": self.user_id,
-                "status": {"$in": [InvoiceStatus.COMPLETED, InvoiceStatus.PROCESSING, InvoiceStatus.SUSPENDED]},
+                "status": {"$in": [
+                    InvoiceStatus.PROCESSING,
+                    InvoiceStatus.PAID,
+                    InvoiceStatus.COMPLETED,
+                    InvoiceStatus.SUSPENDED,
+                ]},
             }
         }
 
         if self.kyc_instance.is_verified:
-            match_stage["$match"]["finished_at"] = {"$gte": datetime.now() - timedelta(days=1)}  # noqa
+            match_stage["$match"]["created_at"] = {"$gte": datetime.now() - timedelta(days=1)}  # noqa
 
         # calculate btc
         result = await InvoiceCRUD.aggregate(
@@ -174,7 +179,7 @@ class KYCController:
     async def get_status(self) -> UserKYC:
         if self.kyc_instance:
             # Caching requests
-            if self.kyc_instance.updated_at and self.kyc_instance.updated_at + timedelta(minutes=10) > datetime.now():
+            if self.kyc_instance.updated_at and self.kyc_instance.updated_at + timedelta(minutes=1) > datetime.now():
                 return self.kyc_instance
 
         status_data = await self.api_wrapper.get_current_status(

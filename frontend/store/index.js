@@ -10,6 +10,7 @@ export const state = () => ({
 
 export const getters = {
   user: (s) => s.user,
+  kyc: (s) => s.kyc || {},
   contract: (s) => s.contract,
   tradeData: (s) => s.tradeData,
   loginDataBuffer: (s) => s.loginDataBuffer,

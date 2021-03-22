@@ -71,7 +71,7 @@ async def admin_invoice_update(
 ):
     status = bool(
         (
-            await InvoiceCRUD.update_invoice_not_safe(
+            await InvoiceCRUD.update_invoice_admin(
                 invoice_id=to_objectid(invoice_id),
                 payload=payload.dict(),
                 filtering_statuses=(InvoiceStatus.SUSPENDED,),
