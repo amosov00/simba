@@ -12,7 +12,7 @@
         span.mr-2.ml-2
           | =
         div.is-flex.flex-column.align-items-center.smb-input-wrapper
-          input(v-model="btc" type="text" @input="convertBTCtoSimba($event)" maxlength="10" :disabled="loading").smb-input
+          input(:class="{'btc-input': error || beyondLimit}"  v-model="btc" type="text" @input="convertBTCtoSimba($event)" maxlength="10" :disabled="loading").smb-input
 
       n-link.btn(v-if="beyondLimit" to="/profile/verification/") {{$t('exchange.upgradeTier2')}}
       b-button.btn(v-else @click="confirm" :loading="loading" :disabled="!termsAccepted || error") {{$t('exchange.create')}}
@@ -222,4 +222,7 @@ export default {
 <style lang="sass" scoped>
 .checkbox-fix:not(.button)
   margin-right: 0
+.btc-input
+  color: red
+
 </style>

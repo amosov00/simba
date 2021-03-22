@@ -32,9 +32,7 @@ export default ({ app, redirect, route }, inject) => {
       maxAge: 60 * 60 * 24 * 7,
       domain: document.domain,
     })
-    setTimeout(() => {
-      redirect('/')
-    })
+    window.location.href = "/"
   })
   inject('authFetchUser', async () => {
     return app.$axios

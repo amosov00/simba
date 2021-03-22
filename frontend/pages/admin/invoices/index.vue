@@ -66,7 +66,7 @@ export default {
     },
   },
   methods: {
-    statusToColor: InvoiceStatusToColor,
+    InvoiceStatusToColor,
     onSearchInput: _.debounce(function () {
       let properSearchQuery = this.searchQuery.toLowerCase().trim()
 
