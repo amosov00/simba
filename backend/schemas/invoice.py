@@ -119,4 +119,6 @@ class InvoiceTransactionManual(BaseModel):
 
 
 class InvoiceUpdateAdmin(BaseModel):
-    status: Literal[InvoiceStatus.PROCESSING, InvoiceStatus.COMPLETED, InvoiceStatus.CANCELLED] = Field(...)  # noqa
+    status: Literal[
+        InvoiceStatus.PROCESSING, InvoiceStatus.COMPLETED, InvoiceStatus.CANCELLED, InvoiceStatus.SUSPENDED  # noqa
+    ] = Field(...)

@@ -69,10 +69,16 @@ async def admin_invoice_update(
     invoice_id: str = Path(...),
     payload: InvoiceUpdateAdmin = Body(...),
 ):
-    await InvoiceCRUD.update_invoice_not_safe(
-        invoice_id=to_objectid(invoice_id), payload=payload.dict(), filtering_statuses=(InvoiceStatus.SUSPENDED,)
+    status = bool(
+        (
+            await InvoiceCRUD.update_invoice_not_safe(
+                invoice_id=to_objectid(invoice_id),
+                payload=payload.dict(),
+                filtering_statuses=(InvoiceStatus.SUSPENDED,),
+            )
+        ).modified_count
     )
-    return True
+    return status
 
 
 @invoices_router.get("/{invoice_id}/sst_transactions/", response_model=List[ReferralTransactionUserID])

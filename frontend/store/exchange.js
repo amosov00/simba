@@ -4,7 +4,7 @@ const initialState = {
   fetchInvoiceDataLoop: true,
   currentStepComponent: '',
   currentStepIndicatorIndex: 0,
-  operation: 'buy',
+  operation: '',
   limits: {},
   currencyRate: {},
   addresses: {

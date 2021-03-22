@@ -110,7 +110,7 @@ export default (context) => {
       fee_in_simba: '(взымается в SIMBA)',
       or: 'или',
       suspended_title: 'Приостановлена, ваш лимит был превышен',
-      suspended_help_text: 'не может быть отправлено, пожалуйста повысти ваш уровень верификации',
+      suspended_help_text: 'не может быть отправлен, пожалуйста повысте ваш уровень верификации',
       contact_support: 'Поддержка',
     },
     dropdown: {

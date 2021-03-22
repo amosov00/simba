@@ -224,5 +224,4 @@ export default {
   margin-right: 0
 .btc-input
   color: red
-
 </style>

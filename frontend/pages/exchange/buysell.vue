@@ -149,9 +149,13 @@ export default {
   async mounted() {
     if (this.$nuxt.$route.query.op) {
       this.setOperation(this.$nuxt.$route.query['op'])
+      this.setCurrentStepComponent('ChooseWallet')
     }
     if (this.$nuxt.$route.query.id) {
       this.setInvoiceId(this.$nuxt.$route.query['id'])
+    }
+    if (!this.invoiceId && !this.operation) {
+      await this.$nuxt.context.redirect('/exchange/')
     }
     await this.proceedInvoice()
 

@@ -121,7 +121,7 @@ class InvoiceCRUD(BaseMongoCRUD):
     @classmethod
     async def update_invoice_not_safe(
         cls, invoice_id: Union[ObjectId, ObjectIdPydantic], payload: dict, filtering_statuses: tuple = None
-    ) -> bool:
+    ):
         query = {"_id": invoice_id}
 
         if filtering_statuses:
