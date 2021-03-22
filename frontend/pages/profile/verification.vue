@@ -5,14 +5,13 @@
         class="indicat"
         :emailConfirm="emailConfirm"
         :passportConfirm="documentReviewed"
-        v-if="kycStatus === 'completed'"
+        v-show="kycStatus === 'completed' || showStartVerify"
       >
       </step-indicator>
       <div id="sumsub-websdk-container" v-show="!showStartVerify"></div>
       <start-verify v-if="showStartVerify" @show="(e) => (showStartVerify = e)" :emailConfirm="emailConfirm">
       </start-verify>
     </div>
-    <pre v-show="false">{{ language }}</pre>
   </div>
 </template>
 
@@ -27,11 +26,6 @@ export default {
   layout: 'profile',
   computed: {
     ...mapState(['user', 'kyc']),
-    language() {
-      const lang = this.$i18n.locale
-      this.launch()
-      return lang
-    },
     emailConfirm() {
       return this.user.is_active
     },
@@ -54,8 +48,6 @@ export default {
     StepIndicator,
   },
   data: () => ({
-    stepsCompleted: [],
-    stepsNext: [],
     showStartVerify: true,
   }),
   methods: {
@@ -92,27 +84,13 @@ export default {
 
     this.showStartVerify = !this.kyc.is_verified
 
-    if (localStorage.getItem('currentStep')) {
-      this.currentStep = localStorage.getItem('currentStep')
-    }
 
     await this.launch()
   },
   watch: {
-    currentStep() {
-      if (this.currentStep === 'IDENTITY') {
-        this.stepsCompleted = []
-        this.stepsNext = ['SELFIE', 'APPLICANT_DATA']
-      }
-      if (this.currentStep === 'SELFIE') {
-        this.stepsCompleted = ['IDENTITY']
-        this.stepsNext = ['APPLICANT_DATA']
-      }
-      if (this.currentStep === 'APPLICANT_DATA') {
-        this.stepsCompleted = ['IDENTITY', 'SELFIE']
-        this.stepsNext = []
-      }
-    },
+    ['$i18n.locale']() {
+      this.launch()
+    }
   },
 }
 </script>
