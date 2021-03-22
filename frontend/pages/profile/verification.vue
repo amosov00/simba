@@ -5,7 +5,7 @@
         class="indicat"
         :emailConfirm="emailConfirm"
         :passportConfirm="documentReviewed"
-        v-if="kycStatus === 'completed'"
+        v-if="kycStatus === 'completed' || showStartVerify"
       >
       </step-indicator>
       <div id="sumsub-websdk-container" v-show="!showStartVerify"></div>
