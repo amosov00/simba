@@ -3,7 +3,7 @@
     div.position-relative
       h3.text-large.has-text-weight-bold {{$t('exchange.status')}}
       div(v-if="isBuyInvoice")
-        div.mt-3.is-size-6 {{$t('exchange.received_payment')}} {{ btcFormat(invoice.btc_amount_proceeded, 8) }} BTC
+        div.mt-3.is-size-6 {{$t('exchange.received_payment')}} {{ btcFormat(btcAmount, 8) }} BTC
         div.mt-2 {{$t('exchange.transaction_hash')}}:
           =' '
           a(:href="getBlockchainLink(btcHash, 'tx', 'btc')" target="_blank").link {{ btcHash }}
@@ -23,7 +23,7 @@
             div {{$t('exchange.confirms')}} {{ETHTxConfirmations}}/{{minConfirmes}}
 
         div(v-else)
-          div.mt-3.is-size-6 {{$t('exchange.sent_payment')}} {{ btcFormat(invoice.btc_amount_proceeded, 8) }} BTC
+          div.mt-3.is-size-6 {{$t('exchange.sent_payment')}} {{ btcFormat(btcAmount, 8) }} BTC
           div.mt-2 {{$t('exchange.transaction_hash')}}:
             =' '
             a(:href="getBlockchainLink(btcHash, 'tx', 'btc')" target="_blank").link {{ btcHash }}
@@ -64,12 +64,22 @@ export default {
     ...mapGetters('exchange', ['isBuyInvoice']),
     ...mapState('exchange', ['invoice', 'invoiceId', 'operation', 'adminEthHash']),
     btcHash() {
-      return this.invoice.btc_tx_hashes.length > 0 ? this.invoice.btc_tx_hashes[0] : ''
+      let hash = this.invoice.btc_tx_hashes.length > 0 ? this.invoice.btc_tx_hashes[0] : ''
+      if (!hash) {
+        hash = this.invoiceBTCHash(this.invoice)
+      }
+      return hash
+    },
+    btcAmount() {
+      return this.invoice.btc_amount_proceeded || this.invoiceBTCAmount(this.invoice)
     },
     ethTransferHash() {
       let tx = this.invoiceEthTxTransfer(this.invoice)
       let txHash = tx ? tx.transactionHash : null
       return txHash || this.invoice.eth_tx_hashes[0]
+    },
+    ethAmount() {
+      return this.invoice.eth_amount_proceeded
     },
     minConfirmes() {
       return this.$config.isProduction ? 3 : 1

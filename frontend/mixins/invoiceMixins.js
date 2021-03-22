@@ -26,6 +26,16 @@ export default {
       let filtered = invoice ? invoice.eth_txs.filter((i) => i.event === 'OnIssued') : []
       return filtered.length > 0 ? filtered[0] : null
     },
+    invoiceBTCHash: (invoice) => {
+      return invoice.btc_txs.length > 0 ? invoice.btc_txs[0].hash : ''
+    },
+    invoiceBTCAmount: (invoice) => {
+      if (invoice.btc_txs.length === 0) {
+        return null
+      }
+      let output = invoice.btc_txs[0].outputs.filter(i => i.addresses.includes(invoice.target_btc_address))
+      return output.length > 0 ? output[0].value : 0
+    },
     getBlockchainLink(hash, hashType, currency) {
       const { isProduction } = this.$config
 

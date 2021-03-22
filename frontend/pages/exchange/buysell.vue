@@ -105,9 +105,15 @@ export default {
             this.setFetchInvoiceDataLoop(false)
             break
           case InvoiceStatus.WAITING:
-            this.setCurrentStepComponent('Waiting')
-            this.setCurrentStepIndicatorIndex(2)
-            this.setFetchInvoiceDataLoop(true)
+            if (invoice.btc_txs.length > 0 || invoice.eth_txs.length > 0) {
+              this.setCurrentStepIndicatorIndex(3)
+              this.setCurrentStepComponent('WatchingIncomingTransactions')
+              this.setFetchInvoiceDataLoop(true)
+            } else {
+              this.setCurrentStepComponent('Waiting')
+              this.setCurrentStepIndicatorIndex(2)
+              this.setFetchInvoiceDataLoop(true)
+            }
             break
           case InvoiceStatus.PROCESSING:
             this.setCurrentStepIndicatorIndex(3)

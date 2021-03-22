@@ -111,6 +111,7 @@ export default (context) => {
       fee_in_simba: '(charged in SIMBA)',
       or: 'or',
       suspended_title: 'Suspended, your limit is exceeded',
+      suspended_help_text: "can't be paid out, please upgrade verification level",
       contact_support: 'Contact support',
     },
     dropdown: {
