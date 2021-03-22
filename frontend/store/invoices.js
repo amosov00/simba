@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import moment from 'moment'
+import buefy from 'buefy'
 
 import { ToastProgrammatic as Toast } from 'buefy'
 
@@ -120,5 +121,10 @@ export const actions = {
       .get(`/invoices/${id}/`)
       .then((res) => res.data)
       .catch((_) => false)
+  },
+  async changeInvoiceStatus({}, data) {
+      await this.$axios.put(`/admin/invoices/${data.id}/`, {
+        status: data.status
+      })
   },
 }
