@@ -123,6 +123,8 @@ async def invoice_confirm(invoice_id: str, user: User = Depends(get_user)):
         )
 
     await InvoiceCRUD.update_invoice_not_safe(
-        invoice.id, user.id, {"status": InvoiceStatus.WAITING, "target_btc_address": invoice.target_btc_address}
+        invoice_id=invoice.id,
+        user_id=user.id,
+        payload={"status": InvoiceStatus.WAITING, "target_btc_address": invoice.target_btc_address}
     )
     return invoice

@@ -53,6 +53,11 @@ export default {
 
   components: { ValidationProvider },
 
+  props: {
+    loading: Boolean,
+    manualInvoiceFetch: Function,
+  },
+
   data: () => ({
     InvoiceTypeSlug,
     termsAccepted: false,
@@ -149,7 +154,7 @@ export default {
       }
 
       this.loading = false
-
+      await this.manualInvoiceFetch()
       await this.setNextStep('Waiting')
     },
 
