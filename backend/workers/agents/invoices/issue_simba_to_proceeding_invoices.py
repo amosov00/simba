@@ -35,7 +35,6 @@ async def issue_simba_to_proceeding_invoices_job(stream):
             },
             fetch_btc=True,
             fetch_eth=False,
-            sort=[("created_at", 1)],
         )
 
         for invoice in proceeding_invoices:
