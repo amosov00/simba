@@ -5,9 +5,9 @@ export default function ({ $axios, app }) {
     switch (error.response.status) {
       case 401:
         await app.$authLogout()
-        break
+        throw error
       default:
-        break
+        throw error
     }
   })
 }
