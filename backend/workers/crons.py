@@ -25,6 +25,11 @@ async def send_btc_to_proceeding_invoices_cron():
     await send_btc_to_proceeding_invoices_job.cast()
 
 
+@app.crontab("*/2 * * * *")
+async def issue_simba_to_proceeding_invoices_cron():
+    await issue_simba_to_proceeding_invoices_job.cast()
+
+
 @app.crontab("20 */3 * * *")
 async def delete_unused_webhooks_cron():
     await delete_unused_webhooks_job.cast()

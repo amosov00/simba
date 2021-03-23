@@ -54,7 +54,6 @@ export default {
   components: { ValidationProvider },
 
   props: {
-    loading: Boolean,
     manualInvoiceFetch: Function,
   },
 
@@ -136,7 +135,7 @@ export default {
             }
           : {
               id: this.invoiceId,
-              simba_amount: this.simba.toFixed(0),
+              simba_amount: this.simba,
               btc_amount: (this.btc * 10 ** 8).toFixed(0),
             }
       )

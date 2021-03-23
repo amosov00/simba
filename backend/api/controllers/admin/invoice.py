@@ -7,7 +7,8 @@ from sentry_sdk import capture_exception
 from config import settings
 from core.integrations import SimbaNodeJSWrapper
 from core.mechanics.crypto import BitcoinWrapper
-from core.mechanics import InvoiceMechanics, ReferralMechanics
+from core.mechanics.referrals import ReferralMechanics
+from core.mechanics.invoices import InvoiceMechanics, InvoiceMultisigMechanics
 from core.mechanics.blockcypher_webhook import BlockCypherWebhookHandler
 from core.utils import to_objectid
 from database.crud import UserCRUD, InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD, MetaCRUD
@@ -124,7 +125,7 @@ async def admin_invoice_pay(invoice_id: str = Path(...)):
 )
 async def admin_invoice_multisig_fetch(invoice_id: str = Path(...)):
     invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
-    data = await InvoiceMechanics(invoice).fetch_multisig_transaction_data()
+    data = await InvoiceMultisigMechanics(invoice).fetch_multisig_transaction_data()
     return await SimbaNodeJSWrapper().fetch_multisig_transaction(data)
 
 
@@ -134,7 +135,7 @@ async def admin_invoice_multisig_fetch(invoice_id: str = Path(...)):
 async def admin_invoice_multisig_pay(invoice_id: str = Path(...), transaction_hash: dict = Body(...)):
     transaction_hash = transaction_hash.get("transaction_hash")
     invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
-    return await InvoiceMechanics(invoice).proceed_multisig_transaction(transaction_hash) if transaction_hash else None
+    return await InvoiceMultisigMechanics(invoice).proceed_multisig_transaction(transaction_hash) if transaction_hash else None
 
 
 @invoices_router.post("/{invoice_id}/cancel/", response_model=InvoiceInDB)

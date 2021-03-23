@@ -17,7 +17,7 @@ from schemas import (
 
 
 class InvoiceBase:
-    def __init__(self, invoice: Union[dict, InvoiceInDB, InvoiceExtended], user: Union[dict, User] = None):
+    def __init__(self, invoice: Union[dict, InvoiceInDB], user: Union[dict, User] = None):
         if isinstance(invoice, dict):
             invoice = InvoiceInDB(**invoice)
 

@@ -13,6 +13,8 @@ from schemas import (
     ObjectIdPydantic,
 )
 from .base import BaseMongoCRUD
+from .btc_transaction import BTCTransactionCRUD
+from .eth_transaction import EthereumTransactionCRUD
 
 __all__ = ["InvoiceCRUD"]
 
@@ -154,3 +156,34 @@ class InvoiceCRUD(BaseMongoCRUD):
             else:
                 return False
         return False
+
+    @classmethod
+    async def find_with_txs(cls, match_query: dict = None, fetch_btc: bool = True, fetch_eth: bool = True, **kwargs):
+        pipeline = [{"$match": match_query}]
+
+        if fetch_btc:
+            pipeline.append(
+                {
+                    "$lookup": {
+                        "from": BTCTransactionCRUD.collection,
+                        "localField": "_id",
+                        "foreignField": "invoice_id",
+                        "as": "btc_txs",
+                    }
+                }
+
+            )
+
+        if fetch_eth:
+            pipeline.append(
+                {
+                    "$lookup": {
+                        "from": EthereumTransactionCRUD.collection,
+                        "localField": "_id",
+                        "foreignField": "invoice_id",
+                        "as": "eth_txs",
+                    }
+                },
+            )
+
+        return await super().aggregate(pipeline, **kwargs)

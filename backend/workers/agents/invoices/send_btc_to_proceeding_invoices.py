@@ -21,10 +21,7 @@ send_btc_to_proceeding_invoices_topic = app.topic(
 
 @app.agent(send_btc_to_proceeding_invoices_topic, concurrency=1)
 async def send_btc_to_proceeding_invoices_job(stream):
-    """Крон для след.
-
-    этапа пайплайна продажи (отсылка BTC)
-    """
+    """Cron for sending BTC for sell invoice with PROCESSING status"""
 
     async for _ in stream:
         meta_manual_payout = await MetaCRUD.find_by_slug(MetaSlugs.MANUAL_PAYOUT)
