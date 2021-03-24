@@ -9,7 +9,11 @@
 </template>
 
 <script>
+import _ from 'lodash'
+import {mapState, mapActions} from 'vuex';
+
 import formatCurrency from '../mixins/formatCurrency'
+
 export default {
   mixins: [formatCurrency],
   props: ['simbaBalance'],
@@ -21,6 +25,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions("exchange", ["fetchCurrencyRate"]),
     setBtc() {
       this.showBtc = true
       this.showTether = false
@@ -31,17 +36,21 @@ export default {
     },
   },
   computed: {
+    ...mapState("exchange", ["currencyRate"]),
     tetherBalance() {
-      return (((this.simbaBalance * 1) / 10 ** 8) * this.btcPrice).toFixed(2)
+      if (!this.currencyRate.BTCUSD) {
+        return 0
+      }
+      return (((this.simbaBalance * 1) / 10 ** 8) * this.currencyRate.BTCUSD).toFixed(2)
     },
     btcBalance() {
       return ((this.simbaBalance * 1) / 100000000).toFixed(4)
     },
   },
   async created() {
-    await this.$axios.get('https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD').then((res) => {
-      this.btcPrice = res.data.USD
-    })
+    if (_.isEmpty(this.currencyRate)) {
+      await this.fetchCurrencyRate()
+    }
   },
 }
 </script>

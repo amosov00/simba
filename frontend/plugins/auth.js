@@ -1,19 +1,4 @@
-const clearCookies = async (app) => {
-  try {
-    await app.$cookies.remove('token', {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7,
-      domain: document.domain,
-    })
-    await app.$cookies.remove('token', {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7,
-      domain: 'my.simba.storage',
-    })
-  } catch (e) {
-    console.error(e)
-  }
-}
+import {clearCookieToken, setCookieToken} from "~/utils/cookies";
 
 export default ({ app, redirect, route }, inject) => {
   inject('authLogin', async (email, password, pin_code) => {
@@ -28,11 +13,7 @@ export default ({ app, redirect, route }, inject) => {
           return false
         }
         app.$axios.setToken(resp.data.token, 'Bearer')
-        app.$cookies.set('token', resp.data.token, {
-          path: '/',
-          maxAge: 60 * 60 * 24 * 7,
-          domain: document.domain,
-        })
+        setCookieToken(app, resp.data.token)
         await app.store.dispatch('getUser')
         await redirect('/exchange')
         return true
@@ -44,7 +25,7 @@ export default ({ app, redirect, route }, inject) => {
   inject('authLogout', async () => {
     app.store.commit('deleteUser')
     await app.$axios.setToken(null, 'Bearer')
-    await clearCookies(app)
+    await clearCookieToken(app)
     // window.location.href = '/'
   })
   inject('authFetchUser', async () => {

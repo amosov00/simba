@@ -36,6 +36,8 @@
 </template>
 
 <script>
+import {mapState, mapActions} from 'vuex';
+
 import WalletTable from '~/components/WalletTable'
 import AddNewWallet from '~/components/AddNewWallet'
 
@@ -50,9 +52,11 @@ export default {
         address: '',
         amount: 0,
       },
+      btc_to_usdt: 10000,
     }
   },
   methods: {
+    ...mapActions("exchange", ["fetchCurrencyRate"]),
     transferFunds() {
       if (this.transferData.address && this.transferData.amount > 0) {
         this.$store.dispatch('contract/transferSimbaToken', this.transferData)
@@ -67,16 +71,8 @@ export default {
       })
     },
   },
-
-  async asyncData({ $axios }) {
-    let btc_to_usdt = await $axios
-      .get('https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USDT')
-      .then((res) => res.data.USDT)
-
-    return { btc_to_usdt }
-  },
-
   computed: {
+    ...mapState("exchange", ["currencyRate"]),
     selectedAddress() {
       if (window.ethereum) {
         return window.ethereum.selectedAddress
@@ -85,15 +81,21 @@ export default {
       }
     },
     totalAmount() {
-      return this.transferData.amount > 0 ? this.transferData.amount * 1 + 5000 : 0
+      return this.transferData.amount > 0 ? this.transferData.amount + 5000 : 0
     },
     totalUSDT() {
-      return (this.totalBTC * this.btc_to_usdt).toFixed(2)
+      return (this.totalBTC * this.currencyRate.BTCUSD).toFixed(2)
     },
     totalBTC() {
-      return (this.transferData.amount * 1) / 100000000
+      return this.transferData.amount / 100000000
     },
   },
+
+  async created() {
+    if (!this.currencyRate.BTCUSD) {
+      await this.fetchCurrencyRate()
+    }
+  }
 }
 </script>
 

@@ -17,7 +17,7 @@ async def fetch_simba_meta_job(stream):
         payload = await EthplorerWrapper().fetch_simba_metadata()
         if payload:
             logging.info("Updated simba meta")
-            await MetaCRUD.update_by_slug(MetaSlugs.SIMBA_META, payload, upsert=True)
+            await MetaCRUD.update_by_slug(MetaSlugs.SIMBA_META, payload)
         else:
             logging.info("Skipped updating meta")
     return True

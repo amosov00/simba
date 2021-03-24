@@ -1,5 +1,7 @@
+import {getCookieToken} from "~/utils/cookies";
+
 export default function ({ $axios, app }) {
-  $axios.setToken(app.$cookies.get('token'), 'Bearer')
+  $axios.setToken(getCookieToken(app), 'Bearer')
 
   $axios.onError(async (error) => {
     switch (error.response.status) {
