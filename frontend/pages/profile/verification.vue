@@ -35,13 +35,6 @@ export default {
     kycStatus() {
       return this.kyc ? this.kyc.status : ''
     },
-    flow() {
-      if (this.$i18n.locale === 'ru') {
-        return 'Basic_ru'
-      } else {
-        return 'basic-kyc'
-      }
-    },
   },
   components: {
     StartVerify,
@@ -53,7 +46,7 @@ export default {
   methods: {
     ...mapActions(['getKYCStatus', 'getKYCToken']),
     async launch() {
-      this.launchWebSdk(this.$config.sumsubURL, this.flow, await this.getKYCToken())
+      this.launchWebSdk(this.$config.sumsubURL, 'basic-kyc', await this.getKYCToken())
     },
     launchWebSdk(apiUrl, flowName, accessToken, applicantEmail, applicantPhone) {
       const origin = document.location.origin
