@@ -97,6 +97,7 @@ export default (context) => {
         expired: 'Expired',
         processing: 'Processing',
         suspended: 'Suspended',
+        all: 'All',
       },
       error_creating_invoice: 'Error creating invoice',
       error_updating_invoice: 'Error updating invoice',
@@ -222,6 +223,7 @@ export default (context) => {
       address_added: 'Address successfully deleted!',
       address_failed_with_pin: 'Failed to add address, make sure you entered correct address and pin-code!',
       address_failed_to_add: 'Error: make sure your provided address is correct, maybe this address already exists',
+      address_failed_to_add_p2sh: 'Only P2SH addresses is supported',
       failed_to_get_signature: 'Failed to get signature!',
       new_eth_wallet_instruct: {
         text1: 'To add a new address, press "Add" button',
@@ -230,6 +232,7 @@ export default (context) => {
       },
       eth_wallet_switch_info: 'to change the address you need to switch in the wallet',
       new_btc_wallet_instruct: {
+        text0: 'Only P2SH addresses is supported',
         text1: 'By adding the BTC address of your wallet you confirm that you have entered the correct one.',
         text2:
           'For total and irrevocable loss of funds when withdrawing to these address you accept the responsibility.',
@@ -272,7 +275,7 @@ export default (context) => {
         'The name SIMBA shows the strength, power, honesty and a friendly attitude towards the world in which we develop this business. We have combined together the knowledge and experience of professionals who are in the blockchain and crypto industry for more than 3-5 years.<br /> SIMBA aims to be the most convenient and robust platform for Bitcoin storage. Our product brings security and efficiency for long-term holdings of crypto assets. It provides a secure storage of institutional level with a user-friendly interface and high level of privacy.',
       date_of_establishment: 'Date of establishment',
       establishment: 'The SIMBA project was founded in October 2019.',
-      сompany_locations: 'Company locations',
+      company_locations: 'Company locations',
       locations:
         'By the end of 2020, SIMBA has locations in 5 countries: Switzerland, Liechtenstein, the United Arab Emirates, Estonia and New Zealand.',
       our_mission: 'Our mission',

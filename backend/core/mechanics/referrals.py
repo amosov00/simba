@@ -4,7 +4,9 @@ from bson import ObjectId
 
 from config import SST_CONTRACT
 from database.crud import UserCRUD, ReferralCRUD, EthereumTransactionCRUD, InvoiceCRUD
-from schemas import User, InvoiceInDB, EthereumTransactionInDB, ReferralTransactionEmail, ObjectIdPydantic
+from schemas import (
+    User, InvoiceInDB, EthereumTransactionInDB, ReferralTransactionEmail, ObjectIdPydantic, SSTContractEvents
+)
 
 __all__ = ["ReferralMechanics"]
 
@@ -75,6 +77,7 @@ class ReferralMechanics:
         sst_txs = await EthereumTransactionCRUD.find_many(
             {
                 "contract": SST_CONTRACT.title,
+                "event": SSTContractEvents.Transfer,
                 "$or": [{"transactionHash": {"$in": invoice.sst_tx_hashes}}, {"invoice_id": invoice.id}],
             }
         )

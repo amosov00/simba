@@ -1,7 +1,7 @@
 <template lang="pug">
     div.main-content
         div.flex.justify-content-between.mb-3
-          h1.is-size-4 {{$t('su_users.users')}} (total: {{ usersLenght }})
+          h1.is-size-4 {{$t('su_users.users')}} (total: {{ users.length }})
           button.btn(@click="exportUsers") Export
         div.mb-3
             b-input(v-model="searchQuery" @input="onSearchInput" :placeholder="`${this.$i18n.t('other.search')}...`" icon="magnify")
@@ -18,6 +18,7 @@
 </template>
 
 <script>
+import {mapState, mapActions} from 'vuex'
 import _ from 'lodash'
 import moment from 'moment'
 // import {saveAs} from 'file-saver';
@@ -27,34 +28,29 @@ export default {
   layout: 'main',
   middleware: ['adminRequired'],
   data: () => ({
-    users: [],
     searchQuery: '',
   }),
   computed: {
-    usersLenght() {
-      return this.users.length
-    },
+    ...mapState('admin', ['users']),
   },
-
   methods: {
+    ...mapActions('admin', ['fetchUsers', 'exportUsers']),
     toDatetime(utc) {
       return moment.utc(utc).format('HH:mm DD-MM-YY')
     },
     onSearchInput: _.debounce(async function () {
-      let query = this.searchQuery.toLowerCase().trim()
-      this.users = await this.$store.dispatch('admin/fetchUsers', query)
+      this.users = await this.fetchUsers(this.searchQuery.toLowerCase().trim())
     }, 500),
     async exportUsers() {
-      const data = await this.$store.dispatch('admin/exportUsers')
+      const data = await this.exportUsers()
       if (data) {
         // saveAs(data, `simba_users.xlsx`)
       }
     },
   },
-
-  async asyncData({ store }) {
-    return {
-      users: await store.dispatch('admin/fetchUsers'),
+  async created() {
+    if (this.users.length === 0) {
+      await this.fetchUsers()
     }
   },
 }

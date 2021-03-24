@@ -68,10 +68,13 @@ export const actions = {
           })
           return true
         })
-        .catch((_) => {
+        .catch(e => {
+          console.log(e.response.data)
           let error
           if (this.getters.user.two_factor) {
             error = this.$i18n.t('wallet.address_failed_with_pin')
+          } else if (e.response.data.detail[0].msg === "Invalid P2SH BTC address") {
+            error = this.$i18n.t('wallet.address_failed_to_add_p2sh')
           } else {
             error = this.$i18n.t('wallet.address_failed_to_add')
           }

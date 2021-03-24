@@ -7,6 +7,7 @@
           img(:src="require('@/assets/images/bitcoin.svg')").add-new-wallet__logo
         div
           b-input(v-model="wallet" :placeholder="$i18n.t('other.address')").input--material
+        div.mt-3.add-new-wallet__btc-info {{$t('wallet.new_btc_wallet_instruct.text0')}}
         div.mt-3.add-new-wallet__btc-info {{$t('wallet.new_btc_wallet_instruct.text1')}}
         div.mt-1.add-new-wallet__btc-info {{$t('wallet.new_btc_wallet_instruct.text2')}}
         div.mt-3
@@ -34,7 +35,7 @@
 </template>
 
 <script>
-import Web3 from '~/plugins/web3'
+import {mapGetters, mapActions} from 'vuex';
 
 export default {
   name: 'AddNewWallet',
@@ -48,20 +49,11 @@ export default {
     confirm_screen: false,
   }),
   computed: {
-    user() {
-      return this.$store.getters.user
-    },
+    ...mapGetters(["user"]),
   },
 
   methods: {
-    check_eth_wallet() {
-      if (window.ethereum !== undefined) {
-        window.ethereum.on('accountsChanged', function (accounts) {
-          this.wallet = window.ethereum.selectedAddress
-        })
-      }
-    },
-
+    ...mapActions(["addAddress"]),
     next_screen() {
       if (this.type === 'eth') {
         if (window.ethereum !== undefined) {
@@ -102,8 +94,7 @@ export default {
         this.metamask_window_opened = true
       }
 
-      this.$store
-        .dispatch('addAddress', {
+      this.addAddress({
           type: this.type,
           address: this.wallet,
           created_at: Date.now(),

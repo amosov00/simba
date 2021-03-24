@@ -26,10 +26,6 @@ def validate_btc_address(address_hash: str):
     if not address_hash:
         return address_hash
 
-    # bypass P2WPKH addresses
-    if len(address_hash) == 42:
-        return address_hash
-
     def decode_base58(bc, length):
         n = 0
         for char in bc:
@@ -46,7 +42,8 @@ def validate_btc_address(address_hash: str):
         pass
 
     if not status:
-        raise ValueError("Invalid BTC address")
+        raise ValueError("Invalid P2SH BTC address")
+
     return address_hash
 
 

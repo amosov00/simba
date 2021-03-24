@@ -1,11 +1,15 @@
-export const state = () => ({})
+export const state = () => ({
+  users: []
+})
 
 export const getters = {}
 
-export const mutations = {}
+export const mutations = {
+  setUsers: (state, payload) => state.users = payload,
+}
 
 export const actions = {
-  async fetchUsers({}, query) {
+  async fetchUsers({commit}, query) {
     return await this.$axios
       .get(
         `/admin/users/`,
@@ -18,6 +22,7 @@ export const actions = {
           : {}
       )
       .then((res) => {
+        commit('setUsers', res.data)
         return res.data
       })
       .catch(() => {})
