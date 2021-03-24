@@ -6,3 +6,4 @@ from .email import *
 from .jwt import *
 from .sentry import *
 from .kafka import *
+from .person_verify import *

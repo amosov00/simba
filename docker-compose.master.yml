@@ -6,14 +6,12 @@ services:
     restart: unless-stopped
     command: yarn start
     image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/frontend:master-latest
-    volumes:
-      - ./static/:/app/static/
     depends_on:
       - backend
     expose:
-      - "3015"
+      - '3015'
     ports:
-      - "3015:3015"
+      - '3015:3015'
     env_file:
       - .env
       - .env.frontend

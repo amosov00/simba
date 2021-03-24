@@ -56,6 +56,8 @@ USER_MODEL_INCLUDE_FIELDS = frozenset(
         "is_active",
         "terms_and_condition",
         "created_at",
+        # "kyc_status",
+        # "kyc_review_response",
     )
 )
 
@@ -120,6 +122,10 @@ class User(BaseModel):
 
     created_at: Optional[datetime] = Field(default=None)
 
+    kyc_status: Optional[str] = Field(default=None)
+    kyc_current_status: Optional[dict] = Field(default=None)
+    kyc_review_response: Optional[dict] = Field(default=None)
+
     @property
     def is_authenticated(self):
         return True
@@ -145,7 +151,8 @@ class UserRecover(BaseModel):
 
 
 class UserReferralURLResponse(BaseModel):
-    URL: str = Field(...)
+    url: str = Field(...)
+    partner_code: str = Field(...)
 
 
 class UserRecoverLink(BaseModel):
@@ -166,8 +173,8 @@ class UserVerifyEmailResponse(BaseModel):
 
 
 class UserLogin(BaseModel):
-    email: str = Field(..., example="email")
-    password: str = Field(..., example="password")
+    email: str = Field(..., min_length=6, example="email")
+    password: str = Field(..., min_length=6, example="password")
     pin_code: Optional[str] = Field(default=None, example="auth pin-code")
 
 

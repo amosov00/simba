@@ -12,120 +12,120 @@
 </template>
 
 <script>
-  import InlineSvg from 'vue-inline-svg'
+import InlineSvg from 'vue-inline-svg'
 
-  export default {
-    name: 'LangSwitcher',
+export default {
+  name: 'LangSwitcher',
 
-    components: {InlineSvg},
+  components: { InlineSvg },
 
-    props: {
-      sidebar: Boolean,
-      default: false
+  props: {
+    sidebar: Boolean,
+    default: false,
+  },
+
+  beforeMount() {
+    this.locale = this.$i18n.locale
+  },
+
+  computed: {
+    currentLanguage() {
+      return this.$i18n.locale
     },
 
-    beforeMount() {
-      this.locale = this.$i18n.locale
+    otherLanguages() {
+      let currentLocale = this.currentLanguage
+
+      return Object.keys(this.langList)
+        .filter((key) => key !== currentLocale)
+        .reduce((obj, key) => {
+          obj[key] = this.langList[key]
+          return obj
+        }, {})
     },
-
-    computed: {
-      currentLanguage() {
-        return this.$i18n.locale
-      },
-
-      otherLanguages() {
-        let currentLocale = this.currentLanguage;
-
-        return Object.keys(this.langList)
-          .filter(key => key !== currentLocale)
-          .reduce((obj, key) => {
-            obj[key] = this.langList[key]
-            return obj
-          }, {})
-      }
+  },
+  data: () => ({
+    showList: false,
+    locale: '',
+    langList: { en: 'english.svg', ru: 'russian.svg' },
+  }),
+  methods: {
+    changeLocale() {
+      this.$i18n.setLocale(this.locale)
     },
-    data: () => ({
-      showList: false,
-      locale: '',
-      langList: {'en': 'english.svg', 'ru': 'russian.svg'}
-    }),
-    methods: {
-      changeLocale() {
-        this.$i18n.setLocale(this.locale)
-      }
-    }
-  }
+  },
+}
 </script>
 
 <style lang="sass">
-  .lang-switcher
+.lang-switcher
+  display: flex
+  align-items: center
+  justify-content: center
+  &__item
     display: flex
     align-items: center
-    justify-content: center
-    &__item
-      display: flex
-      align-items: center
-      justify-content: space-between
-      padding: 6px 13px
-      &:hover
-        color: #0060FF
-    &__tooltip
-      flex-wrap: wrap
-      flex-direction: column
-      display: none
+    justify-content: space-between
+    padding: 6px 13px
+    &:hover
+      color: #0060FF
+  &__tooltip
+    flex-wrap: wrap
+    flex-direction: column
+    display: none
+    position: absolute
+    left: 0
+    bottom: 40px
+    background: #FFFFFF
+    box-shadow: 0px 16px 32px rgba(0, 0, 0, 0.12)
+    border-radius: 4px
+    margin-bottom: -8px
+    padding: 6px 0
+    &:after
       position: absolute
-      left: 0
-      bottom: 40px
-      background: #FFFFFF
-      box-shadow: 0px 16px 32px rgba(0, 0, 0, 0.12)
-      border-radius: 4px
-      margin-bottom: -8px
-      padding: 6px 0
-      &:after
-        position: absolute
-        content: ""
-        border-top: 5px solid #ffffff
-        border-right: 5px solid transparent
-        border-left: 5px solid transparent
-        bottom: -5px
-        top: auto
-        right: auto
-        left: 50%
-        transform: translateX(-50%)
-    &__lang
-      text-transform: uppercase
-      font-family: Didact Gothic, Roboto, sans-serif
-      font-style: normal
-      font-weight: normal
-      font-size: 16px
-      line-height: 0
-    &__flag
-      width: 20px
-      height: 16px
-      margin-left: 10px
+      content: ""
+      border-top: 5px solid #ffffff
+      border-right: 5px solid transparent
+      border-left: 5px solid transparent
+      bottom: -5px
+      top: auto
+      right: auto
+      left: 50%
+      transform: translateX(-50%)
+  &__lang
+    text-transform: uppercase
+    font-family: Didact Gothic, Roboto, sans-serif
+    font-style: normal
+    font-weight: normal
+    font-size: 16px
+    line-height: 0
+  &__flag
+    width: 20px
+    height: 16px
+    margin-left: 10px
+    position: relative
+    //border: 1px solid #e7e7e7
+    box-shadow: 0 -1px 2px rgba(0,0,0,0.15)
+  &__button
+    position: relative
+    display: flex
+    align-items: center
+    padding: 8px 10px
+    cursor: pointer
+    &:hover
+      background-color: #f6f6f6
+      border-radius: 2px
+  &__select
+    margin-left: 10px
+    padding: 5px 8px
+    cursor: pointer
+    border-radius: 4px
+    &--sidebar
       position: relative
-      //border: 1px solid #e7e7e7
-      box-shadow: 0 -1px 2px rgba(0,0,0,0.15)
-    &__button
-      position: relative
-      display: flex
-      align-items: center
-      padding: 8px 10px
+      top: 30px
+      background-color: #002c60
+      border: 0
+      color: #ffffff
+    option
       cursor: pointer
-      &:hover
-        background-color: #f6f6f6
-        border-radius: 2px
-    &__select
-      margin-left: 10px
-      padding: 5px 8px
-      cursor: pointer
-      border-radius: 4px
-      &--sidebar
-        position: relative
-        top: 30px
-        background-color: #002c60
-        border: 0
-        color: #ffffff
-      option
-        cursor: pointer
 </style>

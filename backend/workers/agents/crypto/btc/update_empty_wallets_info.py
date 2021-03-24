@@ -2,7 +2,7 @@ import asyncio
 import logging
 from datetime import timedelta
 
-from core.mechanics import BitcoinWrapper
+from core.mechanics.crypto import BitcoinWrapper
 from database.crud import BTCAddressCRUD, InvoiceCRUD
 from schemas import BTCAddressInDB, InvoiceStatus
 from workers.agents import app
@@ -58,4 +58,5 @@ async def update_empty_btc_addresses_info_job(stream):
 
         if counter:
             logging.info(f"Updated {counter} btc wallets")
-    return True
+
+    return

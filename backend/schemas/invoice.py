@@ -21,6 +21,7 @@ __all__ = [
     "InvoiceInDB",
     "InvoiceExtended",
     "InvoiceTransactionManual",
+    "InvoiceUpdateAdmin",
     "INVOICE_MODEL_EXCLUDE_FIELDS",
 ]
 
@@ -31,11 +32,12 @@ class InvoiceStatus:
     CREATED = "created"
     WAITING = "waiting"  # Waiting transaction from user
     PROCESSING = "processing"  # Waiting to generate SIMBA or send BTC
-    PAID = "paid"  # Paid but waiting confirmation
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
+    PAID = "paid"  # Paid but waiting for tx confirmation
+    COMPLETED = "completed"  # success end
+    CANCELLED = "cancelled"  # invoice closed
+    SUSPENDED = "suspended"  # KYC and verification issues
 
-    ALL = (CREATED, WAITING, PROCESSING, PAID, COMPLETED, CANCELLED)
+    ALL = (CREATED, WAITING, PROCESSING, PAID, COMPLETED, CANCELLED, SUSPENDED)
 
 
 class InvoiceType(IntEnum):
@@ -104,8 +106,8 @@ class InvoiceUpdate(BaseModel):
     target_eth_address: Optional[str] = Field(default=None, description="Address which will be scanned")
     target_btc_address: Optional[str] = Field(default=None, description="Address which will be scanned")
 
-    btc_amount: Union[int, DecimalPydantic] = Field(..., description="Planned amount to receive / send", gt=0)
-    simba_amount: Union[int, DecimalPydantic] = Field(..., description="Planned amount to receive / send", gt=0)
+    btc_amount: Union[int, DecimalPydantic] = Field(..., description="Planned amount to receive / send", ge=0)
+    simba_amount: Union[int, DecimalPydantic] = Field(..., description="Planned amount to receive / send", ge=0)
 
     _validate_target_btc_address = validator("target_btc_address", allow_reuse=True)(validate_btc_address)
     _validate_target_eth_address = validator("target_eth_address", allow_reuse=True)(validate_eth_address)
@@ -114,3 +116,9 @@ class InvoiceUpdate(BaseModel):
 class InvoiceTransactionManual(BaseModel):
     btc_transaction_hash: str = None
     eth_transaction_hash: str = None
+
+
+class InvoiceUpdateAdmin(BaseModel):
+    status: Literal[
+        InvoiceStatus.PROCESSING, InvoiceStatus.COMPLETED, InvoiceStatus.CANCELLED, InvoiceStatus.SUSPENDED  # noqa
+    ] = Field(...)

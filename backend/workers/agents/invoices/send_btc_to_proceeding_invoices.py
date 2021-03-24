@@ -1,10 +1,12 @@
 import asyncio
+import logging
 from datetime import timedelta
 
 from sentry_sdk import capture_exception
 
 from config import settings
-from core.mechanics import BitcoinWrapper, InvoiceMechanics
+from core.mechanics import InvoiceMechanics
+from core.mechanics.crypto import BitcoinWrapper
 from core.mechanics.notifier import SupportNotifier
 from database.crud import InvoiceCRUD, UserCRUD, MetaCRUD
 from schemas import InvoiceInDB, InvoiceStatus, InvoiceType, MetaSlugs
@@ -19,16 +21,13 @@ send_btc_to_proceeding_invoices_topic = app.topic(
 
 @app.agent(send_btc_to_proceeding_invoices_topic, concurrency=1)
 async def send_btc_to_proceeding_invoices_job(stream):
-    """Крон для след.
-
-    этапа пайплайна продажи (отсылка BTC)
-    """
+    """Cron for sending BTC for sell invoice with PROCESSING status"""
 
     async for _ in stream:
         meta_manual_payout = await MetaCRUD.find_by_slug(MetaSlugs.MANUAL_PAYOUT)
         # Finish pipeline if manual mode
         if meta_manual_payout["payload"]["is_active"] is True:
-            return True
+            continue
 
         btc_wrapper = BitcoinWrapper()
         hot_wallet_info = await btc_wrapper.fetch_address_and_save(settings.crypto.btc_hot_wallet_address)
@@ -46,10 +45,11 @@ async def send_btc_to_proceeding_invoices_job(stream):
         for invoice in proceeding_invoices:
             # Finish pipeline if wallet has unconfirmed transactions
             if hot_wallet_info.unconfirmed_transactions_number:
-                return True
+                logging.info("Found active tx in btc hot wallet, skipping")
+                continue
 
             invoice = InvoiceInDB(**invoice)
-            user = await UserCRUD.find_by_id(invoice.id)
+            user = await UserCRUD.find_by_id(invoice.user_id)
 
             if invoice.simba_amount_proceeded >= hot_wallet_info.balance:
                 # Send alarms
@@ -67,8 +67,11 @@ async def send_btc_to_proceeding_invoices_job(stream):
             try:
                 await InvoiceMechanics(invoice, user).send_bitcoins()
             except Exception as e:
+                logging.exception(e)
                 capture_exception(e)
                 continue
 
             # Wait for transaction will appear in blockchain and blockcypher
             await asyncio.sleep(10)
+
+    return

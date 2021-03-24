@@ -1,49 +1,95 @@
-<template lang="pug">
-  div
-    div.steps.is-flex.align-items-center
-      div(v-for="(step, i) in steps.list" :key="i" :class="{ 'steps-item--failed': failedStep(i), 'steps-item--active': activeStep(i)}").steps-item.steps-item--profile
-        | {{ i+1 }}
-        div.steps-item__text {{ $t(step) }}
+<template>
+  <div>
+    <div v-if="kycStatus !== ''">
+      <step-indicator
+        class="indicat"
+        :emailConfirm="emailConfirm"
+        :passportConfirm="documentReviewed"
+        v-show="kycStatus === 'completed' || showStartVerify"
+      >
+      </step-indicator>
+      <div id="sumsub-websdk-container" v-show="!showStartVerify"></div>
+      <start-verify v-if="showStartVerify" @show="(e) => (showStartVerify = e)" :emailConfirm="emailConfirm">
+      </start-verify>
+    </div>
+  </div>
 </template>
 
 <script>
+import { mapActions, mapState } from 'vuex'
+import snsWebSdk from '@sumsub/websdk'
+import StartVerify from '@/components/StartVerify'
+import StepIndicator from '@/components/StepIndicator'
 
-  export default {
-    name: "profile-verification",
-    layout: "profile",
-    computed: {
+export default {
+  name: 'profile-verification',
+  layout: 'profile',
+  computed: {
+    ...mapState(['user', 'kyc']),
+    emailConfirm() {
+      return this.user.is_active
     },
-    data: () => ({
-      steps: {
-        current: 'profile.email_verification',
-        list: ['profile.email_verification', 'profile.verify_address',
-          'profile.id_verification', 'profile.source_of_funds_verification']
-      }
-    }),
-    methods: {
-      activeStep(i) {
-        if(this.failedStep(i)) {
-          return false
-        }
-
-        return i < (this.steps.list.indexOf(this.steps.current)+1)
-      },
-
-      failedStep(i){
-        if(this.stepFail) {
-          if(i === this.stepFail) {
-            return true
-          }
-        }
-
-        return false
-      }
+    documentReviewed() {
+      return this.kyc.is_verified && this.kyc.status === 'completed'
     },
-    created() {
+    kycStatus() {
+      return this.kyc ? this.kyc.status : ''
     },
-    async asyncData({ store }) {
+  },
+  components: {
+    StartVerify,
+    StepIndicator,
+  },
+  data: () => ({
+    showStartVerify: true,
+  }),
+  methods: {
+    ...mapActions(['getKYCStatus', 'getKYCToken']),
+    async launch() {
+      this.launchWebSdk(this.$config.sumsubURL, 'basic-kyc', await this.getKYCToken())
+    },
+    launchWebSdk(apiUrl, flowName, accessToken, applicantEmail, applicantPhone) {
+      const origin = document.location.origin
+      let snsWebSdkInstance = snsWebSdk
+        .Builder(apiUrl, flowName)
+        .withAccessToken(accessToken, (newAccessTokenCallback) => {
+          newAccessTokenCallback(accessToken)
+        })
+        .withConf({
+          lang: this.$i18n.locale,
+          email: applicantEmail,
+          phone: applicantPhone,
+          uiConf: {
+            customCss: `${origin}/${this.$i18n.locale}sumsub.css`,
+          },
+          onError: (error) => {
+            console.error('WebSDK onError', error)
+          },
+        })
+        .build()
+      snsWebSdkInstance.launch('#sumsub-websdk-container', 'basic-kyc')
+    },
+  },
+  async mounted() {
+    if (_.isEmpty(this.kyc)) {
+      await this.getKYCStatus()
     }
-  };
-</script>
 
-<style lang="sass" scoped></style>
+    this.showStartVerify = !this.kyc.is_verified
+
+
+    await this.launch()
+  },
+  watch: {
+    ['$i18n.locale']() {
+      this.launch()
+    }
+  },
+}
+</script>
+<style lang="scss">
+.indicat {
+  margin-left: 115px;
+  margin-bottom: 30px;
+}
+</style>

@@ -3,11 +3,13 @@ from typing import List, Optional, Literal
 from fastapi import APIRouter, Query, Body, Path, responses
 
 from core.mechanics.referrals import ReferralMechanics
+from core.mechanics.user_kyc import KYCController
 from core.utils import to_objectid
 from database.crud import UserCRUD, UserAddressesArchiveCRUD
 from schemas import (
     User,
     UserWithReferrals,
+    UserKYC,
     UserUpdateNotSafe,
     UserAddressesArchive,
     USER_MODEL_INCLUDE_FIELDS,
@@ -48,6 +50,16 @@ async def admin_users_fetch_one(user_id: str = Path(...)):
     user = await UserCRUD.find_by_id(user_id, raise_404=True)
     user["referrals"] = await ReferralMechanics(user).fetch_referrals_top_to_bottom()
     return user
+
+
+@users_router.get(
+    "/{user_id}/kyc/status/",
+    response_model=UserKYC,
+)
+async def admin_users_fetch_one_kyc(user_id: str = Path(...)):
+    user = User(**await UserCRUD.find_by_id(user_id, raise_404=True))
+    kyc_instance = await KYCController.init(user.id)
+    return await kyc_instance.get_status()
 
 
 @users_router.put(

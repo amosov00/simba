@@ -22,6 +22,7 @@ def validate_eth_address(address_hash: str):
 
 def validate_btc_address(address_hash: str):
     """ Origin: https://rosettacode.org/wiki/Bitcoin/address_validation#Python """
+    # TODO not working to P2WPKH address, works for P2PKH
     if not address_hash:
         return address_hash
 
@@ -41,7 +42,7 @@ def validate_btc_address(address_hash: str):
         pass
 
     if not status:
-        raise ValueError("Invalid BTC address")
+        raise ValueError("Invalid P2SH BTC address")
 
     return address_hash
 

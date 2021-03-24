@@ -13,37 +13,40 @@
 </template>
 
 <script>
-  export default {
-    name: "recover-index",
-    layout: "main",
-    data: () => ({
-      password: '',
-      repeat_password: '',
-      query: {
-        recover_code: ''
-      },
-    }),
-    methods: {
-      async changePassword(){
-        this.loading = true;
-
-        let data = { password: this.password, repeat_password: this.repeat_password, recover_code: this.query.recover_code}
-
-        if(await this.$store.dispatch('finishRecover', data)) {
-          this.$buefy.toast.open({message: this.$i18n.t('password.change_success'), type: 'is-primary'});
-          this.$nuxt.context.redirect('/')
-        } else {
-          this.$buefy.toast.open({message: this.$i18n.t('password.change_error'), type: 'is-danger'});
-        }
-
-        this.loading = false;
-      }
+export default {
+  name: 'recover-index',
+  layout: 'main',
+  data: () => ({
+    password: '',
+    repeat_password: '',
+    query: {
+      recover_code: '',
     },
-    asyncData({ query }) {
-      return { query }
-    }
-  };
+  }),
+  methods: {
+    async changePassword() {
+      this.loading = true
+
+      let data = {
+        password: this.password,
+        repeat_password: this.repeat_password,
+        recover_code: this.query.recover_code,
+      }
+
+      if (await this.$store.dispatch('finishRecover', data)) {
+        this.$buefy.toast.open({ message: this.$i18n.t('password.change_success'), type: 'is-primary' })
+        this.$nuxt.context.redirect('/')
+      } else {
+        this.$buefy.toast.open({ message: this.$i18n.t('password.change_error'), type: 'is-danger' })
+      }
+
+      this.loading = false
+    },
+  },
+  asyncData({ query }) {
+    return { query }
+  },
+}
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>

@@ -6,18 +6,16 @@
 </template>
 
 <script>
-  import Header from "~/components/Header";
-  import Footer from "~/components/Footer";
+import Header from '~/components/Header'
+import Footer from '~/components/Footer'
 
-  export default {
-    name: 'main-layout',
-    middleware: ['fetchUser'],
-    components: { Header, Footer },
+export default {
+  name: 'main-layout',
+  middleware: ['fetchUser'],
+  components: { Header, Footer },
 
-    data: () => ({
-    }),
-  }
+  data: () => ({}),
+}
 </script>
 
-<style lang="sass" scoped>
-</style>
+<style lang="sass" scoped></style>

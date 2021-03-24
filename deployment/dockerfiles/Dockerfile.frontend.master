@@ -7,7 +7,9 @@ ENV NUXT_HOST=0.0.0.0
 ENV NUXT_PORT=3015
 ENV API_URL=https://my.simba.storage/api
 ENV API_URL_BROWSER=https://my.simba.storage/api
-ENV SENTRY_DNS=https://99fbc649c9234967a1668a5ef519e2e2@sentry.elastoo.com/7
+ENV API_URL_SUMSUB=https://api.sumsub.com
+ENV DOMAIN=my.simba.storage
+ENV SENTRY_DNS=https://9cdcee818b854090a5c7e3264ca9d313@sentry.elastoo.com/13
 
 COPY ./frontend/ /app/
 WORKDIR /app/

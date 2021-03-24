@@ -2,7 +2,7 @@ import asyncio
 from typing import Optional
 
 from bson import ObjectId
-from sentry_sdk import capture_message, capture_exception
+from sentry_sdk import capture_message, push_scope
 
 from config import SST_CONTRACT, settings
 from core.integrations.ethereum import FunctionsContractWrapper
@@ -42,14 +42,21 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
             result_sst *= cls.REF5_PROF
         return round(result_sst)
 
-    async def _freeze_and_transfer(self, customer_address: str, amount: int) -> Optional[str]:
+    async def _freeze_and_transfer(self, customer_address: str, amount: int, **kwargs) -> Optional[str]:
         try:
             tx_hash = await self.api_wrapper.freeze_and_transfer(customer_address, amount, self.PERIOD)
-        except ValueError as e:
+        except ValueError:
             await Email().send_message_to_support(
                 "sst_transfer", invoice=self.invoice, customer_address=customer_address, amount=amount
             )
-            capture_exception(e)
+            with push_scope() as scope:
+                scope.set_level("error")
+                scope.set_extra("invoice_id", str(self.invoice.id))
+                scope.set_extra("customer_address", str(customer_address))
+                scope.set_extra("amount", str(amount))
+                for k, v in kwargs.items():
+                    scope.set_extra(k, str(v))
+                capture_message("Failed to send SST")
             return None
 
         return tx_hash.hex()
@@ -78,9 +85,10 @@ class SSTWrapper(CryptoValidation, CryptoCurrencyRate):
                 tx_hash: str = await self._freeze_and_transfer(
                     customer_address=customer_address,
                     amount=self._calculate_referrals_accurals(level, sst_tokens),
+                    referral_level=level,
                 )
                 tx_hashes.add(tx_hash) if tx_hash else None
-                await asyncio.sleep(5.0)
+                await asyncio.sleep(9.0)
 
         if list(tx_hashes):
             tx_hashes = list({*self.invoice.sst_tx_hashes, *tx_hashes})

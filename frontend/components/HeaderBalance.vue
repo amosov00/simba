@@ -9,43 +9,41 @@
 </template>
 
 <script>
-import formatCurrency from "../mixins/formatCurrency";
+import formatCurrency from '../mixins/formatCurrency'
 export default {
   mixins: [formatCurrency],
-  props: ["simbaBalance"],
+  props: ['simbaBalance'],
   data() {
     return {
       btcPrice: 0,
       showBtc: true,
-      showTether: false
-    };
+      showTether: false,
+    }
   },
   methods: {
     setBtc() {
-      this.showBtc = true;
-      this.showTether = false;
+      this.showBtc = true
+      this.showTether = false
     },
     setTether() {
-      this.showBtc = false;
-      this.showTether = true;
-    }
+      this.showBtc = false
+      this.showTether = true
+    },
   },
   computed: {
     tetherBalance() {
-      return (((this.simbaBalance * 1) / 100000000) * this.btcPrice).toFixed(2);
+      return (((this.simbaBalance * 1) / 10 ** 8) * this.btcPrice).toFixed(2)
     },
     btcBalance() {
-      return ((this.simbaBalance * 1) / 100000000).toFixed(4);
-    }
+      return ((this.simbaBalance * 1) / 100000000).toFixed(4)
+    },
   },
   async created() {
-    await this.$axios
-      .get("https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD")
-      .then(res => {
-        this.btcPrice = res.data.USD;
-      });
-  }
-};
+    await this.$axios.get('https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD').then((res) => {
+      this.btcPrice = res.data.USD
+    })
+  },
+}
 </script>
 
 <style lang="sass" scoped>

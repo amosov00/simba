@@ -6,10 +6,21 @@ from sentry_sdk import capture_exception
 
 from config import settings
 from core.integrations import SimbaNodeJSWrapper
-from core.mechanics import BitcoinWrapper, InvoiceMechanics, BlockCypherWebhookHandler, ReferralMechanics
+from core.mechanics.crypto import BitcoinWrapper
+from core.mechanics.referrals import ReferralMechanics
+from core.mechanics.invoices import InvoiceMechanics, InvoiceMultisigMechanics
+from core.mechanics.blockcypher_webhook import BlockCypherWebhookHandler
 from core.utils import to_objectid
 from database.crud import UserCRUD, InvoiceCRUD, BTCTransactionCRUD, EthereumTransactionCRUD, MetaCRUD
-from schemas import InvoiceInDB, InvoiceExtended, InvoiceStatus, InvoiceType, MetaSlugs, ReferralTransactionUserID
+from schemas import (
+    InvoiceInDB,
+    InvoiceExtended,
+    InvoiceUpdateAdmin,
+    InvoiceStatus,
+    InvoiceType,
+    MetaSlugs,
+    ReferralTransactionUserID,
+)
 
 __all__ = ["invoices_router"]
 
@@ -54,11 +65,26 @@ async def admin_invoice_fetch_one(invoice_id: str = Path(...)):
     return resp[0] if resp else Response(status_code=404)
 
 
+@invoices_router.put("/{invoice_id}/")
+async def admin_invoice_update(
+    invoice_id: str = Path(...),
+    payload: InvoiceUpdateAdmin = Body(...),
+):
+    status = bool(
+        (
+            await InvoiceCRUD.update_invoice_admin(
+                invoice_id=to_objectid(invoice_id),
+                payload=payload.dict(),
+                filtering_statuses=(InvoiceStatus.SUSPENDED,),
+            )
+        ).modified_count
+    )
+    return status
+
+
 @invoices_router.get("/{invoice_id}/sst_transactions/", response_model=List[ReferralTransactionUserID])
 async def admin_invoice_fetch_sst_tx_info(invoice_id: str = Path(...)):
-    invoice = await InvoiceCRUD.find_by_id(invoice_id, raise_404=True)
-    invoice = InvoiceInDB(**invoice)
-
+    invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
     return await ReferralMechanics.fetch_ref_txs_info_from_invoice(invoice)
 
 
@@ -99,7 +125,7 @@ async def admin_invoice_pay(invoice_id: str = Path(...)):
 )
 async def admin_invoice_multisig_fetch(invoice_id: str = Path(...)):
     invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
-    data = await InvoiceMechanics(invoice).fetch_multisig_transaction_data()
+    data = await InvoiceMultisigMechanics(invoice).fetch_multisig_transaction_data()
     return await SimbaNodeJSWrapper().fetch_multisig_transaction(data)
 
 
@@ -109,7 +135,7 @@ async def admin_invoice_multisig_fetch(invoice_id: str = Path(...)):
 async def admin_invoice_multisig_pay(invoice_id: str = Path(...), transaction_hash: dict = Body(...)):
     transaction_hash = transaction_hash.get("transaction_hash")
     invoice = InvoiceInDB(**await InvoiceCRUD.find_by_id(invoice_id, raise_404=True))
-    return await InvoiceMechanics(invoice).proceed_multisig_transaction(transaction_hash) if transaction_hash else None
+    return await InvoiceMultisigMechanics(invoice).proceed_multisig_transaction(transaction_hash) if transaction_hash else None
 
 
 @invoices_router.post("/{invoice_id}/cancel/", response_model=InvoiceInDB)

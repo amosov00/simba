@@ -11,48 +11,38 @@
         ProfileDropdown(:name="`${user.first_name} ${user.last_name}`")
         div.has-text-weight-bold.text-large {{simbaFormat(simbaBalance)}} SIMBA
     div.header-menu.columns.is-flex(v-if="user")
-      div(style="padding-left: 102px").column.is-9.pa-0
+      div(style="padding-left: 102px").column.is-8.pa-0
         nuxt-link(:to="menuItem.to" v-for="(menuItem, i) in menu" :key="i" active-class="link--active").menu-item.link {{ $t(menuItem.title) }}
         a(href="https://simba.storage/transparency" target="_blank" rel="noopener noreferrer").menu-item.link {{$t('header_menu.transparency')}}
-      div.column.is-3.has-text-right.pa-0
+      div.column.is-4.has-text-right.pa-0
         HeaderBalance(:simbaBalance="simbaBalance")
 </template>
 
 <script>
-import {mapGetters} from "vuex";
-import ProfileDropdown from "~/components/ProfileDropdown";
-import HeaderBalance from "~/components/HeaderBalance";
-import formatCurrency from "../mixins/formatCurrency";
+import { mapGetters } from 'vuex'
+import ProfileDropdown from '~/components/ProfileDropdown'
+import HeaderBalance from '~/components/HeaderBalance'
+import formatCurrency from '../mixins/formatCurrency'
 
 export default {
-  name: "Header",
+  name: 'Header',
   mixins: [formatCurrency],
   components: {
     ProfileDropdown,
-    HeaderBalance
+    HeaderBalance,
   },
   data: () => ({
     menu: [
-      {title: "header_menu.exchange", to: "/exchange/"},
-      {title: "header_menu.about", to: "/about"},
-      {title: "header_menu.wallet", to: "/wallet"},
+      { title: 'header_menu.exchange', to: '/exchange/' },
+      { title: 'header_menu.about', to: '/about' },
+      { title: 'header_menu.wallet', to: '/wallet' },
     ],
   }),
   computed: {
-    ...mapGetters(["user"]),
-    ...mapGetters("contract", ["simbaBalance"]),
+    ...mapGetters(['user']),
+    ...mapGetters('contract', ['simbaBalance']),
   },
-  // methods: {
-  //   ...mapActions({
-  //     fetchSimbaBalance: "contract/fetchSimbaBalance",
-  //   }),
-  // },
-  // async created() {
-  //   if (this.user && this.simbaBalance === 0 ) {
-  //     await this.fetchSimbaBalance()
-  //   }
-  // }
-};
+}
 </script>
 
 <style lang="sass" scoped>

@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from config import BTC_COLD_WALLETS
 from core.integrations import PycoinWrapper
-from core.mechanics import BitcoinWrapper
+from core.mechanics.crypto import BitcoinWrapper
 from database.crud import BTCAddressCRUD
 from schemas import BTCxPub
 from workers.agents import app

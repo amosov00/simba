@@ -72,9 +72,9 @@ class UserCRUD(BaseMongoCRUD):
 
     @classmethod
     async def authenticate(cls, email: str, password: str, pin_code: Optional[str] = None) -> dict:
-        email = email.lower()
+        email = email.lower().strip()
 
-        user = await cls.find_one(query={"email": email})
+        user = await cls.find_one(query={"email": email}) if email else None
 
         if not user:
             raise HTTPException(HTTPStatus.BAD_REQUEST, "User with such email not found")
@@ -90,10 +90,10 @@ class UserCRUD(BaseMongoCRUD):
             token = encode_jwt_token({"id": str(user["_id"])})
             return {"token": token}
         else:
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "Invalid user data")
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Invalid password")
 
     @classmethod
-    async def verify_email(cls, email: str, verification_code: str) -> dict:
+    async def verify_email(cls, email: str, verification_code: str):
         email = email.lower()
 
         user = await super().find_one(query={"email": email})
@@ -117,12 +117,7 @@ class UserCRUD(BaseMongoCRUD):
                 "email_is_active": user["email_is_active"],
             },
         )
-
-        keys = {"password", "repeat_password", "verification_code"}
-        return {
-            "token": encode_jwt_token({"id": user["_id"]}),
-            "user": {x: user[x] for x in user if x not in keys},
-        }
+        return True
 
     @classmethod
     async def autenticate_by_token(cls, token: str) -> Optional[dict]:

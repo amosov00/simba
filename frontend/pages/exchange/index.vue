@@ -5,13 +5,13 @@
         n-link(to="/exchange/buysell?op=buy").btn.mr-2 {{ $t('exchange.buy') }}
         n-link(to="/exchange/buysell?op=sell").btn.mr-2 {{ $t('exchange.sell') }}
       h3.title.is-5.mt-4 {{ $t('exchange.last_bills') }}
-      div.bills-table.flex-1(:class="{'is-flex': billsToShow.length === 0}")
-        div(v-if="billsToShow.length === 0").no-bills {{ $t('exchange.empty_bills') }}
-        n-link(:to="'/exchange/buysell?id=' + item._id" v-for="(item, i) in billsToShow" :key="i").is-flex.bills-table__container
+      div.bills-table.flex-1(:class="{'is-flex': invoicesToShow.length === 0}")
+        div(v-if="invoicesToShow.length === 0").no-bills {{ $t('exchange.empty_bills') }}
+        n-link(:to="'/exchange/buysell?id=' + item._id" v-for="(item, i) in invoicesToShow" :key="i").is-flex.bills-table__container
           div {{ item._id }}
           div {{ simbaFormat(item.simba_amount) }}
           div {{ (new Date(item.created_at)).toLocaleString() }}
-          div {{ getType(item.invoice_type) }}
+          div {{ $t(`exchange.${InvoiceTypeToText(item.invoice_type)}`)  }}
           div(v-if="!getStatus(item).includes(':')") {{ $t(`exchange.statuses.${getStatus(item)}`) }}
           div(v-else) {{ getStatus(item) }}
       div.has-text-centered
@@ -19,59 +19,50 @@
 </template>
 
 <script>
-import moment from 'moment';
-
-import formatCurrency from "~/mixins/formatCurrency";
+import moment from 'moment'
+import { mapGetters, mapActions } from 'vuex'
+import formatCurrency from '~/mixins/formatCurrency'
+import { InvoiceTypeToText, InvoiceStatus } from '~/consts'
 
 export default {
-  name: "exchange-index",
+  name: 'exchange-index',
   layout: 'main',
   mixins: [formatCurrency],
-  middleware: ["authRequired", "contract"],
+  middleware: ['authRequired', 'contract'],
   computed: {
-    invoiceData() {
-      let array_data = JSON.parse(JSON.stringify(this.$store.getters['invoices/invoices'])).reverse();
-
-      let amount = this.amounToView;
-
-      return array_data.slice(0, amount);
-    }
+    ...mapGetters('invoices', ['invoicesReverse']),
+    invoicesToShow() {
+      return this.invoicesReverse.slice(0, this.invoicesAmountToShow)
+    },
+    showBtn() {
+      return this.invoicesReverse.length !== 0 && this.invoicesAmountToShow + 10 < this.invoicesReverse.length
+    },
   },
   data: () => ({
-    amounToView: 6,
-    billsToShow: [],
-    showBtn: true
+    invoicesAmountToShow: 10,
   }),
 
-  mounted() {
-    //this.showMore()
-    this.billsToShow = this.billsList.slice(0, this.amounToView)
-    if (!this.billsToShow.length) {
-      this.showBtn = false
-    }
-
-    if (this.billsList.length <= this.amounToView) {
-      this.showBtn = false
-    }
-  },
-
   methods: {
+    ...mapActions({ fetchInvoices: 'invoices/fetchInvoices' }),
+    InvoiceTypeToText,
     getStatus(item) {
-      if (item.status === 'waiting' || item.status === 'processing' || item.status === 'created') {
-        let current = +Date.now();
-        let dt = +moment.utc(item.created_at).toDate();
+      if (
+        [InvoiceStatus.CREATED, InvoiceStatus.WAITING, InvoiceStatus.PROCESSING, InvoiceStatus.PAID].includes(
+          item.status
+        )
+      ) {
+        let current = +Date.now()
+        let dt = +moment.utc(item.created_at).toDate()
 
-        let plus2hours = +dt + (2 * 60 * 60 * 1000)
+        let plus2hours = +dt + 2 * 60 * 60 * 1000
 
-
-        let diff = plus2hours - current;
+        let diff = plus2hours - current
 
         if (diff < 0) {
-          //return 'expired'
           return '00:00:00'
         }
 
-        let remain = moment.duration(diff);
+        let remain = moment.duration(diff)
 
         const twoDigits = (n) => {
           if (n < 10) {
@@ -82,40 +73,20 @@ export default {
         }
 
         return `${remain.hours()}:${twoDigits(remain.minutes())}:${twoDigits(remain.seconds())}`
-      } else if (item.status === 'cancelled') {
-        return 'expired'
       }
 
       return item.status
     },
 
     showMore() {
-      this.amounToView += 10
-
-      if (this.amounToView >= this.billsList.length) {
-        this.showBtn = false
-        this.amounToView = this.billsList.length
-      }
-
-      this.billsToShow = this.billsList.slice(0, this.amounToView)
+      this.invoicesAmountToShow += 10
     },
-
-    getType(type) {
-      if (type === 2) {
-        return 'SELL'
-      }
-
-      return 'BUY'
-    }
   },
 
-  async asyncData({store}) {
-    await store.dispatch('invoices/fetchInvoices');
-    return {
-      billsList: JSON.parse(JSON.stringify(store.getters['invoices/invoices'])).reverse()
-    }
-  }
-};
+  async created() {
+    await this.fetchInvoices()
+  },
+}
 </script>
 
 <style lang="sass" scoped>

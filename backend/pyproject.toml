@@ -18,7 +18,7 @@ ujson = "^4.0.1"
 uvicorn = "0.11.8"
 uvloop = "^0.14.0"
 blockcypher = "^1.0.90"
-httpx = "^0.16.1"
+httpx = "^0.17.0"
 Jinja2 = "^2.11.2"
 sitri = "^0.10.27"
 hvac = "^0.10.6"
@@ -28,13 +28,10 @@ websockets = "^8.1"
 faust = "^1.10.4"
 web3 = "5.11.0"
 XlsxWriter = "^1.3.7"
+requests = "^2.25.1"
+ethereum-gasprice = "^1.3.0"
 
 [tool.poetry.dev-dependencies]
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
 
 [tool.black]
 line-length = 120
@@ -59,3 +56,6 @@ exclude = '''
                      # the root of the project
 )
 '''
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

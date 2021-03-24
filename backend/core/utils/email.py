@@ -90,6 +90,15 @@ class Email:
         await self._send_message(msg)
         return None
 
+    async def new_suspended_invoice(self, **kwargs):
+        msg = self.create_message(
+            to=self.support_mail,
+            subject="New suspended invoice",
+            body=self._render_template("suspended-invoice", **kwargs),
+        )
+        await self._send_message(msg)
+        return None
+
     async def send_message_to_support(
         self, error_type: Literal["simba_issue", "simba_redeem", "sst_transfer", "btc", "invoice_stucked"], **kwargs
     ) -> None:

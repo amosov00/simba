@@ -38,123 +38,105 @@
         template(slot="empty")
           div.content.has-text-grey.has-text-centered {{$t('wallet.txs_history_empty')}}
         template(slot-scope="props")
-          b-table-column(field="ref_email" label="Email" width="200") {{ props.row.email }}
+          b-table-column(field="email" label="Email" width="200") {{ props.row.email }}
           b-table-column(field="transactionHash" label="TxHash").has-text-primary.overflow-reset
             b-tooltip(:label="props.row.transactionHash" type="is-black" position="is-bottom")
               a(:href="'https://etherscan.io/tx/' + props.row.transactionHash" target="_blank").text-clamp {{ truncateHash(props.row.transactionHash) }}
-          b-table-column(field="referral_level" :label="$i18n.t('other.level')") {{ props.row.referral_level }}
-          b-table-column(field="Amount" :label="$i18n.t('other.amount')") {{ divNum(props.row.amount) }}
+          b-table-column(field="level" :label="$i18n.t('other.level')") {{ props.row.level }}
+          b-table-column(field="amount" :label="$i18n.t('other.amount')") {{ divNum(props.row.amount) }}
       div.level.mt-2
         p.is-size-5.has-text-weight-bold.level-left {{ $i18n.t('other.total')}}
         p.is-size-5.has-text-weight-bold.level-right {{ txTotal }}
 </template>
 
 <script>
-  import invoiceMixins from "~/mixins/invoiceMixins";
+import invoiceMixins from '~/mixins/invoiceMixins'
 
-  import CopyToClipboard from "~/components/CopyToClipboard";
+import CopyToClipboard from '~/components/CopyToClipboard'
 
-  import WalletTable from "~/components/WalletTable";
+import WalletTable from '~/components/WalletTable'
 
-  import moment from 'moment'
+import moment from 'moment'
 
-  import {Decimal} from 'decimal.js';
+import { Decimal } from 'decimal.js'
 
-  export default {
-    name: "profile-partner",
-    layout: "profile",
-    components: { CopyToClipboard, WalletTable },
-    middleware: ["contract", "metamask"],
-    mixins: [invoiceMixins],
-    computed: {
-      rewardAddress() {
-        return this.$store.getters.user.user_eth_addresses[0].address
-      },
-      txTotal() {
-        let total = this.transactions.reduce((total, el) => {
-          return total.plus(el.amount)
-        }, Decimal(0))
-
-        return Decimal.div(total, (10**18)).toFixed(2);
-      }
+export default {
+  name: 'profile-partner',
+  layout: 'profile',
+  components: { CopyToClipboard, WalletTable },
+  middleware: ['contract', 'metamask'],
+  mixins: [invoiceMixins],
+  computed: {
+    rewardAddress() {
+      return this.$store.getters.user.user_eth_addresses[0].address
     },
-    data: () => ({
-      ref_code: '',
-      history_more_data: 5,
-      referrals: []
-    }),
-    methods: {
-      divNum(num) {
-        return (+num / 10**18).toFixed(2);
-      },
+    txTotal() {
+      let total = this.transactions.reduce((total, el) => {
+        return total.plus(el.amount)
+      }, Decimal(0))
 
-      formatDate(date_str) {
-        return moment(String(date_str)).format(("DD/MM/YYYY, h:mm:ss"))
-      },
-
-      setTextRefLink() {
-        if(this.ref_link) {
-          document.getElementById('text-ref-link').setAttribute('href', this.ref_link)
-        }
-      }
+      return Decimal.div(total, 10 ** 18).toFixed(2)
+    },
+  },
+  data: () => ({
+    ref_link: '',
+    ref_code: '',
+    history_more_data: 5,
+    referrals: [],
+    can_invite: false,
+  }),
+  methods: {
+    divNum(num) {
+      return (+num / 10 ** 18).toFixed(2)
     },
 
-    created() {
-      this.formatDate()
-
-      if(this.ref_link) {
-        let url_data = new URL(this.ref_link)
-        this.ref_code = url_data.searchParams.get("referral_id")
-      }
+    formatDate(date_str) {
+      return moment(String(date_str)).format('DD/MM/YYYY, h:mm:ss')
     },
 
-    mounted() {
-      this.setTextRefLink();
+    setTextRefLink() {
+      if (this.ref_link) {
+        document.getElementById('text-ref-link').setAttribute('href', this.ref_link)
+      }
     },
+  },
 
-    updated() {
-      this.setTextRefLink();
-    },
+  created() {
+    this.formatDate()
+  },
 
-    async asyncData({store}) {
+  mounted() {
+    this.setTextRefLink()
+  },
 
-      let ref_link = await store.dispatch('fetchRefLink');
-      let referrals = await store.dispatch('fetchReferrals');
-      let transactions = await store.dispatch('fetchTransactions');
+  updated() {
+    this.setTextRefLink()
+  },
 
-      let result = {
-        can_invite: false
-      }
+  async asyncData({ store }) {
+    const { url, partner_code } = await store.dispatch('fetchRefLink')
+    const { referrals, transactions } = await store.dispatch('fetchReferrals')
 
-      if(store.getters.user.user_eth_addresses.length) {
-        result['can_invite'] = true
-      }
-
-      if(ref_link) {
-        result['ref_link'] = ref_link.URL
-      }
-
-      if(referrals) {
-        result['referrals'] = referrals
-      }
-
-      if(transactions) {
-        result['transactions'] = transactions
-      }
-
-      return result
+    return {
+      can_invite: Boolean(store.getters.user.user_eth_addresses.length),
+      ref_link: decodeURI(url),
+      ref_code: partner_code,
+      referrals: referrals,
+      transactions: transactions,
     }
-  };
+  },
+}
 </script>
 
 <style lang="sass" scoped>
 .w-100
   width: 100%
+
 .overflow-reset
   &:hover
-    overflow: initial!important
+    overflow: initial !important
+
 .text-clamp
   overflow: hidden
   text-overflow: ellipsis
-
 </style>

@@ -2,15 +2,17 @@ from datetime import datetime
 from http import HTTPStatus
 from urllib.parse import urlencode, urljoin
 
-from fastapi import APIRouter, HTTPException, Depends, Body, Path
+from fastapi import APIRouter, HTTPException, Depends, Body, Path, Request
 
 from api.dependencies import get_user
 from config import settings, SST_CONTRACT
 from core.mechanics.referrals import ReferralMechanics
+from core.mechanics.user_kyc import KYCController
 from database.crud import UserCRUD, EthereumTransactionCRUD, UserAddressesArchiveCRUD
 from schemas import (
     UserLogin,
     User,
+    UserKYC,
     UserLoginResponse,
     UserCreationSafe,
     UserChangePassword,
@@ -28,6 +30,8 @@ from schemas import (
     UserBitcoinAddressDelete,
     UserBitcoinAddressInput,
     UserAddressesArchive,
+    UserKYCAccessTokenResponse,
+    UserKYCVerificationLimit,
 )
 
 __all__ = ["router"]
@@ -66,7 +70,7 @@ async def account_change_password(user: User = Depends(get_user), payload: UserC
     return await UserCRUD.change_password(user, payload)
 
 
-@router.post("/verify/", response_model=UserLoginResponse)
+@router.post("/verify/")
 async def account_verify_email(data: UserVerifyEmail = Body(...)):
     return await UserCRUD.verify_email(data.email, data.verification_code)
 
@@ -83,13 +87,15 @@ async def account_recover(data: UserRecoverLink = Body(...)):
 
 @router.get("/referral_link/", response_model=UserReferralURLResponse)
 async def account_get_referral_link(user: User = Depends(get_user)):
-    params = {"referral_id": user.id}
-    url = (
-        urljoin(settings.common.host_url, "register")
-        + "?"
-        + (urlencode(params) if user.user_eth_addresses != [] else "referral_id=*************")
-    )
-    return {"URL": url}
+    if user.user_eth_addresses:
+        params = {"referral_id": user.id}
+    else:
+        params = {"referral_id": "*************"}
+
+    return {
+        "url": urljoin(settings.common.host_url, "register") + "?" + urlencode(params),
+        "partner_code": str(user.id),
+    }
 
 
 @router.get("/2fa/", response_model=User2faURL)
@@ -107,17 +113,41 @@ async def account_delete_2fa(user: User = Depends(get_user), payload: User2faDel
     return await UserCRUD.delete_2fa(user, payload)
 
 
+@router.get("/kyc/token/", response_model=UserKYCAccessTokenResponse)
+async def account_get_kyc_token(user: User = Depends(get_user)):
+    return {"token": await KYCController(user_id=user.id).get_access_token()}
+
+
+@router.get("/kyc/limit/", response_model=UserKYCVerificationLimit)
+async def account_get_kyc_limits(user: User = Depends(get_user)):
+    kyc_instance = await KYCController.init(user.id)
+    return await kyc_instance.calculate_verification_limit()
+
+
+@router.get("/kyc/status/", response_model=UserKYC, response_model_exclude={"review_data", "status_data"})
+async def account_get_kyc_status(user: User = Depends(get_user)):
+    kyc_instance = await KYCController.init(user.id)
+    return await kyc_instance.get_status()
+
+
+@router.post("/kyc/status/")
+async def account_proceed_kyc_status(request: Request):
+    return await KYCController.proceed_webhook(request)
+
+
 @router.get("/referrals/", response_model=UserReferralsResponse)
 async def account_referrals_info(user: User = Depends(get_user)):
-    referrals = await ReferralMechanics(user).fetch_referrals_top_to_bottom()
-    transactions = await EthereumTransactionCRUD.find(
+    instance = ReferralMechanics(user)
+    referrals = await instance.fetch_referrals_top_to_bottom()
+
+    transactions = await EthereumTransactionCRUD.find_many(
         {
             "contract": SST_CONTRACT.title,
             "user_id": user.id,
         }
     )
 
-    transactions = await ReferralMechanics(user).fetch_sst_tx_info_for_user(transactions)
+    transactions = await instance.fetch_sst_tx_info_for_user(transactions)
 
     return {"referrals": referrals, "transactions": transactions}
 

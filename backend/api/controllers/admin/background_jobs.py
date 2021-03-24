@@ -15,6 +15,6 @@ async def admin_backgroud_jobs(job_type: str = Query(..., alias="type")):
     job = {i: getattr(agents, i) for i in dir(agents) if "job" in i}.get(job_type)
     if job:
         await job.cast()
-        return {"sucess": True}
+        return {"sucсess": True}
 
-    return {"sucess": False}
+    return {"sucсess": False}

@@ -15,17 +15,17 @@ class FunctionsContractWrapper(EthereumBaseContractWrapper):
         super().__init__(contract)
         self.admin_address = Web3.toChecksumAddress(admin_address)
         self.admin_privkey = admin_private_key
-        self.simba_fee = SIMBA_BUY_SELL_FEE
 
     def _get_nonce(self):
         return self.w3.eth.getTransactionCount(self.admin_address, "pending")
 
-    def check_min_amount(self, amount: int, *, func_name: str = None, comment: str = None) -> bool:
-        if amount < self.simba_fee:
+    @classmethod
+    def check_min_amount(cls, amount: int, *, func_name: str = None, comment: str = None) -> bool:
+        if amount < SIMBA_BUY_SELL_FEE:
             capture_message(
-                f"trying to {func_name or 'call some contranc func'} < {self.simba_fee} simba, BTC HASH {comment or '?'}"
+                f"trying to {func_name or 'call some contranc func'} < {SIMBA_BUY_SELL_FEE} simba, BTC HASH {comment or '?'}"
             )
-            raise HTTPException(HTTPStatus.BAD_REQUEST, f"minimal simba amount to issue - {self.simba_fee}")
+            raise HTTPException(HTTPStatus.BAD_REQUEST, f"minimal simba amount to issue - {SIMBA_BUY_SELL_FEE}")
 
         return True
 

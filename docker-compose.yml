@@ -12,9 +12,9 @@ services:
     depends_on:
       - backend
     expose:
-      - "3015"
+      - '3015'
     ports:
-      - "3015:3015"
+      - '3015:3015'
     env_file:
       - .env
       - .env.frontend
@@ -30,7 +30,7 @@ services:
       - ./.env.json:/.env.json
     depends_on:
       - db
-#      - backend-nodejs
+    #      - backend-nodejs
     expose:
       - 8010
     ports:
@@ -50,7 +50,6 @@ services:
     env_file:
       - .env
       - .env.backend-nodejs
-
 
   db:
     container_name: simba-mongodb-local

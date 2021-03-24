@@ -7,6 +7,7 @@
           img(:src="require('@/assets/images/bitcoin.svg')").add-new-wallet__logo
         div
           b-input(v-model="wallet" :placeholder="$i18n.t('other.address')").input--material
+        div.mt-3.add-new-wallet__btc-info {{$t('wallet.new_btc_wallet_instruct.text0')}}
         div.mt-3.add-new-wallet__btc-info {{$t('wallet.new_btc_wallet_instruct.text1')}}
         div.mt-1.add-new-wallet__btc-info {{$t('wallet.new_btc_wallet_instruct.text2')}}
         div.mt-3
@@ -34,38 +35,28 @@
 </template>
 
 <script>
-
-import Web3 from '~/plugins/web3'
+import {mapGetters, mapActions} from 'vuex';
 
 export default {
-  name: "AddNewWallet",
+  name: 'AddNewWallet',
   props: {
-    type: String
+    type: String,
   },
   data: () => ({
-    wallet: "",
-    pin_code: "",
+    wallet: '',
+    pin_code: '',
     metamask_window_opened: false,
-    confirm_screen: false
+    confirm_screen: false,
   }),
   computed: {
-    user() {
-      return this.$store.getters.user;
-    }
+    ...mapGetters(["user"]),
   },
 
   methods: {
-    check_eth_wallet() {
-      if(window.ethereum !== undefined) {
-        window.ethereum.on('accountsChanged', function (accounts) {
-          this.wallet = window.ethereum.selectedAddress
-        });
-      }
-    },
-
+    ...mapActions(["addAddress"]),
     next_screen() {
-      if(this.type === 'eth') {
-        if(window.ethereum !== undefined) {
+      if (this.type === 'eth') {
+        if (window.ethereum !== undefined) {
           this.wallet = window.ethereum.selectedAddress
           this.confirm_screen = true
 
@@ -76,13 +67,12 @@ export default {
           })
         }
       } else {
-
-        if(this.addressExists(this.wallet, this.type)) {
-          this.$buefy.toast.open({message: this.$i18n.t('wallet.address_exist'), type:'is-danger'})
+        if (this.addressExists(this.wallet, this.type)) {
+          this.$buefy.toast.open({ message: this.$i18n.t('wallet.address_exist'), type: 'is-danger' })
           return
         }
 
-        if(this.user.two_factor) {
+        if (this.user.two_factor) {
           this.confirm_screen = true
         } else {
           this.add()
@@ -91,73 +81,74 @@ export default {
     },
 
     addressExists(address, type) {
-      return this.user[`user_${type}_addresses`].map(el => el.address).indexOf(address) !== -1
+      return this.user[`user_${type}_addresses`].map((el) => el.address).indexOf(address) !== -1
     },
 
     async add() {
-
-      if(this.addressExists(this.wallet, this.type)) {
-        this.$buefy.toast.open({message: this.$i18n.t('wallet.address_exist'), type:'is-danger'})
+      if (this.addressExists(this.wallet, this.type)) {
+        this.$buefy.toast.open({ message: this.$i18n.t('wallet.address_exist'), type: 'is-danger' })
         return
       }
 
-      if(this.type === 'eth') {
+      if (this.type === 'eth') {
         this.metamask_window_opened = true
       }
 
-      this.$store.dispatch("addAddress", {
-        type: this.type,
-        address: this.wallet,
-        created_at: Date.now(),
-        pin_code: this.pin_code
-      }).then(_ => {
-        if(this.type === 'eth') {
-          this.metamask_window_opened = false
-        }
-        this.$emit('close')
-      }).catch(_ => {
-        if(this.type === 'eth') {
-          this.metamask_window_opened = false
-          this.$buefy.toast.open({message: this.$i18n.t('wallet.failed_to_get_signature'), type: 'is-danger'})
-        }
-      })
-    }
-  }
-};
+      this.addAddress({
+          type: this.type,
+          address: this.wallet,
+          created_at: Date.now(),
+          pin_code: this.pin_code,
+        })
+        .then((_) => {
+          if (this.type === 'eth') {
+            this.metamask_window_opened = false
+          }
+          this.$emit('close')
+        })
+        .catch((_) => {
+          if (this.type === 'eth') {
+            this.metamask_window_opened = false
+            this.$buefy.toast.open({ message: this.$i18n.t('wallet.failed_to_get_signature'), type: 'is-danger' })
+          }
+        })
+    },
+  },
+}
 </script>
 
 <style lang="sass" scoped>
-  .add-new-wallet
-    background: #ffffff
-    max-width: 647px
-    padding: 40px 73px
-    margin: auto
-    &__eth-wallet
-      font-size: 18px
-      color: #000000
-    &__confirm-btn
-      margin-top: 54px
-    &__title
-      font-size: 18px
-      font-weight: 600
-    &__logo
-      margin-top: 41px
-    &__btc-info
-      line-height: 100%
-      color: #8C8C8C
-    &__complete-text
-      margin: 40px 0
-      color: #8C8C8C
-    &__pin-code
-      border: 0
-      border-bottom: 1px solid #969696
-      text-align: center
-      letter-spacing: 20px!important
-      font-size: 48px
-      line-height: 100%
-      color: #000000
-      width: 100%
-      &:focus
-        outline: none
-        border-bottom: 1px solid #0060FF
+.add-new-wallet
+  background: #ffffff
+  max-width: 647px
+  padding: 40px 73px
+  margin: auto
+  &__eth-wallet
+    font-size: 18px
+    color: #000000
+  &__confirm-btn
+    margin-top: 54px
+  &__title
+    font-size: 18px
+    font-weight: 600
+  &__logo
+    margin-top: 41px
+  &__btc-info
+    line-height: 100%
+    color: #8C8C8C
+  &__complete-text
+    margin: 40px 0
+    color: #8C8C8C
+  &__pin-code
+    border: 0
+    border-bottom: 1px solid #969696
+    text-align: center
+    letter-spacing: 20px!important
+    font-size: 48px
+    line-height: 100%
+    color: #000000
+    width: 100%
+    &:focus
+      outline: none
+      border-bottom: 1px solid #0060FF
 </style>

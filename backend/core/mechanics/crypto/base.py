@@ -1,4 +1,3 @@
-from abc import ABC
 from http import HTTPStatus
 from typing import Literal
 
@@ -10,11 +9,11 @@ from schemas import InvoiceType, BTCTransaction
 __all__ = ["CryptoValidation", "ParseCryptoTransaction", "CryptoCurrencyRate"]
 
 
-class CryptoCurrencyRate(ABC):
+class CryptoCurrencyRate:
     # 1 BTC = 100,000,000 SATOSHI
-    SATOSHI_IN_BTC = 10 ** 8
+    BTC_DECIMALS = 10 ** 8
     # 1 BTC = 100,000,000 SIMBA
-    SIMBA_IN_BTC = 10 ** 8
+    SIMBA_DECIMALS = 10 ** 8
 
     SIMBA_IN_SST = 20000
 
@@ -51,7 +50,7 @@ class ParseCryptoTransaction:
         pass
 
 
-class CryptoValidation(ABC):
+class CryptoValidation:
     @classmethod
     def validate_simba_amount(cls, simba: int) -> bool:
         return True if simba and simba >= SIMBA_MINIMAL_BUY_AMOUNT else False
