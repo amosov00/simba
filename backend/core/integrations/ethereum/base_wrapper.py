@@ -58,9 +58,12 @@ class EthereumBaseWrapper(ABC):
                 obj[k] = cls.serialize(val)
             elif isinstance(val, str) and val.startswith("0x"):
                 obj[k] = val.lower()
-            elif isinstance(val, int) and val > 2147483647:
+            elif isinstance(val, int):
                 # fix for OverflowError: MongoDB can only handle up to 8-byte ints
-                obj[k] = to_decimal128(val)
+                if val > 2 ** 128 / 2:
+                    obj[k] = str(val)
+                elif val > 2 ** 32 / 2:
+                    obj[k] = to_decimal128(val)
 
         return obj
 
