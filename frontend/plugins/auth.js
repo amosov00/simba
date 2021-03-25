@@ -26,7 +26,7 @@ export default ({ app, redirect, route }, inject) => {
     app.store.commit('deleteUser')
     await app.$axios.setToken(null, 'Bearer')
     await clearCookieToken(app)
-    // window.location.href = '/'
+    window.location.href = '/'
   })
   inject('authFetchUser', async () => {
     return app.$axios
