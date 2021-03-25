@@ -20,7 +20,3 @@ class BTCAddressCRUD(BaseMongoCRUD):
             {"cold_wallet_title": xpub_title, "path": {"$regex": path}},
             sort=[("created_at", pymongo.DESCENDING), ("_id", pymongo.DESCENDING)],
         )
-
-    @classmethod
-    async def update_or_create(cls, address: str, data: dict):
-        return await cls.update_one({"address": address}, data, upsert=True)

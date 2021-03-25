@@ -29,7 +29,3 @@ class MetaCRUD(BaseMongoCRUD):
         return await super().update_or_insert(
             {"slug": slug}, {"slug": slug, "updated_at": datetime.now(), "payload": payload}, **kwargs
         )
-
-    @classmethod
-    async def update_or_create_email_to_support_time(cls):
-        pass

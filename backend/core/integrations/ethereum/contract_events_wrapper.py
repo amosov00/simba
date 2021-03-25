@@ -7,7 +7,6 @@ from web3.contract import LogFilter
 from websockets import ConnectionClosedError
 
 from database.crud import EthereumTransactionCRUD
-from schemas import EthereumTransaction
 from .base_wrapper import EthereumBaseContractWrapper
 
 __all__ = ["EventsContractWrapper"]
@@ -43,11 +42,14 @@ class EventsContractWrapper(EthereumBaseContractWrapper):
         )
         try:
             for event in event_filter._format_log_entries(log_entries):  # noqa
-                block = self.serialize(event)
-                block["confirmations"] = self.last_block - block["blockNumber"]
-                self.blocks.append(
-                    EthereumTransaction(**block, contract=self.contract_meta.title, fetched_at=datetime.now())
-                )
+                transaction = self.serialize(event)
+                transaction.update({
+                    "confirmations": self.last_block - transaction["blockNumber"],
+                    "contract": self.contract_meta.title,
+                    "fetched_at": datetime.now()
+                })
+                self.transactions.append(transaction)
+
         except ConnectionClosedError as e:
             capture_exception(e)
 
@@ -61,7 +63,7 @@ class EventsContractWrapper(EthereumBaseContractWrapper):
                 self._fetch_event_blocks_with_filter(
                     self._create_filter(event, from_block=current_block, to_block=current_block + step)
                 )
-            print(f"FromBlock:{current_block}; ToBlock:{current_block + step}; TotalResult:{len(self.blocks)}")
+            print(f"FromBlock:{current_block}; ToBlock:{current_block + step}; TotalResult:{len(self.transactions)}")
             current_block += step
 
         return True
@@ -71,50 +73,55 @@ class EventsContractWrapper(EthereumBaseContractWrapper):
             self._fetch_event_blocks_with_filter(
                 self._create_filter(event, from_block=from_block)
             ) if from_block else None
-        return self.blocks
+        return self.transactions
 
-    async def save_blocks(self):
+    async def save_transactions(self):
         tasks = [
-            EthereumTransactionCRUD.update_or_create(
-                transaction_hash=block.transactionHash, log_index=block.logIndex, payload=block.dict()
-            )
-            for block in list(filter(lambda o: o.confirmations >= self.min_confirmations, self.blocks))
-        ]
-        async with asyncio.Semaphore(100):
-            await asyncio.gather(*tasks)
-        return True
-
-    async def find_or_save_blocks(self):
-        tasks = [
-            EthereumTransactionCRUD.find_one_or_insert(
-                {
-                    "transactionHash": block.transactionHash,
-                    "logIndex": block.logIndex,
-                    "transactionIndex": block.transactionIndex,
+            EthereumTransactionCRUD.update_or_insert(
+                query={
+                    "transactionHash": block["transactionHash"],
+                    "logIndex": block["logIndex"],
+                    "transactionIndex": block["transactionIndex"],
                 },
-                payload=block.dict(),
+                payload=block,
             )
-            for block in list(filter(lambda o: o.confirmations >= self.min_confirmations, self.blocks))
+            for block in list(filter(lambda o: o["confirmations"] >= self.min_confirmations, self.transactions))
+        ]
+        async with asyncio.Semaphore(25):
+            await asyncio.gather(*tasks)
+        return True
+
+    async def find_or_save_transactions(self):
+        tasks = [
+            EthereumTransactionCRUD.update_or_insert(
+                query={
+                    "transactionHash": block["transactionHash"],
+                    "logIndex": block["logIndex"],
+                    "transactionIndex": block["transactionIndex"],
+                },
+                payload=block,
+            )
+            for block in list(filter(lambda o: o["confirmations"] >= self.min_confirmations, self.transactions))
         ]
 
         async with asyncio.Semaphore(100):
             await asyncio.gather(*tasks)
         return True
 
-    async def fetch_blocks(self, from_block: Optional[int] = None) -> List[EthereumTransaction]:
+    async def fetch_blocks(self, from_block: Optional[int] = None) -> List[dict]:
         if not from_block:
             last_block = await EthereumTransactionCRUD.find_last_block(self.contract_meta.title)
             from_block = last_block.get("blockNumber") if last_block else None
 
         self.fetch_blocks_from_block(from_block + 1) if from_block else self.fetch_all_blocks()
-        return self.blocks
+        return self.transactions
 
-    async def fetch_blocks_and_save(self, from_block: Optional[int] = None) -> List[EthereumTransaction]:
+    async def fetch_blocks_and_save(self, from_block: Optional[int] = None) -> List[dict]:
         await self.fetch_blocks(from_block)
-        await self.save_blocks()
-        return self.blocks
+        await self.save_transactions()
+        return self.transactions
 
     async def fetch_missing_blocks(self):
         self.fetch_all_blocks()
-        await self.find_or_save_blocks()
+        await self.find_or_save_transactions()
         return True

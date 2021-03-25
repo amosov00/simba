@@ -2,27 +2,38 @@ from abc import ABC
 from typing import Union, List, Literal
 
 import ujson
+from ethereum_gasprice import (
+    AsyncGaspriceController,
+    AsyncEtherscanProvider,
+    AsyncEthGasStationProvider,
+    AsyncEtherchainProvider,
+    AsyncPoaProvider,
+    GaspriceStrategy,
+    EthereumUnit
+)
 from hexbytes import HexBytes
 from web3 import Web3
 from web3.datastructures import AttributeDict
 
 from config import ETH_MAX_GAS_PRICE_GWEI, TRANSACTION_MIN_CONFIRMATIONS, settings
-from core.utils import gasprice_from_etherscan, gasprice_from_ethgasstation
 from core.utils.decimal128 import to_decimal128
-from schemas import EthereumContract, EthereumTransaction
+from schemas import EthereumContract
 
-__all__ = ["EthereumBaseCommonWrapper", "EthereumBaseContractWrapper"]
+__all__ = ["EthereumBaseContractWrapper"]
 
 
 class EthereumBaseWrapper(ABC):
-    gasprice_wrapper = gasprice_from_etherscan
-
     @classmethod
     async def get_actual_gasprice(cls):
-        gasprice = await cls.gasprice_wrapper()
-
-        if not gasprice:
-            gasprice = await gasprice_from_ethgasstation()
+        async with AsyncGaspriceController(
+            return_unit=EthereumUnit.GWEI,
+            providers=(AsyncEtherscanProvider, AsyncEthGasStationProvider, AsyncEtherchainProvider, AsyncPoaProvider),
+            settings={
+                AsyncEtherscanProvider.title: settings.crypto.etherscan_api_token,
+                AsyncEthGasStationProvider.title: settings.crypto.gasstation_api_token,
+            }
+        ) as controller:
+            gasprice = await controller.get_gasprice_by_strategy(GaspriceStrategy.FAST)
 
         return Web3.toWei(min(int(gasprice), ETH_MAX_GAS_PRICE_GWEI), "gwei")
 
@@ -44,7 +55,7 @@ class EthereumBaseWrapper(ABC):
             if isinstance(val, HexBytes):
                 obj[k] = val.hex().lower()
             elif isinstance(val, AttributeDict):
-                obj[k] = dict(val)
+                obj[k] = cls.serialize(val)
             elif isinstance(val, str) and val.startswith("0x"):
                 obj[k] = val.lower()
             elif isinstance(val, int) and val > 2147483647:
@@ -52,12 +63,6 @@ class EthereumBaseWrapper(ABC):
                 obj[k] = to_decimal128(val)
 
         return obj
-
-
-class EthereumBaseCommonWrapper(EthereumBaseWrapper):
-    def __init__(self):
-        self.w3 = Web3(self.init_web3_provider("ws", settings.crypto.infura_ws_url))
-        self.blocks: List[EthereumTransaction] = []
 
 
 class EthereumBaseContractWrapper(EthereumBaseWrapper):
@@ -72,7 +77,7 @@ class EthereumBaseContractWrapper(EthereumBaseWrapper):
 
         self.contract = self.w3.eth.contract(address=self.contract_address, abi=self.abi)
 
-        self.blocks: List[EthereumTransaction] = []
+        self.transactions: List[dict] = []
         self.filters = []
         self._last_block = None
         self._contract_events = []

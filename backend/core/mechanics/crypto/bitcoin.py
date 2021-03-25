@@ -6,8 +6,8 @@ from pycoin.coins.tx_utils import create_signed_tx
 from sentry_sdk import capture_message
 
 from config import BTC_FEE, settings
-from core.integrations.blockcypher import BlockCypherAPIWrapper
 from core.integrations.bitcoin import BitcoinPriceWrapper
+from core.integrations.blockcypher import BlockCypherAPIWrapper
 from core.integrations.pycoin_wrapper import PycoinWrapper
 from database.crud import BTCAddressCRUD
 from schemas import User, InvoiceInDB, BTCTransaction, BTCAddress, ObjectIdPydantic
@@ -51,7 +51,10 @@ class BitcoinWrapper(CryptoValidation, ParseCryptoTransaction):
             address_info.invoice_id = invoice_id
 
         if address_info and save:
-            await BTCAddressCRUD.update_or_create(address_info.address, address_info.dict(exclude_unset=True))
+            await BTCAddressCRUD.update_or_insert(
+                query={"address": address_info.address},
+                payload=address_info.dict(exclude_unset=True),
+            )
 
         return address_info
 
